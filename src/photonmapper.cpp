@@ -89,7 +89,7 @@ public:
 	 */
 
 	// put your code for path tracing with photon gathering here
-    
+		return Color3f{};
     }
 
     virtual std::string toString() const override {
