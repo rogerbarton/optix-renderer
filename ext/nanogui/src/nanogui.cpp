@@ -166,8 +166,8 @@ std::string file_dialog(const std::vector<std::pair<std::string, std::string>> &
     OPENFILENAME ofn;
     ZeroMemory(&ofn, sizeof(OPENFILENAME));
     ofn.lStructSize = sizeof(OPENFILENAME);
-    char tmp = '\0';
-    ofn.lpstrFile = &tmp;
+    char tmp[FILE_DIALOG_MAX_BUFFER];
+    ofn.lpstrFile = tmp;
     ofn.nMaxFile = FILE_DIALOG_MAX_BUFFER;
     ofn.nFilterIndex = 1;
 
@@ -200,7 +200,7 @@ std::string file_dialog(const std::vector<std::pair<std::string, std::string>> &
         cmd += "--save";
     cmd += "--file-filter=\"";
     for (auto pair: filetypes)
-        cmd += "\"*." + pair.first +  "\" ";
+        cmd += "\"" + pair.first +  "\" ";
     cmd += "\"";
     FILE *output = popen(cmd.c_str(), "r");
     while (fgets(buffer, FILE_DIALOG_MAX_BUFFER, output) != NULL)
