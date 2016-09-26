@@ -167,6 +167,7 @@ std::string file_dialog(const std::vector<std::pair<std::string, std::string>> &
     ZeroMemory(&ofn, sizeof(OPENFILENAME));
     ofn.lStructSize = sizeof(OPENFILENAME);
     char tmp[FILE_DIALOG_MAX_BUFFER];
+    tmp[0] = '\0';
     ofn.lpstrFile = tmp;
     ofn.nMaxFile = FILE_DIALOG_MAX_BUFFER;
     ofn.nFilterIndex = 1;
