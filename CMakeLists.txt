@@ -101,7 +101,7 @@ add_dependencies(nori nanogui_p)
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
 add_dependencies(warptest nori)
-add_dependencies(tonemapper OpenEXR_p)
+add_dependencies(tonemapper nori)
 
 # Link to dependency libraries
 target_link_libraries(nori ${extra_libs})
