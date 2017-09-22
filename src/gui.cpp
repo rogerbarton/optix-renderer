@@ -47,7 +47,7 @@ NoriScreen::NoriScreen(ImageBlock &block)
     buttonOpen->setCallback(
             [this]() {
                 using FileType = std::pair<std::string,std::string>;
-                std::vector<FileType> filetypes = { FileType("*.xml", "Nori Scene File"), FileType("*.exr", "EXR Image File") };
+                std::vector<FileType> filetypes = { FileType("xml", "Nori Scene File"), FileType("exr", "EXR Image File") };
                 std::string filename = nanogui::file_dialog(filetypes, false);
                 dropEvent({ filename });
             }

@@ -167,18 +167,39 @@ std::string file_dialog(const std::vector<std::pair<std::string, std::string>> &
     ZeroMemory(&ofn, sizeof(OPENFILENAME));
     ofn.lStructSize = sizeof(OPENFILENAME);
     char tmp[FILE_DIALOG_MAX_BUFFER];
-    tmp[0] = '\0';
     ofn.lpstrFile = tmp;
+    ZeroMemory(tmp, FILE_DIALOG_MAX_BUFFER);
     ofn.nMaxFile = FILE_DIALOG_MAX_BUFFER;
     ofn.nFilterIndex = 1;
 
-    std::vector<char> filter;
-    for (auto pair: filetypes) {
-        for (char c : pair.second)
-            filter.push_back(c);
+    std::string filter;
+
+    if (!save && filetypes.size() > 1) {
+        filter.append("Supported file types (");
+        for (size_t i = 0; i < filetypes.size(); ++i) {
+            filter.append("*.");
+            filter.append(filetypes[i].first);
+            if (i + 1 < filetypes.size())
+                filter.append(";");
+        }
+        filter.append(")");
         filter.push_back('\0');
-        for (char c : pair.first)
-            filter.push_back(c);
+        for (size_t i = 0; i < filetypes.size(); ++i) {
+            filter.append("*.");
+            filter.append(filetypes[i].first);
+            if (i + 1 < filetypes.size())
+                filter.append(";");
+        }
+        filter.push_back('\0');
+    }
+    for (auto pair : filetypes) {
+        filter.append(pair.second);
+        filter.append(" (*.");
+        filter.append(pair.first);
+        filter.append(")");
+        filter.push_back('\0');
+        filter.append("*.");
+        filter.append(pair.first);
         filter.push_back('\0');
     }
     filter.push_back('\0');
@@ -200,8 +221,8 @@ std::string file_dialog(const std::vector<std::pair<std::string, std::string>> &
     if (save)
         cmd += "--save";
     cmd += "--file-filter=\"";
-    for (auto pair: filetypes)
-        cmd += "\"" + pair.first +  "\" ";
+    for (auto pair : filetypes)
+        cmd += "\"*." + pair.first + "\" ";
     cmd += "\"";
     FILE *output = popen(cmd.c_str(), "r");
     while (fgets(buffer, FILE_DIALOG_MAX_BUFFER, output) != NULL)
