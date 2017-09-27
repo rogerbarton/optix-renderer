@@ -322,7 +322,7 @@ namespace internal {
 template<typename T> struct tbb_large_object {enum { value = sizeof(T) > sizeof(void *) }; };
 
 // Obtain type properties in one or another way
-#if   __TBB_CPP11_TYPE_PROPERTIES_PRESENT
+#if   __TBB_CPP11_TYPE_PROPERTIES_PRESENT || defined(__GNUC__) && __GNUC__ >= 7
 template<typename T> struct tbb_trivially_copyable { enum { value = std::is_trivially_copyable<T>::value }; };
 #elif __TBB_TR1_TYPE_PROPERTIES_IN_STD_PRESENT
 template<typename T> struct tbb_trivially_copyable { enum { value = std::has_trivial_copy_constructor<T>::value }; };
