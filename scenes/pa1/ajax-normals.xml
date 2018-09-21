@@ -5,7 +5,7 @@
 	</sampler>
 
 	<!-- Use the normal integrator -->
-        <integrator type="normals"/>
+	<integrator type="normals"/>
 
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
