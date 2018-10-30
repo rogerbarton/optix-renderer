@@ -211,7 +211,7 @@ public:
             positions.resize(3, m_lineCount);
             float coarseScale = 1.f / gridRes, fineScale = 1.f / fineGridRes;
             for (int i=0; i<=gridRes; ++i) {
-                for (int j=0; j<=fineGridRes; ++j) {
+                for (int j=0; j<fineGridRes; ++j) {
                     auto pt = warpPoint(warpType, Point2f(j     * fineScale, i * coarseScale), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
                     pt = warpPoint(warpType, Point2f((j+1) * fineScale, i * coarseScale), parameterValue);
