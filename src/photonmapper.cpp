@@ -101,6 +101,10 @@ public:
         );
     }
 private:
+    /* 
+     * Important: m_photonCount is the total number of photons deposited in the photon map,
+     * NOT the number of emitted photons. You will need to keep track of those yourself.
+     */ 
     int m_photonCount;
     float m_photonRadius;
     std::unique_ptr<PhotonMap> m_photonMap;
