@@ -7,6 +7,7 @@ project("nori")
 include("CMakeConfig.txt")
 
 include_directories(ext)
+add_subdirectory(docs)
 
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
@@ -75,6 +76,7 @@ add_executable(nori
   src/photonmapper.cpp
   src/sphere.cpp
   src/arealight.cpp
+  src/normals.cpp
 )
 
 # The following lines build the warping test application
