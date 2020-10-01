@@ -21,73 +21,70 @@
 
 NORI_NAMESPACE_BEGIN
 
-template <typename T>
-class Checkerboard : public Texture<T> {
+template <typename T> class Checkerboard : public Texture<T> {
 public:
-    Checkerboard(const PropertyList &props);
+  Checkerboard(const PropertyList &props);
 
-    virtual std::string toString() const override;
+  virtual std::string toString() const override;
 
-    virtual T eval(const Point2f & uv) override {
-        /* to be implemented */
-	    return m_value1;
+  virtual T eval(const Point2f &uv) override {
+    Point2f origin;
+    origin.x() = uv.x() / m_scale.x() - m_delta.x();
+    origin.y() = uv.y() / m_scale.y() - m_delta.y();
+
+    int x = int(origin.x()) + (origin.x() < 0.f);
+    int y = int(origin.y()) + (origin.y() < 0.f);
+
+    // checkerboard check
+    if ((x + y) % 2 == 0) {
+      return m_value1;
+    } else {
+      return m_value2;
     }
+  }
 
 protected:
-    T m_value1;
-    T m_value2;
+  T m_value1;
+  T m_value2;
 
-    Point2f m_delta;
-    Vector2f m_scale;
+  Point2f m_delta;
+  Vector2f m_scale;
 };
 
-template <>
-Checkerboard<float>::Checkerboard(const PropertyList &props) {
-    m_delta = props.getPoint2("delta", Point2f(0));
-    m_scale = props.getVector2("scale", Vector2f(1));
-    m_value1 = props.getFloat("value1", 0.f);
-    m_value2 = props.getFloat("value2", 1.f);
+template <> Checkerboard<float>::Checkerboard(const PropertyList &props) {
+  m_delta = props.getPoint2("delta", Point2f(0));
+  m_scale = props.getVector2("scale", Vector2f(1));
+  m_value1 = props.getFloat("value1", 0.f);
+  m_value2 = props.getFloat("value2", 1.f);
 }
 
-template <>
-Checkerboard<Color3f>::Checkerboard(const PropertyList &props) {
-    m_delta = props.getPoint2("delta", Point2f(0));
-    m_scale = props.getVector2("scale", Vector2f(1));
-    m_value1 = props.getColor("value1", Color3f(0));
-    m_value2 = props.getColor("value2", Color3f(1));
+template <> Checkerboard<Color3f>::Checkerboard(const PropertyList &props) {
+  m_delta = props.getPoint2("delta", Point2f(0));
+  m_scale = props.getVector2("scale", Vector2f(1));
+  m_value1 = props.getColor("value1", Color3f(0));
+  m_value2 = props.getColor("value2", Color3f(1));
 }
 
-
-template <>
-std::string Checkerboard<float>::toString() const {
-    return tfm::format(
-        "Checkerboard[\n"
-                "  delta = %s,\n"
-                "  scale = %s,\n"
-                "  value1 = %f,\n"
-                "  value2 = %f,\n"
-                "]",
-        m_delta.toString(),
-        m_scale.toString(),
-        m_value1,
-	    m_value2
-    );
+template <> std::string Checkerboard<float>::toString() const {
+  return tfm::format("Checkerboard[\n"
+                     "  delta = %s,\n"
+                     "  scale = %s,\n"
+                     "  value1 = %f,\n"
+                     "  value2 = %f,\n"
+                     "]",
+                     m_delta.toString(), m_scale.toString(), m_value1,
+                     m_value2);
 }
 
-template <>
-std::string Checkerboard<Color3f>::toString() const {
-    return tfm::format(
-        "Checkerboard[\n"
-                "  delta = %s,\n"
-                "  scale = %s,\n"
-                "  tex1 = %s,\n"
-                "  tex2 = %s,\n"
-                "]",
-        m_delta.toString(),
-        m_scale.toString(),
-        m_value1.toString(),
-	    m_value2.toString()
-    );
+template <> std::string Checkerboard<Color3f>::toString() const {
+  return tfm::format("Checkerboard[\n"
+                     "  delta = %s,\n"
+                     "  scale = %s,\n"
+                     "  tex1 = %s,\n"
+                     "  tex2 = %s,\n"
+                     "]",
+                     m_delta.toString(), m_scale.toString(),
+                     m_value1.toString(), m_value2.toString());
 }
 
 NORI_REGISTER_TEMPLATED_CLASS(Checkerboard, float, "checkerboard_float")
