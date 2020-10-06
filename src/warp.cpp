@@ -92,25 +92,60 @@ Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
 }
 
 float Warp::squareToUniformHemispherePdf(const Vector3f &v) {
-  return (v.z() > 0) ? 2.0f * squareToUniformSpherePdf(v) : 0.0f;
+  return (std::abs(v.squaredNorm() - 1) < Epsilon && v.z() > 0)
+             ? 2.0f * squareToUniformSpherePdf(v)
+             : 0.0f;
 }
 
 Vector3f Warp::squareToCosineHemisphere(const Point2f &sample) {
-  throw NoriException(
-      "Warp::squareToCosineHemisphere() is not yet implemented!");
+  // squareToUniformDisk and project onto hemisphere (x,y stay, z projected)
+  Point2f diskPoint = squareToUniformDisk(sample);
+  // map this point (z coordinate) to hemisphere
+  Vector3f ret;
+  ret.x() = diskPoint.x();
+  ret.y() = diskPoint.y();
+
+  ret.z() = sqrt(1.f - diskPoint.squaredNorm());
+
+  return ret;
 }
 
 float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
-  throw NoriException(
-      "Warp::squareToCosineHemispherePdf() is not yet implemented!");
+  // angle between v and the z axis divided by pi
+  // this results in v_z / PI
+  return (std::abs(v.squaredNorm() - 1) < Epsilon && v.z() > 0) ? v.z() / M_PI
+                                                                : 0.0f;
 }
 
 Vector3f Warp::squareToBeckmann(const Point2f &sample, float alpha) {
-  throw NoriException("Warp::squareToBeckmann() is not yet implemented!");
+  // http://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Reflection_Functions.html
+  float logSample = log(1.f - sample.x());
+  if (std::isinf(logSample))
+    logSample = 0;
+  float tan2Theta = -alpha * alpha * logSample;
+  float phi = sample.y() * 2.f * M_PI;
+  float cosTheta = 1.f / sqrt(1 + tan2Theta);
+  float sinTheta = sqrt(1.f - cosTheta * cosTheta);
+
+  // spherical direction
+  Vector3f res =
+      Vector3f(sinTheta * std::cos(phi), sinTheta * std::sin(phi), cosTheta);
+
+  if (res.z() < 0) {
+    res = -res;
+  }
+
+  return res;
 }
 
 float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
-  throw NoriException("Warp::squareToBeckmannPdf() is not yet implemented!");
+  float c_t = m.z();
+  float r = std::sqrt(m.x() * m.x() + m.y() * m.y());
+  float tantheta = r / m.z();
+  if (std::abs(m.squaredNorm() - 1) > Epsilon || m.z() < 0)
+    return 0.f;
+  return exp(-tantheta * tantheta / alpha / alpha) /
+         (M_PI * alpha * alpha * c_t * c_t * c_t);
 }
 
 Vector3f Warp::squareToUniformTriangle(const Point2f &sample) {
