@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../favicon.ico" />
+
+    <title>Computer Graphics - PA2</title>
+
+    <link href="resources/bootstrap.min.css" rel="stylesheet">
+    <link href="resources/offcanvas.css" rel="stylesheet">
+    <link href="resources/custom2014.css" rel="stylesheet">
+    <link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="container headerBar">
+		<h1>Programming Assignment 2 - Matthias Busenhart</h1>
+</div>
+
+<div class="container contentWrapper">
+<div class="pageContent">
+
+	<!-- ================================================================= -->
+
+	<h2>Part 1: Sample Warping</h2>
+
+	<p>For me this assignment was very easy to implement. With the help of the slides, the online book and some googling I could find all necessary formulas. These could be implemented relatively easy.</p>
+
+    <h3>Uniform disk</h3>
+
+    <p>As shown on the slides, I used following mapping (where $x$ and $y$ are the sample points on the square):</p>
+    <p>$\rho = \sqrt{x}$</p>
+    <p>$\theta = y * 2 * \pi$</p>
+    <p>$out = \left( \rho * \cos{\theta}, \rho * \sin{\theta} \right)$</p>
+
+    <p>This results in the following PDF:</p>
+    <p>$pdf(x,y) = \begin{cases}1/Z & \sqrt{x^2 + y^2} \leq 1\\0 & \text{otherwise}\end{cases}$</p>
+    <p>where $Z= \text{const.}$ such that $\int_0^1 \int_0^1 pdf(x,y) dydx = 1$</p>
+    <p>Using gemoetry, $\frac{1}{\pi}$ seems plausible. We integrate it over the whole uniform disk:</p>
+    <p>$\int_{-1}^{1} \int_{-\sqrt{1-y^2}}^{\sqrt{1-y^2}} \frac{1}{\pi}dxdy$</p>
+    <p>$\int_{-1}^{1}\frac{1}{\pi} * 2 * \sqrt{1-y^2}dy = \frac{2}{\pi} * \frac{1}{2} \left(\sqrt{1-y^2}y + \arcsin{x}\right)\bigg\rvert_{-1}^{1} = 1$</p>
+    
+    <img src="images/circle_points.PNG" alt="Uniform disk"/>
+
+    <h3>Uniform sphere</h3>
+
+    <p>As shown on the slides, I used following mapping (where $x$ and $y$ are the sample points on the square):</p>
+    <p>$z = 2*x-1$</p>
+    <p>$r = \sqrt{1-z*z}$</p>
+    <p>$\sigma = y * 2 * \pi$</p>
+    <p>$out = \left( r * \cos{\sigma}, r * \sin{\sigma}, z\right)$</p>
+    <p>This results in the following PDF:</p>
+    <p>$pdf(x,y) = \begin{cases}1/Z & \sqrt{x^2 + y^2} \leq 1\\0 & \text{otherwise}\end{cases}$</p>
+    <p>where $Z = \text{const.}$ such that $\int_0^1 \int_0^1 pdf(x,y) dydx = 1$</p>
+    <p>Using gemoetry, $\frac{1}{4\pi}$ seems plausible. We integrate it over the whole uniform sphere.</p>
+    <p>In order to do so, we convert the coordinates to sphere coordinates. The integral over $r$ can be neglected, because we are only interested in the area of the sphere, not the volume.</p>
+    <p>The $r^2\sin{\phi}$ (later used with $r=1$) is the jacobian of the conversion between cartesian and spherical coordinates).</p>
+    <p>$\int_0^{2\pi}\int_0^{\pi} \frac{1}{4\pi}\sin{\phi}d\phi d\theta = \frac{1}{4\pi}\int_0^{2\pi} -\cos{\phi}\bigg\rvert_{0}^{\pi}d\theta = \frac{1}{4\pi}\int_0^{2\pi}1+1d\theta = \frac{4\pi}{4\pi}=1$</p>
+    
+    <img src="images/sphere_points.PNG" alt="Uniform sphere"/>
+
+    <h3>Uniform hemisphere</h3>
+
+    <p>Because I have already implemented the uniform sphere, I can create a 3D-point on the sphere area and simply take the absolute value of the $z$-value of the coordinate.</p>
+    <p>The PDF is also the same, only with a factor 2 in front of it. We only integrate now for $\phi$ from 0 to $\frac{\pi}{2}$, because we do not consider the lower hemisphere.</p>
+    <p>$\int_0^{2\pi}\int_0^{\pi/2} \frac{1}{2\pi}\sin{\phi}d\phi d\theta = \frac{1}{2\pi}\int_0^{2\pi} -\cos{\phi}\bigg\rvert_{0}^{\pi/2}d\theta = \frac{1}{2\pi}\int_0^{2\pi}1d\theta = \frac{2\pi}{2\pi}=1$</p>
+    
+    <img src="images/hemisphere_points.PNG" alt="Uniform hemisphere"/>
+
+    <h3>Uniform sphere cap</h3>
+
+    <p>Taken from <a href="https://en.wikipedia.org/wiki/Spherical_cap" target="_blank">Wikipedia</a>, the area of the sphere cap is $2\pi r^2 (1-\cos\theta)$ where in our case $r=1$. The PDF is therefore $p(\theta)=\frac{1}{2\pi(1-\cos\theta)}$ if the point is on the surface of the sphere.</p>
+    
+    <img src="images/spherecap_points.PNG" alt="Uniform sphere cap"/>
+
+    <h3>Cosine hemisphere</h3>
+
+    <p>For this, I have computed the coordinates on the uniform disk and mapped them to the sphere by using the pythagorean theorem. The PDF is given in the task description:</p>
+    <p>$p(\theta) = \frac{cos\theta}{\pi}$</p>
+    <p>This is easy to implement: $\cos\theta$ is just the $z$-component of our sampled point, because our normal is $(0,0,1)$ and the dot product of our normal and the sampled point returns $\cos\theta$.</p>
+    
+    <img src="images/hemispherecos_points.PNG" alt="Cosine hemisphere"/>
+
+    <h3>Beckmann distribution</h3>
+    <p>For implementation, I've searched the online textbook and found the formulas in the <a href="http://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Reflection_Functions.html" target="_blank">Chapter for Sampling Reflection Functions</a>.
+    <p>Using the formula given in the task description, we can write the double integral:</p>
+    <p>$\int_0^{2\pi}\int_0^{\pi/2} p(\theta, \phi) d\theta d\phi = 2\pi \int_0^{\pi/2}\frac{\exp\left(\ -\frac{1-x^2}{x^2 \alpha^2}\right)}{\pi\alpha^2x^3}\sin\theta \frac{dx}{-\sin\theta}$</p>
+    <p>where we have used the fact that $p$ is not dependent on $\phi$. Furthermore we have used the substitution $x=\cos{\theta}$ and $\tan^2\theta = \frac{1-x^2}{x}$, which results in $\frac{dx}{d\theta} = -\sin\theta \Rightarrow d\theta = \frac{dx}{-\sin\theta}$.</p>
+    <p>This integral can be further simplified:</p>
+    <p>$-\frac{2}{\alpha^2}\int_0^{\pi/2}\frac{\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)}{x^3}dx$</p>
+    <p>Using $\int f'(x) ~ e^{~f(x)} dx = e^{~f(x)} + C\text{, where } C\in\mathbb{R}$, with $f=-\frac{1-x^2}{x^2\alpha^2}$ and $f' = \frac{2}{x^3\alpha^2}$, we can simplify the integral to:</p>
+    <p>$-\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)+C$ which is (replacing $\frac{1-x^2}{x^2}$ by $\tan^2$):</p>
+    <p>$-\exp\left(-\frac{\tan^2\theta}{\alpha^2}\right)\bigg\rvert_0^{\pi/2}=1$</p>
+
+    <img src="images/beckmann_points.PNG" alt="Beckmann distribution"/> <br> <br> <br> <br>
+
+	<!-- ================================================================= -->
+
+	<h2>Part 2: Validation</h2>
+
+	<p>No special problems arose.</p>
+
+	<h3>Uniform disk</h3>
+    <img src="images/circle_test.PNG" alt="Uniform disk test"/>
+
+    <h3>Uniform sphere cap (\(\cos{\theta_{max}} = 0.5\))</h3>
+    <img src="images/spherecap_test.PNG" alt="Uniform sphere cap test"/>
+
+    <h3>Uniform hemisphere</h3>
+    <img src="images/hemisphere_test.PNG" alt="Uniform hemisphere test"/>
+
+    <h3>Uniform sphere</h3>
+    <img src="images/sphere_test.PNG" alt="Uniform sphere test"/>
+
+    <h3>Cosine hemisphere</h3>
+    <img src="images/hemispherecos_test.PNG" alt="Cosine hemisphere test"/>
+
+    <h3>Beckmann distribution (\(\alpha = 0.5\))</h3>
+    <img src="images/beckmann_test.PNG" alt="Beckmann distribution test"/> <br>
+
+	<!-- ================================================================= -->
+</div>
+</div>
+
+
+<!-- Bootstrap core JavaScript -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="resources/bootstrap.min.js"></script>
+<script src="/js/offcanvas.js"></script>
+<script src="resources/jquery.event.move.js"></script>
+<script src="resources/jquery.twentytwenty.js"></script>
+
+
+<script>
+$(window).load(function(){$(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5});});
+</script>
+
+<script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+</script>
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+
+</body>
+</html>

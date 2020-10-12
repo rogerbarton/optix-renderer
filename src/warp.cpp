@@ -52,7 +52,7 @@ Point2f Warp::squareToUniformDisk(const Point2f &sample) {
 }
 
 float Warp::squareToUniformDiskPdf(const Point2f &p) {
-  return (p.norm() <= 1.0f) ? 1.0f / M_PI : 0.0f;
+  return (p.squaredNorm() <= 1.0f) ? 1.0f / M_PI : 0.0f;
 }
 
 Vector3f Warp::squareToUniformSphereCap(const Point2f &sample,
@@ -66,7 +66,7 @@ Vector3f Warp::squareToUniformSphereCap(const Point2f &sample,
 }
 
 float Warp::squareToUniformSphereCapPdf(const Vector3f &v, float cosThetaMax) {
-  return (v.norm() <= 1.0f && v.z() <= cosThetaMax)
+  return (std::abs(v.squaredNorm() - 1.0f) < Epsilon && v.z() <= cosThetaMax)
              ? 0.0f
              : 1.0f / (2.0f * M_PI * (1.0f - cosThetaMax));
 }
@@ -82,12 +82,12 @@ Vector3f Warp::squareToUniformSphere(const Point2f &sample) {
 }
 
 float Warp::squareToUniformSpherePdf(const Vector3f &v) {
-  return (v.norm() <= 1.0f) ? 0.25f / M_PI : 0.0f;
+  return (std::abs(v.squaredNorm() - 1.0f) < Epsilon) ? 0.25f / M_PI : 0.0f;
 }
 
 Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
   Vector3f w = squareToUniformSphere(sample);
-  w.z() = abs(w.z()); // z to absolute valu
+  w.z() = abs(w.z()); // z to absolute value
   return w;
 }
 
