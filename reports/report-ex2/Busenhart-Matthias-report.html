@@ -91,14 +91,24 @@
 
     <h3>Beckmann distribution</h3>
     <p>For implementation, I've searched the online textbook and found the formulas in the <a href="http://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Reflection_Functions.html" target="_blank">Chapter for Sampling Reflection Functions</a>.
-    <p>Using the formula given in the task description, we can write the double integral:</p>
-    <p>$\int_0^{2\pi}\int_0^{\pi/2} p(\theta, \phi) d\theta d\phi = 2\pi \int_0^{\pi/2}\frac{\exp\left(\ -\frac{1-x^2}{x^2 \alpha^2}\right)}{\pi\alpha^2x^3}\sin\theta \frac{dx}{-\sin\theta}$</p>
+    <p>Using the formula given in the task description, we can write the double integral to compute the CDF:</p>
+    <p>$P(\phi', \theta')=\int_0^{\phi'}\int_0^{\theta'} p(\theta, \phi) d\theta d\phi = \phi' \int_0^{\theta'}\frac{\exp\left(\ -\frac{1-x^2}{x^2 \alpha^2}\right)}{\pi\alpha^2x^3}\sin\theta \frac{dx}{-\sin\theta}$</p>
     <p>where we have used the fact that $p$ is not dependent on $\phi$. Furthermore we have used the substitution $x=\cos{\theta}$ and $\tan^2\theta = \frac{1-x^2}{x}$, which results in $\frac{dx}{d\theta} = -\sin\theta \Rightarrow d\theta = \frac{dx}{-\sin\theta}$.</p>
     <p>This integral can be further simplified:</p>
-    <p>$-\frac{2}{\alpha^2}\int_0^{\pi/2}\frac{\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)}{x^3}dx$</p>
+    <p>$-\frac{\phi'}{\pi\alpha^2}\int_0^{\theta'}\frac{\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)}{x^3}dx$</p>
     <p>Using $\int f'(x) ~ e^{~f(x)} dx = e^{~f(x)} + C\text{, where } C\in\mathbb{R}$, with $f=-\frac{1-x^2}{x^2\alpha^2}$ and $f' = \frac{2}{x^3\alpha^2}$, we can simplify the integral to:</p>
-    <p>$-\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)+C$ which is (replacing $\frac{1-x^2}{x^2}$ by $\tan^2$):</p>
-    <p>$-\exp\left(-\frac{\tan^2\theta}{\alpha^2}\right)\bigg\rvert_0^{\pi/2}=1$</p>
+    <p>$-\frac{\phi'}{2\pi}\exp\left(-\frac{1-x^2}{x^2\alpha^2}\right)+C$ which is (replacing $\frac{1-x^2}{x^2}$ by $\tan^2$):</p>
+    <p>$-\frac{\phi'}{2\pi}\exp\left(-\frac{\tan^2\theta}{\alpha^2}\right)\bigg\rvert_0^{\theta'}=-\frac{\phi'}{2\pi}\left(\exp\left(\frac{-\tan^2\theta'}{\alpha^2}\right)-1\right) = P(\phi', \theta')$</p>
+    <p>Inserting the maximum values for $\theta$ and $\phi$ results in:</p>
+    <p>$P(\phi'=2\pi, \theta'=\pi/2)=\lim_{\theta'\rightarrow \pi/2}-\frac{2\pi}{2\pi}\left(\exp\left(\frac{-\tan^2\theta'}{\alpha^2}\right)-1\right)=1$</p>
+    <p>For the area-preserving inversion method, we need to compute $P(\theta')$ and $P(\phi')$:</p>
+    <p>$P(\theta') = P(\phi'=2\pi, \theta') = 1-\exp\left(\frac{-\tan^2\theta'}{\alpha^2}\right)$</p>
+    <p>$P(\phi') = P(\phi', \theta'=\pi/2) = \frac{\phi'}{2\pi}$</p>
+    <p>In order to get the coordinates, we invert:</p>
+    <p>$\xi_1 = 1-\exp\left(\frac{-\tan^2\theta'}{\alpha^2}\right)\Rightarrow \tan^2\theta' = -\alpha^2 \log(1-\xi_1)$</p>
+    <p>$\xi_2 = \frac{\phi'}{2\pi}\Rightarrow \phi' = 2\xi_2\pi$</p>
+    <p>By using the function "sphericalCoordinates" from "common.cpp" and the identities $\tan^2 = \sin^2 / \cos^2$ and $\sin^2 + \cos^2 = 1$ we can choose the coordinates:</p>
+    <p>$out = (\sin\theta\cos\phi, \sin\theta\sin\phi, \cos\theta)$</p>
 
     <img src="images/beckmann_points.PNG" alt="Beckmann distribution"/> <br> <br> <br> <br>
 
