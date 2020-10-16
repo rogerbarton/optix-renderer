@@ -25,8 +25,8 @@ int main(int argc, char **argv) {
     try {
 
         // if file is passed as argument, handle it
-        if (argc == 2) {
-            std::string filename = argv[1];
+        for(int i = 1; i < argc; i++) {
+            std::string filename = argv[i];
             filesystem::path path(filename);
 
             if (path.extension() == "exr") {
