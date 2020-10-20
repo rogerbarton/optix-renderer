@@ -25,7 +25,9 @@
 #include <nori/bitmap.h>
 #include <nori/sampler.h>
 #include <nori/integrator.h>
-#include <nori/gui.h>
+#ifndef DISABLE_NORI_GUI
+  #include <nori/gui.h>
+#endif
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <filesystem/resolver.h>

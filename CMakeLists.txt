@@ -9,11 +9,39 @@ include("CMakeConfig.txt")
 include_directories(ext)
 add_subdirectory(docs)
 
+option(NORI_USE_GUI "Build the GUI" ON)
+
+if(NOT NORI_USE_GUI)
+    message("NORI_USE_GUI is OFF.")
+
+    # Disable flag for preprocessor
+    add_definitions(-DDISABLE_NORI_GUI)
+else()
+  message("NORI_USE_GUI is ON.")
+endif()
+
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
+
+if(NORI_USE_GUI)
+  set(NORI_HDRS
+    include/nori/gui
+  )
+  set(NORI_SRC
+    src/gui.cpp
+  )
+else()
+  set(NORI_HDRS
+  )
+
+  set(NORI_SRC
+  )
+endif()
+
 add_executable(nori
 
   # Header files
+  ${NORI_HDRS}
   include/nori/bbox.h
   include/nori/bitmap.h
   include/nori/block.h
@@ -24,7 +52,6 @@ add_executable(nori
   include/nori/common.h
   include/nori/dpdf.h
   include/nori/frame.h
-  include/nori/gui.h
   include/nori/integrator.h
   include/nori/emitter.h
   include/nori/kdtree.h
@@ -46,6 +73,7 @@ add_executable(nori
   include/nori/warp.h
 
   # Source code files
+  ${NORI_SRC}
   src/bitmap.cpp
   src/block.cpp
   src/bvh.cpp
@@ -54,7 +82,6 @@ add_executable(nori
   src/consttexture.cpp
   src/checkerboard.cpp
   src/diffuse.cpp
-  src/gui.cpp
   src/independent.cpp
   src/main.cpp
   src/mesh.cpp
@@ -105,7 +132,10 @@ add_executable(tonemapper
 # Nori depends on some libraries created in CMakeConfig.txt. The following two
 # lines ensure that Nori is built *after* those libraries have been created.
 add_dependencies(nori OpenEXR_p)
-add_dependencies(nori nanogui_p)
+
+if(NORI_USE_GUI)
+  add_dependencies(nori nanogui_p)
+endif()
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
 add_dependencies(warptest nori)

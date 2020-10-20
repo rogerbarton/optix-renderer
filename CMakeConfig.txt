@@ -122,11 +122,13 @@ string(REGEX REPLACE ";" "$" CMAKE_EXTERNAL_ARGUMENTS_STR "${CMAKE_EXTERNAL_ARGU
 list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_EXTERNAL_ARGUMENTS_STR})
 
 # Build nanogui
-ExternalProject_Add(nanogui_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
-)
+if(NOT NORI_DISABLE_GUI)
+  ExternalProject_Add(nanogui_p
+    URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
+    PREFIX          "ext_build"
+    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
+  )
+endif()
 
 # Compile Nori with compiler warnings turned on
 if(MSVC)
@@ -161,6 +163,9 @@ set_target_properties(pugixml PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
 
 # Link to several dependency libraries
-set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml ${extra_libs})
-
+if(NORI_USE_GUI)
+  set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml ${extra_libs})
+else()
+  set(extra_libs IlmImf IlmThread Iex IexMath Imath Half pugixml tbb Xrandr pthread z dl)
+endif()
 # vim: set et ts=2 sw=2 ft=cmake nospell:
