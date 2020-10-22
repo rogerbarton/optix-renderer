@@ -19,9 +19,7 @@ public:
     // shadow ray is ray from the light to the original first intersection
     // add a little bit to the initial position (move a bit in
     // the direction) because of collision with the object itself
-    lRec.shadowRay =
-        Ray3f(this->m_position + Epsilon * (lRec.ref - m_position).normalized(),
-              (lRec.ref - m_position).normalized());
+    lRec.shadowRay = Ray3f(this->m_position, (lRec.ref - m_position).normalized(), Epsilon, (lRec.ref - m_position).norm() - Epsilon);
     lRec.wi = (m_position - lRec.ref).normalized(); // pointing to light
     lRec.pdf = pdf(lRec);                           // 1.0 in this case
     // don't store the normal, because this does not make sense for a point

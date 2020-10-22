@@ -41,7 +41,8 @@ public:
     if (!m_shape)
       throw NoriException("There is no shape attached to this Area light!");
     // check the normal if we are on the back
-    if (lRec.n.dot(lRec.wi) >= 0) {
+    // we use -lRec.wi because wi goes into the emitter (convention)
+    if (lRec.n.dot(-lRec.wi) < 0.f) {
       return Color3f(0.f); // we are on the back, return black
     } else {
       return m_radiance; // we are on the front, return the radiance
@@ -60,19 +61,16 @@ public:
     // create an emitter query
     // we create a new one because we do not want to change the existing one
     // until we actually should return a color
-    EmitterQueryRecord eqr(sqr.ref, sqr.p, sqr.n);
-    eqr.shadowRay = Ray3f(eqr.ref, eqr.wi);
+    //EmitterQueryRecord eqr(sqr.ref, sqr.p, sqr.n);
+    lRec = EmitterQueryRecord(sqr.ref, sqr.p, sqr.n);
+    lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 
     // compute the pdf of this query
-    float probs = pdf(eqr);
+    float probs = pdf(lRec);
     // check for it being near zero
-    if (std::abs(probs - 0.f) < Epsilon) {
+    if (std::abs(probs) < Epsilon) {
       return Color3f(0.f);
     }
-
-    // update lRec
-    lRec = eqr;
-    //lRec.pdf = probs;
 
     // return radiance
     return m_radiance / probs;
@@ -83,7 +81,7 @@ public:
       throw NoriException("There is no shape attached to this Area light!");
 
     // if we are on the back, return 0
-    if (lRec.n.dot(lRec.wi) >= 0) {
+    if (lRec.n.dot(-lRec.wi) < 0.f) {
       return 0.f;
     }
     // create a shape query record and get the pdf of the surface

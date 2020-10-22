@@ -2,6 +2,7 @@
 #include <nori/integrator.h>
 #include <nori/sampler.h>
 #include <nori/scene.h>
+#include <nori/warp.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -26,29 +27,31 @@ public:
       result += emitter->eval(eqr);
     }
 
-    Vector3f wi = its.toLocal((ray.o - its.p).normalized());
+    BSDFQueryRecord bRec(its.toLocal(-ray.d));
+    bRec.uv = its.uv;
+    bRec.measure = ESolidAngle;
 
-    // bsdf query
-    BSDFQueryRecord bqr(wi);
-    bqr.uv = its.uv; // set uv coordinates
-    Color3f bsdf_color = bsdf->sample(bqr, sampler->next2D());
+    Color3f bsdf_col = bsdf->sample(bRec, sampler->next2D());
 
-    if (bsdf_color.isZero()) {
+    if(bsdf_col.isZero(Epsilon)) {
       return result;
     }
 
-    Ray3f shadowray(its.p, its.toWorld(bqr.wo));
-    // compute sampled ray interaction point
-    Intersection its2;
-    if (!scene->rayIntersect(shadowray, its2))
-      return result;
-    // if not encounter emitter return radiance
+    // secondary ray (wo), check if hit emitter
+    Intersection secondaryIts;
+    Ray3f secondaryRay(its.p, its.toWorld(bRec.wo));
 
-    if (its2.mesh->isEmitter()) {
-      EmitterQueryRecord EQR(its.p, its2.p, its2.shFrame.n);
-      auto ems = its2.mesh->getEmitter();
-      result += bsdf_color * ems->eval(EQR);
+    if(!scene->rayIntersect(secondaryRay, secondaryIts)) {
+      return result;
     }
+
+    // test if emitter
+    if(secondaryIts.mesh->isEmitter()) {
+      EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
+
+      result += secondaryIts.mesh->getEmitter()->eval(secondaryEQR) * bsdf_col;
+    }
+
     return result;
   }
   std::string toString() const {

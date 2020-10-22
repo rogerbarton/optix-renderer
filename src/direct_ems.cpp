@@ -13,7 +13,7 @@ public:
     if (!scene->rayIntersect(ray, its)) {
       return Color3f(0.f);
     }
-    Color3f result; // final color
+    Color3f result(0.f); // final color
 
     // get colliding object and shape
     auto shape = its.mesh;
@@ -26,38 +26,31 @@ public:
       result += emitter->eval(eqr);
     }
 
-    Vector3f wo = its.toLocal((ray.o - its.p).normalized());
+    Vector3f wo = -ray.d;
     for (auto &l : scene->getLights()) {
       EmitterQueryRecord eqr(its.p);
       Color3f li = l->sample(eqr, sampler->next2D());
 
       // check if 0 returned to prevent failed sampling, continue
-      if (std::abs(li.maxCoeff() - 0.f) < Epsilon) {
+      if (li.isZero(Epsilon)) {
         continue;
       }
 
-      // compute wi, wo was already computed above
-      Vector3f wi = its.toLocal(eqr.wi);
-
       // compute shadow ray intersection
       Intersection shadRayIts;
-      scene->rayIntersect(eqr.shadowRay, shadRayIts);
 
-      if ((eqr.p - shadRayIts.p).norm() > Epsilon) {
-        if (std::abs(l->pdf(eqr) - 1.0f) > Epsilon) {
-          // we have an intersection on this point --> penumbra
-          continue;
-        }
+      // we have penumbra because we have hit another obstacle      
+      if(scene->rayIntersect(eqr.shadowRay, shadRayIts)) {
+        continue;
       }
 
       // bsdf query
-      BSDFQueryRecord bqr(wi, wo, EMeasure::ESolidAngle);
+      BSDFQueryRecord bqr(its.toLocal(eqr.wi), its.toLocal(wo), EMeasure::ESolidAngle);
       bqr.uv = its.uv; // set uv coordinates
       Color3f bsdf_col = bsdf->eval(bqr);
 
-      // cos and add together
-      float cos = std::abs(eqr.wi.dot(its.shFrame.n)) / eqr.wi.norm();
-      result += li * cos * bsdf_col;
+      // calc cos and add together
+      result += li * std::abs(its.shFrame.cosTheta(its.toLocal(eqr.wi))) * bsdf_col;
     }
     return result;
   }

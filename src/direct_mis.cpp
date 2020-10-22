@@ -41,50 +41,45 @@ public:
     if (!li.isZero(Epsilon)) {
       // normalize over all lights
       pdf_ems = l_ems->pdf(eqr) / scene->getLights().size();
-      Vector3f wo_ems = its.toLocal(eqr.wi);
-      Vector3f wi_ems = its.toLocal((ray.o - its.p).normalized());
+
       Intersection shadRayIts;
-      scene->rayIntersect(eqr.shadowRay, shadRayIts);
-      if ((eqr.p - shadRayIts.p).norm() < Epsilon &&
-          std::abs(pdf_ems) >= Epsilon) {
+
+      // if we don't intersect, calculate the final color
+      // initially check pdf_ems to reduce workload
+      if(!scene->rayIntersect(eqr.shadowRay, shadRayIts)){
         // bsdf query
-        BSDFQueryRecord bqr_ems(wi_ems, wo_ems, EMeasure::ESolidAngle);
+        BSDFQueryRecord bqr_ems(its.toLocal(eqr.wi), its.toLocal(-ray.d), EMeasure::ESolidAngle);
         bqr_ems.uv = its.uv; // set uv coordinates
         Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
 
         // cos and add together
-        float cos = std::abs(eqr.wi.dot(its.shFrame.n)) / eqr.wi.norm();
+        float cos = std::abs(its.shFrame.cosTheta(its.toLocal(eqr.wi)));
         // renormalize by using count of lights
         result_ems = li * cos * bsdf_col_ems * scene->getLights().size();
         w_ems = pdf_ems / (pdf_ems + bsdf->pdf(bqr_ems));
       }
     }
-
     // Sampling the BSDF (mats)
-    Vector3f wi_mat = its.toLocal((ray.o - its.p).normalized());
-
+  
     // bsdf query
-    BSDFQueryRecord bqr_mat(wi_mat);
+    BSDFQueryRecord bqr_mat(its.toLocal(-ray.d));
     bqr_mat.uv = its.uv; // set uv coordinates
+    bqr_mat.measure = ESolidAngle;
     Color3f bsdf_color = bsdf->sample(bqr_mat, sampler->next2D());
 
     if (!bsdf_color.isZero(Epsilon)) {
-      Ray3f shadowray(its.p, its.toWorld(bqr_mat.wo));
+      Ray3f shadowRay(its.p, its.toWorld(bqr_mat.wo));
       // compute sampled ray interaction point
       pdf_mat = bsdf->pdf(bqr_mat);
-      Intersection its2;
-      if (scene->rayIntersect(shadowray, its2) &&
-          std::abs(pdf_mat) >= Epsilon) {
-        if (its2.mesh->isEmitter()) {
-          EmitterQueryRecord EQR(its.p, its2.p, its2.shFrame.n);
-          auto ems = its2.mesh->getEmitter();
-          result_mats = bsdf_color * ems->eval(EQR);
-          w_mat =
-              pdf_mat / (pdf_mat + ems->pdf(EQR) / scene->getLights().size());
-        }
+      Intersection secondaryIts;
+      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.mesh->isEmitter()) {
+        EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
+        auto ems = secondaryIts.mesh->getEmitter();
+        result_mats = bsdf_color * ems->eval(secondaryEQR);
+        w_mat = pdf_mat / (pdf_mat + ems->pdf(secondaryEQR) / scene->getLights().size());
       }
     }
-
+    
     // COMBINE BOTH
     return result + w_ems * result_ems + w_mat * result_mats;
   }
