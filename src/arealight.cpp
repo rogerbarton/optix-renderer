@@ -61,7 +61,6 @@ public:
     // create an emitter query
     // we create a new one because we do not want to change the existing one
     // until we actually should return a color
-    //EmitterQueryRecord eqr(sqr.ref, sqr.p, sqr.n);
     lRec = EmitterQueryRecord(sqr.ref, sqr.p, sqr.n);
     lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 

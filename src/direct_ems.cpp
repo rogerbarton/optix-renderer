@@ -42,8 +42,9 @@ public:
         continue;
       }
 
-      // bsdf query
-      BSDFQueryRecord bqr(its.toLocal(eqr.wi), wo, EMeasure::ESolidAngle);
+      // bsdf query, flip wo and wi
+
+      BSDFQueryRecord bqr(wo, its.toLocal(eqr.wi), EMeasure::ESolidAngle);
       bqr.uv = its.uv; // set uv coordinates
       bqr.p = its.p; // set point p
 

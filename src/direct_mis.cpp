@@ -39,9 +39,10 @@ public:
     if (!li.isZero(Epsilon)) {
 
       // if we don't intersect, calculate the final color
-      if(!scene->rayIntersect(eqr.shadowRay)){
+      if(!scene->rayIntersect(eqr.shadowRay)) {
         // bsdf query
-        BSDFQueryRecord bqr_ems(its.toLocal(eqr.wi), its.toLocal(-ray.d), EMeasure::ESolidAngle);
+        // flip wi and wo
+        BSDFQueryRecord bqr_ems(its.toLocal(-ray.d), its.toLocal(eqr.wi), EMeasure::ESolidAngle);
         bqr_ems.uv = its.uv; // set uv coordinates
         bqr_ems.p = its.p;
         Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
@@ -58,6 +59,7 @@ public:
         }
       }
     }
+
     // Sampling the BSDF (mats)
   
     // bsdf query
