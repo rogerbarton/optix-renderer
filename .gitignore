@@ -9,3 +9,5 @@ Makefile
 *.cmake
 .idea
 
+.vscode/
+
