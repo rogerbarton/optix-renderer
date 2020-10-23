@@ -32,48 +32,56 @@
 
 	<h2>Part 1: Light Sampling</h2>
 
-	<p>TODO: report problems, comments, and time spent... </p>
+	<p>The main code was easy to implement. But some small mistakes took very long to fix. So overall I spent around 1 day for this.</p>
 
 	<h3>Integrator Implementation</h3>
 
-    <p>TODO: report implementation</p>
+    <p>I first check if we hit an emitter. If we do, we compute the light and add this to the final color. Afterwards, we loop over all lights in the scene and sample them.</p>
+    <p>I check if the shadow ray intersects again, if it does, we are in the penumbra and don't add this sampled radiance.</p>
 
     <h3>Shape Area Light</h3>
 
-    <p>TODO: report implementation</p>
+    <p>This implementation is done straightforward. The hardest part was the check if we are on the backside, because we need to use -wi and not wi (because wi is seen from the intersection point, not from the light). This took some time to find out.</p>
+    <p>We compute the shadow ray with epsilon distance to the start and end, because we do not wan't self intersections.</p>
 
     <h3>Validation</h3>
-
-    <p>TODO: report test results (screenshot), and compare your rendering to reference images...</p>
+    <p>All tests passed.</p>
     
     <h4>Point EMS</h4>
+    <p>We see no difference in the images.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/point_ems.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/point_ems.png" alt="Mine" class="img-responsive">
     </div> <br>
     <h4>Sphere EMS</h4>
+    <p>We see difference in the images, but uniform across the whole floor, this is okey.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/sphere_ems.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/sphere_ems.png" alt="Mine" class="img-responsive">
     </div> <br>
     <h4>Sphere Mesh EMS</h4>
+    <p>We see difference in the images, but uniform across the whole floor, this is okey.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/sphere_mesh_ems.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/sphere_mesh_ems.png" alt="Mine" class="img-responsive">
     </div> <br>
     <h4>Sphere2 Mesh EMS</h4>
+    <p>We see difference in the images, but uniform across the whole floor, this is okey.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/sphere2_mesh_ems.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/sphere2_mesh_ems.png" alt="Mine" class="img-responsive">
     </div> <br>
     
     <h4>Oddysey EMS</h4>
+    <p>We see difference in the images, but uniform, this is okey.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/odyssey_ems_64spp.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/odyssey_ems.png" alt="Mine" class="img-responsive">
     </div> <br>
     
     <h4>Veach EMS</h4>
+    <p>We see quite some variance below the area lights. The variance of the differences seem uniform, so I guess this is okey.</p>
+    <p>My code seems to create a better approximation of the light on the tiles.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/veach_ems_256spp.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/veach_ems.png" alt="Mine" class="img-responsive">
@@ -83,39 +91,45 @@
 
 	<h2>Part 2: BRDF Sampling</h2>
 
-    <p>TODO: report problems, comments, and time spent... </p>
+    <p>The main code was easy to implement, however I had problems with the BSDF query record (and using the correct arguments). This resulted in much debugging. Overall I had around 1 day for this.</p>
 
     <h3>Integrator Implementation</h3>
 
-    <p>TODO: report implementation</p>
+    <p>I first check if we hit an emitter. If we do, we compute the light and add this to the final color. Afterwards, I sample the BSDF (using a cosine weighted hemisphere).</p>
+    <p>I finally check if the sampled ray from the BSDF hits an emitter.</p>
 
     <h3>Microfacet BRDF</h3>
 
-    <p>TODO: report implementation</p>
+    <p>The Microfacet BRDF was very easy to implement (straightforward). As all helper functions were given, it was just a task of correctly adding / multiplying them.</p>
 
     <h3>Validation</h3>
 
-    <p>TODO: report test results (screenshot), and compare your rendering to reference images...</p>
+    <p>All tests passed.</p>
+    <img src="images/mine/microfacet.png" class="img-responsive">
     
     <h4>Sphere MATS</h4>
+    <p>We have only uniform variance on the floor.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/sphere_mats.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/sphere_mats.png" alt="Mine" class="img-responsive">
     </div> <br>
 
     <h4>Sphere2 MATS</h4>
+    <p>We have only uniform variance on the floor.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/sphere2_mats.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/sphere2_mats.png" alt="Mine" class="img-responsive">
     </div> <br>
 
     <h4>Oddysey MATS</h4>
+    <p>We have only uniform variance on the floor.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/odyssey_mats_64spp.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/odyssey_mats.png" alt="Mine" class="img-responsive">
     </div> <br>
     
     <h4>Veach MATS</h4>
+    <p>We have only uniform variance everywhere, this seems fine.</p>
     <div class="twentytwenty-container">
 	    <img src="images/ref/veach_mats_256spp.png" alt="Reference" class="img-responsive">
 	    <img src="images/mine/veach_mats.png" alt="Mine" class="img-responsive">
@@ -125,15 +139,15 @@
 
     <h2>Part 3: Multiple Importance Sampling</h2>
 
-    <p>TODO: report problems, comments, and time spent... </p>
+    <p>This was a little bit more tricky to implement as we had to weight the two parts correctly.</p>
 
     <h3>Integrator Implementation</h3>
 
-    <p>TODO: report implementation</p>
+    <p>We do the same as for EMS and MATS respectively, but for EMS we sample only one light and normalize the PDFs accordingly.</p>
 
     <h3>Validation</h3>
 
-    <p>TODO: report test results (screenshot), and compare your rendering to reference images...</p>
+    <p>All tests passed.</p>
     
     <h4>Oddysey MIS</h4>
     <div class="twentytwenty-container">
@@ -148,8 +162,6 @@
 	</div> <br>
 
     <h3>Image Validation</h3>
-
-    <p>TODO: Show a 4-way comparison for each of the 2 scenes in your report. For each scene compare your 3 integrators (direct_ems, direct_mats, direct_mis) with the reference MIS rendering.</p>
 
     <h4>Comparison Oddysey</h4>
     <div class="twentytwenty-container">

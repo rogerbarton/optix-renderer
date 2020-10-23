@@ -80,10 +80,10 @@ public:
         EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
         auto ems = secondaryIts.mesh->getEmitter();
 
-        result_mats = bsdf_color * ems->eval(secondaryEQR);
+        result_mats = bsdf_color * ems->eval(secondaryEQR);// / scene->getLights().size();
         
         float pdf_mat = bsdf->pdf(bqr_mat);
-        float pdf_ems = ems->pdf(secondaryEQR);
+        float pdf_ems = ems->pdf(secondaryEQR) / scene->getLights().size();
 
         if(pdf_mat + pdf_ems > Epsilon) {
           w_mat = pdf_mat / (pdf_mat + pdf_ems);
