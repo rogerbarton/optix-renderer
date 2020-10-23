@@ -26,7 +26,7 @@ public:
       result += emitter->eval(eqr);
     }
 
-    Vector3f wo = -ray.d;
+    Vector3f wo = its.toLocal(-ray.d);
     for (auto &l : scene->getLights()) {
       EmitterQueryRecord eqr(its.p);
       Color3f li = l->sample(eqr, sampler->next2D());
@@ -37,16 +37,16 @@ public:
       }
 
       // compute shadow ray intersection
-      Intersection shadRayIts;
-
       // we have penumbra because we have hit another obstacle      
-      if(scene->rayIntersect(eqr.shadowRay, shadRayIts)) {
+      if(scene->rayIntersect(eqr.shadowRay)) {
         continue;
       }
 
       // bsdf query
-      BSDFQueryRecord bqr(its.toLocal(eqr.wi), its.toLocal(wo), EMeasure::ESolidAngle);
+      BSDFQueryRecord bqr(its.toLocal(eqr.wi), wo, EMeasure::ESolidAngle);
       bqr.uv = its.uv; // set uv coordinates
+      bqr.p = its.p; // set point p
+
       Color3f bsdf_col = bsdf->eval(bqr);
 
       // calc cos and add together

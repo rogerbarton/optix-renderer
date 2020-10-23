@@ -29,6 +29,7 @@ public:
 
     BSDFQueryRecord bRec(its.toLocal(-ray.d));
     bRec.uv = its.uv;
+    bRec.p = its.p;
     bRec.measure = ESolidAngle;
 
     Color3f bsdf_col = bsdf->sample(bRec, sampler->next2D());

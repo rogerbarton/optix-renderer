@@ -67,13 +67,15 @@ public:
 
     // compute the pdf of this query
     float probs = pdf(lRec);
+    lRec.pdf = probs;
+
     // check for it being near zero
     if (std::abs(probs) < Epsilon) {
       return Color3f(0.f);
     }
 
     // return radiance
-    return m_radiance / probs;
+    return eval(lRec) / probs;
   }
 
   virtual float pdf(const EmitterQueryRecord &lRec) const override {
@@ -92,8 +94,8 @@ public:
     // transform the probability to solid angle
     // where the first part is the distance and
     // the second part is the cosine (computed using the normal)
-    return prob * (lRec.p - lRec.ref).squaredNorm() /
-           std::abs(lRec.n.dot(lRec.wi));
+    // taken from the slides (converts pdf to solid anggles)
+    return prob * (lRec.p - lRec.ref).squaredNorm() / std::abs(lRec.n.dot(-lRec.wi));
   }
 
   virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
