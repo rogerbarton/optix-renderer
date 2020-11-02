@@ -42,11 +42,12 @@ public:
             {
                 auto emitter = shape->getEmitter();
                 EmitterQueryRecord eqr(traceRay.o, its.p, its.shFrame.n);
-                Li = Li + w_mats * t * emitter->eval(eqr);
+                Li += w_mats * t * emitter->eval(eqr);
             }
 
             float succ_prob = std::min(t.maxCoeff(), 0.99f);
-            if (counter < 3)
+            succ_prob = std::max(succ_prob, Epsilon);
+            if (counter < 0)
             {
                 counter++;
             }
@@ -56,53 +57,67 @@ public:
             }
             else
             {
-                t = t / succ_prob;
+                t /= succ_prob;
             }
 
-            BSDFQueryRecord bRec(its.toLocal(-traceRay.d));
-            // Sample BSDF
-            Color3f bsdf_col = bsdf->sample(bRec, sampler->next2D());
+            // WE NEED probs seen from its.p
 
-            if (bRec.measure == EDiscrete)
+            BSDFQueryRecord bRec_MATS(its.toLocal(-traceRay.d));
+            // Sample BSDF
+            Color3f bsdf_col = bsdf->sample(bRec_MATS, sampler->next2D());
+
+            if (bRec_MATS.measure == EMeasure::EDiscrete)
             {
                 w_mats = 1.0f;
                 w_ems = 0.f; // do not have to do EMS
             }
             else
             {
+                // ========== EMS =============
                 const Emitter *emitter = scene->getRandomEmitter(sampler->next1D());
 
-                EmitterQueryRecord eqr(its.p);
+                EmitterQueryRecord eqr_ems(its.p);
                 // sample the emitter
-                Color3f ems_col = emitter->sample(eqr, sampler->next2D());
+                Color3f ems_col = emitter->sample(eqr_ems, sampler->next2D());
+
+                Vector3f we = its.toLocal(eqr_ems.wi);
 
                 if (!ems_col.isZero(Epsilon))
                 {
                     // set PDF only if a valid sample was done
-                    pdfems = emitter->pdf(eqr) / scene->getLights().size();
-                    if (!scene->rayIntersect(eqr.shadowRay))
+                    pdfems = emitter->pdf(eqr_ems) / scene->getLights().size();
+                    if (std::abs(pdfems) > Epsilon)
                     {
-                        BSDFQueryRecord bqr_ems(its.toLocal(-traceRay.d), its.toLocal(eqr.wi), EMeasure::ESolidAngle);
-                        bqr_ems.uv = its.uv;
-                        Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
-                        pdfems_bsdf = bsdf->pdf(bqr_ems);
-                        float cos = Frame::cosTheta(its.shFrame.toLocal(eqr.wi));
-                        Li_EMS = ems_col * cos * bsdf_col_ems * scene->getLights().size();
-                    }
-                    else
-                    {
-                        pdfems = 0.f;
+                        Ray3f shadowRay_ems(eqr_ems.shadowRay, Epsilon, (eqr_ems.p - its.p).norm() - Epsilon);
+                        if (!scene->rayIntersect(shadowRay_ems))
+                        {
+                            BSDFQueryRecord bqr_ems(its.toLocal(-traceRay.d), we, EMeasure::ESolidAngle);
+                            bqr_ems.uv = its.uv;
+                            Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
+                            pdfems_bsdf = bsdf->pdf(bqr_ems);
+                            float cos = std::abs(Frame::cosTheta(we));
+                            Li_EMS = ems_col * cos * bsdf_col_ems * scene->getLights().size();
+                        }
+                        else
+                        {
+                            pdfems = 0.f;
+                        }
                     }
                 }
 
+                // ========== MATS =============
+
                 if (!bsdf_col.isZero(Epsilon))
                 {
-                    pdfmat = bsdf->pdf(bRec);
+
+                    pdfmat = bsdf->pdf(bRec_MATS);
                     if (std::abs(pdfmat) < Epsilon)
                     {
+                        // dieletric?
                         break;
                     }
-                    Ray3f shadowray(its.p, its.toWorld(bRec.wo));
+
+                    Ray3f shadowray(its.p, its.toWorld(bRec_MATS.wo));
                     Intersection itsS;
                     if (scene->rayIntersect(shadowray, itsS))
                     {
@@ -116,11 +131,13 @@ public:
                 {
                     break;
                 }
+
+                // calculate the weights
                 if ((pdfmat + pdfmat_ems) > Epsilon)
                 {
                     w_mats = pdfmat / (pdfmat + pdfmat_ems);
                 }
-                if ((pdfems + pdfems_bsdf) > Epsilon)
+                if ((pdfems_bsdf + pdfems) > Epsilon)
                 {
                     w_ems = pdfems / (pdfems_bsdf + pdfems);
                 }
@@ -129,7 +146,7 @@ public:
             t = t * bsdf_col;
 
             // create next ray to trace
-            traceRay = Ray3f(its.p, its.toWorld(bRec.wo));
+            traceRay = Ray3f(its.p, its.toWorld(bRec_MATS.wo));
         }
         return Li;
     }
@@ -142,4 +159,5 @@ protected:
 };
 
 NORI_REGISTER_CLASS(PathMISIntegrator, "path_mis");
+
 NORI_NAMESPACE_END
