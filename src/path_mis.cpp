@@ -78,12 +78,12 @@ public:
 
                 if (!ems_col.isZero(Epsilon))
                 {
+                    // set PDF only if a valid sample was done
                     pdfems = emitter->pdf(eqr) / scene->getLights().size();
                     if (!scene->rayIntersect(eqr.shadowRay))
                     {
                         BSDFQueryRecord bqr_ems(its.toLocal(-traceRay.d), its.toLocal(eqr.wi), EMeasure::ESolidAngle);
                         bqr_ems.uv = its.uv;
-                        //bqr_ems.p = its.p;
                         Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
                         pdfems_bsdf = bsdf->pdf(bqr_ems);
                         float cos = Frame::cosTheta(its.shFrame.toLocal(eqr.wi));
@@ -124,8 +124,6 @@ public:
                 {
                     w_ems = pdfems / (pdfems_bsdf + pdfems);
                 }
-                //w_mats = (pdfmat + pdfmat_ems) > Epsilon ? pdfmat / (pdfmat + pdfmat_ems) : w_mats;
-                //w_ems = (pdfems + pdfems_bsdf) > Epsilon ? pdfems / (pdfems_bsdf + pdfems) : w_ems;
             }
             Li += w_ems * t * Li_EMS;
             t = t * bsdf_col;
