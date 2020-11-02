@@ -20,6 +20,7 @@
 #include <nori/bsdf.h>
 #include <nori/emitter.h>
 #include <nori/warp.h>
+#include <Eigen/Geometry>
 
 NORI_NAMESPACE_BEGIN
 
@@ -38,7 +39,6 @@ public:
     virtual Point3f getCentroid(uint32_t index) const override { return m_position; }
 
     virtual bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override {
-        
         Vector3f L = ray.o - m_position;
         float a = ray.d.dot(ray.d); // D^2
         float b = 2.f * ray.d.dot(L); // 2OD
@@ -46,28 +46,18 @@ public:
 
         // solve quadratic at^2 + bt + c = 0
         float discr = b * b - 4.f * a * c;
-        if (discr < 0) {
+        if (discr < 0.f) {
             return false;
         }
-        float t0, t1;
-        if (discr == 0) {
-            t0 = -0.5 * b / a;
-            t1 = t0;
-        } else {
-            float q = (b > 0) ? 
-                -0.5 * (b + sqrt(discr)) : 
-                -0.5 * (b - sqrt(discr)); 
-            t0 = q / a; 
-            t1 = c / q; 
-        }
-        if (t0 > t1) std::swap(t0, t1);
+        const float tmin = (-b - sqrt(discr)) / 2 / a;
+        const float tmax = (-b + sqrt(discr)) / 2 / a;
 
-        if(t0 < 0) {
-            t0 = t1;
-            if(t0 < 0) return false;
+        if (ray.mint <= tmin && ray.maxt >= tmin) {
+            t = tmin;
+            return true;
         }
-        if(ray.mint < t0 && ray.maxt > t0) {
-            t = t0;
+        if (ray.mint <= tmax && ray.maxt >= tmax) {
+            t = tmax;
             return true;
         }
         return false;
@@ -75,11 +65,14 @@ public:
     }
 
     virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection & its) const override {
-        its.p = ray.o + ray.d * its.t;
-        its.shFrame = Frame((its.p - m_position).normalized());
-        its.geoFrame = its.shFrame;
+        its.p = ray(its.t);
+        Vector3f dir = (its.p - m_position).normalized();
 
-        Point2f uv_coords = sphericalCoordinates(-(its.p - m_position).normalized());
+        
+        its.shFrame = Frame(dir);
+        its.geoFrame = Frame(dir);
+
+        Point2f uv_coords = sphericalCoordinates(-dir);
 
         // switch coordinates and map to [0,1]
         its.uv.x() = uv_coords.y() / (2.0 * M_PI);
