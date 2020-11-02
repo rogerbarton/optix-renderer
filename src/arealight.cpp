@@ -99,7 +99,19 @@ public:
 
   virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
                                const Point2f &sample2) const override {
-    throw NoriException("To implement...");
+    // first: choose a location on the surface
+    if (!m_shape)
+      throw NoriException("There is no shape attached to this Area light!");
+    ShapeQueryRecord sqr(ray.o);
+    m_shape->sampleSurface(sqr, sample1);
+
+    // second: choose sample to cosine weighted hemisphere over the sampled point
+    Vector3f wi = Warp::squareToCosineHemisphere(sample2);
+
+    // build sampled ray
+    ray = Ray3f(sqr.p, Frame(sqr.n).toWorld(wi));
+
+    return M_PI / sqr.pdf * m_radiance; // divide by pdf == multiply by area
   }
 
 protected:
