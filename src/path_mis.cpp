@@ -24,7 +24,7 @@ public:
         {
             Color3f Li_EMS = Color3f(0.f);
             float pdfems = 0.f, pdfmat = 0.f;
-            float pdfems_bsdf = 0.f;
+            float pdfems_mats = 0.f;
             float pdfmat_ems = 0.f;
 
             Intersection its;
@@ -61,87 +61,67 @@ public:
             }
 
             // WE NEED probs seen from its.p
+            // ========== EMS =============
+            const Emitter *emitter = scene->getRandomEmitter(sampler->next1D());
 
+            EmitterQueryRecord eqr_ems(its.p);
+            // sample the emitter
+            Color3f ems_col = emitter->sample(eqr_ems, sampler->next2D());
+
+            Vector3f we = its.toLocal(eqr_ems.wi);
+
+            if (!ems_col.isZero(Epsilon))
+            {
+                if (!scene->rayIntersect(eqr_ems.shadowRay))
+                {
+                    BSDFQueryRecord bqr_ems(its.toLocal(-traceRay.d), we, EMeasure::ESolidAngle);
+                    bqr_ems.uv = its.uv;
+                    bqr_ems.p = its.p;
+                    Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
+
+                    float cos = Frame::cosTheta(we);
+
+                    Li_EMS = ems_col * cos * bsdf_col_ems * scene->getLights().size();
+                    pdfems_mats = bsdf->pdf(bqr_ems);
+                    pdfems = emitter->pdf(eqr_ems) / scene->getLights().size();
+                }
+            }
+            if ((pdfems_mats + pdfems) > Epsilon)
+            {
+                w_ems = pdfems / (pdfems_mats + pdfems);
+            }
+
+            // ========== MATS =============
             BSDFQueryRecord bRec_MATS(its.toLocal(-traceRay.d));
             // Sample BSDF
             Color3f bsdf_col = bsdf->sample(bRec_MATS, sampler->next2D());
 
-            if (bRec_MATS.measure == EMeasure::EDiscrete)
+            if (!bsdf_col.isZero(Epsilon))
             {
-                w_mats = 1.0f;
-                w_ems = 0.f; // do not have to do EMS
-            }
-            else
-            {
-                // ========== EMS =============
-                const Emitter *emitter = scene->getRandomEmitter(sampler->next1D());
-
-                EmitterQueryRecord eqr_ems(its.p);
-                // sample the emitter
-                Color3f ems_col = emitter->sample(eqr_ems, sampler->next2D());
-
-                Vector3f we = its.toLocal(eqr_ems.wi);
-
-                if (!ems_col.isZero(Epsilon))
+                Ray3f shadowray(its.p, its.toWorld(bRec_MATS.wo));
+                Intersection itsS;
+                if (scene->rayIntersect(shadowray, itsS))
                 {
-                    // set PDF only if a valid sample was done
-                    pdfems = emitter->pdf(eqr_ems) / scene->getLights().size();
-                    if (std::abs(pdfems) > Epsilon)
+                    if (itsS.mesh->isEmitter())
                     {
-                        Ray3f shadowRay_ems(eqr_ems.shadowRay, Epsilon, (eqr_ems.p - its.p).norm() - Epsilon);
-                        if (!scene->rayIntersect(shadowRay_ems))
+                        EmitterQueryRecord eqr_mats(its.p, itsS.p, itsS.shFrame.n);
+                        pdfmat = bsdf->pdf(bRec_MATS);
+                        pdfmat_ems = itsS.mesh->getEmitter()->pdf(eqr_mats) / scene->getLights().size();
+
+                        if ((pdfmat + pdfmat_ems) > Epsilon)
                         {
-                            BSDFQueryRecord bqr_ems(its.toLocal(-traceRay.d), we, EMeasure::ESolidAngle);
-                            bqr_ems.uv = its.uv;
-                            Color3f bsdf_col_ems = bsdf->eval(bqr_ems);
-                            pdfems_bsdf = bsdf->pdf(bqr_ems);
-                            float cos = std::abs(Frame::cosTheta(we));
-                            Li_EMS = ems_col * cos * bsdf_col_ems * scene->getLights().size();
-                        }
-                        else
-                        {
-                            pdfems = 0.f;
+                            w_mats = pdfmat / (pdfmat + pdfmat_ems);
                         }
                     }
-                }
-
-                // ========== MATS =============
-
-                if (!bsdf_col.isZero(Epsilon))
-                {
-
-                    pdfmat = bsdf->pdf(bRec_MATS);
-                    if (std::abs(pdfmat) < Epsilon)
-                    {
-                        // dieletric?
-                        break;
-                    }
-
-                    Ray3f shadowray(its.p, its.toWorld(bRec_MATS.wo));
-                    Intersection itsS;
-                    if (scene->rayIntersect(shadowray, itsS))
-                    {
-                        if (itsS.mesh->isEmitter())
-                        {
-                            pdfmat_ems = itsS.mesh->getEmitter()->pdf(EmitterQueryRecord(its.p, itsS.p, itsS.shFrame.n));
-                        }
-                    }
-                }
-                else
-                {
-                    break;
-                }
-
-                // calculate the weights
-                if ((pdfmat + pdfmat_ems) > Epsilon)
-                {
-                    w_mats = pdfmat / (pdfmat + pdfmat_ems);
-                }
-                if ((pdfems_bsdf + pdfems) > Epsilon)
-                {
-                    w_ems = pdfems / (pdfems_bsdf + pdfems);
                 }
             }
+
+            // check for discrete bsdf
+            if (bRec_MATS.measure == EDiscrete) {
+                w_ems = 0.f;
+                w_mats = 1.f;
+            }
+
             Li += w_ems * t * Li_EMS;
             t = t * bsdf_col;
 
