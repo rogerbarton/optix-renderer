@@ -14,8 +14,11 @@ option(NORI_USE_GUI "Build the GUI" ON)
 if(NOT NORI_USE_GUI)
     message("NORI_USE_GUI is OFF.")
 
+    message("Make sure to use the right gcc version:")
+    message("module load new/gcc/4.9.2 cmake/3.9.2")
+
     # Disable flag for preprocessor
-    add_definitions(-DDISABLE_NORI_GUI)
+    add_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
 else()
   message("NORI_USE_GUI is ON.")
 endif()
