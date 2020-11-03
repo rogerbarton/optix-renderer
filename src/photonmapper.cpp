@@ -110,6 +110,12 @@ public:
                 BSDFQueryRecord bqr(its.toLocal(-sampleRay.d));
                 Color3f bsdf_col = bsdf->sample(bqr, sampler->next2D());
 
+                // break if sampling failed
+                if (bsdf_col.isZero(Epsilon))
+                {
+                    break;
+                }
+
                 sampleRay = Ray3f(its.p, its.toWorld(bqr.wo));
                 t = t * bsdf_col;
             }

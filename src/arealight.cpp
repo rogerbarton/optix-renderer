@@ -105,6 +105,10 @@ public:
     ShapeQueryRecord sqr(ray.o);
     m_shape->sampleSurface(sqr, sample1);
 
+    /*if(sqr.pdf < Epsilon) {
+      return Color3f(0.f);
+    }*/
+
     // second: choose sample to cosine weighted hemisphere over the sampled point
     Vector3f wi = Warp::squareToCosineHemisphere(sample2);
 
