@@ -65,13 +65,14 @@ public:
         m_emittedPhotons = 0;
         while (m_photonMap->size() < m_photonCount)
         {
-            Color3f t(1.f); // throughput value
             const Emitter *emitter = scene->getRandomEmitter(sampler->next1D());
             Ray3f sampleRay;
 
             Color3f W = emitter->samplePhoton(sampleRay, sampler->next2D(), sampler->next2D()) * scene->getLights().size();
 
             m_emittedPhotons++;
+
+            int counter = 0;
             while (true)
             {
                 Intersection its;
@@ -95,16 +96,22 @@ public:
                     }
                     else
                     {
-                        m_photonMap->push_back(Photon(its.p, -sampleRay.d, t * W));
+                        m_photonMap->push_back(Photon(its.p, -sampleRay.d, W));
                     }
                 }
 
                 // russian roulette
-                auto successprob = t.maxCoeff();
-                if ((sampler->next1D()) > successprob)
+                auto successprob = std::min(W.maxCoeff(), 0.99f);
+                if (counter < 3)
+                {
+                    counter++;
+                }
+                else if ((sampler->next1D()) > successprob)
+                {
                     break;
+                }
                 else
-                    t /= successprob;
+                    W /= successprob;
 
                 // calculate next ray by sampling BSDF
                 BSDFQueryRecord bqr(its.toLocal(-sampleRay.d));
@@ -117,11 +124,12 @@ public:
                 }
 
                 sampleRay = Ray3f(its.p, its.toWorld(bqr.wo));
-                t = t * bsdf_col;
+                W = W * bsdf_col;
             }
         }
 
         /* Build the photon map */
+        std::cout << "Emitted " << m_emittedPhotons << " Photons." << std::endl;
         m_photonMap->build();
     }
 
@@ -142,9 +150,10 @@ public:
 		 * }
 		 */
 
-        Color3f Li = Color3f(0.f); // initial radiance§
+        Color3f Li = Color3f(0.f); // initial radiance
         Color3f t = Color3f(1.0);  // initial throughput
         Ray3f traceRay(_ray);
+        int counter = 0;
         while (true)
         {
             Intersection its;
@@ -179,25 +188,29 @@ public:
                                     results);
 
                 Color3f photonColor(0.f);
-                for (uint32_t i : results)
+                if (results.size() > 0)
                 {
-                    const Photon &photon = (*m_photonMap)[i];
+                    for (uint32_t i : results)
+                    {
+                        const Photon &photon = (*m_photonMap)[i];
 
-                    // create a bsdf query record given the direction of the photon
-                    BSDFQueryRecord bqr_p(its.toLocal(-traceRay.d), its.toLocal(photon.getDirection()), EMeasure::ESolidAngle);
-                    photonColor += photon.getPower() * bsdf->eval(bqr_p);
+                        // create a bsdf query record given the direction of the photon
+                        BSDFQueryRecord bqr_p(its.toLocal(-traceRay.d), its.toLocal(photon.getDirection()), EMeasure::ESolidAngle);
+                        photonColor += photon.getPower() * bsdf->eval(bqr_p) / (M_PI * m_photonRadius * m_photonRadius);
+                    }
+
+                    Li += t * photonColor / m_emittedPhotons;
                 }
-
-                // dividing the product by the area queried (pi * r * r) and by the emitted photon number
-                photonColor /= M_PI * m_photonRadius * m_photonRadius * m_emittedPhotons;
-
-                Li += t * photonColor;
                 // and terminate the recursion!
                 break;
             }
 
             float succ_prob = std::min(t.maxCoeff(), 0.99f);
-            if (sampler->next1D() > succ_prob)
+            if (counter < 3)
+            {
+                counter++;
+            }
+            else if (sampler->next1D() > succ_prob)
             {
                 break;
             }
