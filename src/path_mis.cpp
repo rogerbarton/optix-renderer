@@ -136,7 +136,7 @@ public:
 
         if (scene->getEnvMap())
         {
-            Li += scene->getEnvMap()->eval(traceRay.d);
+            Li += t * scene->getEnvMap()->eval(traceRay.d);
         }
 
         return Li;

@@ -6,26 +6,34 @@
 
 NORI_NAMESPACE_BEGIN
 
-class DirectIntegrator : public Integrator {
+class DirectIntegrator : public Integrator
+{
 public:
   DirectIntegrator(const PropertyList &propList) {}
 
-  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
+  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+  {
     Intersection its;
     // if no collision at all, return black
-    if (!scene->rayIntersect(ray, its)) {
+    if (!scene->rayIntersect(ray, its))
+    {
+      if (scene->getEnvMap())
+      {
+        return scene->getEnvMap()->eval(ray.d);
+      }
       return Color3f(0.f);
     }
 
     Color3f result; // final Color
 
     // get colliding object
-    auto shape = its.mesh; 
+    auto shape = its.mesh;
     auto bsdf = shape->getBSDF();
     // primary ray, pointing to camera
     Vector3f wo = its.toLocal((ray.o - its.p).normalized());
 
-    for (auto &l : scene->getLights()) {
+    for (auto &l : scene->getLights())
+    {
       // create the emitter query record with the origin point
       EmitterQueryRecord rec(its.p);
       // light i, with a sampled point
@@ -40,13 +48,14 @@ public:
       // check if the primary intersection and the secondary intersection are
       // not too close if they were, the secondary ray would point into the
       // object
-      if ((its.p - light_intersection.p).norm() > Epsilon) {
+      if ((its.p - light_intersection.p).norm() > Epsilon)
+      {
         continue;
       }
 
       // create BSDF query record based on wi, wo and the measure
       BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
-      bsdfRec.uv = its.uv; // set the uv coordinates
+      bsdfRec.uv = its.uv;                      // set the uv coordinates
       Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
 
       // calculate the angle
