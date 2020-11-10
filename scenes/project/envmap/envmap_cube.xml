@@ -11,30 +11,29 @@
 	<integrator type="path_mats"/>
 
 	<!-- Render the scene as viewed by a perspective camera -->
-  
+
 	<camera type="perspective">
-		<transform name="toWorld"> 
-			<lookat target="0, 0, 0"
-				origin="50, 0, 0"
-				up="0, 1, 0"/>
+		<transform name="toWorld">
+			<lookat target="0, 0, 0" origin="50, 0, 0" up="0, 1, 0"/>
 		</transform>
 
 		<float name="fov" value="85"/>
-    
+
 		<integer name="width" value="800"/>
 		<integer name="height" value="800"/>
 	</camera>
 
-  <envmap type="png_env">
-    <texture type="png_texture" name="envmap">
-      <string name="filename" value="../res/canyon1.png"/>
-    </texture>
-  </envmap>
+	<envmap type="png_env">
+		<texture type="png_texture" name="envmap">
+			<boolean name="sphereTexture" value="false"/>
+			<string name="filename" value="../res/canyon1.png"/>
+		</texture>
+		<boolean name="sphereTexture" value="false"/>
+	</envmap>
 
-  <mesh type="sphere">
-    <point name="center" value="0,0,0"/>
-    <float name="radius" value="20"/>
-    <bsdf type="mirror">
-    </bsdf>
-  </mesh>
+	<mesh type="sphere">
+		<point name="center" value="0,0,0"/>
+		<float name="radius" value="20"/>
+		<bsdf type="mirror"/>
+	</mesh>
 </scene>
