@@ -159,6 +159,8 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
+                if (scene->getEnvMap())
+		            Li += t * scene->getEnvMap()->eval(traceRay.d);
                 break;
             }
 
@@ -196,6 +198,9 @@ public:
 
                         // create a bsdf query record given the direction of the photon
                         BSDFQueryRecord bqr_p(its.toLocal(-traceRay.d), its.toLocal(photon.getDirection()), EMeasure::ESolidAngle);
+                        bqr_p.uv = its.uv;
+                        bqr_p.p = its.p;
+                        
                         photonColor += photon.getPower() * bsdf->eval(bqr_p) / (M_PI * m_photonRadius * m_photonRadius);
                     }
 
@@ -220,6 +225,8 @@ public:
             }
 
             BSDFQueryRecord bRec(its.toLocal(-traceRay.d));
+            bRec.uv = its.uv;
+            bRec.p = its.p;
 
             // Sample BSDF
             Color3f bsdf_col = bsdf->sample(bRec, sampler->next2D());
