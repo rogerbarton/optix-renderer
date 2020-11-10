@@ -124,15 +124,17 @@ add_executable(nori
 )
 
 # The following lines build the warping test application
-add_executable(warptest
-  include/nori/warp.h
-  src/warp.cpp
-  src/warptest.cpp
-  src/microfacet.cpp
-  src/object.cpp
-  src/proplist.cpp
-  src/common.cpp
-)
+if(NORI_USE_GUI)
+  add_executable(warptest
+    include/nori/warp.h
+    src/warp.cpp
+    src/warptest.cpp
+    src/microfacet.cpp
+    src/object.cpp
+    src/proplist.cpp
+    src/common.cpp
+  )
+endif(NORI_USE_GUI)
 
 add_executable(tonemapper
         include/nori/bitmap.h
@@ -150,12 +152,17 @@ endif()
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
 add_dependencies(nori lodepng_p)
-add_dependencies(warptest nori)
+
+if(NORI_USE_GUI)
+  add_dependencies(warptest nori)
+  target_link_libraries(warptest ${extra_libs})
+endif(NORI_USE_GUI)
+
 add_dependencies(tonemapper nori)
 
 # Link to dependency libraries
-target_link_libraries(nori ${extra_libs})
-target_link_libraries(warptest ${extra_libs})
 target_link_libraries(tonemapper ${extra_libs})
+target_link_libraries(nori ${extra_libs})
+
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
