@@ -130,12 +130,14 @@ std::string Scene::toString() const {
         "  %s  }\n"
         "  emitters = {\n"
         "  %s  }\n"
+        "  envmap = %s\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
         indent(shapes, 2),
-        indent(lights,2)
+        indent(lights,2),
+        m_envmap ? indent(m_envmap->toString()) : "nullptr"
     );
 }
 
