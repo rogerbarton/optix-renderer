@@ -30,6 +30,8 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
+	            if (scene->getEnvMap())
+		            Li += t * scene->getEnvMap()->eval(traceRay.d);
                 break;
             }
 
@@ -132,11 +134,6 @@ public:
 
             // create next ray to trace
             traceRay = Ray3f(its.p, its.toWorld(bRec_MATS.wo));
-        }
-
-        if (scene->getEnvMap())
-        {
-            Li += t * scene->getEnvMap()->eval(traceRay.d);
         }
 
         return Li;

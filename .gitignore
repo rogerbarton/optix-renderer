@@ -11,3 +11,5 @@ Makefile
 
 .vscode/
 
+
+cmake-build*/
