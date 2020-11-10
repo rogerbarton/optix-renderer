@@ -32,7 +32,8 @@ NORI_NAMESPACE_BEGIN
  * coordinating rendering jobs. It also provides useful query routines that
  * are mostly used by the \ref Integrator implementations.
  */
-class Scene : public NoriObject {
+class Scene : public NoriObject
+{
 public:
     /// Construct a new scene object
     Scene(const PropertyList &);
@@ -65,15 +66,19 @@ public:
     const std::vector<Emitter *> &getLights() const { return m_emitters; }
 
     /// Return a random emitter
-    const Emitter * getRandomEmitter(float rnd) const {
-        auto const & n = m_emitters.size();
+    const Emitter *getRandomEmitter(float rnd) const
+    {
+        auto const &n = m_emitters.size();
         size_t index = std::min(
-                static_cast<size_t>(std::floor(n*rnd)),
-                n-1);
+            static_cast<size_t>(std::floor(n * rnd)),
+            n - 1);
+        if (index >= m_emitters.size())
+            return nullptr;
         return m_emitters[index];
     }
 
-    EnvironmentMap* getEnvMap() const {
+    EnvironmentMap *getEnvMap() const
+    {
         return m_envmap;
     }
 
@@ -91,7 +96,8 @@ public:
      *
      * \return \c true if an intersection was found
      */
-    bool rayIntersect(const Ray3f &ray, Intersection &its) const {
+    bool rayIntersect(const Ray3f &ray, Intersection &its) const
+    {
         return m_bvh->rayIntersect(ray, its, false);
     }
 
@@ -110,7 +116,8 @@ public:
      *
      * \return \c true if an intersection was found
      */
-    bool rayIntersect(const Ray3f &ray) const {
+    bool rayIntersect(const Ray3f &ray) const
+    {
         Intersection its; /* Unused */
         return m_bvh->rayIntersect(ray, its, true);
     }
@@ -118,7 +125,8 @@ public:
     /**
      * \brief Return an axis-aligned box that bounds the scene
      */
-    const BoundingBox3f &getBoundingBox() const {
+    const BoundingBox3f &getBoundingBox() const
+    {
         return m_bvh->getBoundingBox();
     }
 
@@ -137,6 +145,7 @@ public:
     virtual std::string toString() const override;
 
     virtual EClassType getClassType() const override { return EScene; }
+
 private:
     std::vector<Shape *> m_shapes;
     Integrator *m_integrator = nullptr;
@@ -144,7 +153,7 @@ private:
     Camera *m_camera = nullptr;
     BVH *m_bvh = nullptr;
 
-    EnvironmentMap* m_envmap = nullptr;
+    EnvironmentMap *m_envmap = nullptr;
 
     std::vector<Emitter *> m_emitters;
 };

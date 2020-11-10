@@ -32,6 +32,7 @@ public:
             {
 	            if (scene->getEnvMap())
 		            Li += t * scene->getEnvMap()->eval(traceRay.d);
+
                 break;
             }
 
@@ -99,6 +100,8 @@ public:
 
             // ========== MATS =============
             BSDFQueryRecord bRec_MATS(its.toLocal(-traceRay.d));
+            bRec_MATS.uv = its.uv;
+            bRec_MATS.p = its.p;
             // Sample BSDF
             Color3f bsdf_col = bsdf->sample(bRec_MATS, sampler->next2D());
 
