@@ -17,13 +17,18 @@
 */
 
 #include <nori/block.h>
-#include <nori/gui.h>
+#ifndef DISABLE_NORI_GUI
+  #include <nori/gui.h>
+#else
+  #include <nori/render.h>
+#endif
 #include <filesystem/path.h>
 
 int main(int argc, char **argv) {
     using namespace nori;
 
     try {
+#ifndef DISABLE_NORI_GUI
         nanogui::init();
 
         // Open the UI with a dummy image
@@ -50,6 +55,25 @@ int main(int argc, char **argv) {
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();
+
+#else
+        if (argc == 2) {
+            ImageBlock block(Vector2i(720, 720), nullptr);
+            RenderThread m_renderThread(block);
+            std::string filename = argv[1];
+            filesystem::path path(filename);
+
+            if (path.extension() == "xml") {
+                /* Render the XML scene file */
+                m_renderThread.renderScene(filename);
+                // waiting until rendere is finished
+                while(m_renderThread.isBusy());
+            } else {
+                cerr << "Error: unknown file \"" << filename
+                << "\", expected an extension of type .xml" << endl;
+            }
+        }
+#endif
 
     } catch (const std::exception &e) {
         cerr << "Fatal error: " << e.what() << endl;
