@@ -7,7 +7,12 @@ project("nori")
 include("CMakeConfig.txt")
 
 include_directories(ext)
-add_subdirectory(docs)
+
+option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
+
+if(NORI_BUILD_DOCS)
+  add_subdirectory(docs)
+endif(NORI_BUILD_DOCS)
 
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
@@ -44,6 +49,8 @@ add_executable(nori
   include/nori/transform.h
   include/nori/vector.h
   include/nori/warp.h
+  include/nori/environmentmap.h
+  include/nori/lodepng.h
 
   # Source code files
   src/bitmap.cpp
@@ -85,6 +92,10 @@ add_executable(nori
   src/direct_mis.cpp
   src/path_mats.cpp
   src/path_mis.cpp
+  src/disney.cpp
+  src/environmentmap.cpp
+  src/PNGTexture.cpp
+  src/lodepng.cpp
 )
 
 # The following lines build the warping test application
