@@ -33,8 +33,9 @@ public:
 	Vector3f eval(const Point2f &_uv) override
 	{
 		Vector3f out(0.f);
-		unsigned int w = static_cast<unsigned int>((_uv[0]+offsetU) * scaleU * (float)width);
+		unsigned int w = static_cast<unsigned int>((_uv[0]) * scaleU * (float)width);
 		unsigned int h = static_cast<unsigned int>((_uv[1]) * scaleV * (float)height);
+
 		unsigned int index = (h * width + w) % (width * height);
 		out[0] = data[4 * index];
 		out[1] = data[(4 * index) + 1];

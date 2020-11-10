@@ -1,0 +1,80 @@
+<scene>
+
+  <sampler type="independent">
+    <integer name="sampleCount" value="1000"/>
+  </sampler>
+
+  <!--<integrator type="photonmapper">
+    <integer name="photonCount" value="1000"/>
+    <float name="photonRadius" value="0"/>
+  </integrator>-->
+  <integrator type="path_mats"/>
+
+  <camera type="perspective">
+    <transform name="toWorld">
+      <lookat target="0,0,0" origin="0,25,30" up="0,-1,0"/>
+    </transform>
+
+    <float name="fov" value="85"/>
+
+    <integer name="width" value="800"/>
+    <integer name="height" value="800"/>
+  </camera>
+
+  <mesh type="sphere">
+    <point name="center" value="10,-30,0"/>
+    <float name="radius" value="10"/>
+
+    <bsdf type="mirror"/>
+  </mesh>
+
+  <mesh type="sphere">
+    <point name="center" value="0,0,0"/>
+    <float name="radius" value="10"/>
+
+    <bsdf type="disney">
+      <float name="metallic" value="0.8"/>
+      <float name="subsurface" value="0.0"/>
+      <float name="specular" value="0.5"/>
+      <float name="roughness" value="0.5"/>
+      <float name="specularTint" value="0.0"/>
+      <float name="anisotropic" value="0"/>
+      <float name="sheen" value="0.0"/>
+      <float name="sheenTint" value="0.5"/>
+      <float name="clearcoat" value="0"/>
+      <float name="clearcoatGloss" value="1.0"/>
+
+      <color name="baseColor" value="0.2, 0.2, 1"/>
+    </bsdf>
+  </mesh>
+
+  <envmap type="png_env">
+    <texture type="png_texture" name="envmap">
+      <string name="filename" value="../res/rooitou_park.png"/>
+      <!-- left / right -->
+      <float name="offsetU" value="0.0"/>
+
+      <!-- top / down -->
+      <float name="offsetV" value="0.0"/>
+    </texture>
+    <boolean name="sphereTexture" value="true"/>
+
+  </envmap>
+
+  <!-- add an area light above... -->
+
+  <mesh type="sphere">
+    <point name="center" value="0,0,150"/>
+    <float name="radius" value="100"/>
+
+    <bsdf type="diffuse"/>
+    <transform name="toWorld">
+      <scale value="10,1,10"/>
+      <translate value="0, 100, 0"/>
+    </transform>
+    <emitter type="area">
+      <color name="radiance" value="1,0,0"/>
+    </emitter>
+  </mesh>
+
+</scene>
