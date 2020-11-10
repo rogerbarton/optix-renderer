@@ -13,3 +13,4 @@ functionality in your own submissions—however, you are not required to do so.
 * `tbb`: Intel's Boost Thread Building Blocks for multithreading
 * `tinyformat`: type-safe C++11 version of `sprintf` and friends
 * `zlib`: data compression library, used by `openexr`
+* `lodepng`: library to open PNG files
