@@ -24,14 +24,17 @@ public:
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
+
+		offsetU = props.getFloat("offsetU", 0.f);
+		offsetV = props.getFloat("offsetV", 0.f);
 	}
 
 	//4 bytes per pixel, ordered RGBA
 	Vector3f eval(const Point2f &_uv) override
 	{
 		Vector3f out(0.f);
-		unsigned int w = static_cast<unsigned int>(_uv[0] * scaleU * (float)width);
-		unsigned int h = static_cast<unsigned int>(_uv[1] * scaleV * (float)height);
+		unsigned int w = static_cast<unsigned int>((_uv[0]+offsetU) * scaleU * (float)width);
+		unsigned int h = static_cast<unsigned int>((_uv[1]) * scaleV * (float)height);
 		unsigned int index = (h * width + w) % (width * height);
 		out[0] = data[4 * index];
 		out[1] = data[(4 * index) + 1];
@@ -45,8 +48,10 @@ public:
 						   "filename: %s,\n"
 						   "scaleU: %f,\n"
 						   "scaleV: %f,\n"
+						   "offsetU: %f,\n"
+						   "offsetV: %f\n"
 						   "]",
-						   filename, scaleU, scaleV);
+						   filename, scaleU, scaleV, offsetU, offsetV);
 	};
 
 	unsigned int getWidth() override
@@ -64,6 +69,7 @@ private:
 	unsigned int width, height;
 	std::vector<float> data;
 	float scaleU, scaleV;
+	float offsetU, offsetV;
 
 	float InverseGammaCorrect(float value)
 	{

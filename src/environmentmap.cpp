@@ -63,11 +63,12 @@ public:
 	std::string toString() const override
 	{
 		return tfm::format("PngEnvMap[\n"
-			"envmap: %s,\n"
-			"scaleU: %f,\n"
-			"scaleV: %f,\n"
-			"sphereTexture: %d\n"
-		"]", m_map->toString(), scaleU, scaleV, sphereTexture);
+						   "envmap: %s,\n"
+						   "scaleU: %f,\n"
+						   "scaleV: %f,\n"
+						   "sphereTexture: %d\n"
+						   "]",
+						   m_map->toString(), scaleU, scaleV, sphereTexture);
 	};
 
 	//use wi as the escaping ray
@@ -123,12 +124,13 @@ public:
 		else
 		{
 			// eval texture based on w_i
-			Point2f uv_coords = sphericalCoordinates(-_wi);
+
+			Point2f uv_coords = sphericalCoordinates(_wi);
 
 			Point2f uv;
 
 			// switch coordinates and map to [0,1]
-			uv.x() = uv_coords.y() / (2.0 * M_PI);
+			uv.x() = uv_coords.y() / (2.f * M_PI);
 			uv.y() = uv_coords.x() / M_PI;
 
 			return m_map->eval(uv);
@@ -137,8 +139,8 @@ public:
 
 private:
 	Texture<Color3f> *m_map = nullptr;
-	float scaleU, scaleV;
 	bool sphereTexture = false;
+	float scaleU, scaleV;
 
 	void convert_xyz_to_cube_uv(float x, float y, float z, int *index, float *u, float *v)
 	{
