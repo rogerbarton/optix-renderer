@@ -6,22 +6,32 @@
 
 NORI_NAMESPACE_BEGIN
 
-class DirectMATSIntegrator : public Integrator {
+class DirectMATSIntegrator : public Integrator
+{
 public:
   DirectMATSIntegrator(const PropertyList &propList) {}
-  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
+  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+  {
     Intersection its;
-    if (!scene->rayIntersect(ray, its)) {
-      return Color3f(0.f);
+    Color3f result(0.f); // final color
+
+    if (!scene->rayIntersect(ray, its))
+    {
+      if (scene->getEnvMap())
+      {
+        result += scene->getEnvMap()->eval(ray.d);
+      }
+
+      return result;
     }
-    Color3f result; // final color
 
     // get colliding object and shape
     auto shape = its.mesh;
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
-    if (shape->isEmitter()) {
+    if (shape->isEmitter())
+    {
       auto emitter = shape->getEmitter();
       EmitterQueryRecord eqr(ray.o, its.p, its.shFrame.n);
       result += emitter->eval(eqr);
@@ -34,7 +44,8 @@ public:
 
     Color3f bsdf_col = bsdf->sample(bRec, sampler->next2D());
 
-    if(bsdf_col.isZero(Epsilon)) {
+    if (bsdf_col.isZero(Epsilon))
+    {
       return result;
     }
 
@@ -42,12 +53,20 @@ public:
     Intersection secondaryIts;
     Ray3f secondaryRay(its.p, its.toWorld(bRec.wo));
 
-    if(!scene->rayIntersect(secondaryRay, secondaryIts)) {
+    if (!scene->rayIntersect(secondaryRay, secondaryIts))
+    {
+      // if the ray does not intersect again, it will intersect the Env map
+      if (scene->getEnvMap())
+      {
+        result += scene->getEnvMap()->eval(secondaryRay.d) * bsdf_col;
+      }
+
       return result;
     }
 
-    // test if emitter
-    if(secondaryIts.mesh->isEmitter()) {
+    // test if emitter was hit
+    if (secondaryIts.mesh->isEmitter())
+    {
       EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
 
       result += secondaryIts.mesh->getEmitter()->eval(secondaryEQR) * bsdf_col;
@@ -55,7 +74,8 @@ public:
 
     return result;
   }
-  std::string toString() const {
+  std::string toString() const
+  {
     return std::string("DirectMATSIntegrator[]\n");
   }
 

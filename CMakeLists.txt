@@ -50,7 +50,6 @@ add_executable(nori
   include/nori/vector.h
   include/nori/warp.h
   include/nori/environmentmap.h
-  include/nori/lodepng.h
 
   # Source code files
   src/bitmap.cpp
@@ -95,7 +94,6 @@ add_executable(nori
   src/disney.cpp
   src/environmentmap.cpp
   src/PNGTexture.cpp
-  src/lodepng.cpp
 )
 
 # The following lines build the warping test application
@@ -121,6 +119,7 @@ add_dependencies(nori OpenEXR_p)
 add_dependencies(nori nanogui_p)
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
+add_dependencies(nori lodepng_p)
 add_dependencies(warptest nori)
 add_dependencies(tonemapper nori)
 

@@ -92,6 +92,12 @@ void Scene::addChild(NoriObject *obj) {
             m_integrator = static_cast<Integrator *>(obj);
             break;
 
+        case EEnvironmentMap:
+			if (m_envmap)
+				throw NoriException("There can only be one environment map per scene!");
+			m_envmap = static_cast<EnvironmentMap*>(obj);
+			break;
+
         default:
             throw NoriException("Scene::addChild(<%s>) is not supported!",
                 classTypeName(obj->getClassType()));

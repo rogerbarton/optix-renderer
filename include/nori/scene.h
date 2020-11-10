@@ -21,6 +21,7 @@
 
 #include <nori/bvh.h>
 #include <nori/emitter.h>
+#include <nori/environmentmap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -70,6 +71,10 @@ public:
                 static_cast<size_t>(std::floor(n*rnd)),
                 n-1);
         return m_emitters[index];
+    }
+
+    EnvironmentMap* getEnvMap() const {
+        return m_envmap;
     }
 
     /**
@@ -138,6 +143,8 @@ private:
     Sampler *m_sampler = nullptr;
     Camera *m_camera = nullptr;
     BVH *m_bvh = nullptr;
+
+    EnvironmentMap* m_envmap = nullptr;
 
     std::vector<Emitter *> m_emitters;
 };

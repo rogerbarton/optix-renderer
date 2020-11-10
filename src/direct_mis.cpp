@@ -5,13 +5,23 @@
 
 NORI_NAMESPACE_BEGIN
 
-class DirectMISIntegrator : public Integrator {
+class DirectMISIntegrator : public Integrator
+{
 public:
   DirectMISIntegrator(const PropertyList &propList) {}
-  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
+  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+  {
     Intersection its;
-    if (!scene->rayIntersect(ray, its)) {
-      return Color3f(0.f);
+    if (!scene->rayIntersect(ray, its))
+    {
+      if (scene->getEnvMap())
+      {
+        return scene->getEnvMap()->eval(ray.d);
+      }
+      else
+      {
+        return Color3f(0.f);
+      }
     }
     Color3f result(0.f);
     Color3f result_ems(0.f);
@@ -24,7 +34,8 @@ public:
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
-    if (shape->isEmitter()) {
+    if (shape->isEmitter())
+    {
       auto emitter = shape->getEmitter();
       EmitterQueryRecord eqr(ray.o, its.p, its.shFrame.n);
       result += emitter->eval(eqr);
@@ -36,10 +47,12 @@ public:
     Color3f li = l_ems->sample(eqr, sampler->next2D());
 
     // check if 0 returned to prevent failed sampling
-    if (!li.isZero(Epsilon)) {
+    if (!li.isZero(Epsilon))
+    {
 
       // if we don't intersect, calculate the final color
-      if(!scene->rayIntersect(eqr.shadowRay)) {
+      if (!scene->rayIntersect(eqr.shadowRay))
+      {
         // bsdf query
         // flip wi and wo
         BSDFQueryRecord bqr_ems(its.toLocal(-ray.d), its.toLocal(eqr.wi), EMeasure::ESolidAngle);
@@ -54,14 +67,23 @@ public:
         float pdf_mat = bsdf->pdf(bqr_ems);
 
         result_ems = li * cos * bsdf_col_ems * scene->getLights().size();
-        if(pdf_ems + pdf_mat > Epsilon) {
+        if (pdf_ems + pdf_mat > Epsilon)
+        {
           w_ems = pdf_ems / (pdf_ems + pdf_mat);
+        }
+      }
+      else
+      {
+        // add env map
+        if (scene->getEnvMap())
+        {
+          result_ems = li * scene->getEnvMap()->eval(eqr.shadowRay.d);
         }
       }
     }
 
     // Sampling the BSDF (mats)
-  
+
     // bsdf query
     BSDFQueryRecord bqr_mat(its.toLocal(-ray.d));
     bqr_mat.uv = its.uv; // set uv coordinates
@@ -70,31 +92,43 @@ public:
     Color3f bsdf_color = bsdf->sample(bqr_mat, sampler->next2D());
 
     // check if failed sampling
-    if (!bsdf_color.isZero(Epsilon)) {
+    if (!bsdf_color.isZero(Epsilon))
+    {
       Ray3f shadowRay(its.p, its.toWorld(bqr_mat.wo));
 
       // compute sampled ray interaction point
       Intersection secondaryIts;
 
-      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.mesh->isEmitter()) {
+      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.mesh->isEmitter())
+      {
         EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
         auto ems = secondaryIts.mesh->getEmitter();
 
-        result_mats = bsdf_color * ems->eval(secondaryEQR);// / scene->getLights().size();
-        
+        result_mats = bsdf_color * ems->eval(secondaryEQR); // / scene->getLights().size();
+
         float pdf_mat = bsdf->pdf(bqr_mat);
         float pdf_ems = ems->pdf(secondaryEQR) / scene->getLights().size();
 
-        if(pdf_mat + pdf_ems > Epsilon) {
+        if (pdf_mat + pdf_ems > Epsilon)
+        {
           w_mat = pdf_mat / (pdf_mat + pdf_ems);
         }
       }
+      else
+      {
+        // add env map
+        if (scene->getEnvMap())
+        {
+          result_mats = bsdf_color * scene->getEnvMap()->eval(shadowRay.d);
+        }
+      }
     }
-    
+
     // COMBINE BOTH
     return result + w_ems * result_ems + w_mat * result_mats;
   }
-  std::string toString() const {
+  std::string toString() const
+  {
     return std::string("DirectMISIntegrator[]\n");
   }
 

@@ -38,7 +38,24 @@ public:
      * */
     virtual EClassType getClassType() const override { return ETexture; }
 
+    /**
+     * @brief Eval the texture at the current point (in uv-coordinates)
+     */
     virtual T eval(const Point2f & uv) = 0;
+
+    /**
+     * @brief Get Width of image, defaults to 1, used for PNG textures
+     */
+    virtual unsigned int getWidth() {
+		return 1;
+	}
+
+    /**
+     * @brief Get height of image, defaults to 1, used for PNG textures
+     */
+	virtual unsigned int getHeight() {
+		return 1;
+	}
 };
 
 NORI_NAMESPACE_END

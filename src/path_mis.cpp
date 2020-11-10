@@ -63,6 +63,10 @@ public:
             // WE NEED probs seen from its.p
             // ========== EMS =============
             const Emitter *emitter = scene->getRandomEmitter(sampler->next1D());
+            if (!emitter)
+            {
+                throw NoriException("No Emitter in scene!");
+            }
 
             EmitterQueryRecord eqr_ems(its.p);
             // sample the emitter
@@ -117,7 +121,8 @@ public:
             }
 
             // check for discrete bsdf
-            if (bRec_MATS.measure == EDiscrete) {
+            if (bRec_MATS.measure == EDiscrete)
+            {
                 w_ems = 0.f;
                 w_mats = 1.f;
             }
@@ -128,6 +133,12 @@ public:
             // create next ray to trace
             traceRay = Ray3f(its.p, its.toWorld(bRec_MATS.wo));
         }
+
+        if (scene->getEnvMap())
+        {
+            Li += scene->getEnvMap()->eval(traceRay.d);
+        }
+
         return Li;
     }
     std::string toString() const

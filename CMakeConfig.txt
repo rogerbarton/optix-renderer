@@ -128,6 +128,13 @@ ExternalProject_Add(nanogui_p
   CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
 )
 
+# Build lodepng
+ExternalProject_Add(lodepng_p
+  URL             "${CMAKE_SOURCE_DIR}/ext/lodepng"
+  PREFIX          "ext_build"
+  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
+)
+
 # Compile Nori with compiler warnings turned on
 if(MSVC)
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -153,6 +160,7 @@ include_directories(
   ext/hypothesis
   ext/filesystem
   ext/nanogui/ext/eigen
+  ext/lodepng
   include
 )
 
@@ -161,6 +169,6 @@ set_target_properties(pugixml PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
 
 # Link to several dependency libraries
-set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml ${extra_libs})
+set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng ${extra_libs})
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:

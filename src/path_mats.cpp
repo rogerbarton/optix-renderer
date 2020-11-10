@@ -10,7 +10,7 @@ class PathMATSIntegrator : public Integrator
 {
 public:
     PathMATSIntegrator(const PropertyList &propList) {}
-    
+
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
         Color3f Li = Color3f(0.f); // initial radiance§
@@ -60,6 +60,11 @@ public:
 
             // create next ray to trace
             traceRay = Ray3f(its.p, its.toWorld(bRec.wo));
+        }
+
+        if (scene->getEnvMap())
+        {
+            Li += t * scene->getEnvMap()->eval(traceRay.d);
         }
 
         return Li;

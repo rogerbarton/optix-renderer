@@ -29,9 +29,11 @@ NORI_NAMESPACE_BEGIN
  * A Nori object represents an instance that is part of
  * a scene description, e.g. a scattering model or emitter.
  */
-class NoriObject {
+class NoriObject
+{
 public:
-    enum EClassType {
+    enum EClassType
+    {
         EScene = 0,
         EMesh,
         ETexture,
@@ -42,29 +44,44 @@ public:
         ECamera,
         EIntegrator,
         ESampler,
+        EEnvironmentMap,
         ETest,
         EReconstructionFilter,
         EClassTypeCount
     };
 
     /// Turn a class type into a human-readable string
-    static std::string classTypeName(EClassType type) {
-        switch (type) {
-            case EScene:      return "scene";
-            case EMesh:       return "shape";
-            case ETexture:    return "texture";
-            case EBSDF:       return "bsdf";
-            case EEmitter:    return "emitter";
-            case ECamera:     return "camera";
-            case EIntegrator: return "integrator";
-            case ESampler:    return "sampler";
-            case ETest:       return "test";
-            default:          return "<unknown>";
+    static std::string classTypeName(EClassType type)
+    {
+        switch (type)
+        {
+        case EScene:
+            return "scene";
+        case EMesh:
+            return "shape";
+        case ETexture:
+            return "texture";
+        case EBSDF:
+            return "bsdf";
+        case EEmitter:
+            return "emitter";
+        case ECamera:
+            return "camera";
+        case EIntegrator:
+            return "integrator";
+        case ESampler:
+            return "sampler";
+        case ETest:
+            return "test";
+        case EEnvironmentMap:
+            return "environmentmap";
+        default:
+            return "<unknown>";
         }
     }
 
     /// Virtual destructor
-    virtual ~NoriObject() { }
+    virtual ~NoriObject() {}
 
     /**
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.) 
@@ -78,10 +95,11 @@ public:
      * The default implementation does not support children and
      * simply throws an exception
      */
-    virtual void addChild(NoriObject *child) {
+    virtual void addChild(NoriObject *child)
+    {
         throw NoriException(
-                "NoriObject::addChild() is not implemented for objects of type '%s'!",
-                classTypeName(getClassType()));
+            "NoriObject::addChild() is not implemented for objects of type '%s'!",
+            classTypeName(getClassType()));
     }
 
     /**
@@ -91,7 +109,9 @@ public:
      * notified when they are added to a parent object. The
      * default implementation does nothing.
      */
-    virtual void setParent(NoriObject *parent) { /* Do nothing */ }
+    virtual void setParent(NoriObject *parent)
+    { /* Do nothing */
+    }
 
     /**
      * \brief Perform some action associated with the object
@@ -104,19 +124,19 @@ public:
      * constructed an object and added all of its children
      * using \ref addChild().
      */
-    virtual void activate() { /* Do nothing */ }
+    virtual void activate()
+    { /* Do nothing */
+    }
 
     /// Return a brief string summary of the instance (for debugging purposes)
     virtual std::string toString() const = 0;
 
-
     /// Allow to assign a name to the object
-    void setIdName(const std::string & name) { m_idname = name; }
-    const std::string & getIdName() const { return m_idname; }
+    void setIdName(const std::string &name) { m_idname = name; }
+    const std::string &getIdName() const { return m_idname; }
 
 protected:
     std::string m_idname;
-
 };
 
 /**
@@ -125,7 +145,8 @@ protected:
  * This utility class is part of a mini-RTTI framework and can 
  * instantiate arbitrary Nori objects by their name.
  */
-class NoriObjectFactory {
+class NoriObjectFactory
+{
 public:
     typedef std::function<NoriObject *(const PropertyList &)> Constructor;
 
@@ -156,15 +177,17 @@ public:
      *     of the class.
      */
     static NoriObject *createInstance(const std::string &name,
-            const PropertyList &propList) {
+                                      const PropertyList &propList)
+    {
         if (!m_constructors || m_constructors->find(name) == m_constructors->end())
             throw NoriException("A constructor for class \"%s\" could not be found!", name);
         return (*m_constructors)[name](propList);
     }
 
-    static void printRegisteredClasses() {
-        if(m_constructors)
-            for(auto v : *m_constructors)
+    static void printRegisteredClasses()
+    {
+        if (m_constructors)
+            for (auto v : *m_constructors)
                 std::cout << v.first << std::endl;
     }
 
@@ -173,26 +196,32 @@ private:
 };
 
 /// Macro for registering an object constructor with the \ref NoriObjectFactory
-#define NORI_REGISTER_CLASS(cls, name) \
-    cls *cls ##_create(const PropertyList &list) { \
-        return new cls(list); \
-    } \
-    static struct cls ##_{ \
-        cls ##_() { \
-            NoriObjectFactory::registerClass(name, cls ##_create); \
-        } \
-    } cls ##__NORI_;
+#define NORI_REGISTER_CLASS(cls, name)                            \
+    cls *cls##_create(const PropertyList &list)                   \
+    {                                                             \
+        return new cls(list);                                     \
+    }                                                             \
+    static struct cls##_                                          \
+    {                                                             \
+        cls##_()                                                  \
+        {                                                         \
+            NoriObjectFactory::registerClass(name, cls##_create); \
+        }                                                         \
+    } cls##__NORI_;
 
 /// Macro for registering an object constructor with the \ref NoriObjectFactory
-#define NORI_REGISTER_TEMPLATED_CLASS(cls, T, name) \
-    cls<T> * cls ##_## T ##_create(const PropertyList &list) { \
-        return new cls<T>(list); \
-    } \
-    static struct cls ##_## T ##_{ \
-        cls ##_## T ##_() { \
-            NoriObjectFactory::registerClass(name, cls ##_## T ##_create); \
-        } \
-    } cls ## T ##__NORI_;
+#define NORI_REGISTER_TEMPLATED_CLASS(cls, T, name)                     \
+    cls<T> *cls##_##T##_create(const PropertyList &list)                \
+    {                                                                   \
+        return new cls<T>(list);                                        \
+    }                                                                   \
+    static struct cls##_##T##_                                          \
+    {                                                                   \
+        cls##_##T##_()                                                  \
+        {                                                               \
+            NoriObjectFactory::registerClass(name, cls##_##T##_create); \
+        }                                                               \
+    } cls##T##__NORI_;
 
 NORI_NAMESPACE_END
 
