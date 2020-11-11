@@ -77,6 +77,7 @@ add_executable(nori
   include/nori/vector.h
   include/nori/warp.h
   include/nori/environmentmap.h
+  include/nori/HDRLoader.h
 
   # Source code files
   ${NORI_SRC}

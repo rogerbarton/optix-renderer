@@ -1,9 +1,8 @@
-#pragma once
-
 #include <nori/texture.h>
 #include <filesystem/resolver.h>
 #include <lodepng/lodepng.h>
 #include <nori/bsdf.h>
+#include <nori/HDRLoader.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -13,14 +12,56 @@ public:
 	PNGTexture(const PropertyList &props)
 	{
 		filename = getFileResolver()->resolve(props.getString("filename"));
-		std::vector<unsigned char> tmp;
-		lodepng::decode(tmp, width, height, filename.str());
-		data.resize(tmp.size());
 
-		for (unsigned int i = 0; i < data.size(); ++i)
+		if (!filename.is_file())
 		{
-			data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255.f);
+			throw NoriException("PNGTexture: image file not found");
 		}
+
+		std::string extension = filename.str().substr(filename.str().length() - 3, 3);
+
+		if (extension == "png")
+		{
+			std::vector<unsigned char> tmp;
+			lodepng::decode(tmp, width, height, filename.str());
+			data.resize(tmp.size());
+
+			for (unsigned int i = 0; i < data.size(); ++i)
+			{
+				data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255.f);
+			}
+		}
+		else if (extension == "hdr")
+		{
+			nori::HDRLoader::HDRLoaderResult result;
+			bool ret = nori::HDRLoader::load(filename.str().c_str(), result);
+			if(!ret) {
+				throw NoriException("Could not load HDR file...");
+			}
+
+			width = result.width;
+			height = result.height;
+
+			data.resize(width*height*4);
+
+			std::cout << "Image size: " << width << "/" << height << std::endl;
+
+			// copy over the data
+			for (unsigned int i = 0; i < data.size(); ++i)
+			{
+				data[i] = result.cols[i];
+			}
+
+			delete result.cols; // delete image buffer
+		}
+		else
+		{
+			throw NoriException("PNGTexture: Extension %s unknown.", extension);
+		}
+
+		std::cout << "Extension: " << extension << std::endl;
+
+		std::cout << data[0] << "/" << data[1] << "/" << data[2] << std::endl;
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
