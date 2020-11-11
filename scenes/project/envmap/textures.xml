@@ -15,7 +15,7 @@
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
 		<transform name="toWorld">
-			<lookat target="0, 0, 0" origin="80, 50, -90" up="0, 0, -1"/>
+			<lookat target="0, 0, 0" origin="-100, -80, -40" up="0, 0, -1"/>
 		</transform>
 
 		<float name="fov" value="85"/>
@@ -26,9 +26,12 @@
 
 	<envmap type="png_env">
 		<texture type="png_texture" name="envmap">
-			<string name="filename" value="../res/wooden_motel.png"/>
+			<string name="filename" value="../res/photo_studio_01.png"/>
 		</texture>
 		<boolean name="sphereTexture" value="true"/>
+		<float name="offsetZ1" value="0"/>
+		<float name="offsetY" value="180"/>
+		<float name="offsetZ2" value="-25"/>
 	</envmap>
 
 	<mesh type="sphere">
@@ -36,7 +39,7 @@
 		<float name="radius" value="20"/>
 		<bsdf type="diffuse">
 			<texture type="png_texture" name="albedo">
-				<string name="filename" value="../res/photo_studio_01.png"/>
+				<string name="filename" value="../res/wooden_motel.png"/>
 			</texture>
 		</bsdf>
 	</mesh>

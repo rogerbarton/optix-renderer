@@ -176,7 +176,6 @@ namespace nori::HDRLoader
         }
 
         int w, h;
-        std::cout << reso << std::endl;
         if (!sscanf(reso, "-Y %d +X %d", &h, &w))
         {
             fclose(file);
