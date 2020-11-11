@@ -122,13 +122,13 @@ string(REGEX REPLACE ";" "$" CMAKE_EXTERNAL_ARGUMENTS_STR "${CMAKE_EXTERNAL_ARGU
 list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_EXTERNAL_ARGUMENTS_STR})
 
 # Build nanogui
-if(NOT NORI_USE_GUI)
+if(NORI_USE_GUI)
   ExternalProject_Add(nanogui_p
     URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
     PREFIX          "ext_build"
     CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
   )
-endif(NOT NORI_USE_GUI)
+endif(NORI_USE_GUI)
 
 # Build lodepng
 ExternalProject_Add(lodepng_p
