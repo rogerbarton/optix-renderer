@@ -29,9 +29,8 @@
 			<string name="filename" value="../res/photo_studio_01.png"/>
 		</texture>
 		<boolean name="sphereTexture" value="true"/>
-		<float name="offsetZ1" value="0"/>
-		<float name="offsetY" value="180"/>
-		<float name="offsetZ2" value="-25"/>
+		<!-- Use euler angles to describe the texture rotation -->
+		<vector name="eulerAngles" value="0, 180, 95"/>
 	</envmap>
 
 	<mesh type="sphere">
