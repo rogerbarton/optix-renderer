@@ -44,8 +44,6 @@ public:
 
 			data.resize(width*height*4);
 
-			std::cout << "Image size: " << width << "/" << height << std::endl;
-
 			// copy over the data
 			for (unsigned int i = 0; i < data.size(); ++i)
 			{
@@ -61,8 +59,6 @@ public:
 
 		std::cout << "Extension: " << extension << std::endl;
 
-		std::cout << data[0] << "/" << data[1] << "/" << data[2] << std::endl;
-
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
 
@@ -74,8 +70,8 @@ public:
 	Vector3f eval(const Point2f &_uv) override
 	{
 		Vector3f out(0.f);
-		unsigned int w = static_cast<unsigned int>((_uv[0]) * scaleU * (float)width);
-		unsigned int h = static_cast<unsigned int>((_uv[1]) * scaleV * (float)height);
+		unsigned int w = static_cast<unsigned int>((_uv[0] + offsetU) * scaleU * (float)width);
+		unsigned int h = static_cast<unsigned int>((_uv[1] + offsetV) * scaleV * (float)height);
 
 		unsigned int index = (h * width + w) % (width * height);
 		out[0] = data[4 * index];
