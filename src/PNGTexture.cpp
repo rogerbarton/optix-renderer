@@ -13,13 +13,10 @@ public:
 	PNGTexture(const PropertyList &props)
 	{
 		filename = getFileResolver()->resolve(props.getString("filename"));
-
 		if (!filename.exists())
-		{
-			throw NoriException("PNGTexture: image file not found");
-		}
+			throw NoriException("PNGTexture: image file not found %s", filename);
 
-		std::string extension = filename.str().substr(filename.str().length() - 3, 3);
+		std::string extension = filename.extension();
 
 		if (extension == "png")
 		{
@@ -34,7 +31,7 @@ public:
 		}
 		else if (extension == "hdr")
 		{
-			nori::HDRLoader::HDRLoaderResult result;
+			nori::HDRLoader::HDRLoaderResult result{};
 			bool ret = nori::HDRLoader::load(filename.str().c_str(), result);
 			if (!ret)
 			{
@@ -56,10 +53,8 @@ public:
 		}
 		else
 		{
-			throw NoriException("PNGTexture: Extension %s unknown.", extension);
+			throw NoriException("PNGTexture: file extension .%s unknown.", extension);
 		}
-
-		std::cout << "Extension: " << extension << std::endl;
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);

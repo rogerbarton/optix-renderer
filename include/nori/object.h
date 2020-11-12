@@ -37,6 +37,7 @@ public:
         EScene = 0,
         EMesh,
         ETexture,
+        EVolume,
         EBSDF,
         EPhaseFunction,
         EEmitter,
@@ -62,6 +63,8 @@ public:
             return "shape";
         case ETexture:
             return "texture";
+        case EVolume:
+            return "volume";
         case EBSDF:
             return "bsdf";
         case EEmitter:
