@@ -215,7 +215,7 @@ void RenderThread::renderScene(const std::string &filename)
 
             /* apply the denoiser */
             if (m_scene->getDenoiser())
-                m_scene->getDenoiser()->denoise(&(*bitmap));
+                m_scene->getDenoiser()->denoise(bitmap);
 
             /* Save using the OpenEXR format */
             bitmap->save(outputName);
