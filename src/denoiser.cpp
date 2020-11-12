@@ -42,8 +42,8 @@ public:
                     {
                         for (int l = lower; l < upper; l++)
                         {
-                            int k_ = clamp(i + k, 0, bitmap->rows());
-                            int l_ = clamp(j + l, 0, bitmap->cols());
+                            int k_ = clamp(i + k, 0, bitmap->rows() -1);
+                            int l_ = clamp(j + l, 0, bitmap->cols() -1);
                             if (k_ != i + k || l_ != j + l)
                                 continue; // we must skip this one
                             weight_ijkl = weight(i, j, k_, l_, (*bitmap)(i, j), (*bitmap)(k_, l_));
