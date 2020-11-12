@@ -2,51 +2,32 @@
 cmake_minimum_required (VERSION 2.8)
 project("nori")
 
+option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
+option(NORI_USE_GUI    "Build the GUI"   ON)
+
+if(NOT NORI_USE_GUI)
+  message("NORI_USE_GUI is OFF.")
+
+  # Disable flag for preprocessor
+  add_definitions(-DDISABLE_NORI_GUI)
+endif()
+
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
 include("CMakeConfig.txt")
 
 include_directories(ext)
 
-option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
-
 if(NORI_BUILD_DOCS)
   add_subdirectory(docs)
 endif(NORI_BUILD_DOCS)
 
-option(NORI_USE_GUI "Build the GUI" ON)
-
-if(NOT NORI_USE_GUI)
-    message("NORI_USE_GUI is OFF.")
-
-    # Disable flag for preprocessor
-    add_definitions(-DDISABLE_NORI_GUI)
-else()
-  message("NORI_USE_GUI is ON.")
-endif()
 
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
-
-if(NORI_USE_GUI)
-  set(NORI_HDRS
-    include/nori/gui
-  )
-  set(NORI_SRC
-    src/gui.cpp
-  )
-else()
-  set(NORI_HDRS
-  )
-
-  set(NORI_SRC
-  )
-endif()
-
 add_executable(nori
 
   # Header files
-  ${NORI_HDRS}
   include/nori/bbox.h
   include/nori/bitmap.h
   include/nori/block.h
@@ -81,7 +62,6 @@ add_executable(nori
   include/nori/denoiser.h
 
   # Source code files
-  ${NORI_SRC}
   src/bitmap.cpp
   src/block.cpp
   src/bvh.cpp
@@ -126,19 +106,6 @@ add_executable(nori
   src/denoiser.cpp
 )
 
-# The following lines build the warping test application
-if(NORI_USE_GUI)
-  add_executable(warptest
-    include/nori/warp.h
-    src/warp.cpp
-    src/warptest.cpp
-    src/microfacet.cpp
-    src/object.cpp
-    src/proplist.cpp
-    src/common.cpp
-  )
-endif(NORI_USE_GUI)
-
 add_executable(tonemapper
         include/nori/bitmap.h
         src/bitmap.cpp
@@ -148,20 +115,33 @@ add_executable(tonemapper
 # Nori depends on some libraries created in CMakeConfig.txt. The following two
 # lines ensure that Nori is built *after* those libraries have been created.
 add_dependencies(nori OpenEXR_p)
-
-if(NORI_USE_GUI)
-  add_dependencies(nori nanogui_p)
-endif()
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
 add_dependencies(nori lodepng_p)
 
+add_dependencies(tonemapper nori)
+
 if(NORI_USE_GUI)
+  # Append additional gui sources
+  target_sources(nori PRIVATE
+          include/nori/gui.h
+          src/gui.cpp
+          )
+  add_dependencies(nori nanogui_p)
+
+  # The following lines build the warping test application
+  add_executable(warptest
+          include/nori/warp.h
+          src/warp.cpp
+          src/warptest.cpp
+          src/microfacet.cpp
+          src/object.cpp
+          src/proplist.cpp
+          src/common.cpp
+          )
   add_dependencies(warptest nori)
   target_link_libraries(warptest ${extra_libs})
 endif(NORI_USE_GUI)
-
-add_dependencies(tonemapper nori)
 
 # Link to dependency libraries
 target_link_libraries(tonemapper ${extra_libs})

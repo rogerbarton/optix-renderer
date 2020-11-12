@@ -2,7 +2,6 @@
 
 #include <nori/object.h>
 #include <nori/bitmap.h>
-#include <bits/unique_ptr.h>
 
 NORI_NAMESPACE_BEGIN
 

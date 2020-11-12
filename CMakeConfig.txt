@@ -21,7 +21,7 @@ endif()
 
 # This build file 
 include(ExternalProject)
-set(CMAKE_EXTERNAL_ARGUMENTS -DCMAKE_BUILD_TYPE=Release
+set(CMAKE_EXTERNAL_ARGUMENTS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   -DCMAKE_GENERATOR=${CMAKE_GENERATOR} -Wno-dev
   -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/ext_build/dist)
 
@@ -34,12 +34,7 @@ if (MSVC)
   include_directories(ext/glew/include)
   set(extra_libs opengl32 glew)
 
-  set(extra_libs ${extra_libs}
-    $<$<CONFIG:Debug>:zlibstaticd>
-    $<$<CONFIG:RelWithDebInfo>:zlibstatic>
-    $<$<CONFIG:Release>:zlibstatic> 
-    $<$<CONFIG:MinSizeRel>:zlibstatic>
-  )
+  set(extra_libs ${extra_libs} zlibstatic)
 
   # Statically link against the C++ runtime library, also apply these settings to nested projects
   set(CompilerFlags

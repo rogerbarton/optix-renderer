@@ -101,7 +101,7 @@ install(DIRECTORY ext/eigen/Eigen DESTINATION include)
 install(DIRECTORY include/nanogui DESTINATION include)
 
 link_directories(${CMAKE_BINARY_DIR}/ext_build/src/glfw_p-build/src)
-add_executable(example src/example.cpp)
-target_link_libraries(example nanogui glfw3 ${extra_libs})
+#add_executable(example src/example.cpp)
+#target_link_libraries(example nanogui glfw3 ${extra_libs})
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
