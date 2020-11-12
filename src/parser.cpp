@@ -74,6 +74,7 @@ NoriObject *loadFromXML(const std::string &filename)
         ETest = NoriObject::ETest,
         EReconstructionFilter = NoriObject::EReconstructionFilter,
         EEnvironmentMap = NoriObject::EEnvironmentMap,
+        EDenoiser = NoriObject::EDenoiser,
 
         /* Properties */
         EBoolean = NoriObject::EClassTypeCount,
@@ -105,6 +106,7 @@ NoriObject *loadFromXML(const std::string &filename)
     tags["phase"] = EPhaseFunction;
     tags["integrator"] = EIntegrator;
     tags["envmap"] = EEnvironmentMap;
+    tags["denoiser"] = EDenoiser;
     tags["sampler"] = ESampler;
     tags["rfilter"] = EReconstructionFilter;
     tags["test"] = ETest;

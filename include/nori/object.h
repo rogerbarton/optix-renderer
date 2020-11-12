@@ -45,6 +45,7 @@ public:
         EIntegrator,
         ESampler,
         EEnvironmentMap,
+        EDenoiser,
         ETest,
         EReconstructionFilter,
         EClassTypeCount
@@ -75,6 +76,8 @@ public:
             return "test";
         case EEnvironmentMap:
             return "environmentmap";
+        case EDenoiser:
+            return "denoiser";
         default:
             return "<unknown>";
         }

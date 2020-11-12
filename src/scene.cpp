@@ -37,6 +37,9 @@ Scene::~Scene() {
     for(auto e : m_emitters)
         delete e;
     m_emitters.clear();
+
+    if(m_envmap)delete m_envmap;
+    if(m_denoiser) delete m_denoiser;
 }
 
 void Scene::activate() {
@@ -97,6 +100,11 @@ void Scene::addChild(NoriObject *obj) {
 				throw NoriException("There can only be one environment map per scene!");
 			m_envmap = static_cast<EnvironmentMap*>(obj);
 			break;
+        case EDenoiser:
+            if(m_denoiser)
+                throw NoriException("There can only be one denoiser per scene!");
+            m_denoiser = static_cast<Denoiser*>(obj);
+            break;
 
         default:
             throw NoriException("Scene::addChild(<%s>) is not supported!",
@@ -130,14 +138,16 @@ std::string Scene::toString() const {
         "  %s  }\n"
         "  emitters = {\n"
         "  %s  }\n"
-        "  envmap = %s\n"
+        "  envmap = %s,\n"
+        "  denoiser = %s\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
         indent(shapes, 2),
         indent(lights,2),
-        m_envmap ? indent(m_envmap->toString()) : "nullptr"
+        m_envmap ? indent(m_envmap->toString()) : "nullptr",
+        m_denoiser ? indent(m_denoiser->toString()) : "nullptr"
     );
 }
 

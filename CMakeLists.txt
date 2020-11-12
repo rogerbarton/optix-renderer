@@ -78,6 +78,7 @@ add_executable(nori
   include/nori/warp.h
   include/nori/environmentmap.h
   include/nori/HDRLoader.h
+  include/nori/denoiser.h
 
   # Source code files
   ${NORI_SRC}
@@ -122,6 +123,7 @@ add_executable(nori
   src/disney.cpp
   src/environmentmap.cpp
   src/PNGTexture.cpp
+  src/denoiser.cpp
 )
 
 # The following lines build the warping test application

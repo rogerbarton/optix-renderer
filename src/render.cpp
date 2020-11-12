@@ -25,37 +25,42 @@
 #include <nori/bitmap.h>
 #include <nori/sampler.h>
 #include <nori/integrator.h>
+
 #ifndef DISABLE_NORI_GUI
-  #include <nori/gui.h>
+#include <nori/gui.h>
 #endif
+
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <filesystem/resolver.h>
 #include <tbb/concurrent_vector.h>
 
-
 NORI_NAMESPACE_BEGIN
 
-RenderThread::RenderThread(ImageBlock & block) :
-        m_block(block)
+RenderThread::RenderThread(ImageBlock &block) : m_block(block)
 {
     m_render_status = 0;
     m_progress = 1.f;
 }
-RenderThread::~RenderThread() {
+RenderThread::~RenderThread()
+{
     stopRendering();
 }
 
-bool RenderThread::isBusy() {
-    if(m_render_status == 3) {
+bool RenderThread::isBusy()
+{
+    if (m_render_status == 3)
+    {
         m_render_thread.join();
         m_render_status = 0;
     }
     return m_render_status != 0;
 }
 
-void RenderThread::stopRendering() {
-    if(isBusy()) {
+void RenderThread::stopRendering()
+{
+    if (isBusy())
+    {
         cout << "Requesting interruption of the current rendering" << endl;
         m_render_status = 2;
         m_render_thread.join();
@@ -64,27 +69,33 @@ void RenderThread::stopRendering() {
     }
 }
 
-float RenderThread::getProgress() {
-    if(isBusy()) {
+float RenderThread::getProgress()
+{
+    if (isBusy())
+    {
         return m_progress;
     }
-    else return 1.f;
+    else
+        return 1.f;
 }
 
-static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block) {
+static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
+{
     const Camera *camera = scene->getCamera();
     const Integrator *integrator = scene->getIntegrator();
 
     Point2i offset = block.getOffset();
-    Vector2i size  = block.getSize();
+    Vector2i size = block.getSize();
 
     /* Clear the block contents */
     block.clear();
 
     /* For each pixel and pixel sample sample */
-    for (int y=0; y<size.y(); ++y) {
-        for (int x=0; x<size.x(); ++x) {
-            Point2f pixelSample = Point2f((float) (x + offset.x()), (float) (y + offset.y())) + sampler->next2D();
+    for (int y = 0; y < size.y(); ++y)
+    {
+        for (int x = 0; x < size.x(); ++x)
+        {
+            Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
             Point2f apertureSample = sampler->next2D();
 
             /* Sample a ray from the camera */
@@ -100,7 +111,8 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
     }
 }
 
-void RenderThread::renderScene(const std::string & filename) {
+void RenderThread::renderScene(const std::string &filename)
+{
 
     filesystem::path path(filename);
 
@@ -109,10 +121,11 @@ void RenderThread::renderScene(const std::string & filename) {
        resources (OBJ files, textures) using relative paths */
     getFileResolver()->prepend(path.parent_path());
 
-    NoriObject* root = loadFromXML(filename);
+    NoriObject *root = loadFromXML(filename);
 
     // When the XML root object is a scene, start rendering it ..
-    if (root->getClassType() == NoriObject::EScene) {
+    if (root->getClassType() == NoriObject::EScene)
+    {
         m_scene = static_cast<Scene *>(root);
 
         const Camera *camera_ = m_scene->getCamera();
@@ -131,7 +144,7 @@ void RenderThread::renderScene(const std::string & filename) {
 
         /* Do the following in parallel and asynchronously */
         m_render_status = 1;
-        m_render_thread = std::thread([this,outputName] {
+        m_render_thread = std::thread([this, outputName] {
             const Camera *camera = m_scene->getCamera();
             Vector2i outputSize = camera->getOutputSize();
 
@@ -145,12 +158,13 @@ void RenderThread::renderScene(const std::string & filename) {
             auto numSamples = m_scene->getSampler()->getSampleCount();
             auto numBlocks = blockGenerator.getBlockCount();
 
-            tbb::concurrent_vector< std::unique_ptr<Sampler> > samplers;
+            tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
             samplers.resize(numBlocks);
 
-            for (uint32_t k = 0; k < numSamples ; ++k) {
-                m_progress = k/float(numSamples);
-                if(m_render_status == 2)
+            for (uint32_t k = 0; k < numSamples; ++k)
+            {
+                m_progress = k / float(numSamples);
+                if (m_render_status == 2)
                     break;
 
                 tbb::blocked_range<int> range(0, numBlocks);
@@ -160,13 +174,15 @@ void RenderThread::renderScene(const std::string & filename) {
                     ImageBlock block(Vector2i(NORI_BLOCK_SIZE),
                                      camera->getReconstructionFilter());
 
-                    for (int i = range.begin(); i < range.end(); ++i) {
+                    for (int i = range.begin(); i < range.end(); ++i)
+                    {
                         // Request an image block from the block generator
                         blockGenerator.next(block);
 
                         // Get block id to continue using the same sampler
                         auto blockId = block.getBlockId();
-                        if(k == 0) { // Initialize the sampler for the first sample
+                        if (k == 0)
+                        { // Initialize the sampler for the first sample
                             std::unique_ptr<Sampler> sampler(m_scene->getSampler()->clone());
                             sampler->prepare(block);
                             samplers.at(blockId) = std::move(sampler);
@@ -197,6 +213,10 @@ void RenderThread::renderScene(const std::string & filename) {
             std::unique_ptr<Bitmap> bitmap(m_block.toBitmap());
             m_block.unlock();
 
+            /* apply the denoiser */
+            if (m_scene->getDenoiser())
+                m_scene->getDenoiser()->denoise(&(*bitmap));
+
             /* Save using the OpenEXR format */
             bitmap->save(outputName);
 
@@ -205,13 +225,11 @@ void RenderThread::renderScene(const std::string & filename) {
 
             m_render_status = 3;
         });
-
     }
-    else {
+    else
+    {
         delete root;
     }
-
 }
-
 
 NORI_NAMESPACE_END

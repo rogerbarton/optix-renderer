@@ -22,6 +22,7 @@
 #include <nori/bvh.h>
 #include <nori/emitter.h>
 #include <nori/environmentmap.h>
+#include <nori/denoiser.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -80,6 +81,10 @@ public:
     EnvironmentMap *getEnvMap() const
     {
         return m_envmap;
+    }
+
+    Denoiser *getDenoiser() const {
+        return m_denoiser;
     }
 
     /**
@@ -154,6 +159,7 @@ private:
     BVH *m_bvh = nullptr;
 
     EnvironmentMap *m_envmap = nullptr;
+    Denoiser *m_denoiser = nullptr;
 
     std::vector<Emitter *> m_emitters;
 };
