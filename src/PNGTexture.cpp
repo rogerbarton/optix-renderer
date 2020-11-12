@@ -14,7 +14,7 @@ public:
 	{
 		filename = getFileResolver()->resolve(props.getString("filename"));
 
-		if (!filename.is_file())
+		if (!filename.exists())
 		{
 			throw NoriException("PNGTexture: image file not found");
 		}

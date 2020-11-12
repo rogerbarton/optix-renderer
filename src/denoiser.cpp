@@ -18,11 +18,11 @@ public:
         inner_range = clamp(props.getInteger("range", 1), 1, 50);
     }
 
-    std::unique_ptr<Bitmap> denoise(const std::unique_ptr<Bitmap> &bitmap) override
+    Bitmap *denoise(const Bitmap *bitmap) const override
     {
         std::cout << "Denoising the image..." << std::endl;
 
-        std::unique_ptr<Bitmap> output(new Bitmap(Vector2i(bitmap->rows(), bitmap->cols())));
+        Bitmap *output = new Bitmap(Vector2i(bitmap->rows(), bitmap->cols()));
 
         // Bilateral Filter (https://en.wikipedia.org/wiki/Bilateral_filter)
 
@@ -76,7 +76,7 @@ public:
     }
 
 private:
-    float weight(int i_, int j_, int k_, int l_, Color3f Iij, Color3f Ikl)
+    float weight(int i_, int j_, int k_, int l_, const Color3f& Iij, const Color3f& Ikl) const
     {
         // source https://en.wikipedia.org/wiki/Bilateral_filter
         float i = static_cast<float>(i_);
