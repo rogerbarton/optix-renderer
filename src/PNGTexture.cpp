@@ -70,7 +70,7 @@ public:
 	//4 bytes per pixel, ordered RGBA
 	Vector3f eval(const Point2f &_uv) override
 	{
-		Eigen::Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);
+		Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);
 
 		Eigen::Matrix3f rot = Eigen::Quaternionf(
 								  Eigen::Quaternionf::Identity() *
@@ -97,10 +97,10 @@ public:
 	std::string toString() const override
 	{
 		return tfm::format("PNGTexture[\n"
-						   "filename: %s,\n"
-						   "scaleU: %f,\n"
-						   "scaleV: %f,\n"
-						   "eulerAngles: %s\n"
+						   "  filename = %s,\n"
+						   "  scaleU = %f,\n"
+						   "  scaleV = %f,\n"
+						   "  eulerAngles = %s\n"
 						   "]",
 						   filename, scaleU, scaleV, eulerAngles.toString());
 	};

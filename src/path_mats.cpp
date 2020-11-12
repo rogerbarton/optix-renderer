@@ -73,7 +73,7 @@ public:
 
     std::string toString() const
     {
-        return std::string("PathMATSIntegrator[]\n");
+        return std::string("PathMATSIntegrator[]");
     }
 
 protected:

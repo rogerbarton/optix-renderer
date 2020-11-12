@@ -129,7 +129,7 @@ public:
   }
   std::string toString() const
   {
-    return std::string("DirectMISIntegrator[]\n");
+    return std::string("DirectMISIntegrator[]");
   }
 
 protected:

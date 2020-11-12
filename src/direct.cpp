@@ -67,7 +67,7 @@ public:
     return result;
   }
 
-  std::string toString() const { return tfm::format("DirectIntegrator[]\n"); }
+  std::string toString() const { return tfm::format("DirectIntegrator[]"); }
 
 protected:
 };

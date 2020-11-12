@@ -143,7 +143,7 @@ public:
     }
     std::string toString() const
     {
-        return std::string("PathMISIntegrator[]\n");
+        return "PathMISIntegrator[]";
     }
 
 protected:

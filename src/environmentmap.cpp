@@ -64,10 +64,10 @@ public:
 	std::string toString() const override
 	{
 		return tfm::format("PngEnvMap[\n"
-						   "envmap: %s,\n"
-						   "scaleU: %f,\n"
-						   "scaleV: %f,\n"
-						   "sphereTexture: %d\n"
+						   "  envmap = %s,\n"
+						   "  scaleU = %f,\n"
+						   "  scaleV = %f,\n"
+						   "  sphereTexture = %d\n"
 						   "]",
 						   m_map->toString(), scaleU, scaleV, sphereTexture);
 	};

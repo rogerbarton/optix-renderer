@@ -69,7 +69,7 @@ public:
   }
   std::string toString() const
   {
-    return std::string("DirectEMSIntegrator[]\n");
+    return std::string("DirectEMSIntegrator[]");
   }
 
 protected:

@@ -13,10 +13,6 @@ namespace nori::HDRLoader
 {
 
     typedef unsigned char RGBE[4];
-#define R 0
-#define G 1
-#define B 2
-#define E 3
 
 #define MINELEN 8
 #define MAXELEN 0x7fff
@@ -38,10 +34,10 @@ namespace nori::HDRLoader
     {
         while (len-- > 0)
         {
-            int expo = scan[0][E] - 128;
-            cols[0] = convertComponent(expo, scan[0][R]);
-            cols[1] = convertComponent(expo, scan[0][G]);
-            cols[2] = convertComponent(expo, scan[0][B]);
+            int expo = scan[0][3] - 128;
+            cols[0] = convertComponent(expo, scan[0][0]);
+            cols[1] = convertComponent(expo, scan[0][1]);
+            cols[2] = convertComponent(expo, scan[0][2]);
             cols[3] = 0.f; // because PNGTexture wants length 4
             cols += 4;
             scan++;
@@ -55,18 +51,18 @@ namespace nori::HDRLoader
 
         while (len > 0)
         {
-            scanline[0][R] = fgetc(file);
-            scanline[0][G] = fgetc(file);
-            scanline[0][B] = fgetc(file);
-            scanline[0][E] = fgetc(file);
+            scanline[0][0] = fgetc(file);
+            scanline[0][1] = fgetc(file);
+            scanline[0][2] = fgetc(file);
+            scanline[0][3] = fgetc(file);
             if (feof(file))
                 return false;
 
-            if (scanline[0][R] == 1 &&
-                scanline[0][G] == 1 &&
-                scanline[0][B] == 1)
+            if (scanline[0][0] == 1 &&
+                scanline[0][1] == 1 &&
+                scanline[0][2] == 1)
             {
-                for (i = scanline[0][E] << rshift; i > 0; i--)
+                for (i = scanline[0][3] << rshift; i > 0; i--)
                 {
                     memcpy(&scanline[0][0], &scanline[-1][0], 4);
                     scanline++;
@@ -98,14 +94,14 @@ namespace nori::HDRLoader
             return oldDecrunch(scanline, len, file);
         }
 
-        scanline[0][G] = fgetc(file);
-        scanline[0][B] = fgetc(file);
+        scanline[0][1] = fgetc(file);
+        scanline[0][2] = fgetc(file);
         i = fgetc(file);
 
-        if (scanline[0][G] != 2 || scanline[0][B] & 128)
+        if (scanline[0][1] != 2 || scanline[0][2] & 128)
         {
-            scanline[0][R] = 2;
-            scanline[0][E] = i;
+            scanline[0][0] = 2;
+            scanline[0][3] = i;
             return oldDecrunch(scanline + 1, len - 1, file);
         }
 

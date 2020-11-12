@@ -76,7 +76,7 @@ public:
   }
   std::string toString() const
   {
-    return std::string("DirectMATSIntegrator[]\n");
+    return std::string("DirectMATSIntegrator[]");
   }
 
 protected:
