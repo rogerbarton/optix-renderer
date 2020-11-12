@@ -19,8 +19,6 @@ public:
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
 
-		eulerAngles =  props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
-
 		sphereTexture = props.getBoolean("sphereTexture", false);
 	};
 
@@ -69,10 +67,9 @@ public:
 						   "envmap: %s,\n"
 						   "scaleU: %f,\n"
 						   "scaleV: %f,\n"
-						   "eulerAngles: %s,\n"
 						   "sphereTexture: %d\n"
 						   "]",
-						   m_map->toString(), scaleU, scaleV, eulerAngles.toString(), sphereTexture);
+						   m_map->toString(), scaleU, scaleV, sphereTexture);
 	};
 
 	//use wi as the escaping ray
@@ -127,18 +124,8 @@ public:
 		}
 		else
 		{
-			// eval texture based on w_i
-
-			// Create rotation matrix out of euler angles
-			Eigen::Matrix3f rot = Eigen::Quaternionf(
-									   Eigen::Quaternionf::Identity() *
-									   Eigen::AngleAxisf(eulerAngles.x(), Eigen::Vector3f::UnitZ()) *
-									   Eigen::AngleAxisf(eulerAngles.y(), Eigen::Vector3f::UnitX())) *
-									   Eigen::AngleAxisf(eulerAngles.z(), Eigen::Vector3f::UnitZ())
-									   .toRotationMatrix();
-			Vector3f wi = rot * _wi;
-			Point2f uv_coords = sphericalCoordinates(wi);
-
+			// eval texture based on _wi
+			Point2f uv_coords = sphericalCoordinates(_wi);
 			Point2f uv;
 
 			// switch coordinates and map to [0,1]
@@ -153,7 +140,6 @@ private:
 	Texture<Color3f> *m_map = nullptr;
 	bool sphereTexture = false;
 	float scaleU, scaleV;
-	Vector3f eulerAngles;
 
 	void convert_xyz_to_cube_uv(float x, float y, float z, int *index, float *u, float *v)
 	{

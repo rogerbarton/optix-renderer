@@ -27,10 +27,9 @@
 	<envmap type="png_env">
 		<texture type="png_texture" name="envmap">
 			<string name="filename" value="../res/photo_studio_01.png"/>
+			<vector name="eulerAngles" value="0, 180, 95"/>
 		</texture>
 		<boolean name="sphereTexture" value="true"/>
-		<!-- Use euler angles to describe the texture rotation -->
-		<vector name="eulerAngles" value="0, 180, 95"/>
 	</envmap>
 
 	<mesh type="sphere">
@@ -39,6 +38,7 @@
 		<bsdf type="diffuse">
 			<texture type="png_texture" name="albedo">
 				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0, 10, 180"/>
 			</texture>
 		</bsdf>
 	</mesh>

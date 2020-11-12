@@ -3,6 +3,7 @@
 #include <lodepng/lodepng.h>
 #include <nori/bsdf.h>
 #include <nori/HDRLoader.h>
+#include <Eigen/Geometry>
 
 NORI_NAMESPACE_BEGIN
 
@@ -62,14 +63,29 @@ public:
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
+
+		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
 	}
 
 	//4 bytes per pixel, ordered RGBA
 	Vector3f eval(const Point2f &_uv) override
 	{
+		Eigen::Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);
+
+		Eigen::Matrix3f rot = Eigen::Quaternionf(
+								  Eigen::Quaternionf::Identity() *
+								  Eigen::AngleAxisf(eulerAngles.x(), Eigen::Vector3f::UnitZ()) *
+								  Eigen::AngleAxisf(eulerAngles.y(), Eigen::Vector3f::UnitX())) *
+							  Eigen::AngleAxisf(eulerAngles.z(), Eigen::Vector3f::UnitZ())
+								  .toRotationMatrix();
+		Point2f uv_coords = sphericalCoordinates(rot * wi);
+		Point2f uv;
+		uv.x() = uv_coords.y() / (2.f * M_PI);
+		uv.y() = uv_coords.x() / M_PI;
+
 		Vector3f out;
-		unsigned int w = static_cast<unsigned int>((_uv[0]) * scaleU * (float)width);
-		unsigned int h = static_cast<unsigned int>((_uv[1]) * scaleV * (float)height);
+		unsigned int w = static_cast<unsigned int>((uv[0]) * scaleU * (float)width);
+		unsigned int h = static_cast<unsigned int>((uv[1]) * scaleV * (float)height);
 
 		unsigned int index = (h * width + w) % (width * height);
 		out[0] = data[4 * index];
@@ -84,8 +100,9 @@ public:
 						   "filename: %s,\n"
 						   "scaleU: %f,\n"
 						   "scaleV: %f,\n"
+						   "eulerAngles: %s\n"
 						   "]",
-						   filename, scaleU, scaleV);
+						   filename, scaleU, scaleV, eulerAngles.toString());
 	};
 
 	unsigned int getWidth() override
@@ -103,6 +120,7 @@ private:
 	unsigned int width, height;
 	std::vector<float> data;
 	float scaleU, scaleV;
+	Vector3f eulerAngles;
 
 	float InverseGammaCorrect(float value)
 	{
