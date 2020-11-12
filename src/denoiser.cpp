@@ -46,16 +46,16 @@ public:
                             int l_ = clamp(j + l, 0, bitmap->cols());
                             if (k_ != i + k || l_ != j + l)
                                 continue; // we must skip this one
-                            weight_ijkl = weight(i, j, k_, l_, bitmap->operator()(i, j), bitmap->operator()(k_, l_));
+                            weight_ijkl = weight(i, j, k_, l_, (*bitmap)(i, j), (*bitmap)(k_, l_));
                             sum_weights += weight_ijkl;
-                            I_weight += bitmap->operator()(k_, l_) * weight_ijkl;
+                            I_weight += (*bitmap)(k_, l_) * weight_ijkl;
                         }
                     }
                     if (sum_weights < Epsilon)
                     {
                         throw NoriException("Denoiser: Sum of Weights was below 0");
                     }
-                    output->operator()(i, j) = I_weight / sum_weights;
+                    (*output)(i, j) = I_weight / sum_weights;
                 }
             }
         };
