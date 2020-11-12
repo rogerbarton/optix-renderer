@@ -34,8 +34,9 @@
 
 	<denoiser type="basic">
 		<integer name="iterations" value="1"/>
-		<float name="sigma_d" value="0.3"/>
-		<float name="sigma_r" value="0.4"/>
+		<float name="sigma_d" value="0.5"/>
+		<float name="sigma_r" value="0.5"/>
+		<integer name="range" value="5"/>
 	</denoiser>
 
 	<mesh type="sphere">

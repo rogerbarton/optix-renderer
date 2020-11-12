@@ -13,7 +13,7 @@ public:
     {
         return EDenoiser;
     }
-    virtual void denoise(std::unique_ptr<Bitmap>& bitmap) = 0;
+    virtual std::unique_ptr<Bitmap> denoise(const std::unique_ptr<Bitmap>& bitmap) = 0;
     virtual std::string toString() const override {
         return tfm::format("Denoiser[]");
     }

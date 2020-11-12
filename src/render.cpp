@@ -140,11 +140,13 @@ void RenderThread::renderScene(const std::string &filename)
         size_t lastdot = outputName.find_last_of(".");
         if (lastdot != std::string::npos)
             outputName.erase(lastdot, std::string::npos);
+
+        std::string outputNameDenoised = outputName + "_denoised.exr";
         outputName += ".exr";
 
         /* Do the following in parallel and asynchronously */
         m_render_status = 1;
-        m_render_thread = std::thread([this, outputName] {
+        m_render_thread = std::thread([this, outputName, outputNameDenoised] {
             const Camera *camera = m_scene->getCamera();
             Vector2i outputSize = camera->getOutputSize();
 
@@ -214,8 +216,10 @@ void RenderThread::renderScene(const std::string &filename)
             m_block.unlock();
 
             /* apply the denoiser */
-            if (m_scene->getDenoiser())
-                m_scene->getDenoiser()->denoise(bitmap);
+            if (m_scene->getDenoiser()) {
+                std::unique_ptr<Bitmap> bitmap_denoised = m_scene->getDenoiser()->denoise(bitmap);
+                bitmap_denoised->save(outputNameDenoised);
+            }
 
             /* Save using the OpenEXR format */
             bitmap->save(outputName);
