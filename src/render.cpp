@@ -217,7 +217,7 @@ void RenderThread::renderScene(const std::string &filename)
 
             /* apply the denoiser */
             if (m_scene->getDenoiser()) {
-                std::unique_ptr<Bitmap> bitmap_denoised(m_scene->getDenoiser()->denoise(&(*bitmap)));
+                std::unique_ptr<Bitmap> bitmap_denoised(m_scene->getDenoiser()->denoise(bitmap.get()));
                 bitmap_denoised->save(outputNameDenoised);
             }
 
