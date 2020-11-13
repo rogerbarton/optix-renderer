@@ -134,7 +134,9 @@ ExternalProject_Add(lodepng_p
 
 # Build openvdb
 if(WIN32)
-  set(OPENVDB_CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64")
+  set(OPENVDB_CMAKE_ARGS
+          -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake)
   message(STATUS "Ensure you run the install-dependencies.bat script once. ${OPENVDB_CMAKE_ARGS}")
 endif()
 
@@ -144,6 +146,8 @@ ExternalProject_Add(openvdb_p
   CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} ${OPENVDB_CMAKE_ARGS}
 )
 add_dependencies(openvdb_p tbb_p)
+add_dependencies(openvdb_p OpenEXR_p)
+add_dependencies(openvdb_p zlib_p)
 
 # Compile Nori with compiler warnings turned on
 if(MSVC)
@@ -171,6 +175,7 @@ include_directories(
   ext/filesystem
   ext/nanogui/ext/eigen
   ext/lodepng
+  ext/openvdb/openvdb
   ext/openvdb/nanovdb
   include
 )
@@ -181,9 +186,9 @@ set_target_properties(pugixml PROPERTIES
 
 # Link to several dependency libraries
 if(NORI_USE_GUI)
-  set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng ${extra_libs})
+  set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng openvdb ${extra_libs})
 else()
-  set(extra_libs IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng tbb Xrandr pthread z dl)
+  set(extra_libs IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng tbb Xrandr pthread z dl openvdb)
 endif()
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:

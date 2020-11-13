@@ -120,6 +120,7 @@ add_dependencies(nori OpenEXR_p)
 add_dependencies(nori tbb_p)
 add_dependencies(nori pugixml)
 add_dependencies(nori lodepng_p)
+add_dependencies(nori openvdb_p)
 
 add_dependencies(tonemapper nori)
 
