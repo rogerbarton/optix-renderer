@@ -100,6 +100,7 @@ void Scene::addChild(NoriObject *obj) {
 				throw NoriException("There can only be one environment map per scene!");
 			m_envmap = static_cast<EnvironmentMap*>(obj);
 			break;
+            
         case EDenoiser:
             if(m_denoiser)
                 throw NoriException("There can only be one denoiser per scene!");
