@@ -90,6 +90,7 @@ public:
                 // https://stackoverflow.com/questions/33426921/pick-a-matrix-cell-according-to-its-probability
                 while (true)
                 {
+                    // TODO only select 95% (not those with hightes probability)
                     float p = histogram.cumulative * next1D();
                     Histogram::map_type::const_iterator it = histogram.map.lower_bound(p);
                     if (it != histogram.map.end())

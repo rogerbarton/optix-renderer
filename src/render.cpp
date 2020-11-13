@@ -189,7 +189,7 @@ void RenderThread::renderScene(const std::string &filename)
                     padded.block(1, 1, m_block.rows(), m_block.cols()) = m_block;
 
                     Eigen::Matrix3f stencil;                                        // stencil of weights
-                    stencil << -1.f, -1.f, -1.f, -1.f, 8.f, -1.f, -1.f, -1.f, -1.f; // create a simple stencil operator
+                    stencil << -1.f, -1.f, -1.f, -1.f, 8.f, -1.f, -1.f, -1.f, -1.f; // create a simple stencil
 
                     // move over all pixels and perform the stencil operation
 
@@ -208,13 +208,14 @@ void RenderThread::renderScene(const std::string &filename)
                                         curr += stencil(k, l) * m_block(i + 1 + k, j + 1 + l).divideByFilterWeight();
                                     }
                                 }
-                                curr = curr.cwiseAbs();
+                                curr = curr.cwiseAbs(); // take abs because we might have a negative color (because of stencil)
                                 if (curr.isValid())
                                     variance(i, j) = Eigen::Vector3f(curr).norm();
                                 else
                                 {
                                     variance(i, j) = 0.f;
-                                    std::cout << "Got invalid variance at pixel " << i << "/" << j <<": "<<curr.transpose() <<std::endl;
+                                    std::cout << "Got invalid variance at pixel " << i << "/"
+                                              << j << ": " << curr.transpose() << std::endl;
                                 }
                             }
                         }
