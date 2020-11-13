@@ -150,5 +150,10 @@ endif(NORI_USE_GUI)
 target_link_libraries(tonemapper ${extra_libs})
 target_link_libraries(nori ${extra_libs})
 
+set_target_properties(nori PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+        )
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
