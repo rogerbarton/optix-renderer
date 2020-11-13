@@ -1,3 +1,6 @@
 [submodule "ext/openvdb"]
 	path = ext/openvdb
 	url = https://github.com/AcademySoftwareFoundation/openvdb.git
+[submodule "ext/vcpkg"]
+	path = ext/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
