@@ -24,7 +24,6 @@ struct processTriangularMatrix<MatrixType,0>
 {
   static void run(MatrixType& m, MatrixType& T, const MatrixType& U)
   {
-    typedef typename MatrixType::Index Index;
     const Index size = m.cols();
 
     for (Index i=0; i < size; ++i) {
@@ -62,7 +61,7 @@ struct generateTestMatrix<MatrixType,1>
 };
 
 template <typename Derived, typename OtherDerived>
-double relerr(const MatrixBase<Derived>& A, const MatrixBase<OtherDerived>& B)
+typename Derived::RealScalar relerr(const MatrixBase<Derived>& A, const MatrixBase<OtherDerived>& B)
 {
   return std::sqrt((A - B).cwiseAbs2().sum() / (std::min)(A.cwiseAbs2().sum(), B.cwiseAbs2().sum()));
 }

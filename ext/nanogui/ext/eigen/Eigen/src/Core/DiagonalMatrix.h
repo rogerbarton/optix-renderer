@@ -22,7 +22,7 @@ class DiagonalBase : public EigenBase<Derived>
     typedef typename DiagonalVectorType::Scalar Scalar;
     typedef typename DiagonalVectorType::RealScalar RealScalar;
     typedef typename internal::traits<Derived>::StorageKind StorageKind;
-    typedef typename internal::traits<Derived>::Index Index;
+    typedef typename internal::traits<Derived>::StorageIndex StorageIndex;
 
     enum {
       RowsAtCompileTime = DiagonalVectorType::SizeAtCompileTime,
@@ -30,7 +30,7 @@ class DiagonalBase : public EigenBase<Derived>
       MaxRowsAtCompileTime = DiagonalVectorType::MaxSizeAtCompileTime,
       MaxColsAtCompileTime = DiagonalVectorType::MaxSizeAtCompileTime,
       IsVectorAtCompileTime = 0,
-      Flags = 0
+      Flags = NoPreferredStorageOrderBit
     };
 
     typedef Matrix<Scalar, RowsAtCompileTime, ColsAtCompileTime, 0, MaxRowsAtCompileTime, MaxColsAtCompileTime> DenseMatrixType;
@@ -44,18 +44,7 @@ class DiagonalBase : public EigenBase<Derived>
 
     EIGEN_DEVICE_FUNC
     DenseMatrixType toDenseMatrix() const { return derived(); }
-    template<typename DenseDerived>
-    EIGEN_DEVICE_FUNC
-    void evalTo(MatrixBase<DenseDerived> &other) const;
-    template<typename DenseDerived>
-    EIGEN_DEVICE_FUNC
-    void addTo(MatrixBase<DenseDerived> &other) const
-    { other.diagonal() += diagonal(); }
-    template<typename DenseDerived>
-    EIGEN_DEVICE_FUNC
-    void subTo(MatrixBase<DenseDerived> &other) const
-    { other.diagonal() -= diagonal(); }
-
+    
     EIGEN_DEVICE_FUNC
     inline const DiagonalVectorType& diagonal() const { return derived().diagonal(); }
     EIGEN_DEVICE_FUNC
@@ -66,44 +55,36 @@ class DiagonalBase : public EigenBase<Derived>
     EIGEN_DEVICE_FUNC
     inline Index cols() const { return diagonal().size(); }
 
-    /** \returns the diagonal matrix product of \c *this by the matrix \a matrix.
-      */
     template<typename MatrixDerived>
     EIGEN_DEVICE_FUNC
-    const DiagonalProduct<MatrixDerived, Derived, OnTheLeft>
+    const Product<Derived,MatrixDerived,LazyProduct>
     operator*(const MatrixBase<MatrixDerived> &matrix) const
     {
-      return DiagonalProduct<MatrixDerived, Derived, OnTheLeft>(matrix.derived(), derived());
+      return Product<Derived, MatrixDerived, LazyProduct>(derived(),matrix.derived());
     }
 
+    typedef DiagonalWrapper<const CwiseUnaryOp<internal::scalar_inverse_op<Scalar>, const DiagonalVectorType> > InverseReturnType;
     EIGEN_DEVICE_FUNC
-    inline const DiagonalWrapper<const CwiseUnaryOp<internal::scalar_inverse_op<Scalar>, const DiagonalVectorType> >
+    inline const InverseReturnType
     inverse() const
     {
-      return diagonal().cwiseInverse();
+      return InverseReturnType(diagonal().cwiseInverse());
     }
     
     EIGEN_DEVICE_FUNC
-    inline const DiagonalWrapper<const CwiseUnaryOp<internal::scalar_multiple_op<Scalar>, const DiagonalVectorType> >
+    inline const DiagonalWrapper<const EIGEN_EXPR_BINARYOP_SCALAR_RETURN_TYPE(DiagonalVectorType,Scalar,product) >
     operator*(const Scalar& scalar) const
     {
-      return diagonal() * scalar;
+      return DiagonalWrapper<const EIGEN_EXPR_BINARYOP_SCALAR_RETURN_TYPE(DiagonalVectorType,Scalar,product) >(diagonal() * scalar);
     }
     EIGEN_DEVICE_FUNC
-    friend inline const DiagonalWrapper<const CwiseUnaryOp<internal::scalar_multiple_op<Scalar>, const DiagonalVectorType> >
+    friend inline const DiagonalWrapper<const EIGEN_SCALAR_BINARYOP_EXPR_RETURN_TYPE(Scalar,DiagonalVectorType,product) >
     operator*(const Scalar& scalar, const DiagonalBase& other)
     {
-      return other.diagonal() * scalar;
+      return DiagonalWrapper<const EIGEN_SCALAR_BINARYOP_EXPR_RETURN_TYPE(Scalar,DiagonalVectorType,product) >(scalar * other.diagonal());
     }
 };
 
-template<typename Derived>
-template<typename DenseDerived>
-void DiagonalBase<Derived>::evalTo(MatrixBase<DenseDerived> &other) const
-{
-  other.setZero();
-  other.diagonal() = diagonal();
-}
 #endif
 
 /** \class DiagonalMatrix
@@ -125,10 +106,9 @@ struct traits<DiagonalMatrix<_Scalar,SizeAtCompileTime,MaxSizeAtCompileTime> >
  : traits<Matrix<_Scalar,SizeAtCompileTime,SizeAtCompileTime,0,MaxSizeAtCompileTime,MaxSizeAtCompileTime> >
 {
   typedef Matrix<_Scalar,SizeAtCompileTime,1,0,MaxSizeAtCompileTime,1> DiagonalVectorType;
-  typedef Dense StorageKind;
-  typedef DenseIndex Index;
+  typedef DiagonalShape StorageKind;
   enum {
-    Flags = LvalueBit
+    Flags = LvalueBit | NoPreferredStorageOrderBit
   };
 };
 }
@@ -142,7 +122,7 @@ class DiagonalMatrix
     typedef const DiagonalMatrix& Nested;
     typedef _Scalar Scalar;
     typedef typename internal::traits<DiagonalMatrix>::StorageKind StorageKind;
-    typedef typename internal::traits<DiagonalMatrix>::Index Index;
+    typedef typename internal::traits<DiagonalMatrix>::StorageIndex StorageIndex;
     #endif
 
   protected:
@@ -164,7 +144,7 @@ class DiagonalMatrix
 
     /** Constructs a diagonal matrix with given dimension  */
     EIGEN_DEVICE_FUNC
-    inline DiagonalMatrix(Index dim) : m_diagonal(dim) {}
+    explicit inline DiagonalMatrix(Index dim) : m_diagonal(dim) {}
 
     /** 2D constructor. */
     EIGEN_DEVICE_FUNC
@@ -248,14 +228,15 @@ struct traits<DiagonalWrapper<_DiagonalVectorType> >
 {
   typedef _DiagonalVectorType DiagonalVectorType;
   typedef typename DiagonalVectorType::Scalar Scalar;
-  typedef typename DiagonalVectorType::Index Index;
-  typedef typename DiagonalVectorType::StorageKind StorageKind;
+  typedef typename DiagonalVectorType::StorageIndex StorageIndex;
+  typedef DiagonalShape StorageKind;
+  typedef typename traits<DiagonalVectorType>::XprKind XprKind;
   enum {
     RowsAtCompileTime = DiagonalVectorType::SizeAtCompileTime,
     ColsAtCompileTime = DiagonalVectorType::SizeAtCompileTime,
-    MaxRowsAtCompileTime = DiagonalVectorType::SizeAtCompileTime,
-    MaxColsAtCompileTime = DiagonalVectorType::SizeAtCompileTime,
-    Flags =  traits<DiagonalVectorType>::Flags & LvalueBit
+    MaxRowsAtCompileTime = DiagonalVectorType::MaxSizeAtCompileTime,
+    MaxColsAtCompileTime = DiagonalVectorType::MaxSizeAtCompileTime,
+    Flags =  (traits<DiagonalVectorType>::Flags & LvalueBit) | NoPreferredStorageOrderBit
   };
 };
 }
@@ -272,7 +253,7 @@ class DiagonalWrapper
 
     /** Constructor from expression of diagonal coefficients to wrap. */
     EIGEN_DEVICE_FUNC
-    inline DiagonalWrapper(DiagonalVectorType& a_diagonal) : m_diagonal(a_diagonal) {}
+    explicit inline DiagonalWrapper(DiagonalVectorType& a_diagonal) : m_diagonal(a_diagonal) {}
 
     /** \returns a const reference to the wrapped expression of diagonal coefficients. */
     EIGEN_DEVICE_FUNC
@@ -295,7 +276,7 @@ template<typename Derived>
 inline const DiagonalWrapper<const Derived>
 MatrixBase<Derived>::asDiagonal() const
 {
-  return derived();
+  return DiagonalWrapper<const Derived>(derived());
 }
 
 /** \returns true if *this is approximately equal to a diagonal matrix,
@@ -309,12 +290,11 @@ MatrixBase<Derived>::asDiagonal() const
 template<typename Derived>
 bool MatrixBase<Derived>::isDiagonal(const RealScalar& prec) const
 {
-  using std::abs;
   if(cols() != rows()) return false;
   RealScalar maxAbsOnDiagonal = static_cast<RealScalar>(-1);
   for(Index j = 0; j < cols(); ++j)
   {
-    RealScalar absOnDiagonal = abs(coeff(j,j));
+    RealScalar absOnDiagonal = numext::abs(coeff(j,j));
     if(absOnDiagonal > maxAbsOnDiagonal) maxAbsOnDiagonal = absOnDiagonal;
   }
   for(Index j = 0; j < cols(); ++j)
@@ -325,6 +305,38 @@ bool MatrixBase<Derived>::isDiagonal(const RealScalar& prec) const
     }
   return true;
 }
+
+namespace internal {
+
+template<> struct storage_kind_to_shape<DiagonalShape> { typedef DiagonalShape Shape; };
+
+struct Diagonal2Dense {};
+
+template<> struct AssignmentKind<DenseShape,DiagonalShape> { typedef Diagonal2Dense Kind; };
+
+// Diagonal matrix to Dense assignment
+template< typename DstXprType, typename SrcXprType, typename Functor>
+struct Assignment<DstXprType, SrcXprType, Functor, Diagonal2Dense>
+{
+  static void run(DstXprType &dst, const SrcXprType &src, const internal::assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar> &/*func*/)
+  {
+    Index dstRows = src.rows();
+    Index dstCols = src.cols();
+    if((dst.rows()!=dstRows) || (dst.cols()!=dstCols))
+      dst.resize(dstRows, dstCols);
+    
+    dst.setZero();
+    dst.diagonal() = src.diagonal();
+  }
+  
+  static void run(DstXprType &dst, const SrcXprType &src, const internal::add_assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar> &/*func*/)
+  { dst.diagonal() += src.diagonal(); }
+  
+  static void run(DstXprType &dst, const SrcXprType &src, const internal::sub_assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar> &/*func*/)
+  { dst.diagonal() -= src.diagonal(); }
+};
+
+} // namespace internal
 
 } // end namespace Eigen
 

@@ -13,7 +13,6 @@
 
 template<typename MatrixType> void basicStuff(const MatrixType& m)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
   typedef Matrix<Scalar, MatrixType::RowsAtCompileTime, 1> VectorType;
   typedef Matrix<Scalar, MatrixType::RowsAtCompileTime, MatrixType::RowsAtCompileTime> SquareMatrixType;
@@ -126,11 +125,24 @@ template<typename MatrixType> void basicStuff(const MatrixType& m)
   for(typename MatrixType::Index i=0;i<rows;++i)
     sm2.col(i).noalias() -= sm1.row(i);
   VERIFY_IS_APPROX(sm2,-sm1.transpose());
+  
+  // check ternary usage
+  {
+    bool b = internal::random<int>(0,10)>5;
+    m3 = b ? m1 : m2;
+    if(b) VERIFY_IS_APPROX(m3,m1);
+    else  VERIFY_IS_APPROX(m3,m2);
+    m3 = b ? -m1 : m2;
+    if(b) VERIFY_IS_APPROX(m3,-m1);
+    else  VERIFY_IS_APPROX(m3,m2);
+    m3 = b ? m1 : -m2;
+    if(b) VERIFY_IS_APPROX(m3,m1);
+    else  VERIFY_IS_APPROX(m3,-m2);
+  }
 }
 
 template<typename MatrixType> void basicStuffComplex(const MatrixType& m)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
   typedef typename NumTraits<Scalar>::Real RealScalar;
   typedef Matrix<RealScalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime> RealMatrixType;
@@ -223,7 +235,7 @@ void fixedSizeMatrixConstruction()
     for(int k=0; k<2; ++k) VERIFY(m2(k) == DenseIndex(raw[k]));
     for(int k=0; k<2; ++k) VERIFY(a2(k) == DenseIndex(raw[k]));
     for(int k=0; k<2; ++k) VERIFY(m3(k) == int(raw[k]));
-    for(int k=0; k<2; ++k) VERIFY(m4(k) == float(raw[k]));
+    for(int k=0; k<2; ++k) VERIFY((m4(k)) == Scalar(float(raw[k])));
   }
   {
     Matrix<Scalar,1,1> m(raw), m1(raw[0]), m2( (DenseIndex(raw[0])) ), m3( (int(raw[0])) );

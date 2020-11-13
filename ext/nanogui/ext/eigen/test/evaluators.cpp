@@ -1,7 +1,101 @@
-#define EIGEN_ENABLE_EVALUATORS
+
 #include "main.h"
 
-using internal::copy_using_evaluator;
+namespace Eigen {
+
+  template<typename Lhs,typename Rhs>
+  const Product<Lhs,Rhs>
+  prod(const Lhs& lhs, const Rhs& rhs)
+  {
+    return Product<Lhs,Rhs>(lhs,rhs);
+  }
+
+  template<typename Lhs,typename Rhs>
+  const Product<Lhs,Rhs,LazyProduct>
+  lazyprod(const Lhs& lhs, const Rhs& rhs)
+  {
+    return Product<Lhs,Rhs,LazyProduct>(lhs,rhs);
+  }
+  
+  template<typename DstXprType, typename SrcXprType>
+  EIGEN_STRONG_INLINE
+  DstXprType& copy_using_evaluator(const EigenBase<DstXprType> &dst, const SrcXprType &src)
+  {
+    call_assignment(dst.const_cast_derived(), src.derived(), internal::assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar>());
+    return dst.const_cast_derived();
+  }
+  
+  template<typename DstXprType, template <typename> class StorageBase, typename SrcXprType>
+  EIGEN_STRONG_INLINE
+  const DstXprType& copy_using_evaluator(const NoAlias<DstXprType, StorageBase>& dst, const SrcXprType &src)
+  {
+    call_assignment(dst, src.derived(), internal::assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar>());
+    return dst.expression();
+  }
+  
+  template<typename DstXprType, typename SrcXprType>
+  EIGEN_STRONG_INLINE
+  DstXprType& copy_using_evaluator(const PlainObjectBase<DstXprType> &dst, const SrcXprType &src)
+  {
+    #ifdef EIGEN_NO_AUTOMATIC_RESIZING
+    eigen_assert((dst.size()==0 || (IsVectorAtCompileTime ? (dst.size() == src.size())
+                                                          : (dst.rows() == src.rows() && dst.cols() == src.cols())))
+                && "Size mismatch. Automatic resizing is disabled because EIGEN_NO_AUTOMATIC_RESIZING is defined");
+  #else
+    dst.const_cast_derived().resizeLike(src.derived());
+  #endif
+    
+    call_assignment(dst.const_cast_derived(), src.derived(), internal::assign_op<typename DstXprType::Scalar,typename SrcXprType::Scalar>());
+    return dst.const_cast_derived();
+  }
+
+  template<typename DstXprType, typename SrcXprType>
+  void add_assign_using_evaluator(const DstXprType& dst, const SrcXprType& src)
+  {
+    typedef typename DstXprType::Scalar Scalar;
+    call_assignment(const_cast<DstXprType&>(dst), src.derived(), internal::add_assign_op<Scalar,typename SrcXprType::Scalar>());
+  }
+
+  template<typename DstXprType, typename SrcXprType>
+  void subtract_assign_using_evaluator(const DstXprType& dst, const SrcXprType& src)
+  {
+    typedef typename DstXprType::Scalar Scalar;
+    call_assignment(const_cast<DstXprType&>(dst), src.derived(), internal::sub_assign_op<Scalar,typename SrcXprType::Scalar>());
+  }
+
+  template<typename DstXprType, typename SrcXprType>
+  void multiply_assign_using_evaluator(const DstXprType& dst, const SrcXprType& src)
+  {
+    typedef typename DstXprType::Scalar Scalar;
+    call_assignment(dst.const_cast_derived(), src.derived(), internal::mul_assign_op<Scalar,typename SrcXprType::Scalar>());
+  }
+
+  template<typename DstXprType, typename SrcXprType>
+  void divide_assign_using_evaluator(const DstXprType& dst, const SrcXprType& src)
+  {
+    typedef typename DstXprType::Scalar Scalar;
+    call_assignment(dst.const_cast_derived(), src.derived(), internal::div_assign_op<Scalar,typename SrcXprType::Scalar>());
+  }
+  
+  template<typename DstXprType, typename SrcXprType>
+  void swap_using_evaluator(const DstXprType& dst, const SrcXprType& src)
+  {
+    typedef typename DstXprType::Scalar Scalar;
+    call_assignment(dst.const_cast_derived(), src.const_cast_derived(), internal::swap_assign_op<Scalar>());
+  }
+
+  namespace internal {
+    template<typename Dst, template <typename> class StorageBase, typename Src, typename Func>
+    EIGEN_DEVICE_FUNC void call_assignment(const NoAlias<Dst,StorageBase>& dst, const Src& src, const Func& func)
+    {
+      call_assignment_no_alias(dst.expression(), src, func);
+    }
+  }
+  
+}
+
+template<typename XprType> long get_cost(const XprType& ) { return Eigen::internal::evaluator<XprType>::CoeffReadCost; }
+
 using namespace std;
 
 #define VERIFY_IS_APPROX_EVALUATOR(DEST,EXPR) VERIFY_IS_APPROX(copy_using_evaluator(DEST,(EXPR)), (EXPR).eval());
@@ -72,8 +166,19 @@ void test_evaluators()
     c = a*a;
     copy_using_evaluator(a, prod(a,a));
     VERIFY_IS_APPROX(a,c);
+
+    // check compound assignment of products
+    d = c;
+    add_assign_using_evaluator(c.noalias(), prod(a,b));
+    d.noalias() += a*b;
+    VERIFY_IS_APPROX(c, d);
+
+    d = c;
+    subtract_assign_using_evaluator(c.noalias(), prod(a,b));
+    d.noalias() -= a*b;
+    VERIFY_IS_APPROX(c, d);
   }
-  
+
   {
     // test product with all possible sizes
     int s = internal::random<int>(1,100);
@@ -124,7 +229,7 @@ void test_evaluators()
     
     // this does not work because Random is eval-before-nested: 
     // copy_using_evaluator(w, Vector2d::Random().transpose());
-    
+
     // test CwiseUnaryOp
     VERIFY_IS_APPROX_EVALUATOR(v2, 3 * v);
     VERIFY_IS_APPROX_EVALUATOR(w, (3 * v).transpose());
@@ -326,5 +431,69 @@ void test_evaluators()
     divide_assign_using_evaluator(arr.row(1), arr.row(2) + 1);
     arr_ref.row(1) /= (arr_ref.row(2) + 1);
     VERIFY_IS_APPROX(arr, arr_ref);
+  }
+  
+  {
+    // test triangular shapes
+    MatrixXd A = MatrixXd::Random(6,6), B(6,6), C(6,6), D(6,6);
+    A.setRandom();B.setRandom();
+    VERIFY_IS_APPROX_EVALUATOR2(B, A.triangularView<Upper>(), MatrixXd(A.triangularView<Upper>()));
+    
+    A.setRandom();B.setRandom();
+    VERIFY_IS_APPROX_EVALUATOR2(B, A.triangularView<UnitLower>(), MatrixXd(A.triangularView<UnitLower>()));
+    
+    A.setRandom();B.setRandom();
+    VERIFY_IS_APPROX_EVALUATOR2(B, A.triangularView<UnitUpper>(), MatrixXd(A.triangularView<UnitUpper>()));
+    
+    A.setRandom();B.setRandom();
+    C = B; C.triangularView<Upper>() = A;
+    copy_using_evaluator(B.triangularView<Upper>(), A);
+    VERIFY(B.isApprox(C) && "copy_using_evaluator(B.triangularView<Upper>(), A)");
+    
+    A.setRandom();B.setRandom();
+    C = B; C.triangularView<Lower>() = A.triangularView<Lower>();
+    copy_using_evaluator(B.triangularView<Lower>(), A.triangularView<Lower>());
+    VERIFY(B.isApprox(C) && "copy_using_evaluator(B.triangularView<Lower>(), A.triangularView<Lower>())");
+    
+    
+    A.setRandom();B.setRandom();
+    C = B; C.triangularView<Lower>() = A.triangularView<Upper>().transpose();
+    copy_using_evaluator(B.triangularView<Lower>(), A.triangularView<Upper>().transpose());
+    VERIFY(B.isApprox(C) && "copy_using_evaluator(B.triangularView<Lower>(), A.triangularView<Lower>().transpose())");
+    
+    
+    A.setRandom();B.setRandom(); C = B; D = A;
+    C.triangularView<Upper>().swap(D.triangularView<Upper>());
+    swap_using_evaluator(B.triangularView<Upper>(), A.triangularView<Upper>());
+    VERIFY(B.isApprox(C) && "swap_using_evaluator(B.triangularView<Upper>(), A.triangularView<Upper>())");
+    
+    
+    VERIFY_IS_APPROX_EVALUATOR2(B, prod(A.triangularView<Upper>(),A), MatrixXd(A.triangularView<Upper>()*A));
+    
+    VERIFY_IS_APPROX_EVALUATOR2(B, prod(A.selfadjointView<Upper>(),A), MatrixXd(A.selfadjointView<Upper>()*A));
+  }
+
+  {
+    // test diagonal shapes
+    VectorXd d = VectorXd::Random(6);
+    MatrixXd A = MatrixXd::Random(6,6), B(6,6);
+    A.setRandom();B.setRandom();
+    
+    VERIFY_IS_APPROX_EVALUATOR2(B, lazyprod(d.asDiagonal(),A), MatrixXd(d.asDiagonal()*A));
+    VERIFY_IS_APPROX_EVALUATOR2(B, lazyprod(A,d.asDiagonal()), MatrixXd(A*d.asDiagonal()));
+  }
+
+  {
+    // test CoeffReadCost
+    Matrix4d a, b;
+    VERIFY_IS_EQUAL( get_cost(a), 1 );
+    VERIFY_IS_EQUAL( get_cost(a+b), 3);
+    VERIFY_IS_EQUAL( get_cost(2*a+b), 4);
+    VERIFY_IS_EQUAL( get_cost(a*b), 1);
+    VERIFY_IS_EQUAL( get_cost(a.lazyProduct(b)), 15);
+    VERIFY_IS_EQUAL( get_cost(a*(a*b)), 1);
+    VERIFY_IS_EQUAL( get_cost(a.lazyProduct(a*b)), 15);
+    VERIFY_IS_EQUAL( get_cost(a*(a+b)), 1);
+    VERIFY_IS_EQUAL( get_cost(a.lazyProduct(a+b)), 15);
   }
 }

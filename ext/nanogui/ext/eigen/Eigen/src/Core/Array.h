@@ -12,7 +12,16 @@
 
 namespace Eigen {
 
-/** \class Array 
+namespace internal {
+template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+struct traits<Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> > : traits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+{
+  typedef ArrayXpr XprKind;
+  typedef ArrayBase<Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> > XprBase;
+};
+}
+
+/** \class Array
   * \ingroup Core_Module
   *
   * \brief General-purpose arrays with easy API for coefficient-wise operations
@@ -24,20 +33,14 @@ namespace Eigen {
   * API for the %Matrix class provides easy access to linear-algebra
   * operations.
   *
-  * This class can be extended with the help of the plugin mechanism described on the page
-  * \ref TopicCustomizingEigen by defining the preprocessor symbol \c EIGEN_ARRAY_PLUGIN.
+  * See documentation of class Matrix for detailed information on the template parameters
+  * storage layout.
   *
-  * \sa \ref TutorialArrayClass, \ref TopicClassHierarchy
+  * This class can be extended with the help of the plugin mechanism described on the page
+  * \ref TopicCustomizing_Plugins by defining the preprocessor symbol \c EIGEN_ARRAY_PLUGIN.
+  *
+  * \sa \blank \ref TutorialArrayClass, \ref TopicClassHierarchy
   */
-namespace internal {
-template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct traits<Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> > : traits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
-{
-  typedef ArrayXpr XprKind;
-  typedef ArrayBase<Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> > XprBase;
-};
-}
-
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 class Array
   : public PlainObjectBase<Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
@@ -75,6 +78,21 @@ class Array
       return Base::operator=(other);
     }
 
+    /** Set all the entries to \a value.
+      * \sa DenseBase::setConstant(), DenseBase::fill()
+      */
+    /* This overload is needed because the usage of
+      *   using Base::operator=;
+      * fails on MSVC. Since the code below is working with GCC and MSVC, we skipped
+      * the usage of 'using'. This should be done only for operator=.
+      */
+    EIGEN_DEVICE_FUNC
+    EIGEN_STRONG_INLINE Array& operator=(const Scalar &value)
+    {
+      Base::setConstant(value);
+      return *this;
+    }
+
     /** Copies the value of the expression \a other into \c *this with automatic resizing.
       *
       * *this might be resized to match the dimensions of \a other. If *this was a null matrix (not already initialized),
@@ -86,7 +104,7 @@ class Array
       */
     template<typename OtherDerived>
     EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Array& operator=(const ArrayBase<OtherDerived>& other)
+    EIGEN_STRONG_INLINE Array& operator=(const DenseBase<OtherDerived>& other)
     {
       return Base::_set(other);
     }
@@ -99,7 +117,7 @@ class Array
     {
       return Base::_set(other);
     }
-
+    
     /** Default constructor.
       *
       * For fixed-size matrices, does nothing.
@@ -129,21 +147,20 @@ class Array
     }
 #endif
 
-#ifdef EIGEN_HAVE_RVALUE_REFERENCES
-    Array(Array&& other)
+#if EIGEN_HAS_RVALUE_REFERENCES
+    EIGEN_DEVICE_FUNC
+    Array(Array&& other) EIGEN_NOEXCEPT_IF(std::is_nothrow_move_constructible<Scalar>::value)
       : Base(std::move(other))
     {
       Base::_check_template_params();
-      if (RowsAtCompileTime!=Dynamic && ColsAtCompileTime!=Dynamic)
-        Base::_set_noalias(other);
     }
-    Array& operator=(Array&& other)
+    EIGEN_DEVICE_FUNC
+    Array& operator=(Array&& other) EIGEN_NOEXCEPT_IF(std::is_nothrow_move_assignable<Scalar>::value)
     {
       other.swap(*this);
       return *this;
     }
 #endif
-
 
     #ifndef EIGEN_PARSED_BY_DOXYGEN
     template<typename T>
@@ -206,50 +223,24 @@ class Array
       m_storage.data()[3] = val3;
     }
 
-    /** Constructor copying the value of the expression \a other */
-    template<typename OtherDerived>
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Array(const ArrayBase<OtherDerived>& other)
-             : Base(other.rows() * other.cols(), other.rows(), other.cols())
-    {
-      Base::_check_template_params();
-      Base::_set_noalias(other);
-    }
     /** Copy constructor */
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE Array(const Array& other)
-            : Base(other.rows() * other.cols(), other.rows(), other.cols())
-    {
-      Base::_check_template_params();
-      Base::_set_noalias(other);
-    }
-    /** Copy constructor with in-place evaluation */
-    template<typename OtherDerived>
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Array(const ReturnByValue<OtherDerived>& other)
-    {
-      Base::_check_template_params();
-      Base::resize(other.rows(), other.cols());
-      other.evalTo(*this);
-    }
+            : Base(other)
+    { }
+
+  private:
+    struct PrivateType {};
+  public:
 
     /** \sa MatrixBase::operator=(const EigenBase<OtherDerived>&) */
     template<typename OtherDerived>
     EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Array(const EigenBase<OtherDerived> &other)
-      : Base(other.derived().rows() * other.derived().cols(), other.derived().rows(), other.derived().cols())
-    {
-      Base::_check_template_params();
-      Base::_resize_to_match(other);
-      *this = other;
-    }
-
-    /** Override MatrixBase::swap() since for dynamic-sized matrices of same type it is enough to swap the
-      * data pointers.
-      */
-    template<typename OtherDerived>
-    void swap(ArrayBase<OtherDerived> const & other)
-    { this->_swap(other.derived()); }
+    EIGEN_STRONG_INLINE Array(const EigenBase<OtherDerived> &other,
+                              typename internal::enable_if<internal::is_convertible<typename OtherDerived::Scalar,Scalar>::value,
+                                                           PrivateType>::type = PrivateType())
+      : Base(other.derived())
+    { }
 
     EIGEN_DEVICE_FUNC inline Index innerStride() const { return 1; }
     EIGEN_DEVICE_FUNC inline Index outerStride() const { return this->innerSize(); }

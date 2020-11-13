@@ -11,10 +11,6 @@
 #ifndef EIGEN_MATRIX_LOGARITHM
 #define EIGEN_MATRIX_LOGARITHM
 
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383279503L
-#endif
-
 namespace Eigen { 
 
 namespace internal { 
@@ -41,6 +37,7 @@ template <typename MatrixType>
 void matrix_log_compute_2x2(const MatrixType& A, MatrixType& result)
 {
   typedef typename MatrixType::Scalar Scalar;
+  typedef typename MatrixType::RealScalar RealScalar;
   using std::abs;
   using std::ceil;
   using std::imag;
@@ -53,15 +50,20 @@ void matrix_log_compute_2x2(const MatrixType& A, MatrixType& result)
   result(1,0) = Scalar(0);
   result(1,1) = logA11;
 
-  if (A(0,0) == A(1,1)) {
+  Scalar y = A(1,1) - A(0,0);
+  if (y==Scalar(0))
+  {
     result(0,1) = A(0,1) / A(0,0);
-  } else if ((abs(A(0,0)) < 0.5*abs(A(1,1))) || (abs(A(0,0)) > 2*abs(A(1,1)))) {
-    result(0,1) = A(0,1) * (logA11 - logA00) / (A(1,1) - A(0,0));
-  } else {
+  }
+  else if ((abs(A(0,0)) < RealScalar(0.5)*abs(A(1,1))) || (abs(A(0,0)) > 2*abs(A(1,1))))
+  {
+    result(0,1) = A(0,1) * (logA11 - logA00) / y;
+  }
+  else
+  {
     // computation in previous branch is inaccurate if A(1,1) \approx A(0,0)
-    int unwindingNumber = static_cast<int>(ceil((imag(logA11 - logA00) - M_PI) / (2*M_PI)));
-    Scalar y = A(1,1) - A(0,0), x = A(1,1) + A(0,0);
-    result(0,1) = A(0,1) * (Scalar(2) * numext::atanh2(y,x) + Scalar(0,2*M_PI*unwindingNumber)) / y;
+    int unwindingNumber = static_cast<int>(ceil((imag(logA11 - logA00) - RealScalar(EIGEN_PI)) / RealScalar(2*EIGEN_PI)));
+    result(0,1) = A(0,1) * (numext::log1p(y/A(0,0)) + Scalar(0,2*EIGEN_PI*unwindingNumber)) / y;
   }
 }
 
@@ -231,8 +233,8 @@ void matrix_log_compute_big(const MatrixType& A, MatrixType& result)
   MatrixType T = A, sqrtT;
 
   int maxPadeDegree = matrix_log_max_pade_degree<Scalar>::value;
-  const RealScalar maxNormForPade = maxPadeDegree<= 5? 5.3149729967117310e-1:                     // single precision
-                                    maxPadeDegree<= 7? 2.6429608311114350e-1:                     // double precision
+  const RealScalar maxNormForPade = maxPadeDegree<= 5? 5.3149729967117310e-1L:                    // single precision
+                                    maxPadeDegree<= 7? 2.6429608311114350e-1L:                    // double precision
                                     maxPadeDegree<= 8? 2.32777776523703892094e-1L:                // extended precision
                                     maxPadeDegree<=10? 1.05026503471351080481093652651105e-1L:    // double-double
                                                        1.1880960220216759245467951592883642e-1L;  // quadruple precision
@@ -310,7 +312,7 @@ public:
   typedef typename Derived::Index Index;
 
 protected:
-  typedef typename internal::nested<Derived, 10>::type DerivedNested;
+  typedef typename internal::ref_selector<Derived>::type DerivedNested;
 
 public:
 
@@ -322,22 +324,22 @@ public:
   
   /** \brief Compute the matrix logarithm.
     *
-    * \param[out]  result  Logarithm of \p A, where \A is as specified in the constructor.
+    * \param[out]  result  Logarithm of \c A, where \c A is as specified in the constructor.
     */
   template <typename ResultType>
   inline void evalTo(ResultType& result) const
   {
-    typedef typename internal::remove_all<DerivedNested>::type DerivedNestedClean;
-    typedef internal::traits<DerivedNestedClean> Traits;
+    typedef typename internal::nested_eval<Derived, 10>::type DerivedEvalType;
+    typedef typename internal::remove_all<DerivedEvalType>::type DerivedEvalTypeClean;
+    typedef internal::traits<DerivedEvalTypeClean> Traits;
     static const int RowsAtCompileTime = Traits::RowsAtCompileTime;
     static const int ColsAtCompileTime = Traits::ColsAtCompileTime;
-    static const int Options = DerivedNestedClean::Options;
     typedef std::complex<typename NumTraits<Scalar>::Real> ComplexScalar;
-    typedef Matrix<ComplexScalar, Dynamic, Dynamic, Options, RowsAtCompileTime, ColsAtCompileTime> DynMatrixType;
+    typedef Matrix<ComplexScalar, Dynamic, Dynamic, 0, RowsAtCompileTime, ColsAtCompileTime> DynMatrixType;
     typedef internal::MatrixLogarithmAtomic<DynMatrixType> AtomicType;
     AtomicType atomic;
     
-    internal::matrix_function_compute<DerivedNestedClean>::run(m_A, atomic, result);
+    internal::matrix_function_compute<typename DerivedEvalTypeClean::PlainObject>::run(m_A, atomic, result);
   }
 
   Index rows() const { return m_A.rows(); }

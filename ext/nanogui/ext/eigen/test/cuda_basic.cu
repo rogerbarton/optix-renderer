@@ -1,4 +1,11 @@
-
+// This file is part of Eigen, a lightweight C++ template library
+// for linear algebra.
+//
+// Copyright (C) 2015-2016 Gael Guennebaud <gael.guennebaud@inria.fr>
+//
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // workaround issue between gcc >= 4.7 and cuda 5.5
 #if (defined __GNUC__) && (__GNUC__>4 || __GNUC_MINOR__>=7)
@@ -11,10 +18,13 @@
 #define EIGEN_TEST_FUNC cuda_basic
 #define EIGEN_DEFAULT_DENSE_INDEX_TYPE int
 
+#include <math_constants.h>
+#include <cuda.h>
 #include "main.h"
 #include "cuda_common.h"
 
-#include <Eigen/Eigenvalues>
+// Check that dense modules can be properly parsed by nvcc
+#include <Eigen/Dense>
 
 // struct Foo{
 //   EIGEN_DEVICE_FUNC
@@ -48,24 +58,44 @@ struct coeff_wise {
 };
 
 template<typename T>
+struct replicate {
+  EIGEN_DEVICE_FUNC
+  void operator()(int i, const typename T::Scalar* in, typename T::Scalar* out) const
+  {
+    using namespace Eigen;
+    T x1(in+i);
+    int step   = x1.size() * 4;
+    int stride = 3 * step;
+    
+    typedef Map<Array<typename T::Scalar,Dynamic,Dynamic> > MapType;
+    MapType(out+i*stride+0*step, x1.rows()*2, x1.cols()*2) = x1.replicate(2,2);
+    MapType(out+i*stride+1*step, x1.rows()*3, x1.cols()) = in[i] * x1.colwise().replicate(3);
+    MapType(out+i*stride+2*step, x1.rows(), x1.cols()*3) = in[i] * x1.rowwise().replicate(3);
+  }
+};
+
+template<typename T>
 struct redux {
   EIGEN_DEVICE_FUNC
   void operator()(int i, const typename T::Scalar* in, typename T::Scalar* out) const
   {
     using namespace Eigen;
-    int N = 6;
+    int N = 10;
     T x1(in+i);
     out[i*N+0] = x1.minCoeff();
     out[i*N+1] = x1.maxCoeff();
     out[i*N+2] = x1.sum();
     out[i*N+3] = x1.prod();
-//     out[i*N+4] = x1.colwise().sum().maxCoeff();
-//     out[i*N+5] = x1.rowwise().maxCoeff().sum();
+    out[i*N+4] = x1.matrix().squaredNorm();
+    out[i*N+5] = x1.matrix().norm();
+    out[i*N+6] = x1.colwise().sum().maxCoeff();
+    out[i*N+7] = x1.rowwise().maxCoeff().sum();
+    out[i*N+8] = x1.matrix().colwise().squaredNorm().sum();
   }
 };
 
 template<typename T1, typename T2>
-struct prod {
+struct prod_test {
   EIGEN_DEVICE_FUNC
   void operator()(int i, const typename T1::Scalar* in, typename T1::Scalar* out) const
   {
@@ -114,7 +144,7 @@ void test_cuda_basic()
   Eigen::VectorXf in, out;
   
   #ifndef __CUDA_ARCH__
-  int data_size = nthreads * 16;
+  int data_size = nthreads * 512;
   in.setRandom(data_size);
   out.setRandom(data_size);
   #endif
@@ -122,11 +152,14 @@ void test_cuda_basic()
   CALL_SUBTEST( run_and_compare_to_cuda(coeff_wise<Vector3f>(), nthreads, in, out) );
   CALL_SUBTEST( run_and_compare_to_cuda(coeff_wise<Array44f>(), nthreads, in, out) );
   
+  CALL_SUBTEST( run_and_compare_to_cuda(replicate<Array4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_cuda(replicate<Array33f>(), nthreads, in, out) );
+  
   CALL_SUBTEST( run_and_compare_to_cuda(redux<Array4f>(), nthreads, in, out) );
   CALL_SUBTEST( run_and_compare_to_cuda(redux<Matrix3f>(), nthreads, in, out) );
   
-  CALL_SUBTEST( run_and_compare_to_cuda(prod<Matrix3f,Matrix3f>(), nthreads, in, out) );
-  CALL_SUBTEST( run_and_compare_to_cuda(prod<Matrix4f,Vector4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_cuda(prod_test<Matrix3f,Matrix3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_cuda(prod_test<Matrix4f,Vector4f>(), nthreads, in, out) );
   
   CALL_SUBTEST( run_and_compare_to_cuda(diagonal<Matrix3f,Vector3f>(), nthreads, in, out) );
   CALL_SUBTEST( run_and_compare_to_cuda(diagonal<Matrix4f,Vector4f>(), nthreads, in, out) );

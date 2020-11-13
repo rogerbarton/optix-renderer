@@ -29,7 +29,7 @@ template<typename _MatrixType> class UpperBidiagonalization
     };
     typedef typename MatrixType::Scalar Scalar;
     typedef typename MatrixType::RealScalar RealScalar;
-    typedef typename MatrixType::Index Index;
+    typedef Eigen::Index Index; ///< \deprecated since Eigen 3.3
     typedef Matrix<Scalar, 1, ColsAtCompileTime> RowVectorType;
     typedef Matrix<Scalar, RowsAtCompileTime, 1> ColVectorType;
     typedef BandMatrix<RealScalar, ColsAtCompileTime, ColsAtCompileTime, 1, 0, RowMajor> BidiagonalType;
@@ -37,7 +37,7 @@ template<typename _MatrixType> class UpperBidiagonalization
     typedef Matrix<Scalar, ColsAtCompileTimeMinusOne, 1> SuperDiagVectorType;
     typedef HouseholderSequence<
               const MatrixType,
-              CwiseUnaryOp<internal::scalar_conjugate_op<Scalar>, const Diagonal<const MatrixType,0> >
+              const typename internal::remove_all<typename Diagonal<const MatrixType,0>::ConjugateReturnType>::type
             > HouseholderUSequenceType;
     typedef HouseholderSequence<
               const typename internal::remove_all<typename MatrixType::ConjugateReturnType>::type,
@@ -53,7 +53,7 @@ template<typename _MatrixType> class UpperBidiagonalization
     */
     UpperBidiagonalization() : m_householder(), m_bidiagonal(), m_isInitialized(false) {}
 
-    UpperBidiagonalization(const MatrixType& matrix)
+    explicit UpperBidiagonalization(const MatrixType& matrix)
       : m_householder(matrix.rows(), matrix.cols()),
         m_bidiagonal(matrix.cols(), matrix.cols()),
         m_isInitialized(false)
@@ -95,7 +95,6 @@ void upperbidiagonalization_inplace_unblocked(MatrixType& mat,
                                               typename MatrixType::RealScalar *upper_diagonal,
                                               typename MatrixType::Scalar* tempData = 0)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
 
   Index rows = mat.rows();
@@ -153,14 +152,15 @@ template<typename MatrixType>
 void upperbidiagonalization_blocked_helper(MatrixType& A,
                                            typename MatrixType::RealScalar *diagonal,
                                            typename MatrixType::RealScalar *upper_diagonal,
-                                           typename MatrixType::Index bs,
+                                           Index bs,
                                            Ref<Matrix<typename MatrixType::Scalar, Dynamic, Dynamic,
                                                       traits<MatrixType>::Flags & RowMajorBit> > X,
                                            Ref<Matrix<typename MatrixType::Scalar, Dynamic, Dynamic,
                                                       traits<MatrixType>::Flags & RowMajorBit> > Y)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
+  typedef typename MatrixType::RealScalar RealScalar;
+  typedef typename NumTraits<RealScalar>::Literal Literal;
   enum { StorageOrder = traits<MatrixType>::Flags & RowMajorBit };
   typedef InnerStride<int(StorageOrder) == int(ColMajor) ? 1 : Dynamic> ColInnerStride;
   typedef InnerStride<int(StorageOrder) == int(ColMajor) ? Dynamic : 1> RowInnerStride;
@@ -220,10 +220,10 @@ void upperbidiagonalization_blocked_helper(MatrixType& A,
         if(k) u_k -= U_k1.adjoint() * X.row(k).head(k).adjoint();
       }
 
-      // 5 - construct right Householder transform in-placecols
+      // 5 - construct right Householder transform in-place
       u_k.makeHouseholderInPlace(tau_u, upper_diagonal[k]);
 
-      // this eases the application of Householder transforAions
+      // this eases the application of Householder transformations
       // A(k,k+1) will store tau_u later
       A(k,k+1) = Scalar(1);
 
@@ -265,7 +265,7 @@ void upperbidiagonalization_blocked_helper(MatrixType& A,
     SubMatType A10( A.block(bs,0, brows-bs,bs) );
     SubMatType A01( A.block(0,bs, bs,bcols-bs) );
     Scalar tmp = A01(bs-1,0);
-    A01(bs-1,0) = 1;
+    A01(bs-1,0) = Literal(1);
     A11.noalias() -= A10 * Y.topLeftCorner(bcols,bs).bottomRows(bcols-bs).adjoint();
     A11.noalias() -= X.topLeftCorner(brows,bs).bottomRows(brows-bs) * A01;
     A01(bs-1,0) = tmp;
@@ -282,10 +282,9 @@ void upperbidiagonalization_blocked_helper(MatrixType& A,
   */
 template<typename MatrixType, typename BidiagType>
 void upperbidiagonalization_inplace_blocked(MatrixType& A, BidiagType& bidiagonal,
-                                            typename MatrixType::Index maxBlockSize=32,
+                                            Index maxBlockSize=32,
                                             typename MatrixType::Scalar* /*tempData*/ = 0)
 {
-  typedef typename MatrixType::Index Index;
   typedef typename MatrixType::Scalar Scalar;
   typedef Block<MatrixType,Dynamic,Dynamic> BlockType;
 
@@ -361,6 +360,7 @@ UpperBidiagonalization<_MatrixType>& UpperBidiagonalization<_MatrixType>::comput
 {
   Index rows = matrix.rows();
   Index cols = matrix.cols();
+  EIGEN_ONLY_USED_FOR_DEBUG(cols);
 
   eigen_assert(rows >= cols && "UpperBidiagonalization is only for Arices satisfying rows>=cols.");
 
@@ -382,6 +382,8 @@ UpperBidiagonalization<_MatrixType>& UpperBidiagonalization<_MatrixType>::comput
 {
   Index rows = matrix.rows();
   Index cols = matrix.cols();
+  EIGEN_ONLY_USED_FOR_DEBUG(rows);
+  EIGEN_ONLY_USED_FOR_DEBUG(cols);
 
   eigen_assert(rows >= cols && "UpperBidiagonalization is only for Arices satisfying rows>=cols.");
 

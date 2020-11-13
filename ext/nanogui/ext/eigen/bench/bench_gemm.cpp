@@ -112,6 +112,7 @@ void matlab_cplx_cplx(const M& ar, const M& ai, const M& br, const M& bi, M& cr,
   cr.noalias() -= ai * bi;
   ci.noalias() += ar * bi;
   ci.noalias() += ai * br;
+  // [cr ci] += [ar ai] * br + [-ai ar] * bi
 }
 
 void matlab_real_cplx(const M& a, const M& br, const M& bi, M& cr, M& ci)
@@ -148,7 +149,7 @@ int main(int argc, char ** argv)
   int m = s;
   int n = s;
   int p = s;
-  int cache_size = -1;
+  int cache_size1=-1, cache_size2=l2, cache_size3 = 0;
 
   bool need_help = false;
   for (int i=1; i<argc;)
@@ -169,7 +170,13 @@ int main(int argc, char ** argv)
       else if(argv[i][1]=='c')
       {
         ++i;
-        cache_size = atoi(argv[i++]);
+        cache_size1 = atoi(argv[i++]);
+        if(argv[i][0]!='-')
+        {
+          cache_size2 = atoi(argv[i++]);
+          if(argv[i][0]!='-')
+            cache_size3 = atoi(argv[i++]);
+        }
       }
       else if(argv[i][1]=='t')
       {
@@ -191,15 +198,16 @@ int main(int argc, char ** argv)
 
   if(need_help)
   {
-    std::cout << argv[0] << " -s <matrix sizes> -c <cache size> -t <nb tries> -p <nb repeats>\n";
+    std::cout << argv[0] << " -s <matrix sizes> -c <cache sizes> -t <nb tries> -p <nb repeats>\n";
     std::cout << "   <matrix sizes> : size\n";
     std::cout << "   <matrix sizes> : rows columns depth\n";
     return 1;
   }
 
-  if(cache_size>0)
-    setCpuCacheSizes(cache_size,96*cache_size);
-
+#if EIGEN_VERSION_AT_LEAST(3,2,90)
+  if(cache_size1>0)
+    setCpuCacheSizes(cache_size1,cache_size2,cache_size3);
+#endif
   
   A a(m,p); a.setRandom();
   B b(p,n); b.setRandom();
@@ -233,7 +241,7 @@ int main(int argc, char ** argv)
     blas_gemm(a,b,r);
     c.noalias() += a * b;
     if(!r.isApprox(c)) {
-      std::cout << r  - c << "\n";
+      std::cout << (r  - c).norm() << "\n";
       std::cerr << "Warning, your product is crap!\n\n";
     }
   #else
@@ -242,7 +250,7 @@ int main(int argc, char ** argv)
       gemm(a,b,c);
       r.noalias() += a.cast<Scalar>() .lazyProduct( b.cast<Scalar>() );
       if(!r.isApprox(c)) {
-        std::cout << r - c << "\n";
+        std::cout << (r  - c).norm() << "\n";
         std::cerr << "Warning, your product is crap!\n\n";
       }
     }

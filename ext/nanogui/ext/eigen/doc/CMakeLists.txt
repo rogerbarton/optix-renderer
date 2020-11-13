@@ -34,8 +34,8 @@ set(EIGEN_DOXY_PROJECT_NAME             "Eigen-unsupported")
 set(EIGEN_DOXY_OUTPUT_DIRECTORY_SUFFIX  "/unsupported")
 set(EIGEN_DOXY_INPUT                    "\"${Eigen_SOURCE_DIR}/unsupported/Eigen\" \"${Eigen_SOURCE_DIR}/unsupported/doc\"")
 set(EIGEN_DOXY_HTML_COLORSTYLE_HUE      "0")
-# set(EIGEN_DOXY_TAGFILES                 "\"${Eigen_BINARY_DIR}/doc/eigen.doxytags =../\"")
-set(EIGEN_DOXY_TAGFILES                 "")
+set(EIGEN_DOXY_TAGFILES                 "\"${Eigen_BINARY_DIR}/doc/Eigen.doxytags=..\"")
+#set(EIGEN_DOXY_TAGFILES                 "")
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
@@ -78,6 +78,8 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/eigen_navtree_hacks.js           ${CMAKE_CURRENT_BINARY_DIR}/html/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Eigen_Silly_Professor_64x64.png  ${CMAKE_CURRENT_BINARY_DIR}/html/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2pnode.png                    ${CMAKE_CURRENT_BINARY_DIR}/html/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2node.png                     ${CMAKE_CURRENT_BINARY_DIR}/html/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/AsciiQuickReference.txt          ${CMAKE_CURRENT_BINARY_DIR}/html/
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -88,6 +90,8 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E make_directory ${Eigen_BINARY_DIR}/doc/html/unsupported
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/eigen_navtree_hacks.js           ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Eigen_Silly_Professor_64x64.png  ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2pnode.png                    ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2node.png                     ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
   WORKING_DIRECTORY ${Eigen_BINARY_DIR}/doc
 )
 
@@ -100,7 +104,8 @@ add_custom_target(doc ALL
   COMMAND ${CMAKE_COMMAND} -E copy ${Eigen_BINARY_DIR}/doc/html/group__TopicUnalignedArrayAssert.html ${Eigen_BINARY_DIR}/doc/html/TopicUnalignedArrayAssert.html
   COMMAND ${CMAKE_COMMAND} -E rename html eigen-doc
   COMMAND ${CMAKE_COMMAND} -E remove eigen-doc/eigen-doc.tgz
-  COMMAND ${CMAKE_COMMAND} -E tar cfz eigen-doc/eigen-doc.tgz eigen-doc
+  COMMAND ${CMAKE_COMMAND} -E tar cfz eigen-doc.tgz eigen-doc
+  COMMAND ${CMAKE_COMMAND} -E rename eigen-doc.tgz eigen-doc/eigen-doc.tgz
   COMMAND ${CMAKE_COMMAND} -E rename eigen-doc html
   WORKING_DIRECTORY ${Eigen_BINARY_DIR}/doc)
 
