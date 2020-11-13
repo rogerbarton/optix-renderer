@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 /////// Common internal implementation of Windows-specific stuff //////////////
@@ -27,7 +23,7 @@
 #ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
 #endif
-// Check that the target Windows version has all API calls requried.
+// Check that the target Windows version has all API calls required.
 #ifndef _WIN32_WINNT
 # define _WIN32_WINNT 0x0400
 #endif
@@ -45,7 +41,7 @@
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "user32.lib")
 
-// maximum mumber of lines the output console should have
+// maximum number of lines the output console should have
 static const WORD MAX_CONSOLE_LINES = 500;
 const COLORREF              RGBKEY = RGB(8, 8, 16); // at least 8 for 16-bit palette
 HWND                        g_hAppWnd;           // The program's window handle
@@ -151,14 +147,14 @@ static bool RedirectIOToConsole(void)
 
 
 video::video()
-    : red_mask(0xff0000), red_shift(16), green_mask(0xff00),
-      green_shift(8), blue_mask(0xff), blue_shift(0), depth(24)
+    : depth(24), red_shift(16), green_shift(8), blue_shift(0),
+      red_mask(0xff0000), green_mask(0xff00), blue_mask(0xff)
 {
     assert(g_video == 0);
     g_video = this; title = "Video"; running = threaded = calc_fps = false; updating = true;
 }
 
-//! optionally call it just before init() to set own 
+//! optionally call it just before init() to set own
 void video::win_set_class(WNDCLASSEX &wcex)
 {
     gWndClass = &wcex;

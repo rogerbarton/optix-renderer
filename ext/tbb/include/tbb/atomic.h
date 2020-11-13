@@ -1,25 +1,35 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
+
+#include "internal/_deprecated_header_message_guard.h"
+
+#if !defined(__TBB_show_deprecation_message_atomic_H) && defined(__TBB_show_deprecated_header_message)
+#define  __TBB_show_deprecation_message_atomic_H
+#pragma message("TBB Warning: tbb/atomic.h is deprecated. For details, please see Deprecated Features appendix in the TBB reference manual.")
+#endif
+
+#if defined(__TBB_show_deprecated_header_message)
+#undef __TBB_show_deprecated_header_message
+#endif
 
 #ifndef __TBB_atomic_H
 #define __TBB_atomic_H
+
+#define __TBB_atomic_H_include_area
+#include "internal/_warning_suppress_enable_notice.h"
 
 #include <cstddef>
 
@@ -31,8 +41,8 @@
 
 #include "tbb_machine.h"
 
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-    // Workaround for overzealous compiler warnings
+#if _MSC_VER && !__INTEL_COMPILER
+    // Suppress overzealous compiler warnings till the end of the file
     #pragma warning (push)
     #pragma warning (disable: 4244 4267 4512)
 #endif
@@ -54,7 +64,9 @@ enum memory_semantics {
 //! @cond INTERNAL
 namespace internal {
 
-#if __TBB_ATTRIBUTE_ALIGNED_PRESENT
+#if __TBB_ALIGNAS_PRESENT
+    #define __TBB_DECL_ATOMIC_FIELD(t,f,a) alignas(a) t f;
+#elif __TBB_ATTRIBUTE_ALIGNED_PRESENT
     #define __TBB_DECL_ATOMIC_FIELD(t,f,a) t f  __attribute__ ((aligned(a)));
 #elif __TBB_DECLSPEC_ALIGN_PRESENT
     #define __TBB_DECL_ATOMIC_FIELD(t,f,a) __declspec(align(a)) t f;
@@ -402,10 +414,12 @@ public:
 /** See the Reference for details.
     @ingroup synchronization */
 template<typename T>
-struct atomic: internal::atomic_impl<T> {
+struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic")
+atomic: internal::atomic_impl<T> {
 #if __TBB_ATOMIC_CTORS
     atomic() = default;
     constexpr atomic(T arg): internal::atomic_impl<T>(arg) {}
+    constexpr atomic<T>(const atomic<T>& rhs): internal::atomic_impl<T>(rhs) {}
 #endif
     T operator=( T rhs ) {
         // "this" required here in strict ISO C++ because store_with_release is a dependent name
@@ -416,16 +430,20 @@ struct atomic: internal::atomic_impl<T> {
 
 #if __TBB_ATOMIC_CTORS
     #define __TBB_DECL_ATOMIC(T)                                                                    \
-        template<> struct atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {              \
+        template<> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic")  \
+        atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {                                \
             atomic() = default;                                                                     \
             constexpr atomic(T arg): internal::atomic_impl_with_arithmetic<T,T,char>(arg) {}        \
+            constexpr atomic<T>(const atomic<T>& rhs):                                              \
+                      internal::atomic_impl_with_arithmetic<T,T,char>(rhs) {}                       \
                                                                                                     \
             T operator=( T rhs ) {return store_with_release(rhs);}                                  \
             atomic<T>& operator=( const atomic<T>& rhs ) {store_with_release(rhs); return *this;}   \
         };
 #else
     #define __TBB_DECL_ATOMIC(T)                                                                    \
-        template<> struct atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {              \
+        template<> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic")  \
+        atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {                                \
             T operator=( T rhs ) {return store_with_release(rhs);}                                  \
             atomic<T>& operator=( const atomic<T>& rhs ) {store_with_release(rhs); return *this;}   \
         };
@@ -449,15 +467,20 @@ __TBB_DECL_ATOMIC(unsigned long)
    type synonyms on the platform.  Type U should be the wider variant of T from the
    perspective of /Wp64. */
 #define __TBB_DECL_ATOMIC_ALT(T,U) \
-    template<> struct atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {             \
+    template<> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic") \
+    atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {                               \
         atomic() = default ;                                                                   \
         constexpr atomic(T arg): internal::atomic_impl_with_arithmetic<T,T,char>(arg) {}       \
+        constexpr atomic<T>(const atomic<T>& rhs):                                             \
+                  internal::atomic_impl_with_arithmetic<T,T,char>(rhs) {}                      \
+                                                                                               \
         T operator=( U rhs ) {return store_with_release(T(rhs));}                              \
         atomic<T>& operator=( const atomic<T>& rhs ) {store_with_release(rhs); return *this;}  \
     };
 #else
 #define __TBB_DECL_ATOMIC_ALT(T,U) \
-    template<> struct atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {             \
+    template<> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic") \
+    atomic<T>: internal::atomic_impl_with_arithmetic<T,T,char> {                               \
         T operator=( U rhs ) {return store_with_release(T(rhs));}                              \
         atomic<T>& operator=( const atomic<T>& rhs ) {store_with_release(rhs); return *this;}  \
     };
@@ -480,10 +503,12 @@ __TBB_DECL_ATOMIC(wchar_t)
 #endif /* _MSC_VER||!defined(_NATIVE_WCHAR_T_DEFINED) */
 
 //! Specialization for atomic<T*> with arithmetic and operator->.
-template<typename T> struct atomic<T*>: internal::atomic_impl_with_arithmetic<T*,ptrdiff_t,T> {
+template<typename T> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic")
+atomic<T*>: internal::atomic_impl_with_arithmetic<T*,ptrdiff_t,T> {
 #if __TBB_ATOMIC_CTORS
     atomic() = default ;
     constexpr atomic(T* arg): internal::atomic_impl_with_arithmetic<T*,ptrdiff_t,T>(arg) {}
+    constexpr atomic(const atomic<T*>& rhs): internal::atomic_impl_with_arithmetic<T*,ptrdiff_t,T>(rhs) {}
 #endif
     T* operator=( T* rhs ) {
         // "this" required here in strict ISO C++ because store_with_release is a dependent name
@@ -498,10 +523,12 @@ template<typename T> struct atomic<T*>: internal::atomic_impl_with_arithmetic<T*
 };
 
 //! Specialization for atomic<void*>, for sake of not allowing arithmetic or operator->.
-template<> struct atomic<void*>: internal::atomic_impl<void*> {
+template<> struct __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::atomic is deprecated, use std::atomic")
+atomic<void*>: internal::atomic_impl<void*> {
 #if __TBB_ATOMIC_CTORS
     atomic() = default ;
     constexpr atomic(void* arg): internal::atomic_impl<void*>(arg) {}
+    constexpr atomic(const atomic<void*>& rhs): internal::atomic_impl<void*>(rhs) {}
 #endif
     void* operator=( void* rhs ) {
         // "this" required here in strict ISO C++ because store_with_release is a dependent name
@@ -551,6 +578,9 @@ inline atomic<T>& as_atomic( T& t ) {
 
 #if _MSC_VER && !__INTEL_COMPILER
     #pragma warning (pop)
-#endif // warnings 4244, 4267 are back
+#endif // warnings are restored
+
+#include "internal/_warning_suppress_disable_notice.h"
+#undef __TBB_atomic_H_include_area
 
 #endif /* __TBB_atomic_H */

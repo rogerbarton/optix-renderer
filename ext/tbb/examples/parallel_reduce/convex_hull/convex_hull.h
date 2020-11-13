@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #ifndef __CONVEX_HULL_H__
@@ -33,8 +29,9 @@
 #include <functional>
 #include <climits>
 #include "tbb/tick_count.h"
-#include "tbb/task_scheduler_init.h"
+#include "tbb/global_control.h"
 #include "../../common/utility/utility.h"
+#include "../../common/utility/get_default_num_threads.h"
 #include "../../common/utility/fast_random.h"
 
 using namespace std;
@@ -42,7 +39,6 @@ using namespace std;
 namespace cfg {
     // convex hull problem user set parameters
     long   numberOfPoints  = 5000000; // problem size
-    utility::thread_number_range threads(tbb::task_scheduler_init::default_num_threads);
 
     // convex hull grain sizes for 3 subproblems. Be sure 16*GS < 512Kb
     const size_t generateGrainSize = 25000;
@@ -56,12 +52,12 @@ namespace util {
     vector<string> OUTPUT;
 
     // utility functionality
-    void ParseInputArgs(int argc, char* argv[]) {
+    void ParseInputArgs(int argc, char* argv[], utility::thread_number_range& threads) {
         utility::parse_cli_arguments(
                 argc,argv,
                 utility::cli_argument_pack()
                     //"-h" option for displaying help is present implicitly
-                    .positional_arg(cfg::threads,"n-of-threads",utility::thread_number_range_desc)
+                    .positional_arg(threads,"n-of-threads",utility::thread_number_range_desc)
                     .positional_arg(cfg::numberOfPoints,"n-of-points","number of points")
                     .arg(silent,"silent","no output except elapsed time")
                     .arg(verbose,"verbose","turns verbose ON")

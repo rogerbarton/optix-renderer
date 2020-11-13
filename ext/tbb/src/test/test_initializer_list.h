@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #ifndef __TBB_test_initializer_list_H
@@ -96,10 +92,10 @@ namespace initializer_list_support_tests{
         element_type test_seq[] = INIT_SEQ;                                                                                                           \
         container_type expected(test_seq,test_seq + Harness::array_length(test_seq));                                                                 \
                                                                                                                                                       \
-        /*test for explicit contructor call*/                                                                                                         \
+        /*test for explicit constructor call*/                                                                                                         \
         container_type vd INIT_SEQ;                                                                                                                   \
         ASSERT(vd == expected,"initialization via explicit constructor call with init list failed");                                                  \
-        /*test for explicit contructor call with std::initializer_list*/                                                                              \
+        /*test for explicit constructor call with std::initializer_list*/                                                                              \
                                                                                                                                                       \
         std::initializer_list<element_type> init_list = INIT_SEQ;                                                                                     \
         container_type v1 (init_list);                                                                                                                \
@@ -126,6 +122,9 @@ namespace initializer_list_support_tests{
             std::vector<T> vec;
             public:
             ad_hoc_container(){}
+            typename std::vector<T>::const_iterator begin() const {return vec.begin();}
+            typename std::vector<T>::const_iterator end() const {return vec.end();}
+            typename std::vector<T>::size_type size() const {return vec.size();}
             template<typename InputIterator>
             ad_hoc_container(InputIterator begin, InputIterator end) : vec(begin,end) {}
             ad_hoc_container(std::initializer_list<T> il) : vec(il.begin(),il.end()) {}
@@ -143,7 +142,7 @@ namespace initializer_list_support_tests{
     __TBB_TEST_INIT_LIST_SUITE_SINGLE(TestCompilerSupportInt, initializer_list_helpers::ad_hoc_container, int, AD_HOC_INIT_SEQ )
     #undef AD_HOC_INIT_SEQ
 
-    #if __TBB_CPP11_INIT_LIST_ASSIGN_OP_RESOLUTION_BROKEN
+    #if __TBB_CPP11_INIT_LIST_TEST_BROKEN
         void TestCompilerSupportIntPair(){
             REPORT("Known issue: skip initializer_list compiler test for std::pair list elements.\n");
         }

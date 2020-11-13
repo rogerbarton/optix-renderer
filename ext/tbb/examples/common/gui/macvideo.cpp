@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #include "video.h"
@@ -37,8 +33,13 @@ int cocoa_update=0;
 struct timeval g_time;
 
 video::video()
-    : red_mask(0xff0000), red_shift(16), green_mask(0xff00),
-      green_shift(8), blue_mask(0xff), blue_shift(0), depth(24)
+#if __TBB_IOS
+    : depth(24), red_shift(0), green_shift(8), blue_shift(16),
+    red_mask(0xff), green_mask(0xff00), blue_mask(0xff0000)
+#else
+    : depth(24), red_shift(16), green_shift(8), blue_shift(0),
+    red_mask(0xff0000), green_mask(0xff00), blue_mask(0xff)
+#endif
 {
     assert(g_video == 0);
     g_video = this; title = "Video"; cocoa_update=1; updating = true; calc_fps = false;
@@ -65,10 +66,10 @@ void video::terminate()
 {
     if(calc_fps) {
         double fps = g_fps;
-		struct timezone tz; struct timeval end_time; gettimeofday(&end_time, &tz);
-		fps /= (end_time.tv_sec+1.0*end_time.tv_usec/1000000.0) - (g_time.tv_sec+1.0*g_time.tv_usec/1000000.0);
+        struct timezone tz; struct timeval end_time; gettimeofday(&end_time, &tz);
+        fps /= (end_time.tv_sec+1.0*end_time.tv_usec/1000000.0) - (g_time.tv_sec+1.0*g_time.tv_usec/1000000.0);
         printf("%s: %.1f fps\n", title, fps);
-  	}
+    }
     g_video = 0; running = false;
     if(g_pImg) { delete[] g_pImg; g_pImg = 0; }
 }
@@ -82,9 +83,9 @@ video::~video()
 bool video::next_frame()
 {
     if(calc_fps){
-	    if(!g_fps) {
-		    struct timezone tz; gettimeofday(&g_time, &tz);
-	    }
+        if(!g_fps) {
+            struct timezone tz; gettimeofday(&g_time, &tz);
+        }
         g_fps++;
     }
     struct timezone tz; struct timeval now_time; gettimeofday(&now_time, &tz);
@@ -92,7 +93,7 @@ bool video::next_frame()
     if( sec>1 ){
         if(calc_fps) {
             memcpy(&g_time, &now_time, sizeof(g_time));
-            int fps; 
+            int fps;
             fps = g_fps/sec;
             cocoa_update = (int)updating;
             snprintf(window_title,WINDOW_TITLE_SIZE, "%s%s: %d fps", title, updating?"":" (no updating)", int(fps));
@@ -114,7 +115,7 @@ extern "C" void on_mouse_func(int x, int y, int k)
     g_video->on_mouse(x, y, k);
     return;
 }
- 
+
 extern "C" void on_key_func(int x)
 {
     g_video->on_key(x);
@@ -136,15 +137,16 @@ void video::main_loop()
 //! Change window title
 void video::show_title()
 {
-    strncpy( window_title, title, WINDOW_TITLE_SIZE );
+    if(title)
+        strncpy( window_title, title, WINDOW_TITLE_SIZE );
     return;
 }
 
 ///////////////////////////////////////////// public methods of video class ///////////////////////
 
 drawing_area::drawing_area(int x, int y, int sizex, int sizey)
-    : start_x(x), start_y(y), size_x(sizex), size_y(sizey), pixel_depth(24),
-    base_index(y*g_sizex + x), max_index(g_sizex*g_sizey), index_stride(g_sizex), ptr32(g_pImg)
+    : base_index(y*g_sizex + x), max_index(g_sizex*g_sizey), index_stride(g_sizex),
+    pixel_depth(24), ptr32(g_pImg), start_x(x), start_y(y), size_x(sizex), size_y(sizey)
 {
     assert(x < g_sizex); assert(y < g_sizey);
     assert(x+sizex <= g_sizex); assert(y+sizey <= g_sizey);
@@ -152,7 +154,7 @@ drawing_area::drawing_area(int x, int y, int sizex, int sizey)
     index = base_index; // current index
 }
 
-void drawing_area::update() 
+void drawing_area::update()
 {
-    //nothing to do, updating via timer in cocoa part. 
+    //nothing to do, updating via timer in cocoa part.
 }

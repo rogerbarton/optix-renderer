@@ -1,16 +1,23 @@
 ------------------------------------------------------------------------
 Intel(R) Threading Building Blocks - Release Notes
-                   Version 4.3
+                   Version 2020
 ------------------------------------------------------------------------
 
+Intel(R) Threading Building Blocks (Intel(R) TBB) is planned to be
+improved through renewal and update with latest C++ standards to increase
+usability. Evaluation of some Intel(R) TBB features removal will be
+conducted in some future releases. Features under consideration are mapped
+to updated options as described in the 'TBB Revamp: Background,Changes,
+and Modernization'
+(see https://software.intel.com/en-us/articles/tbb-revamp).
 
 System Requirements
 -------------------
 
-Intel(R) Threading Building Blocks (Intel(R) TBB) is available
-commercially (see http://software.intel.com/en-us/intel-tbb) as a
-binary distribution, and in open source, in both source and binary
-forms (see http://threadingbuildingblocks.org).
+Intel(R) Threading Building Blocks is available commercially
+(see http://software.intel.com/en-us/intel-tbb) as a binary distribution,
+and in open source, in both source and binary forms
+(see https://github.com/intel/tbb).
 
 When built from source, Intel(R) TBB is intended to be highly portable
 and so supports a wide variety of operating systems and platforms (see
@@ -23,19 +30,21 @@ and compilers listed here.
 Hardware - Recommended
 
     Microsoft* Windows* Systems
-        Intel(R) Core(TM) 2 Duo processor or Intel(R) Xeon(R) processor
-            or higher
+        Intel(R) Core(TM) processor family
+        Intel(R) Xeon(R) processor family
     Linux* Systems
-        Intel(R) Core(TM) 2 Duo processor or Intel(R) Xeon(R) processor
-            or higher
-        Intel(R) Xeon Phi(TM) coprocessor
-    OS X* Systems
-        Intel(R) Core(TM) 2 Duo processor or higher
+        Intel(R) Core(TM) processor family
+        Intel(R) Xeon(R) processor family
+    macOS* Systems
+        Intel(R) Core(TM) processor family
+    Android* Systems
+        Intel(R) Atom(TM) processor family
 
 Hardware - Supported
 
-    Intel(R) Pentium(R) 4 processor family and higher
-    Intel(R) Xeon Phi(TM) coprocessor
+    Intel(R) Pentium(R) processor family
+    Intel(R) Xeon Phi(TM) processor family
+    Intel(R) Atom(TM) processor family
     Non Intel(R) processors compatible with the above processors
 
 Software - Minimum Requirements
@@ -45,106 +54,79 @@ Software - Minimum Requirements
 
 Software - Recommended
 
-    Intel(R) Parallel Studio XE 2013 SP1
-    Intel(R) Parallel Studio XE 2015 Professional Edition
+    Intel(R) Parallel Studio XE 2019, 2020
+    Intel(R) System Studio 2019, 2020
 
 Software - Supported Operating Systems
 
     Systems with Microsoft* Windows* operating systems
-        Microsoft* Windows* 8, 8.1
-        Microsoft* Windows* 7 SP1
-        Microsoft* Windows* Server 2012
-        Microsoft* Windows* Server 2008 SP2 (IA-32 only)
-        Microsoft* Windows* Server 2008 R2 SP1
-        Microsoft* Windows* HPC Server 2008
+        Microsoft* Windows* 10
+        Microsoft* Windows* Server 2016
+        Microsoft* Windows* Server 2019
     Systems with Linux* operating systems
-        Red Hat* Enterprise Linux* 5, 6, 7
-        Fedora* 20
-        Debian* 6.0, 7
-        Ubuntu* 12.04 LTS, 14.04 LTS
-        Ubuntu* 13.10
-        SuSE* Linux* Enterprise Server 11
+        CentOS* 7.1
+        Debian* 9, 10
+        Fedora* 30
         Intel(R) Cluster Ready
-    Systems with OS X* operating systems
-        OS X* 10.9 and higher
+        Red Hat* Enterprise Linux* 7, 8
+        SuSE* Linux* Enterprise Server 12,15
+        Ubuntu* 16.04 LTS, 18.04 LTS
+        Ubuntu* 19.04
+        WindRiver* Linux 9
+        Yocto* 2.3
+    Systems with OS X* or macOS* operating systems
+        macOS* 10.14, 10.15
+    Systems with Android* operating systems
+        Android* 6.x, 7.x, 8.x, 9.x
 
 Software - Supported Compilers
 
-    Intel(R) C++ Compiler 13.1 (Intel(R) Parallel Studio XE 2013 SP1)
-        and higher
-    Microsoft* Visual C++ 10.0 (Microsoft* Visual Studio* 2010,
-        Windows* OS only) and higher
+    Intel(R) C++ Compiler 18, 19 and 19.1 version
+    Microsoft* Visual C++ 14.1 (Microsoft* Visual Studio* 2017,
+        Windows* OS only)
+    Microsoft* Visual C++ 14.2 (Microsoft* Visual Studio* 2019,
+        Windows* OS only)
+    Microsoft* Windows* Software Development Kit for Windows* 8.1
+    Microsoft* Windows* Software Development Kit for Windows* 10
     For each supported Linux* operating system, the standard gcc
-        version provided with that operating system is supported,
-        including gcc 4.1 through 4.8.2
-    Xcode* 5.0 and higher and command line tools (OS X* only)
+        version provided with that operating system is supported
+            GNU Compilers (gcc) 4.8 - 9.1
+            GNU C Library (glibc) version 2.17 - 2.29
+    Clang* 3.8 - 8.0
+    Xcode* 8.x - 11.x
+    Android* NDK r10e - r17b
 
+Software - Supported Performance Analysis Tools
+
+    Intel(R) VTune(TM) Amplifier XE 2019, 2020
+    Intel(R) Inspector XE 2019, 2020
+    Intel(R) Advisor XE 2019, 2020
 
 Known Issues
 ------------
 
-Please note the following with respect to this particular release of
-Intel(R) Threading Building Blocks.
+Below is the list of known issues in this release of
+Intel(R) Threading Building Blocks (Intel(R) TBB).
+See the "Known Issues" appendix in the Intel(R) TBB Developer
+Reference for notes applicable to multiple releases of Intel(R) TBB.
 
 Library Issues
 
-    - If an application uses static version of MSVCRT libraries or uses
-        Intel TBB DLL built with static MSVCRT (vc_mt variant), and throws
-        an exception from a functor passed to task_group::run_and_wait(),
-        the exception will not be intercepted by Intel TBB and will not
-        result in cancellation of the task_group. For a workaround, catch
-        the exception in the functor and explicitly cancel the task_group.
-
-    - The debug version of Intel TBB DLL built with static MSVCRT
-        (vc_mt/tbb_debug.dll) additionally requires
-        Microsoft* Visual C++ 10.0 debug library (msvcp100d.dll) in order
-        to run.
-
-    - If you are using Intel(R) Threading Building Blocks and OpenMP*
-        constructs mixed together in rapid succession in the same
-        program, and you are using Intel(R) compilers for your OpenMP*
-        code, set KMP_BLOCKTIME to a small value (e.g., 20 milliseconds)
-        to improve performance.  This setting can also be made within
-        your OpenMP* code via the kmp_set_blocktime() library call.  See
-        the Intel(R) compiler OpenMP* documentation for more details on
-        KMP_BLOCKTIME and kmp_set_blocktime().
-
-    - In general, non-debug ("release") builds of applications or
-        examples should link against the non-debug versions of the
-        Intel(R) Threading Building Blocks libraries, and debug builds
-        should link against the debug versions of these libraries.  On
-        Windows* OS, compile with /MD and use Intel(R) Threading
-        Building Blocks release libraries, or compile with /MDd and use
-        debug libraries; not doing so may cause run-time failures.  See
-        the Tutorial in the product "doc" sub-directory for more details
-        on debug vs. release libraries.
-
-    - If an open source version installed to the system folders like
-        /usr/lib64 on Linux OS, examples may fail to link because sometimes
-        gcc searches for folders in unexpected order. To resolve this, use
-        the -L command line linker option needs to be used to set the right
-        location. This does not affect a program execution.
-
-    - Running applications linked with Intel(R) Threading Building Blocks
-        version 4.0 U5 or higher under Intel(R) Graphics Performance
-        Analyzers is not supported.
-
-    - If an application that uses dynamic memory allocator replacement via
-        LD_PRELOAD is analyzed with Intel(R) VTune(TM) Amplifier XE for Linux,
-        the analysis may fail to start. For a workaround, either specify
-        the full path to both libtbbmalloc_proxy.so.2 and libtbbmalloc.so.2
-        in LD_PRELOAD, or set up a Intel(R) VTune(TM) Amplifier XE project
-        to use a shell script that sets LD_PRELOAD and starts the application.
+    - If you build Intel(R) TBB from sources with GCC 6 or higher,
+        specify the -flifetime-dse=1 option to prevent crashes at
+        runtime, or use Intel(R) TBB makefiles that automatically set
+        this option.
 
 ------------------------------------------------------------------------
-Copyright (C) 2005-2014 Intel Corporation.  All Rights Reserved.
+(C) 2020 Intel Corporation
 
-Intel, Xeon and Pentium are registered trademarks or trademarks of
-Intel Corporation or its subsidiaries in the United States and other countries.
+Intel, the Intel logo, Intel Core, Intel Atom, Celeron, Xeon,
+Intel Xeon Phi and Pentium are trademarks of Intel Corporation
+in the U.S. and/or other countries
 
 * Other names and brands may be claimed as the property of others.
 
 Third Party and Open Source Licenses
 
-Content of some examples or binaries may be covered by various open-source 
+Content of some examples or binaries may be covered by various open-source
 licenses. See the index.html file in each respective folder for details.

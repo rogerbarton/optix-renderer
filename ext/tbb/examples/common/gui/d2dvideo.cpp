@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 // common Windows parts
@@ -64,7 +60,7 @@ void DrawBitmap()
     HRESULT hr = S_OK;
     if (m_pRenderTarget) {
         m_pRenderTarget->BeginDraw();
-        if (m_pBitmap) 
+        if (m_pBitmap)
             hr = m_pBitmap->CopyFromMemory(NULL,(BYTE*)g_pImg, 4*g_sizex);
         DisplayError( "DrawBitmap error", hr );
         m_pRenderTarget->DrawBitmap(m_pBitmap);
@@ -103,7 +99,7 @@ LRESULT CALLBACK InternalWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPa
                 Sleep(0);
             }
             break;
-        // Proccess all mouse and keyboard events
+        // Process all mouse and keyboard events
         case WM_LBUTTONDOWN:    mouse( 1, lParam ); break;
         case WM_LBUTTONUP:      mouse(-1, lParam ); break;
         case WM_RBUTTONDOWN:    mouse( 2, lParam ); break;
@@ -172,7 +168,7 @@ bool video::init_window(int sizex, int sizey)
 void video::terminate()
 {
     if (m_pBitmap) m_pBitmap->Release();
-    if (m_pRenderTarget) m_pRenderTarget->Release(); 
+    if (m_pRenderTarget) m_pRenderTarget->Release();
     if (m_pD2DFactory) m_pD2DFactory->Release();
     g_video = 0; running = false;
     if(g_pImg) { delete[] g_pImg; g_pImg = 0; }
@@ -181,8 +177,8 @@ void video::terminate()
 //////////// drawing area constructor & destructor /////////////
 
 drawing_area::drawing_area(int x, int y, int sizex, int sizey)
-: start_x(x), start_y(y), size_x(sizex), size_y(sizey), pixel_depth(24),
-    base_index(y*g_sizex + x), max_index(g_sizex*g_sizey), index_stride(g_sizex), ptr32(g_pImg)
+    : base_index(y*g_sizex + x), max_index(g_sizex*g_sizey), index_stride(g_sizex),
+    pixel_depth(24), ptr32(g_pImg), start_x(x), start_y(y), size_x(sizex), size_y(sizey)
 {
     assert(x < g_sizex); assert(y < g_sizey);
     assert(x+sizex <= g_sizex); assert(y+sizey <= g_sizey);

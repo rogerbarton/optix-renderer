@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #ifndef _TBB_tbb_misc_H
@@ -24,6 +20,10 @@
 #include "tbb/tbb_stddef.h"
 #include "tbb/tbb_machine.h"
 #include "tbb/atomic.h"     // For atomic_xxx definitions
+
+#if __TBB_NUMA_SUPPORT
+#include "tbb/info.h"
+#endif /*__TBB_NUMA_SUPPORT*/
 
 #if __linux__ || __FreeBSD__
 #include <sys/param.h>  // __FreeBSD_version
@@ -39,12 +39,14 @@
 #define __TBB_USE_OS_AFFINITY_SYSCALL (__TBB_OS_AFFINITY_SYSCALL_PRESENT && !__bg__)
 
 namespace tbb {
+
 namespace internal {
 
 const size_t MByte = 1024*1024;
 
-#if __TBB_WIN8UI_SUPPORT
-// In Win8UI mode, TBB uses a thread creation API that does not allow to specify the stack size.
+#if __TBB_WIN8UI_SUPPORT && (_WIN32_WINNT < 0x0A00)
+// In Win8UI mode (Windows 8 Store* applications), TBB uses a thread creation API
+// that does not allow to specify the stack size.
 // Still, the thread stack size value, either explicit or default, is used by the scheduler.
 // So here we set the default value to match the platform's default of 1MB.
 const size_t ThreadStackSize = 1*MByte;
@@ -65,6 +67,8 @@ inline int AvailableHwConcurrency() {
 }
 #endif /* __TBB_HardwareConcurrency */
 
+//! Returns OS regular memory page size
+size_t DefaultSystemPageSize();
 
 #if _WIN32||_WIN64
 
@@ -82,9 +86,6 @@ void MoveThreadIntoProcessorGroup( void* hThread, int groupIndex );
 
 //! Throws std::runtime_error with what() returning error_code description prefixed with aux_info
 void handle_win_error( int error_code );
-
-//! True if environment variable with given name is set and not 0; otherwise false.
-bool GetBoolEnvironmentVariable( const char * name );
 
 //! Prints TBB version information on stderr
 void PrintVersion();
@@ -105,8 +106,8 @@ void PrintRMLVersionInfo( void* arg, const char* server_info );
 /** Provided here to avoid including not strict safe <algorithm>.\n
     In case operands cause signed/unsigned or size mismatch warnings it is caller's
     responsibility to do the appropriate cast before calling the function. **/
-template<typename T1, typename T2>
-T1 min ( const T1& val1, const T2& val2 ) {
+template<typename T>
+T min ( const T& val1, const T& val2 ) {
     return val1 < val2 ? val1 : val2;
 }
 
@@ -114,8 +115,8 @@ T1 min ( const T1& val1, const T2& val2 ) {
 /** Provided here to avoid including not strict safe <algorithm>.\n
     In case operands cause signed/unsigned or size mismatch warnings it is caller's
     responsibility to do the appropriate cast before calling the function. **/
-template<typename T1, typename T2>
-T1 max ( const T1& val1, const T2& val2 ) {
+template<typename T>
+T max ( const T& val1, const T& val2 ) {
     return val1 < val2 ? val2 : val1;
 }
 
@@ -252,16 +253,38 @@ inline void run_initializer( bool (*f)(), atomic<do_once_state>& state ) {
     public:
         affinity_helper() : threadMask(NULL), is_changed(0) {}
         ~affinity_helper();
-        void protect_affinity_mask();
+        void protect_affinity_mask( bool restore_process_mask  );
+        void dismiss();
     };
+    void destroy_process_mask();
 #else
     class affinity_helper : no_copy {
     public:
-        void protect_affinity_mask() {}
+        void protect_affinity_mask( bool ) {}
+        void dismiss() {}
     };
+    inline void destroy_process_mask(){}
 #endif /* __TBB_USE_OS_AFFINITY_SYSCALL */
 
-extern bool cpu_has_speculation();
+bool cpu_has_speculation();
+bool gcc_rethrow_exception_broken();
+void fix_broken_rethrow();
+
+#if __TBB_NUMA_SUPPORT
+class binding_handler;
+
+binding_handler* construct_binding_handler(int slot_num);
+void destroy_binding_handler(binding_handler* handler_ptr);
+void bind_thread_to_node(binding_handler* handler_ptr, int slot_num , int numa_id);
+void restore_affinity_mask(binding_handler* handler_ptr, int slot_num);
+
+namespace numa_topology {
+    bool is_initialized();
+    void initialize();
+    void destroy();
+}
+
+#endif /*__TBB_NUMA_SUPPORT*/
 
 } // namespace internal
 } // namespace tbb

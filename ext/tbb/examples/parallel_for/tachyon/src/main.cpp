@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 /*
@@ -101,8 +97,8 @@ void initoptions(argoptions * opt) {
     opt->verbosemode = -1;
     opt->antialiasing = -1;
     opt->displaymode = -1;
-    opt->boundmode = -1; 
-    opt->boundthresh = -1; 
+    opt->boundmode = -1;
+    opt->boundthresh = -1;
     opt->usecamfile = -1;
 }
 
@@ -124,7 +120,7 @@ int CreateScene() {
 
     // scene->hres and scene->vres should be equal to screen resolution
     scene->hres = global_xwinsize = global_xsize;
-    scene->vres = global_ywinsize = global_ysize;  
+    scene->vres = global_ywinsize = global_ysize;
 
     return 0;
 }
@@ -141,7 +137,7 @@ unsigned int __stdcall example_main(void *)
         tachyon.init_console();
 
         // always using window even if(!global_usegraphics)
-        global_usegraphics = 
+        global_usegraphics =
             tachyon.init_window(global_xwinsize, global_ywinsize);
         if(!tachyon.running)
             exit(-1);
@@ -153,7 +149,7 @@ unsigned int __stdcall example_main(void *)
             global_startTime=(long) time(NULL);
             global_isCancelled=false;
             if (video)video->running = true;
-            tbb::task_scheduler_init init (global_number_of_threads);
+            tbb::global_control c(tbb::global_control::max_allowed_parallelism, global_number_of_threads);
             memset(g_pImg, 0, sizeof(unsigned int) * global_xsize * global_ysize);
             tachyon.main_loop();
             global_elapsedTime = (long)(time(NULL)-global_startTime);
@@ -164,6 +160,64 @@ unsigned int __stdcall example_main(void *)
                 rt_sleep( 100 );
             }
         }
+        return NULL;
+
+    } catch ( std::exception& e ) {
+        std::cerr<<"error occurred. error text is :\"" <<e.what()<<"\"\n";
+        return 1;
+    }
+}
+
+#elif __TBB_IOS
+
+#include "tbb/tbb.h"
+#include "CoreFoundation/CoreFoundation.h"
+extern "C" void get_screen_resolution(int *x, int *y);
+
+int CreateScene() {
+
+    CFURLRef balls_dat_url = CFBundleCopyResourceURL(CFBundleGetMainBundle(), CFSTR("balls"), CFSTR("dat"),NULL);
+    char filename[1024];
+    CFURLGetFileSystemRepresentation(balls_dat_url, true, (UInt8*)filename, (CFIndex)sizeof(filename));
+    CFRelease(balls_dat_url);
+
+    global_scene = rt_newscene();
+    rt_initialize();
+
+    if ( readmodel(filename, global_scene) != 0 ) {
+        rt_finalize();
+        return -1;
+    }
+
+    // need these early for create_graphics_window() so grab these here...
+    scenedef *scene = (scenedef *) global_scene;
+
+    get_screen_resolution(&global_xsize, &global_ysize);
+
+    // scene->hres and scene->vres should be equal to screen resolution
+    scene->hres = global_xwinsize = global_xsize;
+    scene->vres = global_ywinsize = global_ysize;
+    return 0;
+}
+
+int main (int argc, char *argv[]) {
+    try {
+
+        if ( CreateScene() != 0 ) return -1;
+
+        tachyon_video tachyon;
+        tachyon.threaded = true;
+        tachyon.init_console();
+
+        global_usegraphics = tachyon.init_window(global_xwinsize, global_ywinsize);
+        if(!tachyon.running) return -1;
+
+        //TODO: add a demo loop.
+        video = &tachyon;
+        if (video)video->running = true;
+        memset(g_pImg, 0, sizeof(unsigned int) * global_xsize * global_ysize);
+        tachyon.main_loop();
+        video->running=false;
         return NULL;
 
     } catch ( std::exception& e ) {
@@ -208,7 +262,7 @@ int useoptions(argoptions * opt, SceneHandle scene) {
 
   if (opt->antialiasing != -1) {
     /* need new api code for this */
-  } 
+  }
 
   if (opt->displaymode != -1) {
     rt_displaymode(scene, opt->displaymode);
@@ -223,7 +277,7 @@ int useoptions(argoptions * opt, SceneHandle scene) {
   }
 
   return 0;
-}    
+}
 
 argoptions ParseCommandLine(int argc, const char *argv[]) {
     argoptions opt;
@@ -308,7 +362,7 @@ int main (int argc, char *argv[]) {
 
         tachyon.title = global_window_title;
         // always using window even if(!global_usegraphics)
-        global_usegraphics = 
+        global_usegraphics =
             tachyon.init_window(global_xwinsize, global_ywinsize);
         if(!tachyon.running)
             return -1;

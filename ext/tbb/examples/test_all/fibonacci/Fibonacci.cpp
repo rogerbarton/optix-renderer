@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 /* Example program that computes Fibonacci numbers in different ways.
@@ -36,8 +32,10 @@
 #include <cstdlib>
 #include <cassert>
 #include <utility>
+#include <thread>
+#include <atomic>
+#include <mutex>
 #include "tbb/task.h"
-#include "tbb/task_scheduler_init.h"
 #include "tbb/tick_count.h"
 #include "tbb/blocked_range.h"
 #include "tbb/concurrent_vector.h"
@@ -48,11 +46,9 @@
 #include "tbb/parallel_reduce.h"
 #include "tbb/parallel_scan.h"
 #include "tbb/pipeline.h"
-#include "tbb/atomic.h"
-#include "tbb/mutex.h"
 #include "tbb/spin_mutex.h"
 #include "tbb/queuing_mutex.h"
-#include "tbb/tbb_thread.h"
+#include "tbb/global_control.h"
 
 using namespace std;
 using namespace tbb;
@@ -71,6 +67,8 @@ struct Matrix2x2
     }
     Matrix2x2 operator * (const Matrix2x2 &to) const; //< Multiply two Matrices
 };
+//! Identity matrix
+static const Matrix2x2 MatrixIdentity(1, 0, 0, 1);
 //! Default matrix to multiply
 static const Matrix2x2 Matrix1110(1, 1, 1, 0);
 //! Raw arrays matrices multiply
@@ -119,9 +117,9 @@ value SerialQueueFib(int n)
         Q.push(Matrix1110);
     Matrix2x2 A, B;
     while(true) {
-        while( !Q.try_pop(A) ) this_tbb_thread::yield();
+        while( !Q.try_pop(A) ) std::this_thread::yield();
         if(Q.empty()) break;
-        while( !Q.try_pop(B) ) this_tbb_thread::yield();
+        while( !Q.try_pop(B) ) std::this_thread::yield();
         Q.push(A * B);
     }
     return A.v[0][0];
@@ -165,6 +163,19 @@ public:
     }
 };
 
+#if __TBB_CPP11_PRESENT
+template<>
+void SharedSerialFibBody<std::mutex>::operator()( const blocked_range<int>& range ) const {
+    for(;;) {
+        std::lock_guard<std::mutex> lock(mutex);
+        if(SharedI >= SharedN) break;
+        value sum = SharedA + SharedB;
+        SharedA = SharedB; SharedB = sum;
+        ++SharedI;
+    }
+}
+#endif
+
 //! Root function
 template<class M>
 value SharedSerialFib(int n)
@@ -179,7 +190,7 @@ value SharedSerialFib(int n)
 //! Hash comparer
 struct IntHashCompare {
     bool equal( const int j, const int k ) const { return j == k; }
-    unsigned long hash( const int k ) const { return (unsigned long)k; }   
+    unsigned long hash( const int k ) const { return (unsigned long)k; }
 };
 //! NumbersTable type based on concurrent_hash_map
 typedef concurrent_hash_map<int, value, IntHashCompare> NumbersTable;
@@ -191,12 +202,11 @@ public:
     //! constructor
     ConcurrentHashSerialFibTask( NumbersTable &cht, int n ) : Fib(cht), my_n(n) { }
     //! executing task
-    /*override*/ task* execute()
-    {
+    task* execute() /*override*/ {
         for( int i = 2; i <= my_n; ++i ) { // there is no difference in to recycle or to make loop
             NumbersTable::const_accessor f1, f2; // same as iterators
             if( !Fib.find(f1, i-1) || !Fib.find(f2, i-2) ) {
-                // Something is seriously wrong, because i-1 and i-2 must have been inserted 
+                // Something is seriously wrong, because i-1 and i-2 must have been inserted
                 // earlier by this thread or another thread.
                 assert(0);
             }
@@ -212,7 +222,7 @@ public:
 //! Root function
 value ConcurrentHashSerialFib(int n)
 {
-    NumbersTable Fib; 
+    NumbersTable Fib;
     bool okay;
     okay = Fib.insert( make_pair(0, 0) ); assert(okay); // assign initial values
     okay = Fib.insert( make_pair(1, 1) ); assert(okay);
@@ -248,7 +258,7 @@ struct QueueStream {
 };
 
 //! Functor for parallel_for which fills the queue
-struct parallel_forFibBody { 
+struct parallel_forFibBody {
     QueueStream &my_stream;
     //! fill functor arguments
     parallel_forFibBody(QueueStream &s) : my_stream(s) { }
@@ -287,10 +297,10 @@ struct QueueInsertTask: public task {
     //! fill task arguments
     QueueInsertTask( int n, QueueStream &s ) : my_n(n), my_stream(s) { }
     //! executing task
-    /*override*/ task* execute() {
+    task* execute() /*override*/ {
         // Execute of parallel pushing of n-1 initial matrices
-        parallel_for( blocked_range<int>( 1, my_n, 10 ), parallel_forFibBody(my_stream) ); 
-        my_stream.producer_is_done = true; 
+        parallel_for( blocked_range<int>( 1, my_n, 10 ), parallel_forFibBody(my_stream) );
+        my_stream.producer_is_done = true;
         return 0;
     }
 };
@@ -300,7 +310,7 @@ struct QueueProcessTask: public task {
     //! fill task argument
     QueueProcessTask( QueueStream &s ) : my_stream(s) { }
     //! executing task
-    /*override*/ task* execute() {
+    task* execute() /*override*/ {
         while( !my_stream.producer_is_done || my_stream.Queue.unsafe_size()>1 ) {
             parallel_while<parallel_whileFibBody> w; // run while loop in parallel
             w.run( my_stream, parallel_whileFibBody( w, my_stream ) );
@@ -320,68 +330,72 @@ value ParallelQueueFib(int n)
     // before the second task in the list starts.
     task::spawn_root_and_wait(list);
     assert(stream.Queue.unsafe_size() == 1); // it is easy to lose some work
-    Matrix2x2 M; 
+    Matrix2x2 M;
     bool result = stream.Queue.try_pop( M ); // get last matrix
     assert( result );
     return M.v[0][0]; // and result number
 }
 
-// *** Queue with pipeline *** //
+// *** Queue with parallel_pipeline *** //
 
-//! filter to fills queue
-class InputFilter: public filter {
-    tbb::atomic<int> N; //< index of Fibonacci number minus 1
-public:
-    concurrent_queue<Matrix2x2> Queue;
-    //! fill filter arguments
-    InputFilter( int n ) : filter(false /*is not serial*/) { N = n; }
-    //! executing filter
-    /*override*/ void* operator()(void*)
-    {
+typedef concurrent_queue<Matrix2x2> queue_t;
+namespace parallel_pipeline_ns {
+    std::atomic<int> N; //< index of Fibonacci number minus 1
+    queue_t Queue;
+}
+
+//! functor to fills queue
+struct InputFunc {
+    InputFunc( ) { }
+    queue_t* operator()(tbb::flow_control& fc) const {
+        using namespace parallel_pipeline_ns;
+
         int n = --N;
-        if(n <= 0) return 0;
+        if(n <= 0) {
+            fc.stop();
+            return NULL;
+        }
         Queue.push( Matrix1110 );
         return &Queue;
     }
 };
-//! filter to process queue
-class MultiplyFilter: public filter {
-public:
-    MultiplyFilter( ) : filter(false /*is not serial*/) { }
-    //! executing filter
-    /*override*/ void* operator()(void*p)
-    {
-        concurrent_queue<Matrix2x2> &Queue = *static_cast<concurrent_queue<Matrix2x2> *>(p);
+//! functor to process queue
+struct MultiplyFunc {
+    MultiplyFunc( ) { }
+    void operator()(queue_t* queue) const {
+        //concurrent_queue<Matrix2x2> &Queue = *static_cast<concurrent_queue<Matrix2x2> *>(p);
         Matrix2x2 m1, m2;
         // get two elements
-        while( !Queue.try_pop( m1 ) ) this_tbb_thread::yield(); 
-        while( !Queue.try_pop( m2 ) ) this_tbb_thread::yield();
+        while( !queue->try_pop( m1 ) ) std::this_thread::yield();
+        while( !queue->try_pop( m2 ) ) std::this_thread::yield();
         m1 = m1 * m2; // process them
-        Queue.push( m1 ); // and push back
-        return this; // just nothing
+        queue->push( m1 ); // and push back
     }
 };
 //! Root function
 value ParallelPipeFib(int n)
 {
-    InputFilter input( n-1 );
-    MultiplyFilter process;
-    // Create the pipeline
-    pipeline pipeline;
-    // add filters
-    pipeline.add_filter( input ); // first
-    pipeline.add_filter( process ); // second
+    using namespace parallel_pipeline_ns;
 
-    input.Queue.push( Matrix1110 );
-    // Run the pipeline
-    pipeline.run( n ); // must be larger then max threads number
-    pipeline.clear(); // do not forget clear the pipeline
+    N = n-1;
+    Queue.push( Matrix1110 );
 
-    assert( input.Queue.unsafe_size()==1 );
-    Matrix2x2 M; 
-    bool result = input.Queue.try_pop( M ); // get last element
+    tbb::parallel_pipeline(
+        n,
+        tbb::make_filter<void,queue_t*>(
+            tbb::filter::parallel, InputFunc() )
+    &
+        tbb::make_filter<queue_t*,void>(
+            tbb::filter::parallel, MultiplyFunc() )
+    );
+
+    assert( Queue.unsafe_size()==1 );
+    Matrix2x2 M;
+    bool result = Queue.try_pop( M ); // get last element
     assert( result );
-    return M.v[0][0]; // get value
+    value res = M.v[0][0]; // get value
+    Queue.clear();
+    return res;
 }
 
 // *** parallel_reduce *** //
@@ -389,20 +403,20 @@ value ParallelPipeFib(int n)
 //! Functor for parallel_reduce
 struct parallel_reduceFibBody {
     Matrix2x2 sum;
-    int splitted;  //< flag to make one less operation for splitted bodies
+    int split_flag;  //< flag to make one less operation for split bodies
     //! Constructor fills sum with initial matrix
-    parallel_reduceFibBody() : sum( Matrix1110 ), splitted(0) { }
+    parallel_reduceFibBody() : sum( Matrix1110 ), split_flag(0) { }
     //! Splitting constructor
-    parallel_reduceFibBody( parallel_reduceFibBody& other, split ) : sum( Matrix1110 ), splitted(1/*note that it is splitted*/) {}
+    parallel_reduceFibBody( parallel_reduceFibBody& other, split ) : sum( Matrix1110 ), split_flag(1/*note that it is split*/) {}
     //! Join point
     void join( parallel_reduceFibBody &s ) {
         sum = sum * s.sum;
     }
     //! Process multiplications
     void operator()( const blocked_range<int> &r ) {
-        for( int k = r.begin() + splitted; k < r.end(); ++k )
+        for( int k = r.begin() + split_flag; k < r.end(); ++k )
             sum = sum * Matrix1110;
-        splitted = 0; // reset flag, because this method can be reused for next range
+        split_flag = 0; // reset flag, because this method can be reused for next range
     }
 };
 //! Root function
@@ -417,35 +431,52 @@ value parallel_reduceFib(int n)
 
 //! Functor for parallel_scan
 struct parallel_scanFibBody {
-    Matrix2x2 sum;
-    int first;  // flag to make one less operation for first range
-    //! Constructor fills sum with initial matrix
-    parallel_scanFibBody() : sum( Matrix1110 ), first(1) {}
+    /** Though parallel_scan is usually used to accumulate running sums,
+        it can be used to accumulate running products too. */
+    Matrix2x2 product;
+    /** Pointer to output sequence */
+    value* const output;
+    //! Constructor sets product to identity matrix
+    parallel_scanFibBody(value* output_) : product( MatrixIdentity ), output(output_) {}
     //! Splitting constructor
-    parallel_scanFibBody( parallel_scanFibBody &b, split) : sum( Matrix1110 ), first(1) {}
-    //! Join point
+    parallel_scanFibBody( parallel_scanFibBody &b, split) : product( MatrixIdentity ), output(b.output) {}
+    //! Method for merging summary information from a, which was split off from *this, into *this.
     void reverse_join( parallel_scanFibBody &a ) {
-        sum = sum * a.sum;
+        // When using non-commutative reduction operation, reverse_join
+        // should put argument "a" on the left side of the operation.
+        // The reversal from the argument order is why the method is
+        // called "reverse_join" instead of "join".
+        product = a.product * product;
     }
-    //! Assign point
+    //! Method for assigning final result back to original body.
     void assign( parallel_scanFibBody &b ) {
-        sum = b.sum;
+        product = b.product;
     }
-    //! Process multiplications. For two tags
-    template<typename T>
-    void operator()( const blocked_range<int> &r, T) {
-        // see tag.is_final_scan() for what tag is used
-        for( int k = r.begin() + first; k < r.end(); ++k )
-            sum = sum * Matrix1110;
-        first = 0; // reset flag, because this method can be reused for next range
+    //! Compute matrix running product.
+    /** Tag indicates whether is is the final scan over the range, or
+        just a helper "prescan" that is computing a partial reduction. */
+    template<typename Tag>
+    void operator()( const blocked_range<int> &r, Tag tag) {
+        for( int k = r.begin(); k < r.end(); ++k ) {
+            // Code performs an "exclusive" scan, which outputs a value *before* updating the product.
+            // For an "inclusive" scan, output the value after the update.
+            if( tag.is_final_scan() )
+                output[k] = product.v[0][1];
+            product = product * Matrix1110;
+        }
     }
 };
 //! Root function
 value parallel_scanFib(int n)
 {
-    parallel_scanFibBody b;
-    parallel_scan(blocked_range<int>(1/*one less, because body skip first*/, n, 3), b);
-    return b.sum.v[0][0];
+    value* output = new value[n];
+    parallel_scanFibBody b(output);
+    parallel_scan(blocked_range<int>(0, n, 3), b);
+    // output[0..n-1] now contains the Fibonacci sequence (modulo integer wrap-around).
+    // Check the last two values for correctness.
+    assert( n<2 || output[n-2]+output[n-1]==b.product.v[0][1] );
+    delete[] output;
+    return b.product.v[0][1];
 }
 
 // *** Raw tasks *** //
@@ -457,11 +488,11 @@ struct FibTask: public task {
     value x, y;
     bool second_phase; //< flag of continuation
     // task arguments
-    FibTask( int n_, value& sum_ ) : 
+    FibTask( int n_, value& sum_ ) :
         n(n_), sum(sum_), second_phase(false)
     {}
     //! Execute task
-    /*override*/ task* execute() {
+    task* execute() /*override*/ {
         // Using Lucas' formula here
         if( second_phase ) { // children finished
             sum = n&1 ? x*x + y*y : x*x - y*y;
@@ -482,7 +513,7 @@ struct FibTask: public task {
     }
 };
 //! Root function
-value ParallelTaskFib(int n) { 
+value ParallelTaskFib(int n) {
     value sum;
     FibTask& a = *new(task::allocate_root()) FibTask(n, sum);
     task::spawn_root_and_wait(a);
@@ -503,8 +534,8 @@ void IntRange::set_from_string( const char* s ) {
     char* end;
     high = low = strtol(s,&end,0);
     switch( *end ) {
-    case ':': 
-        high = strtol(end+1,0,0); 
+    case ':':
+        high = strtol(end+1,0,0);
         break;
     case '\0':
         break;
@@ -552,7 +583,7 @@ int main(int argc, char* argv[])
     for( unsigned long i=0; i<ntrial; ++i ) {
         for(int threads = NThread.low; threads <= NThread.high; threads *= 2)
         {
-            task_scheduler_init scheduler_init(threads);
+            tbb::global_control c(tbb::global_control::max_allowed_parallelism, threads);
             if(Verbose) printf("\nThreads number is %d\n", threads);
 
             sum = Measure("Shared serial (mutex)\t", SharedSerialFib<mutex>, NumbersCount); assert(result == sum);

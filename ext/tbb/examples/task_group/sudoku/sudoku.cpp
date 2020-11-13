@@ -1,24 +1,21 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #include "../../common/utility/utility.h"
+#include "../../common/utility/get_default_num_threads.h"
 
 #if __TBB_MIC_OFFLOAD
 #pragma offload_attribute (push,target(mic))
@@ -27,21 +24,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <atomic>
 
-#include "tbb/atomic.h"
 #include "tbb/tick_count.h"
-#include "tbb/task_scheduler_init.h"
 #include "tbb/task_group.h"
+#include "tbb/global_control.h"
 
 #pragma warning(disable: 4996)
-
-#if __INTEL_COMPILER
-#define __TBB_LAMBDAS_PRESENT ( _TBB_CPP0X && __INTEL_COMPILER > 1100 )
-#elif __GNUC__
-#define __TBB_LAMBDAS_PRESENT ( _TBB_CPP0X && __TBB_GCC_VERSION >= 40500 )
-#elif _MSC_VER
-#define __TBB_LAMBDAS_PRESENT ( _MSC_VER>=1600 )
-#endif
 
 const unsigned BOARD_SIZE=81;
 const unsigned BOARD_DIM=9;
@@ -49,7 +38,7 @@ const unsigned BOARD_DIM=9;
 using namespace tbb;
 using namespace std;
 
-tbb::atomic<unsigned> nSols;
+std::atomic<unsigned> nSols;
 bool find_one = false;
 bool verbose = false;
 unsigned short init_values[BOARD_SIZE] = {1,0,0,9,0,0,0,8,0,0,8,0,2,0,0,0,0,0,0,0,5,0,0,0,7,0,0,0,5,2,1,0,0,4,0,0,0,0,0,0,0,5,0,0,7,4,0,0,7,0,0,0,3,0,0,3,0,0,0,2,0,0,5,0,0,0,0,0,0,1,0,0,5,0,0,0,1,0,0,0,0};
@@ -65,7 +54,7 @@ void read_board(const char *filename) {
     FILE *fp;
     int input;
     fp = fopen(filename, "r");
-    if (!fp) { 
+    if (!fp) {
         fprintf(stderr, "sudoku: Could not open input file '%s'.\n", filename);
         exit(1);
     }
@@ -94,7 +83,7 @@ void print_board(board_element *b) {
 void print_potential_board(board_element *b) {
     for (unsigned row=0; row<BOARD_DIM; ++row) {
         for (unsigned col=0; col<BOARD_DIM; ++col) {
-            if (b[row*BOARD_DIM+col].solved_element) 
+            if (b[row*BOARD_DIM+col].solved_element)
                 printf("  %4d ", b[row*BOARD_DIM+col].solved_element);
             else
                 printf(" [%4d]", b[row*BOARD_DIM+col].potential_set);
@@ -113,7 +102,7 @@ void init_board(board_element *b) {
 
 void init_board(board_element *b, unsigned short arr[81]) {
     for (unsigned i=0; i<BOARD_SIZE; ++i) {
-        b[i].solved_element = arr[i]; 
+        b[i].solved_element = arr[i];
         b[i].potential_set = 0;
     }
 }
@@ -201,7 +190,7 @@ bool examine_potentials(board_element *b, bool *progress) {
     return valid_board(b);
 }
 
-#if !__TBB_LAMBDAS_PRESENT
+#if !__TBB_CPP11_LAMBDAS_PRESENT
 void partial_solve(board_element *b, unsigned first_potential_set);
 
 class PartialSolveBoard {
@@ -239,7 +228,7 @@ void partial_solve(board_element *b, unsigned first_potential_set) {
                 new_board = (board_element *)malloc(BOARD_SIZE*sizeof(board_element));
                 copy_board(b, new_board);
                 new_board[first_potential_set].solved_element = potential;
-#if __TBB_LAMBDAS_PRESENT
+#if __TBB_CPP11_LAMBDAS_PRESENT
                 g->run( [=]{ partial_solve(new_board, first_potential_set); } );
 #else
                 g->run(PartialSolveBoard(new_board, first_potential_set));
@@ -254,7 +243,7 @@ void partial_solve(board_element *b, unsigned first_potential_set) {
 }
 
 unsigned solve(int p) {
-    task_scheduler_init init(p);
+    tbb::global_control c(tbb::global_control::max_allowed_parallelism, p);
     nSols = 0;
     board_element *start_board = (board_element *)malloc(BOARD_SIZE*sizeof(board_element));
     init_board(start_board, init_values);
@@ -271,25 +260,11 @@ unsigned solve(int p) {
 #pragma offload_attribute (pop)
 #endif // __TBB_MIC_OFFLOAD
 
-int do_get_default_num_threads() {
-    int threads;
-    #if __TBB_MIC_OFFLOAD
-    #pragma offload target(mic) out(threads)
-    #endif // __TBB_MIC_OFFLOAD
-    threads = tbb::task_scheduler_init::default_num_threads();
-    return threads;
-}
-
-int get_default_num_threads() {
-    static int threads = do_get_default_num_threads();
-    return threads;
-}
-
 int main(int argc, char *argv[]) {
     try {
         tbb::tick_count mainStartTime = tbb::tick_count::now();
 
-        utility::thread_number_range threads(get_default_num_threads);
+        utility::thread_number_range threads(utility::get_default_num_threads);
         string filename = "";
         bool silent = false;
 

@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 #ifndef __TBB_concurrent_queue_H
@@ -54,13 +50,13 @@ public:
     //! Prefix on a page
     struct page {
         page* next;
-        uintptr_t mask; 
+        uintptr_t mask;
     };
 
 protected:
     //! Capacity of the queue
     ptrdiff_t my_capacity;
-   
+
     //! Always a power of 2
     size_t items_per_page;
 
@@ -94,7 +90,7 @@ protected:
 
 //! Type-independent portion of concurrent_queue_iterator.
 /** @ingroup containers */
-class concurrent_queue_iterator_base : no_assign{
+class concurrent_queue_iterator_base : no_assign {
     //! concurrent_queue over which we are iterating.
     /** NULL if one past last element in queue. */
     concurrent_queue_iterator_rep* my_rep;
@@ -109,10 +105,10 @@ protected:
     mutable void* my_item;
 
     //! Default constructor
-    __TBB_EXPORTED_METHOD concurrent_queue_iterator_base() : my_rep(NULL), my_item(NULL) {}
+    __TBB_EXPORTED_METHOD concurrent_queue_iterator_base() : no_assign(), my_rep(NULL), my_item(NULL) {}
 
     //! Copy constructor
-    concurrent_queue_iterator_base( const concurrent_queue_iterator_base& i ) : my_rep(NULL), my_item(NULL) {
+    concurrent_queue_iterator_base( const concurrent_queue_iterator_base& i ) : no_assign(), my_rep(NULL), my_item(NULL) {
         assign(i);
     }
 
@@ -139,7 +135,7 @@ class concurrent_queue_iterator: public concurrent_queue_iterator_base {
     friend class ::tbb::concurrent_queue;
 #else
 public: // workaround for MSVC
-#endif 
+#endif
     //! Construct iterator pointing to head of queue.
     concurrent_queue_iterator( const concurrent_queue_base& queue ) :
         concurrent_queue_iterator_base(queue)
@@ -148,7 +144,7 @@ public: // workaround for MSVC
 public:
     concurrent_queue_iterator() {}
 
-    /** If Value==Container::value_type, then this routine is the copy constructor. 
+    /** If Value==Container::value_type, then this routine is the copy constructor.
         If Value==const Container::value_type, then this routine is a conversion constructor. */
     concurrent_queue_iterator( const concurrent_queue_iterator<Container,typename Container::value_type>& other ) :
         concurrent_queue_iterator_base(other)
@@ -160,7 +156,7 @@ public:
         return *this;
     }
 
-    //! Reference to current item 
+    //! Reference to current item
     Value& operator*() const {
         return *static_cast<Value*>(my_item);
     }
@@ -202,12 +198,12 @@ template<typename T>
 class concurrent_queue: public internal::concurrent_queue_base {
     template<typename Container, typename Value> friend class internal::concurrent_queue_iterator;
 
-    //! Class used to ensure exception-safety of method "pop" 
+    //! Class used to ensure exception-safety of method "pop"
     class destroyer {
         T& my_value;
     public:
         destroyer( T& value ) : my_value(value) {}
-        ~destroyer() {my_value.~T();}          
+        ~destroyer() {my_value.~T();}
     };
 
     T& get_ref( page& pg, size_t index ) {
@@ -215,11 +211,11 @@ class concurrent_queue: public internal::concurrent_queue_base {
         return static_cast<T*>(static_cast<void*>(&pg+1))[index];
     }
 
-    /*override*/ virtual void copy_item( page& dst, size_t index, const void* src ) {
-        new( &get_ref(dst,index) ) T(*static_cast<const T*>(src)); 
+    virtual void copy_item( page& dst, size_t index, const void* src ) __TBB_override {
+        new( &get_ref(dst,index) ) T(*static_cast<const T*>(src));
     }
 
-    /*override*/ virtual void assign_and_destroy_item( void* dst, page& src, size_t index ) {
+    virtual void assign_and_destroy_item( void* dst, page& src, size_t index ) __TBB_override {
         T& from = get_ref(src,index);
         destroyer d(from);
         *static_cast<T*>(dst) = from;
@@ -244,7 +240,7 @@ public:
     typedef std::ptrdiff_t difference_type;
 
     //! Construct empty queue
-    concurrent_queue() : 
+    concurrent_queue() :
         concurrent_queue_base( sizeof(T) )
     {
     }
@@ -278,8 +274,8 @@ public:
     }
 
     //! Return number of pushes minus number of pops.
-    /** Note that the result can be negative if there are pops waiting for the 
-        corresponding pushes.  The result can also exceed capacity() if there 
+    /** Note that the result can be negative if there are pops waiting for the
+        corresponding pushes.  The result can also exceed capacity() if there
         are push operations in flight. */
     size_type size() const {return internal_size();}
 
@@ -308,8 +304,8 @@ public:
     iterator end() {return iterator();}
     const_iterator begin() const {return const_iterator(*this);}
     const_iterator end() const {return const_iterator();}
-    
-}; 
+
+};
 
 template<typename T>
 concurrent_queue<T>::~concurrent_queue() {

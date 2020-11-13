@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 //
@@ -45,11 +41,12 @@
 #define _MAIN_C_ 1
 #include "som.h"
 
-#include "tbb/task_scheduler_init.h"
 #include "tbb/flow_graph.h"
 #include "tbb/blocked_range2d.h"
 #include "tbb/tick_count.h"
-#include "../examples/common/utility/utility.h"
+#include "tbb/task_arena.h"
+#include "../../common/utility/utility.h"
+#include "../../common/utility/get_default_num_threads.h"
 
 #define RED 0
 #define GREEN 1
@@ -100,12 +97,19 @@ queue_node<search_result_type> *q[SPECULATION_CNT];  // queue for function nodes
 search_node_array_type* s_array[SPECULATION_CNT];  // 2d array of function nodes
 graph_array_type* g_array[SPECULATION_CNT];        // 2d array of graphs
 
+// All graphs must locate in the same arena.
+graph* construct_graph(task_arena& ta) {
+    graph* result;
+    ta.execute([&result]{result = new graph;});
+    return result;
+}
+
 // build a set of SPECULATION_CNT graphs, each of which consists of a broadcast_node,
 //    xranges x yranges function_nodes, and one queue_node for output.
 //    once speculation starts, if i % SPECULATION_CNT is the current graph, (i+1) % SPECULATION_CNT
 //    is the first speculation, and so on.
 void
-build_BMU_graph(SOMap &map1) {
+build_BMU_graph(SOMap &map1, task_arena& ta) {
     // build current graph
     xsize = ((int)map1.size() + xranges - 1) / xranges;
     ysize = ((int)map1[0].size() + yranges - 1) / yranges;
@@ -114,7 +118,7 @@ build_BMU_graph(SOMap &map1) {
     for(int ii = 0; ii < xranges*yranges+1;++ii) function_node_execs.push_back(0);
 
     for(int scnt = 0; scnt < SPECULATION_CNT; ++scnt) {
-        g[scnt] = new graph;
+        g[scnt] = construct_graph(ta);
         send_to[scnt] = new b_node(*(g[scnt]));  // broadcast node to the function_nodes
         q[scnt] = new queue_node<search_result_type>(*(g[scnt]));  // output queue
 
@@ -135,7 +139,7 @@ build_BMU_graph(SOMap &map1) {
                 int ymax = (j + ysize) > (int)map1[0].size() ? (int)map1[0].size() : j + ysize;
                 subsquare_type sst(i,xmax,1,j,ymax,1);
                 BMU_search_body bb(map1,sst,function_node_execs[offset]);
-                graph *g_local = new graph;
+                graph *g_local = construct_graph(ta);
                 search_node *s = new search_node(*g_local, serial, bb); // copies Body
                 (*g_array[scnt])[xindex].push_back(g_local);
                 (*s_array[scnt])[xindex].push_back(s);
@@ -256,8 +260,8 @@ graph_BMU( int indx ) {  // indx ranges over [0 .. SPECULATION_CNT -1]
     // end of one epoch
 }
 
-void graph_teach(SOMap &map1, teaching_vector_type &in) {
-    build_BMU_graph(map1);
+void graph_teach(SOMap &map1, teaching_vector_type &in, task_arena& ta) {
+    build_BMU_graph(map1, ta);
     // normally the training would pick random exemplars to teach the SOM.  We need
     // the process to be reproducible, so we will pick the exemplars in order, [0, in.size())
     int next_j = 0;
@@ -310,8 +314,8 @@ int
 main(int argc, char** argv) {
     int l_speculation_start;
     utility::thread_number_range threads( 
-            task_scheduler_init::default_num_threads,
-            task_scheduler_init::default_num_threads()  // run only the default number of threads if none specified
+            utility::get_default_num_threads,
+            utility::get_default_num_threads()  // run only the default number of threads if none specified
     );
 
     utility::parse_cli_arguments(argc,argv,
@@ -344,7 +348,8 @@ main(int argc, char** argv) {
     // adjust nPasses so the 1x1 time is somewhere around serial_time_adjust seconds.
    // make sure the example test runs for at least 0.5 second.
     for(;;) {
-        task_scheduler_init init(1);
+        // Restrict max concurrency level via task_arena interface
+        task_arena ta(1);
         SOMap map1(xMax,yMax);
         speculation_start = nPasses + 1;  // Don't speculate
 
@@ -352,7 +357,7 @@ main(int argc, char** argv) {
         yranges = 1;
         map1.initialize(InitializeGradient, max_range, min_range);
         tick_count t0 = tick_count::now();
-        graph_teach(map1, my_teaching);
+        graph_teach(map1, my_teaching, ta);
         tick_count t1 = tick_count::now();
         double nSeconds = (t1-t0).seconds();
         if(nSeconds < 0.5) {
@@ -391,7 +396,8 @@ main(int argc, char** argv) {
     }
     double single_time;  // for speedup calculations
     for(int p = threads.first; p <= threads.last; ++p) {
-        task_scheduler_init init(p);
+        // Restrict max concurrency level via task_arena interface
+        task_arena ta(p);
         if ( extra_debug )printf( " -------------- Running with %d threads. ------------\n", p);
        // run the SOM build for a series of subranges
         for(xranges = 1; xranges <= xRangeMax; ++xranges) {
@@ -408,7 +414,7 @@ main(int argc, char** argv) {
     
                 if(extra_debug) printf( "Start learning for [%d,%d] ----------- \n", xranges,yranges);
                 tick_count t0 = tick_count::now();
-                graph_teach(map1, my_teaching);
+                graph_teach(map1, my_teaching, ta);
                 tick_count t1 = tick_count::now();
                 
                 if ( extra_debug )printf( "Done learning for [%d,%d], which took %g seconds ", xranges,yranges, (t1-t0).seconds());

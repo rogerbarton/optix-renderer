@@ -1,22 +1,18 @@
 @echo off
 REM
-REM Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+REM Copyright (c) 2005-2020 Intel Corporation
 REM
-REM This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-REM you can redistribute it and/or modify it under the terms of the GNU General Public License
-REM version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-REM distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-REM implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-REM See  the GNU General Public License for more details.   You should have received a copy of
-REM the  GNU General Public License along with Threading Building Blocks; if not, write to the
-REM Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+REM Licensed under the Apache License, Version 2.0 (the "License");
+REM you may not use this file except in compliance with the License.
+REM You may obtain a copy of the License at
 REM
-REM As a special exception,  you may use this file  as part of a free software library without
-REM restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-REM functions from this file, or you compile this file and link it with other files to produce
-REM an executable,  this file does not by itself cause the resulting executable to be covered
-REM by the GNU General Public License. This exception does not however invalidate any other
-REM reasons why the executable file might be covered by the GNU General Public License.
+REM     http://www.apache.org/licenses/LICENSE-2.0
+REM
+REM Unless required by applicable law or agreed to in writing, software
+REM distributed under the License is distributed on an "AS IS" BASIS,
+REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+REM See the License for the specific language governing permissions and
+REM limitations under the License.
 REM
 
 :: Getting parameters
@@ -27,6 +23,17 @@ set arch=%1
 if ("%2") == ("debug") set postfix=_debug
 set output_dir=%3
 
+:: Check if necessary .dll's already exist in output directory
+set dlls=tbb%postfix%.dll tbbmalloc%postfix%.dll
+(for %%a in (%dlls%) do (
+    if not exist %output_dir%\%%a (
+        goto copy_libs
+    )
+))
+:: Necessary .dll's already exist; no need to do anything
+exit /B 0
+
+:copy_libs
 :: Optional 4th parameter to set install root
 if ("%4") NEQ ("") set TBBROOT=%4
 :: Actually we can set install root by ourselves
@@ -34,10 +41,13 @@ if ("%TBBROOT%") == ("") set TBBROOT=%~d0%~p0..\..\
 
 :: Getting vs folders in case vc_mt binaries are not provided
 :: ordered from oldest to newest, so we end with newest available version
-if ("%VS90COMNTOOLS%")  NEQ ("") set vc_dir=vc9
-if ("%VS100COMNTOOLS%") NEQ ("") set vc_dir=vc10
-if ("%VS110COMNTOOLS%") NEQ ("") set vc_dir=vc11
-if ("%VS120COMNTOOLS%") NEQ ("") set vc_dir=vc12
+if ("%VS140COMNTOOLS%") NEQ ("") set vc_dir=vc14
+:: To use Microsoft* Visual Studio* 2017 IDE, make sure the variable VS150COMNTOOLS is set in your IDE instance.
+:: If it is not, try running Microsoft Visual Studio 2017 from Microsoft* Developer Command Prompt* for VS 2017.
+:: For details, see https://developercommunity.visualstudio.com/content/problem/730/vs154-env-var-vs150comntools-missing-from-build-sy.html
+if ("%VS150COMNTOOLS%") NEQ ("") set vc_dir=vc14
+:: The same comment also applies to Microsoft Visual Studio 2019 and variable VS160COMNTOOLS
+if ("%VS160COMNTOOLS%") NEQ ("") set vc_dir=vc14
 
 :: Are we standalone/oss or inside compiler?
 if exist "%TBBROOT%\bin\%arch%\%vc_dir%\tbb%postfix%.dll" set interim_path=bin\%arch%

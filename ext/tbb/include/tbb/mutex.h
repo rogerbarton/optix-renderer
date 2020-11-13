@@ -1,25 +1,35 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
+
+#include "internal/_deprecated_header_message_guard.h"
+
+#if !defined(__TBB_show_deprecation_message_mutex_H) && defined(__TBB_show_deprecated_header_message)
+#define  __TBB_show_deprecation_message_mutex_H
+#pragma message("TBB Warning: tbb/mutex.h is deprecated. For details, please see Deprecated Features appendix in the TBB reference manual.")
+#endif
+
+#if defined(__TBB_show_deprecated_header_message)
+#undef __TBB_show_deprecated_header_message
+#endif
 
 #ifndef __TBB_mutex_H
 #define __TBB_mutex_H
+
+#define __TBB_mutex_H_include_area
+#include "internal/_warning_suppress_enable_notice.h"
 
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
@@ -34,10 +44,9 @@
 
 namespace tbb {
 
-//! Wrapper around the platform's native reader-writer lock.
-/** For testing purposes only.
-    @ingroup synchronization */
-class mutex : internal::mutex_copy_deprecated_and_disabled {
+//! Wrapper around the platform's native lock.
+/** @ingroup synchronization */
+class __TBB_DEPRECATED_IN_VERBOSE_MODE_MSG("tbb::critical_section is deprecated, use std::mutex") mutex : internal::mutex_copy_deprecated_and_disabled {
 public:
     //! Construct unacquired mutex.
     mutex() {
@@ -61,7 +70,7 @@ public:
   #if _WIN32||_WIN64
         DeleteCriticalSection(&impl);
   #else
-        pthread_mutex_destroy(&impl); 
+        pthread_mutex_destroy(&impl);
 
   #endif /* _WIN32||_WIN64 */
 #endif /* TBB_USE_ASSERT */
@@ -75,7 +84,7 @@ public:
         It also nicely provides the "node" for queuing locks. */
     class scoped_lock : internal::no_copy {
     public:
-        //! Construct lock that has not acquired a mutex. 
+        //! Construct lock that has not acquired a mutex.
         scoped_lock() : my_mutex(NULL) {};
 
         //! Acquire lock on given mutex.
@@ -85,7 +94,7 @@ public:
 
         //! Release lock (if lock is held).
         ~scoped_lock() {
-            if( my_mutex ) 
+            if( my_mutex )
                 release();
         }
 
@@ -208,7 +217,7 @@ public:
     };
 private:
 #if _WIN32||_WIN64
-    CRITICAL_SECTION impl;    
+    CRITICAL_SECTION impl;
     enum state_t state;
 #else
     pthread_mutex_t impl;
@@ -229,6 +238,9 @@ public:
 
 __TBB_DEFINE_PROFILING_SET_NAME(mutex)
 
-} // namespace tbb 
+} // namespace tbb
+
+#include "internal/_warning_suppress_disable_notice.h"
+#undef __TBB_mutex_H_include_area
 
 #endif /* __TBB_mutex_H */

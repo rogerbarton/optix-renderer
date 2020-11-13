@@ -1,26 +1,29 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
+#if __TBB_CPF_BUILD
+#define TBB_DEPRECATED_FLOW_NODE_EXTRACTION 1
+#endif
+
+#include "harness.h"
 #include "harness_graph.h"
 
+#include "tbb/flow_graph.h"
 #include "tbb/task_scheduler_init.h"
+#include "test_follows_and_precedes_api.h"
 
 #define N 1000
 #define MAX_NODES 4
@@ -35,14 +38,18 @@ struct empty_no_assign : private NoAssign {
 // A class to use as a fake predecessor of continue_node
 struct fake_continue_sender : public tbb::flow::sender<tbb::flow::continue_msg>
 {
+    typedef tbb::flow::sender<tbb::flow::continue_msg>::successor_type successor_type;
     // Define implementations of virtual methods that are abstract in the base class
-    /*override*/ bool register_successor( successor_type& ) { return false; }
-    /*override*/ bool remove_successor( successor_type& )   { return false; }  
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
-    /*override*/void internal_add_built_successor( successor_type &) { }
-    /*override*/void internal_delete_built_successor( successor_type &) { }
-    /*override*/void copy_successors(std::vector<successor_type *> &) {}
-    /*override*/size_t successor_count() {return 0;}
+    bool register_successor( successor_type& ) __TBB_override { return false; }
+    bool remove_successor( successor_type& )   __TBB_override { return false; }
+#if TBB_DEPRECATED_FLOW_NODE_EXTRACTION
+    typedef tbb::flow::sender<tbb::flow::continue_msg>::built_successors_type built_successors_type;
+    built_successors_type bst;
+    built_successors_type &built_successors() __TBB_override { return bst; }
+    void internal_add_built_successor( successor_type &) __TBB_override { }
+    void internal_delete_built_successor( successor_type &) __TBB_override { }
+    void copy_successors(successor_list_type &) __TBB_override {}
+    size_t successor_count() __TBB_override {return 0;}
 #endif
 };
 
@@ -70,16 +77,17 @@ void run_continue_nodes( int p, tbb::flow::graph& g, tbb::flow::continue_node< O
     }
 
     for (size_t num_receivers = 1; num_receivers <= MAX_NODES; ++num_receivers ) {
-        harness_counting_receiver<OutputType> *receivers = new harness_counting_receiver<OutputType>[num_receivers];
+        std::vector< harness_counting_receiver<OutputType> > receivers(num_receivers, harness_counting_receiver<OutputType>(g));
         harness_graph_executor<tbb::flow::continue_msg, OutputType>::execute_count = 0;
 
         for (size_t r = 0; r < num_receivers; ++r ) {
             tbb::flow::make_edge( n, receivers[r] );
         }
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
+#if TBB_DEPRECATED_FLOW_NODE_EXTRACTION
         ASSERT(n.successor_count() == (size_t)num_receivers, NULL);
         ASSERT(n.predecessor_count() == 0, NULL);
-        typename tbb::flow::continue_node<OutputType>::successor_vector_type my_succs;
+        typename tbb::flow::continue_node<OutputType>::successor_list_type my_succs;
+        typedef typename tbb::flow::continue_node<OutputType>::successor_list_type::iterator sv_iter_type;
         n.copy_successors(my_succs);
         ASSERT(my_succs.size() == num_receivers, NULL);
 #endif
@@ -96,13 +104,15 @@ void run_continue_nodes( int p, tbb::flow::graph& g, tbb::flow::continue_node< O
             ASSERT( (int)c == p, NULL );
         }
 
-        for (size_t r = 0; r < num_receivers; ++r ) {
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
-            tbb::flow::remove_edge( n, *(my_succs[r]) );
-#else
-            tbb::flow::remove_edge( n, receivers[r] );
-#endif
+#if TBB_DEPRECATED_FLOW_NODE_EXTRACTION
+        for(sv_iter_type si=my_succs.begin(); si != my_succs.end(); ++si) {
+            tbb::flow::remove_edge( n, **si );
         }
+#else
+        for (size_t r = 0; r < num_receivers; ++r ) {
+            tbb::flow::remove_edge( n, receivers[r] );
+        }
+#endif
     }
 }
 
@@ -153,7 +163,7 @@ void continue_nodes_with_copy( ) {
         }
 
         for (size_t num_receivers = 1; num_receivers <= MAX_NODES; ++num_receivers ) {
-            harness_counting_receiver<OutputType> *receivers = new harness_counting_receiver<OutputType>[num_receivers];
+            std::vector< harness_counting_receiver<OutputType> > receivers(num_receivers, harness_counting_receiver<OutputType>(g));
 
             for (size_t r = 0; r < num_receivers; ++r ) {
                 tbb::flow::make_edge( exe_node, receivers[r] );
@@ -168,6 +178,9 @@ void continue_nodes_with_copy( ) {
                 // 3) the nodes will send to multiple successors.
                 ASSERT( (int)c == p, NULL );
             }
+            for (size_t r = 0; r < num_receivers; ++r ) {
+                tbb::flow::remove_edge( exe_node, receivers[r] );
+            }
         }
 
         // validate that the local body matches the global execute_count and both are correct
@@ -176,12 +189,10 @@ void continue_nodes_with_copy( ) {
         size_t global_count = global_execute_count;
         size_t inc_count = body_copy.local_execute_count;
         ASSERT( global_count == expected_count && global_count == inc_count, NULL );
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
         g.reset(tbb::flow::rf_reset_bodies);
         body_copy = tbb::flow::copy_body< inc_functor<OutputType> >( exe_node );
         inc_count = body_copy.local_execute_count;
         ASSERT( Offset == inc_count, "reset(rf_reset_bodies) did not reset functor" );
-#endif
 
     }
 }
@@ -189,7 +200,7 @@ void continue_nodes_with_copy( ) {
 template< typename OutputType >
 void run_continue_nodes() {
     harness_graph_executor< tbb::flow::continue_msg, OutputType>::max_executors = 0;
-    #if __TBB_LAMBDAS_PRESENT
+    #if __TBB_CPP11_LAMBDAS_PRESENT
     continue_nodes<OutputType>( []( tbb::flow::continue_msg i ) -> OutputType { return harness_graph_executor<tbb::flow::continue_msg, OutputType>::func(i); } );
     #endif
     continue_nodes<OutputType>( &harness_graph_executor<tbb::flow::continue_msg, OutputType>::func );
@@ -206,7 +217,7 @@ void test_concurrency(int num_threads) {
 }
 /*
  * Connection of two graphs is not currently supported, but works to some limited extent.
- * This test is included to check for backward compatibility. It checks that a continue_node 
+ * This test is included to check for backward compatibility. It checks that a continue_node
  * with predecessors in two different graphs receives the required
  * number of continue messages before it executes.
  */
@@ -239,7 +250,7 @@ void test_two_graphs(){
     start_h.try_put(continue_msg());
     g.wait_for_all();
     ASSERT(count==1, "Not all continue messages received");
- 
+
     //two try_puts from the graph that doesn't contain the node
     count=0;
     start_h.try_put(continue_msg());
@@ -254,7 +265,7 @@ void test_two_graphs(){
     ASSERT(count==0, "Node executed without waiting for all predecessors");
 }
 
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
+#if TBB_DEPRECATED_FLOW_NODE_EXTRACTION
 void test_extract() {
     int my_count = 0;
     tbb::flow::continue_msg cm;
@@ -272,13 +283,13 @@ void test_extract() {
         ASSERT(b1.predecessor_count() == 0 && b1.successor_count() == 1, "b1 has incorrect counts");
         ASSERT(c0.predecessor_count() == 2 && c0.successor_count() == 1, "c0 has incorrect counts");
         ASSERT(q0.predecessor_count() == 1 && q0.successor_count() == 0, "q0 has incorrect counts");
-    
+
         /* b0         */
         /*   \        */
         /*    c0 - q0 */
         /*   /        */
         /* b1         */
-    
+
         b0.try_put(tbb::flow::continue_msg());
         g.wait_for_all();
         ASSERT(my_count == 0, "continue_node fired too soon");
@@ -286,15 +297,15 @@ void test_extract() {
         g.wait_for_all();
         ASSERT(my_count == 1, "continue_node didn't fire");
         ASSERT(q0.try_get(cm), "continue_node didn't forward");
-    
+
         b0.extract();
-    
+
         /* b0         */
         /*            */
         /*    c0 - q0 */
         /*   /        */
         /* b1         */
-    
+
         ASSERT(b0.predecessor_count() == 0 && b0.successor_count() == 0, "b0 has incorrect counts");
         ASSERT(b1.predecessor_count() == 0 && b1.successor_count() == 1, "b1 has incorrect counts");
         ASSERT(c0.predecessor_count() == 1 && c0.successor_count() == 1, "c0 has incorrect counts");
@@ -307,15 +318,15 @@ void test_extract() {
         g.wait_for_all();
         ASSERT(my_count == 2, "continue_node didn't fire though it has only one predecessor");
         ASSERT(q0.try_get(cm), "continue_node didn't forward second time");
-    
+
         c0.extract();
-    
+
         /* b0         */
         /*            */
         /*    c0   q0 */
         /*            */
         /* b1         */
-    
+
         ASSERT(b0.predecessor_count() == 0 && b0.successor_count() == 0, "b0 has incorrect counts");
         ASSERT(b1.predecessor_count() == 0 && b1.successor_count() == 0, "b1 has incorrect counts");
         ASSERT(c0.predecessor_count() == 0 && c0.successor_count() == 0, "c0 has incorrect counts");
@@ -328,30 +339,208 @@ void test_extract() {
         ASSERT(my_count == 2, "continue didn't fire though it has only one predecessor");
         ASSERT(!q0.try_get(cm), "continue_node forwarded though it shouldn't");
         make_edge(b0, c0);
-    
+
         /* b0         */
         /*   \        */
         /*    c0   q0 */
         /*            */
         /* b1         */
-    
+
         ASSERT(b0.predecessor_count() == 0 && b0.successor_count() == 1, "b0 has incorrect counts");
         ASSERT(b1.predecessor_count() == 0 && b1.successor_count() == 0, "b1 has incorrect counts");
         ASSERT(c0.predecessor_count() == 1 && c0.successor_count() == 0, "c0 has incorrect counts");
         ASSERT(q0.predecessor_count() == 0 && q0.successor_count() == 0, "q0 has incorrect counts");
-    
+
         b0.try_put(tbb::flow::continue_msg());
         g.wait_for_all();
-    
+
         ASSERT(my_count == 3, "continue didn't fire though it has only one predecessor");
         ASSERT(!q0.try_get(cm), "continue_node forwarded though it shouldn't");
-    
+
         tbb::flow::make_edge(b1, c0);
         tbb::flow::make_edge(c0, q0);
         my_count = 0;
     }
 }
 #endif
+
+struct lightweight_policy_body : NoAssign {
+    const tbb::tbb_thread::id my_thread_id;
+    tbb::atomic<size_t> my_count;
+
+    lightweight_policy_body() : my_thread_id(tbb::this_tbb_thread::get_id()) {
+        my_count = 0;
+    }
+    void operator()(tbb::flow::continue_msg) {
+        ++my_count;
+        tbb::tbb_thread::id body_thread_id = tbb::this_tbb_thread::get_id();
+        ASSERT(body_thread_id == my_thread_id, "Body executed as not lightweight");
+    }
+};
+
+void test_lightweight_policy() {
+    tbb::flow::graph g;
+    tbb::flow::continue_node<tbb::flow::continue_msg, tbb::flow::lightweight> node1(g, lightweight_policy_body());
+    tbb::flow::continue_node<tbb::flow::continue_msg, tbb::flow::lightweight> node2(g, lightweight_policy_body());
+
+    tbb::flow::make_edge(node1, node2);
+    const size_t n = 10;
+    for(size_t i = 0; i < n; ++i) {
+        node1.try_put(tbb::flow::continue_msg());
+    }
+    g.wait_for_all();
+
+    lightweight_policy_body body1 = tbb::flow::copy_body<lightweight_policy_body>(node1);
+    lightweight_policy_body body2 = tbb::flow::copy_body<lightweight_policy_body>(node2);
+    ASSERT(body1.my_count == n, "Body of the first node needs to be executed N times");
+    ASSERT(body2.my_count == n, "Body of the second node needs to be executed N times");
+}
+
+#if __TBB_PREVIEW_FLOW_GRAPH_NODE_SET
+#include <array>
+#include <vector>
+void test_follows_and_precedes_api() {
+    using msg_t = tbb::flow::continue_msg;
+
+    std::array<msg_t, 3> messages_for_follows = { { msg_t(), msg_t(), msg_t() } };
+    std::vector<msg_t> messages_for_precedes  = { msg_t() };
+
+    auto pass_through = [](const msg_t& msg) { return msg; };
+
+    follows_and_precedes_testing::test_follows
+        <msg_t, tbb::flow::continue_node<msg_t>>
+        (messages_for_follows, pass_through);
+
+    follows_and_precedes_testing::test_precedes
+        <msg_t, tbb::flow::continue_node<msg_t>>
+        (messages_for_precedes, pass_through);
+}
+#endif // __TBB_PREVIEW_FLOW_GRAPH_NODE_SET
+
+#if __TBB_CPP17_DEDUCTION_GUIDES_PRESENT
+
+template <typename ExpectedType, typename Body>
+void test_deduction_guides_common(Body body) {
+    using namespace tbb::flow;
+    graph g;
+
+    continue_node c1(g, body);
+    static_assert(std::is_same_v<decltype(c1), continue_node<ExpectedType>>);
+
+    continue_node c2(g, body, lightweight());
+    static_assert(std::is_same_v<decltype(c2), continue_node<ExpectedType, lightweight>>);
+
+    continue_node c3(g, 5, body);
+    static_assert(std::is_same_v<decltype(c3), continue_node<ExpectedType>>);
+
+    continue_node c4(g, 5, body, lightweight());
+    static_assert(std::is_same_v<decltype(c4), continue_node<ExpectedType, lightweight>>);
+
+#if __TBB_PREVIEW_FLOW_GRAPH_PRIORITIES
+    continue_node c5(g, body, node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c5), continue_node<ExpectedType>>);
+
+    continue_node c6(g, body, lightweight(), node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c6), continue_node<ExpectedType, lightweight>>);
+
+    continue_node c7(g, 5, body, node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c7), continue_node<ExpectedType>>);
+
+    continue_node c8(g, 5, body, lightweight(), node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c8), continue_node<ExpectedType, lightweight>>);
+#endif
+
+#if __TBB_PREVIEW_FLOW_GRAPH_NODE_SET
+    broadcast_node<continue_msg> b(g);
+
+    continue_node c9(follows(b), body);
+    static_assert(std::is_same_v<decltype(c9), continue_node<ExpectedType>>);
+
+    continue_node c10(follows(b), body, lightweight());
+    static_assert(std::is_same_v<decltype(c10), continue_node<ExpectedType, lightweight>>);
+
+    continue_node c11(follows(b), 5, body);
+    static_assert(std::is_same_v<decltype(c11), continue_node<ExpectedType>>);
+
+    continue_node c12(follows(b), 5, body, lightweight());
+    static_assert(std::is_same_v<decltype(c12), continue_node<ExpectedType, lightweight>>);
+
+#if __TBB_PREVIEW_FLOW_GRAPH_PRIORITIES
+    continue_node c13(follows(b), body, node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c13), continue_node<ExpectedType>>);
+
+    continue_node c14(follows(b), body, lightweight(), node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c14), continue_node<ExpectedType, lightweight>>);
+
+    continue_node c15(follows(b), 5, body, node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c15), continue_node<ExpectedType>>);
+
+    continue_node c16(follows(b), 5, body, lightweight(), node_priority_t(5));
+    static_assert(std::is_same_v<decltype(c16), continue_node<ExpectedType, lightweight>>);
+#endif
+#endif // __TBB_PREVIEW_FLOW_GRAPH_NODE_SET
+
+    continue_node c17(c1);
+    static_assert(std::is_same_v<decltype(c17), continue_node<ExpectedType>>);
+}
+
+int continue_body_f(const tbb::flow::continue_msg&) { return 1; }
+void continue_void_body_f(const tbb::flow::continue_msg&) {}
+
+void test_deduction_guides() {
+    using tbb::flow::continue_msg;
+    test_deduction_guides_common<int>([](const continue_msg&)->int { return 1; } );
+    test_deduction_guides_common<continue_msg>([](const continue_msg&) {});
+
+    test_deduction_guides_common<int>([](const continue_msg&) mutable ->int { return 1; });
+    test_deduction_guides_common<continue_msg>([](const continue_msg&) mutable {});
+
+    test_deduction_guides_common<int>(continue_body_f);
+    test_deduction_guides_common<continue_msg>(continue_void_body_f);
+}
+
+#endif // __TBB_CPP17_DEDUCTION_GUIDES_PRESENT
+
+// TODO: use pass_through from test_function_node instead
+template<typename T>
+struct passing_body {
+    T operator()(const T& val) {
+        return val;
+    }
+};
+
+/*
+    The test covers the case when a node with non-default mutex type is a predecessor for continue_node,
+    because there used to be a bug when make_edge(node, continue_node)
+    did not update continue_node's predecesosor threshold
+    since the specialization of node's successor_cache for a continue_node was not chosen.
+*/
+void test_successor_cache_specialization() {
+    using namespace tbb::flow;
+
+    graph g;
+
+    broadcast_node<continue_msg> node_with_default_mutex_type(g);
+    buffer_node<continue_msg> node_with_non_default_mutex_type(g);
+
+    continue_node<continue_msg> node(g, passing_body<continue_msg>());
+
+    make_edge(node_with_default_mutex_type, node);
+    make_edge(node_with_non_default_mutex_type, node);
+
+    buffer_node<continue_msg> buf(g);
+
+    make_edge(node, buf);
+
+    node_with_default_mutex_type.try_put(continue_msg());
+    node_with_non_default_mutex_type.try_put(continue_msg());
+
+    g.wait_for_all();
+
+    continue_msg storage;
+    ASSERT((buf.try_get(storage) && !buf.try_get(storage)),
+            "Wrong number of messages is passed via continue_node");
+}
 
 int TestMain() {
     if( MinThread<1 ) {
@@ -362,9 +551,18 @@ int TestMain() {
        test_concurrency(p);
    }
    test_two_graphs();
-#if TBB_PREVIEW_FLOW_GRAPH_FEATURES
+#if __TBB_PREVIEW_LIGHTWEIGHT_POLICY
+   test_lightweight_policy();
+#endif
+#if TBB_DEPRECATED_FLOW_NODE_EXTRACTION
    test_extract();
 #endif
+#if __TBB_PREVIEW_FLOW_GRAPH_NODE_SET
+    test_follows_and_precedes_api();
+#endif
+#if __TBB_CPP17_DEDUCTION_GUIDES_PRESENT
+    test_deduction_guides();
+#endif
+   test_successor_cache_specialization();
    return Harness::Done;
 }
-

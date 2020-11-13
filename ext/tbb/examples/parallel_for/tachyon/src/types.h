@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 /*
@@ -52,13 +48,13 @@
 #elif _WIN32
 #include <malloc.h>
 #define alloca _alloca
-#elif __FreeBSD__||__NetBSD__
+#elif __FreeBSD__||__NetBSD__||__OpenBSD__
 #include <stdlib.h>
 #else
 #include <alloca.h>
 #endif
 
-/* 
+/*
  * types.h - This file contains all of the type definitions for the raytracer
  *
  *  $Id: types.h,v 1.2 2007-02-22 17:54:16 Exp $
@@ -72,9 +68,9 @@
 
 /* Maximum internal table sizes */
 /* Use prime numbers for best memory system performance */
-#define INTTBSIZE 1024       /* maximum intersections we can hold    */ 
+#define INTTBSIZE 1024       /* maximum intersections we can hold    */
 #define MAXLIGHTS 39         /* maximum number of lights in a scene  */
-#define MAXIMGS   39         /* maxiumum number of distinct images   */
+#define MAXIMGS   39         /* maximum number of distinct images   */
 #define RPCQSIZE  113	     /* number of RPC messages to queue      */
 
 /* Parameter values for rt_boundmode() */
@@ -136,7 +132,7 @@ typedef struct {         /* Scalar Volume Data */
   char name[96];         /* Volume data filename              */
   unsigned char * data;  /* pointer to raw byte volume data   */
 } scalarvol;
- 
+
 typedef struct {
   color (* texfunc)(void *, void *, void *);
   int shadowcast;  /* does the object cast a shadow */
@@ -148,7 +144,7 @@ typedef struct {
   flt phongexp;    /* phong exponent/shininess factor */
   int phongtype;   /* phong type: 0 == plastic, nonzero == metal */
   flt specular;    /* specular reflection */
-  flt opacity;     /* how opaque the object is */ 
+  flt opacity;     /* how opaque the object is */
   vector ctr;      /* origin of texture */
   vector rot;      /* rotation of texture about origin */
   vector scale;    /* scale of texture in x,y,z */
@@ -164,23 +160,23 @@ typedef struct {
   int (* bbox)(void *, vector *, vector *);        /* return the object bbox */
   void (* free)(void *);                           /* free the object        */
 } object_methods;
- 
-typedef struct {
-  unsigned int id;                      /* Unique Object serial number    */
-  void * nextobj;                       /* pointer to next object in list */ 
-  object_methods * methods;             /* this object's methods          */
-  texture * tex;                        /* object texture                 */
-} object; 
 
 typedef struct {
-  object * obj;  /* to object we hit                        */ 
+  unsigned int id;                      /* Unique Object serial number    */
+  void * nextobj;                       /* pointer to next object in list */
+  object_methods * methods;             /* this object's methods          */
+  texture * tex;                        /* object texture                 */
+} object;
+
+typedef struct {
+  object * obj;  /* to object we hit                        */
   flt t;         /* distance along the ray to the hit point */
 } intersection;
 
 typedef struct {
   int num;                      /* number of intersections    */
   intersection closest;         /* closest intersection > 0.0 */
-  intersection list[INTTBSIZE]; /* list of all intersections  */ 
+  intersection list[INTTBSIZE]; /* list of all intersections  */
 } intersectstruct;
 
 typedef struct {
@@ -204,7 +200,7 @@ typedef struct {
 } scenedef;
 
 typedef struct {
-   intersectstruct * intstruct; /* ptr to thread's intersection data       */ 
+   intersectstruct * intstruct; /* ptr to thread's intersection data       */
    unsigned int depth;   /* levels left to recurse.. (maxdepth - curdepth) */
    unsigned int flags;   /* ray flags, any special treatment needed etc    */
    unsigned int serial;  /* serial number of the ray                       */

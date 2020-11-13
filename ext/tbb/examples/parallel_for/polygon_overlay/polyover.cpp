@@ -1,21 +1,17 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2020 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 // Polygon overlay
@@ -27,10 +23,10 @@
 #include <assert.h>
 #include "tbb/tick_count.h"
 #include "tbb/blocked_range.h"
-#include "tbb/task_scheduler_init.h"
 #include "tbb/parallel_for.h"
-#include "tbb/mutex.h"
 #include "tbb/spin_mutex.h"
+#include "tbb/global_control.h"
+#include "../../common/utility/get_default_num_threads.h"
 #include "polyover.h"
 #include "polymain.h"
 #include "pover_video.h"
@@ -129,8 +125,8 @@ void NaiveParallelOverlay(Polygon_map_t *&result_map, Polygon_map_t &polymap1, P
 // -----------------------------------
     bool automatic_threadcount = false;
 
-    if(gThreadsLow == THREADS_UNSET || gThreadsLow == tbb::task_scheduler_init::automatic) {
-        gThreadsLow = gThreadsHigh = tbb::task_scheduler_init::automatic;
+    if(gThreadsLow == THREADS_UNSET || gThreadsLow == utility::get_default_num_threads()) {
+        gThreadsLow = gThreadsHigh = utility::get_default_num_threads();
         automatic_threadcount = true;
     }
     result_map = new Polygon_map_t;
@@ -144,7 +140,7 @@ void NaiveParallelOverlay(Polygon_map_t *&result_map, Polygon_map_t &polymap1, P
     int grain_size = gGrainSize;
 
     for(int nthreads = gThreadsLow; nthreads <= gThreadsHigh; nthreads++) {
-        tbb::task_scheduler_init init(nthreads);
+        tbb::global_control c(tbb::global_control::max_allowed_parallelism, nthreads);
         if(gIsGraphicalVersion) {
             RPolygon *xp = new RPolygon(0, 0, gMapXSize-1, gMapYSize-1, 0, 0, 0);  // Clear the output space
             delete xp;
@@ -204,7 +200,7 @@ void split_at( Flagged_map_t& in_map, Flagged_map_t &left_out, Flagged_map_t &ri
 // vectors of pointers, and each range owns its maps (has to free them on destruction.)
 template <typename T>
 class blocked_range_with_maps {
-    
+
     typedef blocked_range<T> my_range_type;
 
 private:
@@ -365,8 +361,8 @@ void SplitParallelOverlay(Polygon_map_t **result_map, Polygon_map_t *polymap1, P
     double domainSplitParallelTime;
     tbb::tick_count t0, t1;
     tbb::spin_mutex *resultMutex;
-    if(gThreadsLow == THREADS_UNSET || gThreadsLow == tbb::task_scheduler_init::automatic ) {
-        gThreadsLow = gThreadsHigh = tbb::task_scheduler_init::automatic;
+    if(gThreadsLow == THREADS_UNSET || gThreadsLow == utility::get_default_num_threads() ) {
+        gThreadsLow = gThreadsHigh = utility::get_default_num_threads();
         automatic_threadcount = true;
     }
     *result_map = new Polygon_map_t;
@@ -384,7 +380,7 @@ void SplitParallelOverlay(Polygon_map_t **result_map, Polygon_map_t *polymap1, P
     grain_size = gGrainSize;
 #endif
     for(nthreads = gThreadsLow; nthreads <= gThreadsHigh; nthreads++) {
-        tbb::task_scheduler_init init(nthreads);
+        tbb::global_control c(tbb::global_control::max_allowed_parallelism, nthreads);
         if(gIsGraphicalVersion) {
             RPolygon *xp = new RPolygon(0, 0, gMapXSize-1, gMapYSize-1, 0, 0, 0);  // Clear the output space
             delete xp;
@@ -481,8 +477,8 @@ void SplitParallelOverlayCV(concurrent_Polygon_map_t **result_map, Polygon_map_t
     bool automatic_threadcount = false;
     double domainSplitParallelTime;
     tbb::tick_count t0, t1;
-    if(gThreadsLow == THREADS_UNSET || gThreadsLow == tbb::task_scheduler_init::automatic ) {
-        gThreadsLow = gThreadsHigh = tbb::task_scheduler_init::automatic;
+    if(gThreadsLow == THREADS_UNSET || gThreadsLow == utility::get_default_num_threads() ) {
+        gThreadsLow = gThreadsHigh = utility::get_default_num_threads();
         automatic_threadcount = true;
     }
     *result_map = new concurrent_Polygon_map_t;
@@ -499,7 +495,7 @@ void SplitParallelOverlayCV(concurrent_Polygon_map_t **result_map, Polygon_map_t
     grain_size = gGrainSize;
 #endif
     for(nthreads = gThreadsLow; nthreads <= gThreadsHigh; nthreads++) {
-        tbb::task_scheduler_init init(nthreads);
+        tbb::global_control c(tbb::global_control::max_allowed_parallelism, nthreads);
         if(gIsGraphicalVersion) {
             RPolygon *xp = new RPolygon(0, 0, gMapXSize-1, gMapYSize-1, 0, 0, 0);  // Clear the output space
             delete xp;
@@ -520,7 +516,7 @@ void SplitParallelOverlayCV(concurrent_Polygon_map_t **result_map, Polygon_map_t
         }
 #if _DEBUG
         {
-            
+
             Polygon_map_t s_result_map;
             for(concurrent_Polygon_map_t::const_iterator ci = (*result_map)->begin(); ci != (*result_map)->end(); ++ci) {
                 s_result_map.push_back(*ci);
@@ -606,8 +602,8 @@ void SplitParallelOverlayETS(ETS_Polygon_map_t **result_map, Polygon_map_t *poly
     bool automatic_threadcount = false;
     double domainSplitParallelTime;
     tbb::tick_count t0, t1;
-    if(gThreadsLow == THREADS_UNSET || gThreadsLow == tbb::task_scheduler_init::automatic ) {
-        gThreadsLow = gThreadsHigh = tbb::task_scheduler_init::automatic;
+    if(gThreadsLow == THREADS_UNSET || gThreadsLow == utility::get_default_num_threads() ) {
+        gThreadsLow = gThreadsHigh = utility::get_default_num_threads();
         automatic_threadcount = true;
     }
     *result_map = new ETS_Polygon_map_t;
@@ -624,7 +620,7 @@ void SplitParallelOverlayETS(ETS_Polygon_map_t **result_map, Polygon_map_t *poly
     grain_size = gGrainSize;
 #endif
     for(nthreads = gThreadsLow; nthreads <= gThreadsHigh; nthreads++) {
-        tbb::task_scheduler_init init(nthreads);
+        tbb::global_control c(tbb::global_control::max_allowed_parallelism, nthreads);
         if(gIsGraphicalVersion) {
             RPolygon *xp = new RPolygon(0, 0, gMapXSize-1, gMapYSize-1, 0, 0, 0);  // Clear the output space
             delete xp;
@@ -646,7 +642,7 @@ void SplitParallelOverlayETS(ETS_Polygon_map_t **result_map, Polygon_map_t *poly
         }
 #if _DEBUG
         {
-            
+
             Polygon_map_t s_result_map;
             flattened2d<ETS_Polygon_map_t> psv = flatten2d(**result_map);
             s_result_map.push_back(RPolygon(0,0,mapxSize, mapySize));
