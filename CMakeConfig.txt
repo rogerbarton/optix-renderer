@@ -177,6 +177,7 @@ include_directories(
   ext/lodepng
   ext/openvdb/openvdb
   ext/openvdb/nanovdb
+  ext/boost
   include
 )
 

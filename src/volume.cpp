@@ -1,6 +1,10 @@
-#include "nori/volume.h"    
+#include "nori/volume.h"
 #include <nori/object.h>
 #include <filesystem/resolver.h>
+
+#include <openvdb/tools/LevelSetSphere.h>
+#include <nanovdb/util/OpenToNanoVDB.h>
+#include <nanovdb/util/IO.h>
 
 NORI_NAMESPACE_BEGIN
 
