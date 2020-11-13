@@ -1,7 +1,7 @@
 <scene>
 
-  <sampler type="independent">
-    <integer name="sampleCount" value="10"/>
+  <sampler type="adaptive">
+    <integer name="sampleCount" value="100"/>
   </sampler>
 
   <!--<integrator type="photonmapper">
