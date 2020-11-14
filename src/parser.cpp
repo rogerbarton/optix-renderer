@@ -99,6 +99,7 @@ NoriObject *loadFromXML(const std::string &filename)
     tags["scene"] = EScene;
     tags["mesh"] = EMesh;
     tags["texture"] = ETexture;
+    tags["volume"] = EMedium;
     tags["bsdf"] = EBSDF;
     tags["emitter"] = EEmitter;
     tags["camera"] = ECamera;

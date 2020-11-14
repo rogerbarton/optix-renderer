@@ -87,6 +87,12 @@ include_directories(${OpenVDB_INCLUDE_DIRS})
 link_directories(${OpenVDB_LIBRARY_DIRS})
 message(STATUS "OpenVDB libs: ${OpenVDB_LIBRARIES}")
 
+find_package(Blosc)
+if(Blosc_FOUND)
+  add_definitions(-DNANOVDB_USE_BLOSC)
+  include_directories(${Blosc_INCLUDE_DIRS})
+endif(Blosc_FOUND)
+
 find_package(TBB REQUIRED COMPONENTS tbb)
 include_directories(${Tbb_INCLUDE_DIRS})
 link_directories(${Tbb_LIBRARY_DIRS})
@@ -162,7 +168,7 @@ include_directories(
 )
 
 # Link to several dependency libraries
-set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${extra_libs})
+set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
   list(APPEND extra_libs nanogui glfw3 ${gui_libs})
 endif()
