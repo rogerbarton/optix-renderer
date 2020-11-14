@@ -56,7 +56,7 @@ elseif(APPLE)
   find_library(opengl_library OpenGL)
   find_library(corevideo_library CoreVideo)
   find_library(iokit_library IOKit)
-  set(extra_libs tbb ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library} z)
+  set(extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library} z)
 
   # Compile in C++11 mode
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
@@ -71,11 +71,16 @@ elseif(APPLE)
   set(CMAKE_EXTERNAL_ARGUMENTS ${CMAKE_EXTERNAL_ARGUMENTS} -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT})
 elseif("${CMAKE_SYSTEM}" MATCHES "Linux")
   # Linux-specific build flags
-  set(extra_libs tbb GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
+  set(extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 
   # Compile in C++11 mode
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
+
+# Build openvdb
+#find_package(OpenVDB REQUIRED)
+#include_directories(${OpenVDB_INCLUDE_DIRS})
+#link_directories(${OpenVDB_LIBRARY_DIRS})
 
 #if(WIN32)
 #  # Build zlib (only needed on Windows, Linux/OSX already have it)
@@ -92,9 +97,10 @@ endif()
 #  PREFIX          "ext_build"
 #  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DTBB_BUILD_TESTS=OFF -DTBB_USE_DEBUG=1
 #        )
-find_package(TBB REQUIRED)
+find_package(TBB REQUIRED COMPONENTS tbb)
 include_directories(${Tbb_INCLUDE_DIRS})
 link_directories(${Tbb_LIBRARY_DIRS})
+message(STATUS "TBB: ${Tbb_LIBRARIES}   ${Tbb_INCLUDE_DIRS}   ${Tbb_LIBRARY_DIRS}")
 
 # Build IlmBase, a support library needed by OpenEXR
 #ExternalProject_Add(IlmBase_p
@@ -140,18 +146,6 @@ ExternalProject_Add(lodepng_p
   CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
 )
 
-# Build openvdb
-if(WIN32)
-  set(OPENVDB_CMAKE_ARGS
-          -DVCPKG_TARGET_TRIPLET=x64-windows
-          -DCtextMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake)
-  message(STATUS "Ensure you run the install-dependencies.bat script once. ${OPENVDB_CMAKE_ARGS}")
-endif()
-
-#find_package(OpenVDB REQUIRED)
-include_directories(${OpenVDB_INCLUDE_DIRS})
-link_directories(${OpenVDB_LIBRARY_DIRS})
-
 # Node: find IlmBase after openvdb! else variables are overwritten
 find_package(IlmBase REQUIRED)
 include_directories(${IlmBase_INCLUDE_DIRS})
@@ -176,7 +170,6 @@ endif()
 link_directories(${CMAKE_BINARY_DIR}/ext_build/dist/lib)
 include_directories(
   ${CMAKE_BINARY_DIR}/ext_build/dist/include
-#  ${CMAKE_BINARY_DIR}/ext_build/dist/include/OpenEXR
   ext/pcg32
   ext/tinyformat
   ext/pugixml/src
@@ -184,9 +177,6 @@ include_directories(
   ext/filesystem
   ext/nanogui/ext/eigen
   ext/lodepng
-#  ext/openvdb/openvdb
-  ext/openvdb/nanovdb
-#  ext/boost
   include
 )
 
