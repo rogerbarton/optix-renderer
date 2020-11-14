@@ -25,6 +25,7 @@
 #include <filesystem/path.h>
 
 int main(int argc, char **argv) {
+	std::cout << "Hello!" << std::endl;
     using namespace nori;
 
     try {

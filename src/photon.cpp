@@ -69,7 +69,7 @@ PhotonData::PhotonData(const Vector3f &dir, const Color3f &power) {
         rgbe[0] = (uint8_t) (power.r() * max);
         rgbe[1] = (uint8_t) (power.g() * max);
         rgbe[2] = (uint8_t) (power.b() * max);
-        rgbe[3] = e + 128; /* Exponent value in bias format */
+        rgbe[3] = static_cast<uint8_t>(e + 128); /* Exponent value in bias format */
     }
 }
 

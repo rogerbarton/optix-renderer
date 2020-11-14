@@ -135,7 +135,8 @@ void Bitmap::saveToLDR(const std::string &filename) {
             dst += 3;
         }
     }
-    stbi_write_png(filename.c_str(),cols(),rows(),3,rgb8.get(),3*cols());
+	stbi_write_png(filename.c_str(), static_cast<int>(cols()), static_cast<int>(rows()), 3, rgb8.get(),
+	               static_cast<int>(3 * cols()));
 }
 
 NORI_NAMESPACE_END
