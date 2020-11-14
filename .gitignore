@@ -6,5 +6,8 @@
 CMakeCache.txt
 CMakeFiles
 Makefile
+.idea/
 .vscode/
 cmake-build*/
+
+*.exr

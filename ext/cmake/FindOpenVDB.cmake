@@ -306,6 +306,9 @@ set(OPENVDB_PYTHON_PATH_SUFFIXES
 
 set(OPENVDB_LIB_PATH_SUFFIXES
   ${CMAKE_INSTALL_LIBDIR}
+  $<$<CMAKE_BUILD_TYPE:Debug>:
+        debug/lib64
+        debug/lib>
   lib64
   lib
 )
