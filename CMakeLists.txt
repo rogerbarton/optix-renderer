@@ -60,7 +60,6 @@ add_executable(nori
   include/nori/environmentmap.h
   include/nori/HDRLoader.h
   include/nori/denoiser.h
-  include/nori/volume.h
 
   # Source code files
   src/bitmap.cpp

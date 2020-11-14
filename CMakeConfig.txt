@@ -87,6 +87,12 @@ include_directories(${OpenVDB_INCLUDE_DIRS})
 link_directories(${OpenVDB_LIBRARY_DIRS})
 message(STATUS "OpenVDB libs: ${OpenVDB_LIBRARIES}")
 
+if(CMAKE_BUILD_TYPE MATCHES Debug AND WIN32)
+  # Workaround for cmake not copying OpenVDB dependencies to the binary folder in debug mode
+  configure_file(${CMAKE_SOURCE_DIR}/ext/vcpkg/installed/x64-windows/lib/Half-2_5.lib ${CMAKE_BINARY_DIR}/Half-2_5.lib COPYONLY)
+endif()
+
+# Optionally find Blosc for nanoVDB compression, (openVDB already finds this by itself)
 find_package(Blosc)
 if(Blosc_FOUND)
   add_definitions(-DNANOVDB_USE_BLOSC)
