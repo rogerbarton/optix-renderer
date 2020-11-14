@@ -6,10 +6,5 @@
 CMakeCache.txt
 CMakeFiles
 Makefile
-*.cmake
-.idea
-
 .vscode/
-
-
 cmake-build*/
