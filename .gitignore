@@ -11,3 +11,5 @@ Makefile
 cmake-build*/
 
 *.exr
+
+*.nvdb
