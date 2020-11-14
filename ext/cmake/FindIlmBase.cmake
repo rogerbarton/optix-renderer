@@ -212,6 +212,10 @@ list(APPEND _ILMBASE_LIBRARYDIR_SEARCH_DIRS
 set(_ILMBASE_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 set(_IlmBase_Version_Suffix "-${IlmBase_VERSION_MAJOR}_${IlmBase_VERSION_MINOR}")
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(_IlmBase_Version_Suffix ${_IlmBase_Version_Suffix}_d)
+endif()
+
 if(WIN32)
   if(ILMBASE_USE_STATIC_LIBS)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")

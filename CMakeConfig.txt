@@ -120,12 +120,6 @@ include_directories(${OpenEXR_INCLUDE_DIRS})
 link_directories(${OpenEXR_LIBRARY_DIRS})
 message(STATUS "OpenEXR libs: ${OpenEXR_LIBRARIES}")
 
-# Make sure everything is built in the right oder
-#add_dependencies(OpenEXR_p IlmBase_p)
-#if(WIN32)
-#  add_dependencies(OpenEXR_p zlib_p)
-#endif(WIN32)
-
 # Pass external arguments to nested build processes
 string(REGEX REPLACE ";" "$" CMAKE_EXTERNAL_ARGUMENTS_STR "${CMAKE_EXTERNAL_ARGUMENTS}")
 list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_EXTERNAL_ARGUMENTS_STR})
@@ -185,6 +179,8 @@ set_target_properties(pugixml PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
 
 # Link to several dependency libraries
-set(extra_libs nanogui glfw3 pugixml lodepng ${Tbb_LIBRARIES} ${OpenEXR_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenVDB_LIBRARIES} ${extra_libs})
+set(extra_libs nanogui glfw3 pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${extra_libs})
+
+
 message(STATUS "extra_libs: ${extra_libs}")
 # vim: set et ts=2 sw=2 ft=cmake nospell:

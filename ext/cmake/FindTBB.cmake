@@ -207,6 +207,10 @@ else()
   endif()
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  list(TRANSFORM TBB_FIND_COMPONENTS APPEND _debug)
+endif()
+
 set(Tbb_LIB_COMPONENTS "")
 
 foreach(COMPONENT ${TBB_FIND_COMPONENTS})
