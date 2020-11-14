@@ -43,9 +43,9 @@ void Mesh::sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const 
 
     Vector3f bc = Warp::squareToUniformTriangle(s);
 
-    sRec.p = getInterpolatedVertex(idT,bc);
+    sRec.p = getInterpolatedVertex(static_cast<uint32_t>(idT),bc);
     if (m_N.size() > 0) {
-        sRec.n = getInterpolatedNormal(idT, bc);
+        sRec.n = getInterpolatedNormal(static_cast<uint32_t>(idT), bc);
     }
     else {
         Point3f p0 = m_V.col(m_F(0, idT));

@@ -75,7 +75,7 @@ public:
         Point2f uv_coords = sphericalCoordinates(-dir);
 
         // switch coordinates and map to [0,1]
-        its.uv.x() = uv_coords.y() / (2.0 * M_PI);
+        its.uv.x() = uv_coords.y() / (2.f * M_PI);
         its.uv.y() = uv_coords.x() / M_PI;
     }
 
