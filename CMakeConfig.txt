@@ -10,6 +10,7 @@
 # need to read or change anything in this file; see CMakeLists.txt instead.
 
 include(CMakeParseArguments)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/ext/cmake)
 
 # Set a default build configuration (Release)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -34,7 +35,7 @@ if (MSVC)
   include_directories(ext/glew/include)
   set(extra_libs opengl32 glew)
 
-  set(extra_libs ${extra_libs} zlibstatic)
+#  set(extra_libs ${extra_libs} zlibstatic)
 
   # Statically link against the C++ runtime library, also apply these settings to nested projects
   set(CompilerFlags
@@ -70,47 +71,54 @@ elseif(APPLE)
   set(CMAKE_EXTERNAL_ARGUMENTS ${CMAKE_EXTERNAL_ARGUMENTS} -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT})
 elseif("${CMAKE_SYSTEM}" MATCHES "Linux")
   # Linux-specific build flags
-  set(extra_libs tbb GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread z dl)
+  set(extra_libs tbb GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 
   # Compile in C++11 mode
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
-if(WIN32)
-  # Build zlib (only needed on Windows, Linux/OSX already have it)
-  ExternalProject_Add(zlib_p
-    URL             "${CMAKE_SOURCE_DIR}/ext/zlib"
-    PREFIX          "ext_build"
-    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
-  )
-endif(WIN32)
+#if(WIN32)
+#  # Build zlib (only needed on Windows, Linux/OSX already have it)
+#  ExternalProject_Add(zlib_p
+#    URL             "${CMAKE_SOURCE_DIR}/ext/zlib"
+#    PREFIX          "ext_build"
+#    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
+#  )
+#endif(WIN32)
 
 # Build Intel Thread Building Blocks
-ExternalProject_Add(tbb_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/tbb"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DTBB_BUILD_TESTS=OFF
-)
+#ExternalProject_Add(tbb_p
+#  URL             "${CMAKE_SOURCE_DIR}/ext/tbb"
+#  PREFIX          "ext_build"
+#  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DTBB_BUILD_TESTS=OFF -DTBB_USE_DEBUG=1
+#        )
+find_package(TBB REQUIRED)
+include_directories(${Tbb_INCLUDE_DIRS})
+link_directories(${Tbb_LIBRARY_DIRS})
 
 # Build IlmBase, a support library needed by OpenEXR
-ExternalProject_Add(IlmBase_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/openexr/IlmBase"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DBUILD_SHARED_LIBS=OFF -DNAMESPACE_VERSIONING=NO
-)
+#ExternalProject_Add(IlmBase_p
+#  URL             "${CMAKE_SOURCE_DIR}/ext/openexr/IlmBase"
+#  PREFIX          "ext_build"
+#  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DBUILD_SHARED_LIBS=OFF -DNAMESPACE_VERSIONING=NO
+#)
 
 # Build OpenEXR
-ExternalProject_Add(OpenEXR_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/openexr/OpenEXR"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DILMBASE_PACKAGE_PREFIX=${CMAKE_BINARY_DIR}/ext_build/dist -DBUILD_SHARED_LIBS=OFF -DNAMESPACE_VERSIONING=NO
-)
+#ExternalProject_Add(OpenEXR_p
+#  URL             "${CMAKE_SOURCE_DIR}/ext/openexr/OpenEXR"
+#  PREFIX          "ext_build"
+#  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DILMBASE_PACKAGE_PREFIX=${CMAKE_BINARY_DIR}/ext_build/dist -DBUILD_SHARED_LIBS=OFF -DNAMESPACE_VERSIONING=NO
+#)
+find_package(OpenEXR REQUIRED)
+include_directories(${OpenEXR_INCLUDE_DIRS})
+link_directories(${OpenEXR_LIBRARY_DIRS})
+message(STATUS "OpenEXR libs: ${OpenEXR_LIBRARIES}")
 
 # Make sure everything is built in the right oder
-add_dependencies(OpenEXR_p IlmBase_p)
-if(WIN32)
-  add_dependencies(OpenEXR_p zlib_p)
-endif(WIN32)
+#add_dependencies(OpenEXR_p IlmBase_p)
+#if(WIN32)
+#  add_dependencies(OpenEXR_p zlib_p)
+#endif(WIN32)
 
 # Pass external arguments to nested build processes
 string(REGEX REPLACE ";" "$" CMAKE_EXTERNAL_ARGUMENTS_STR "${CMAKE_EXTERNAL_ARGUMENTS}")
@@ -136,18 +144,19 @@ ExternalProject_Add(lodepng_p
 if(WIN32)
   set(OPENVDB_CMAKE_ARGS
           -DVCPKG_TARGET_TRIPLET=x64-windows
-          -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake)
+          -DCtextMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake)
   message(STATUS "Ensure you run the install-dependencies.bat script once. ${OPENVDB_CMAKE_ARGS}")
 endif()
 
-ExternalProject_Add(openvdb_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/openvdb"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} ${OPENVDB_CMAKE_ARGS}
-)
-add_dependencies(openvdb_p tbb_p)
-add_dependencies(openvdb_p OpenEXR_p)
-add_dependencies(openvdb_p zlib_p)
+#find_package(OpenVDB REQUIRED)
+include_directories(${OpenVDB_INCLUDE_DIRS})
+link_directories(${OpenVDB_LIBRARY_DIRS})
+
+# Node: find IlmBase after openvdb! else variables are overwritten
+find_package(IlmBase REQUIRED)
+include_directories(${IlmBase_INCLUDE_DIRS})
+link_directories(${IlmBase_LIBRARY_DIRS})
+message(STATUS "IlmBase libs: ${IlmBase_LIBRARIES}")
 
 # Compile Nori with compiler warnings turned on
 if(MSVC)
@@ -167,7 +176,7 @@ endif()
 link_directories(${CMAKE_BINARY_DIR}/ext_build/dist/lib)
 include_directories(
   ${CMAKE_BINARY_DIR}/ext_build/dist/include
-  ${CMAKE_BINARY_DIR}/ext_build/dist/include/OpenEXR
+#  ${CMAKE_BINARY_DIR}/ext_build/dist/include/OpenEXR
   ext/pcg32
   ext/tinyformat
   ext/pugixml/src
@@ -175,9 +184,9 @@ include_directories(
   ext/filesystem
   ext/nanogui/ext/eigen
   ext/lodepng
-  ext/openvdb/openvdb
+#  ext/openvdb/openvdb
   ext/openvdb/nanovdb
-  ext/boost
+#  ext/boost
   include
 )
 
@@ -186,10 +195,6 @@ set_target_properties(pugixml PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
 
 # Link to several dependency libraries
-if(NORI_USE_GUI)
-  set(extra_libs nanogui glfw3 IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng openvdb ${extra_libs})
-else()
-  set(extra_libs IlmImf IlmThread Iex IexMath Imath Half pugixml lodepng tbb Xrandr pthread z dl openvdb)
-endif()
-
+set(extra_libs nanogui glfw3 pugixml lodepng ${Tbb_LIBRARIES} ${OpenEXR_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenVDB_LIBRARIES} ${extra_libs})
+message(STATUS "extra_libs: ${extra_libs}")
 # vim: set et ts=2 sw=2 ft=cmake nospell:
