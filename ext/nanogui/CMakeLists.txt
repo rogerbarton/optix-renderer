@@ -97,7 +97,6 @@ endif()
 file(GLOB NANOVG_HEADERS ext/nanovg/src/*.h)
 install(TARGETS nanogui ARCHIVE DESTINATION lib)
 install(FILES ${NANOVG_HEADERS} DESTINATION include)
-install(DIRECTORY ext/eigen/Eigen DESTINATION include)
 install(DIRECTORY include/nanogui DESTINATION include)
 
 link_directories(${CMAKE_BINARY_DIR}/ext_build/src/glfw_p-build/src)

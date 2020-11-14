@@ -115,6 +115,8 @@ include_directories(${IlmBase_INCLUDE_DIRS})
 link_directories(${IlmBase_LIBRARY_DIRS})
 message(STATUS "IlmBase libs: ${IlmBase_LIBRARIES}")
 
+include_directories(ext/eigen)
+install(DIRECTORY ext/eigen/Eigen DESTINATION include)
 
 # -- Build external in-project libraries
 # Pass external arguments to nested build processes
@@ -170,6 +172,7 @@ include_directories(
   ext/nanogui/ext/eigen
   ext/lodepng
   ext/openvdb/nanovdb
+  ext/eigen
   include
 )
 
