@@ -62,7 +62,9 @@ elseif("${CMAKE_SYSTEM}" MATCHES "Linux")
   set(extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 endif()
 
-include_directories(ext/eigen ext/glfw/include ext/nanovg/src include ${CMAKE_BINARY_DIR})
+include_directories(${Eigen3_DIR})
+
+include_directories(ext/glfw/include ext/nanovg/src include ${CMAKE_BINARY_DIR})
 add_library(nanogui STATIC
   ext/nanovg/src/nanovg.c resources.cpp
   include/nanogui/glutil.h src/glutil.cpp

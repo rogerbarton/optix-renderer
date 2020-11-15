@@ -115,8 +115,8 @@ include_directories(${IlmBase_INCLUDE_DIRS})
 link_directories(${IlmBase_LIBRARY_DIRS})
 message(STATUS "IlmBase libs: ${IlmBase_LIBRARIES}")
 
-include_directories(ext/eigen)
-install(DIRECTORY ext/eigen/Eigen DESTINATION include)
+set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ext/eigen)
+include_directories(${Eigen3_DIR})
 
 # -- Build external in-project libraries
 # Pass external arguments to nested build processes
@@ -128,7 +128,7 @@ if(NORI_USE_GUI)
   ExternalProject_Add(nanogui_p
     URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
     PREFIX          "ext_build"
-    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
+    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DEigen3_DIR=${Eigen3_DIR}
   )
 endif(NORI_USE_GUI)
 
@@ -169,10 +169,8 @@ include_directories(
   ext/pugixml/src
   ext/hypothesis
   ext/filesystem
-  ext/nanogui/ext/eigen
   ext/lodepng
   ext/openvdb/nanovdb
-  ext/eigen
   include
 )
 
