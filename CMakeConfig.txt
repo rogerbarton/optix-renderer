@@ -35,7 +35,7 @@ if (MSVC)
   add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
 
   include_directories(ext/glew/include)
-  set(gui_libs opengl32 glew)
+  set(gui_libs opengl32)
 
 #  set(gui_libs ${gui_libs} zlibstatic)
 
@@ -125,11 +125,24 @@ list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_
 
 # Build nanogui
 if(NORI_USE_GUI)
-  ExternalProject_Add(nanogui_p
-    URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
-    PREFIX          "ext_build"
-    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DEigen3_DIR=${Eigen3_DIR}
-  )
+  if(WIN32)
+    find_package(glew REQUIRED)
+    include_directories(${GLEW_INCLUDE_DIRS})
+  endif(WIN32)
+
+  set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
+  include_directories(${GLFW_DIR}/include)
+  add_subdirectory(${GLFW_DIR})
+#  set_property( TARGET glfw PROPERTY C_STANDARD 99 )
+
+#  ExternalProject_Add(nanogui_p
+#    URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
+#    PREFIX          "ext_build"
+#    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DEigen3_DIR=${Eigen3_DIR} -DGLFW_DIR=${GLFW_DIR}
+#  )
+  add_subdirectory(ext/nanogui)
+
+#  add_subdirectory(ext/imgui)
 endif(NORI_USE_GUI)
 
 # Build lodepng
@@ -142,7 +155,6 @@ ExternalProject_Add(lodepng_p
 add_library(pugixml STATIC ext/pugixml/src/pugixml.cpp)
 set_target_properties(pugixml PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
-
 
 # -- Compile Nori with compiler warnings turned on
 if(MSVC)
@@ -169,6 +181,7 @@ include_directories(
   ext/pugixml/src
   ext/hypothesis
   ext/filesystem
+  ext/nanogui/include
   ext/lodepng
   ext/openvdb/nanovdb
   include
@@ -177,7 +190,7 @@ include_directories(
 # Link to several dependency libraries
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
-  list(APPEND extra_libs nanogui glfw3 ${gui_libs})
+  list(APPEND extra_libs nanogui ${GLEW_LIBRARIES} glfw ${GLFW_LIBRARIES} ${gui_libs})
 endif()
 
 message(STATUS "extra_libs: ${extra_libs}")

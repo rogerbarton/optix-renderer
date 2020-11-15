@@ -129,7 +129,6 @@ if(NORI_USE_GUI)
           include/nori/gui.h
           src/gui.cpp
           )
-  add_dependencies(nori nanogui_p)
 
   # The following lines build the warping test application
   add_executable(warptest

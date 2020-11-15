@@ -13,7 +13,7 @@ endif()
 # Run simple C converter to put font files into the data segment
 add_executable(bin2c resources/bin2c.c)
 set(bin2c_cmdline resources.cpp resources.h)
-file(GLOB resources "${CMAKE_SOURCE_DIR}/resources/*.ttf")
+file(GLOB resources "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.ttf")
 foreach(file ${resources})
   list(APPEND bin2c_cmdline ${file})
 endforeach()
@@ -21,33 +21,46 @@ endforeach()
 include(ExternalProject)
 
 add_custom_command(
-  OUTPUT resources.cpp resources.h
-  COMMAND bin2c ARGS ${bin2c_cmdline}
-  DEPENDS bin2c ${resources}
-  COMMENT "Running bin2c"
-  PRE_BUILD VERBATIM)
+        OUTPUT resources.cpp resources.h
+        COMMAND bin2c ARGS ${bin2c_cmdline}
+        DEPENDS bin2c ${resources}
+        COMMENT "Running bin2c"
+        PRE_BUILD VERBATIM)
 
-ExternalProject_Add(glfw_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/glfw"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST} -DGLFW_BUILD_TESTS=0 -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_DOCS=0 
-)
+# Needed to generated files
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+#ExternalProject_Add(glfw_p
+#  URL             "${CMAKE_SOURCE_DIR}/ext/glfw"
+#  PREFIX          "ext_build"
+#  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST} -DGLFW_BUILD_TESTS=0 -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_DOCS=0
+#)
+
+if(WIN32)
+#  find_package(glew REQUIRED)
+  include_directories(${GLEW_INCLUDE_DIRS})
+  list(APPEND nanogui_extra_libs ${GLEW_LIBRARIES})
+endif(WIN32)
+
+include_directories(${GLFW_DIR}/include)
+#add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR})
+list(APPEND nanogui_extra_libs glfw ${GLFW_LIBRARIES})
 
 set(extra_source "")
 if(WIN32)
-  ExternalProject_Add(glew_p
-    URL             "${CMAKE_SOURCE_DIR}/ext/glew"
-    PREFIX          "ext_build"
-    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST}
-  )
-  add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-  include_directories(ext/glew/include)
-  set(extra_libs opengl32
-    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Debug/glew.lib>
-    $<$<CONFIG:Release>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Release/glew.lib>
-    $<$<CONFIG:RelWithDebInfo>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/RelWithDebInfo/glew.lib>
-    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/MinSizeRel/glew.lib>
-  )
+#  ExternalProject_Add(glew_p
+#    URL             "${CMAKE_SOURCE_DIR}/ext/glew"
+#    PREFIX          "ext_build"
+#    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST}
+#  )
+#  add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
+#  include_directories(ext/glew/include)
+#  set(extra_libs opengl32
+#    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Debug/glew.lib>
+#    $<$<CONFIG:Release>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Release/glew.lib>
+#    $<$<CONFIG:RelWithDebInfo>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/RelWithDebInfo/glew.lib>
+#    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/MinSizeRel/glew.lib>
+#  )
 elseif (APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
   # Find standard libraries needed for OpenGL/GLFW
@@ -55,16 +68,15 @@ elseif (APPLE)
   find_library(opengl_library OpenGL)
   find_library(corevideo_library CoreVideo)
   find_library(iokit_library IOKit)
-  set(extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
+  set(nanogui_extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   set(extra_source src/darwin.mm)
 elseif("${CMAKE_SYSTEM}" MATCHES "Linux")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  set(extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
+  set(nanogui_extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 endif()
 
-include_directories(${Eigen3_DIR})
+include_directories()
 
-include_directories(ext/glfw/include ext/nanovg/src include ${CMAKE_BINARY_DIR})
 add_library(nanogui STATIC
   ext/nanovg/src/nanovg.c resources.cpp
   include/nanogui/glutil.h src/glutil.cpp
@@ -90,18 +102,21 @@ add_library(nanogui STATIC
   ${extra_source}
 )
 
-add_dependencies(nanogui glfw_p)
+target_include_directories(nanogui PUBLIC include ext/nanovg/src ${Eigen3_DIR})
+target_include_directories(nanogui PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(nanogui ${nanogui_extra_libs})
+#add_dependencies(nanogui glfw_p)
 
-if(WIN32)
-  add_dependencies(nanogui glew_p)
-endif()
+#if(WIN32)
+#  add_dependencies(nanogui glew_p)
+#endif()
 
-file(GLOB NANOVG_HEADERS ext/nanovg/src/*.h)
-install(TARGETS nanogui ARCHIVE DESTINATION lib)
-install(FILES ${NANOVG_HEADERS} DESTINATION include)
-install(DIRECTORY include/nanogui DESTINATION include)
+#file(GLOB NANOVG_HEADERS ext/nanovg/src/*.h)
+#install(TARGETS nanogui ARCHIVE DESTINATION lib)
+#install(FILES ${NANOVG_HEADERS} DESTINATION include)
+#install(DIRECTORY include/nanogui DESTINATION include)
 
-link_directories(${CMAKE_BINARY_DIR}/ext_build/src/glfw_p-build/src)
+#link_directories(${CMAKE_BINARY_DIR}/ext_build/src/glfw_p-build/src)
 #add_executable(example src/example.cpp)
 #target_link_libraries(example nanogui glfw3 ${extra_libs})
 
