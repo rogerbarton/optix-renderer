@@ -123,7 +123,7 @@ include_directories(${Eigen3_DIR})
 string(REGEX REPLACE ";" "$" CMAKE_EXTERNAL_ARGUMENTS_STR "${CMAKE_EXTERNAL_ARGUMENTS}")
 list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_EXTERNAL_ARGUMENTS_STR})
 
-# Build nanogui
+# Build gui libs: nanogui, imgui, glfw, glew
 if(NORI_USE_GUI)
   if(WIN32)
     set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
@@ -134,15 +134,8 @@ if(NORI_USE_GUI)
   set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
   include_directories(${GLFW_DIR}/include)
   add_subdirectory(${GLFW_DIR})
-#  set_property( TARGET glfw PROPERTY C_STANDARD 99 )
 
-#  ExternalProject_Add(nanogui_p
-#    URL             "${CMAKE_SOURCE_DIR}/ext/nanogui"
-#    PREFIX          "ext_build"
-#    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS} -DEigen3_DIR=${Eigen3_DIR} -DGLFW_DIR=${GLFW_DIR}
-#  )
   add_subdirectory(ext/nanogui)
-
 #  add_subdirectory(ext/imgui)
 endif(NORI_USE_GUI)
 
@@ -182,7 +175,6 @@ include_directories(
   ext/pugixml/src
   ext/hypothesis
   ext/filesystem
-  ext/nanogui/include
   ext/lodepng
   ext/openvdb/nanovdb
   include

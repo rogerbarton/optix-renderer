@@ -40,19 +40,6 @@ if(WIN32)
   include_directories(${GLEW_DIR}/include)
   list(APPEND nanogui_extra_libs glew)
 
-  #  ExternalProject_Add(glew_p
-#    URL             "${CMAKE_SOURCE_DIR}/ext/glew"
-#    PREFIX          "ext_build"
-#    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST}
-#  )
-#  add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-#  include_directories(ext/glew/include)
-#  set(extra_libs opengl32
-#    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Debug/glew.lib>
-#    $<$<CONFIG:Release>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/Release/glew.lib>
-#    $<$<CONFIG:RelWithDebInfo>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/RelWithDebInfo/glew.lib>
-#    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/ext_build/src/glew_p-build/MinSizeRel/glew.lib>
-#  )
 elseif (APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
   # Find standard libraries needed for OpenGL/GLFW
@@ -97,19 +84,5 @@ add_library(nanogui STATIC
 target_include_directories(nanogui PUBLIC include ext/nanovg/src ${Eigen3_DIR})
 target_include_directories(nanogui PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(nanogui ${nanogui_extra_libs})
-#add_dependencies(nanogui glfw_p)
-
-#if(WIN32)
-#  add_dependencies(nanogui glew_p)
-#endif()
-
-#file(GLOB NANOVG_HEADERS ext/nanovg/src/*.h)
-#install(TARGETS nanogui ARCHIVE DESTINATION lib)
-#install(FILES ${NANOVG_HEADERS} DESTINATION include)
-#install(DIRECTORY include/nanogui DESTINATION include)
-
-#link_directories(${CMAKE_BINARY_DIR}/ext_build/src/glfw_p-build/src)
-#add_executable(example src/example.cpp)
-#target_link_libraries(example nanogui glfw3 ${extra_libs})
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
