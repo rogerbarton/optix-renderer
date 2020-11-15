@@ -30,25 +30,17 @@ add_custom_command(
 # Needed to generated files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#ExternalProject_Add(glfw_p
-#  URL             "${CMAKE_SOURCE_DIR}/ext/glfw"
-#  PREFIX          "ext_build"
-#  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST} -DGLFW_BUILD_TESTS=0 -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_DOCS=0
-#)
-
-if(WIN32)
-#  find_package(glew REQUIRED)
-  include_directories(${GLEW_INCLUDE_DIRS})
-  list(APPEND nanogui_extra_libs ${GLEW_LIBRARIES})
-endif(WIN32)
-
+# -- GLFW and GLEW
 include_directories(${GLFW_DIR}/include)
-#add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR})
+#add_subdirectory(${GLFW_DIR})     # already done by parent cmakelists
 list(APPEND nanogui_extra_libs glfw ${GLFW_LIBRARIES})
 
 set(extra_source "")
 if(WIN32)
-#  ExternalProject_Add(glew_p
+  include_directories(${GLEW_DIR}/include)
+  list(APPEND nanogui_extra_libs glew)
+
+  #  ExternalProject_Add(glew_p
 #    URL             "${CMAKE_SOURCE_DIR}/ext/glew"
 #    PREFIX          "ext_build"
 #    CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS_LIST}
@@ -68,11 +60,11 @@ elseif (APPLE)
   find_library(opengl_library OpenGL)
   find_library(corevideo_library CoreVideo)
   find_library(iokit_library IOKit)
-  set(nanogui_extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
+  list(APPEND nanogui_extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   set(extra_source src/darwin.mm)
 elseif("${CMAKE_SYSTEM}" MATCHES "Linux")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  set(nanogui_extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
+  list(APPEND nanogui_extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 endif()
 
 include_directories()
