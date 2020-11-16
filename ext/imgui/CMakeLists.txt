@@ -46,5 +46,5 @@ add_library(imgui STATIC
 target_include_directories(imgui
     INTERFACE ..
     PRIVATE .)
-target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
-target_link_libraries(imgui glfw glew ${OPENGL_gl_LIBRARY})
+target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+target_link_libraries(imgui PUBLIC glfw glad ${OPENGL_gl_LIBRARY})

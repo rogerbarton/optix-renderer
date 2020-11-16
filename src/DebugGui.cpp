@@ -146,18 +146,18 @@ void DebugGui::initGlfw(const char *windowTitle, int width, int height)
 void DebugGui::initGl()
 {
 
-#if defined(WIN32)
-	static bool glewInitialized = false;
-	if (!glewInitialized)
-	{
-		glewExperimental = GL_TRUE;
-		glewInitialized = true;
-		if (glewInit() != GLEW_NO_ERROR)
-			throw std::runtime_error("Could not initialize GLEW.");
-	}
-	GL_CHECK(glClearColor(0.212f, 0.271f, 0.31f, 1.0f));
-	GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
-#endif
+// #if defined(WIN32)
+// 	static bool glewInitialized = false;
+// 	if (!glewInitialized)
+// 	{
+// 		glewExperimental = GL_TRUE;
+// 		glewInitialized = true;
+// 		if (glewInit() != GLEW_NO_ERROR)
+// 			throw std::runtime_error("Could not initialize GLEW.");
+// 	}
+	// GL_CHECK(glClearColor(0.212f, 0.271f, 0.31f, 1.0f));
+	// GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
+// #endif
 }
 
 void DebugGui::initImGui()
