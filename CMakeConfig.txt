@@ -126,9 +126,11 @@ list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_
 # Build gui libs: nanogui, imgui, glfw, glew
 if(NORI_USE_GUI)
   set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
+  add_definitions(-DGLEW_STATIC)
   add_subdirectory(${GLEW_DIR})
   include_directories(${GLEW_DIR}/include)
 
+  set(BUILD_SHARED_LIBS OFF)
   set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
   include_directories(${GLFW_DIR}/include)
   add_subdirectory(${GLFW_DIR})
