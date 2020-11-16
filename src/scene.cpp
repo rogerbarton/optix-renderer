@@ -22,37 +22,44 @@
 #include <nori/sampler.h>
 #include <nori/camera.h>
 #include <nori/emitter.h>
+#include <nori/volume.h>
 
 NORI_NAMESPACE_BEGIN
 
-Scene::Scene(const PropertyList &) {
+Scene::Scene(const PropertyList &)
+{
     m_bvh = new BVH();
 }
 
-Scene::~Scene() {
+Scene::~Scene()
+{
     delete m_bvh;
     delete m_sampler;
     delete m_camera;
     delete m_integrator;
-    for(auto e : m_emitters)
+    for (auto e : m_emitters)
         delete e;
     m_emitters.clear();
 
-    if(m_envmap)delete m_envmap;
-    if(m_denoiser) delete m_denoiser;
+    if (m_envmap)
+        delete m_envmap;
+    if (m_denoiser)
+        delete m_denoiser;
 }
 
-void Scene::activate() {
+void Scene::activate()
+{
     m_bvh->build();
 
     if (!m_integrator)
         throw NoriException("No integrator was specified!");
     if (!m_camera)
         throw NoriException("No camera was specified!");
-    
-    if (!m_sampler) {
+
+    if (!m_sampler)
+    {
         /* Create a default (independent) sampler */
-        m_sampler = static_cast<Sampler*>(
+        m_sampler = static_cast<Sampler *>(
             NoriObjectFactory::createInstance("independent", PropertyList()));
         m_sampler->activate();
     }
@@ -62,59 +69,68 @@ void Scene::activate() {
     cout << endl;
 }
 
-void Scene::addChild(NoriObject *obj) {
-    switch (obj->getClassType()) {
-        case EMesh: {
-                Shape *mesh = static_cast<Shape *>(obj);
-                m_bvh->addShape(mesh);
-                m_shapes.push_back(mesh);
-                if(mesh->isEmitter())
-                    m_emitters.push_back(mesh->getEmitter());
-            }
-            break;
-        
-        case EEmitter:
-            m_emitters.push_back(static_cast<Emitter *>(obj));
-            break;
+void Scene::addChild(NoriObject *obj)
+{
+    switch (obj->getClassType())
+    {
+    case EMesh:
+    {
+        Shape *mesh = static_cast<Shape *>(obj);
+        m_bvh->addShape(mesh);
+        m_shapes.push_back(mesh);
+        if (mesh->isEmitter())
+            m_emitters.push_back(mesh->getEmitter());
+    }
+    break;
 
-        case ESampler:
-            if (m_sampler)
-                throw NoriException("There can only be one sampler per scene!");
-            m_sampler = static_cast<Sampler *>(obj);
-            break;
+    case EEmitter:
+        m_emitters.push_back(static_cast<Emitter *>(obj));
+        break;
 
-        case ECamera:
-            if (m_camera)
-                throw NoriException("There can only be one camera per scene!");
-            m_camera = static_cast<Camera *>(obj);
-            break;
-        
-        case EIntegrator:
-            if (m_integrator)
-                throw NoriException("There can only be one integrator per scene!");
-            m_integrator = static_cast<Integrator *>(obj);
-            break;
+    case ESampler:
+        if (m_sampler)
+            throw NoriException("There can only be one sampler per scene!");
+        m_sampler = static_cast<Sampler *>(obj);
+        break;
 
-        case EEnvironmentMap:
-			if (m_envmap)
-				throw NoriException("There can only be one environment map per scene!");
-			m_envmap = static_cast<EnvironmentMap*>(obj);
-			break;
-        case EDenoiser:
-            if(m_denoiser)
-                throw NoriException("There can only be one denoiser per scene!");
-            m_denoiser = static_cast<Denoiser*>(obj);
-            break;
+    case ECamera:
+        if (m_camera)
+            throw NoriException("There can only be one camera per scene!");
+        m_camera = static_cast<Camera *>(obj);
+        break;
 
-        default:
-            throw NoriException("Scene::addChild(<%s>) is not supported!",
-                classTypeName(obj->getClassType()));
+    case EIntegrator:
+        if (m_integrator)
+            throw NoriException("There can only be one integrator per scene!");
+        m_integrator = static_cast<Integrator *>(obj);
+        break;
+
+    case EEnvironmentMap:
+        if (m_envmap)
+            throw NoriException("There can only be one environment map per scene!");
+        m_envmap = static_cast<EnvironmentMap *>(obj);
+        break;
+    case EDenoiser:
+        if (m_denoiser)
+            throw NoriException("There can only be one denoiser per scene!");
+        m_denoiser = static_cast<Denoiser *>(obj);
+        break;
+
+    case EVolume:
+        m_volumes.push_back(static_cast<Volume *>(obj));
+        break;
+
+    default:
+        throw NoriException("Scene::addChild(<%s>) is not supported!",
+                            classTypeName(obj->getClassType()));
     }
 }
 
-std::string Scene::toString() const {
+std::string Scene::toString() const
+{
     std::string shapes;
-    for (size_t i=0; i<m_shapes.size(); ++i) {
+    for (size_t i = 0; i < m_shapes.size(); ++i)
+    {
         shapes += std::string("  ") + indent(m_shapes[i]->toString(), 2);
         if (i + 1 < m_shapes.size())
             shapes += ",";
@@ -122,11 +138,21 @@ std::string Scene::toString() const {
     }
 
     std::string lights;
-    for (size_t i=0; i<m_emitters.size(); ++i) {
+    for (size_t i = 0; i < m_emitters.size(); ++i)
+    {
         lights += std::string("  ") + indent(m_emitters[i]->toString(), 2);
         if (i + 1 < m_emitters.size())
             lights += ",";
         lights += "\n";
+    }
+
+    std::string volumes;
+    for (size_t i = 0; i < m_volumes.size(); ++i)
+    {
+        volumes += std::string("  ") + indent(m_volumes[i]->toString(), 2);
+        if (i + 1 < m_volumes.size())
+            volumes += ",";
+        volumes += "\n";
     }
 
     return tfm::format(
@@ -139,16 +165,18 @@ std::string Scene::toString() const {
         "  emitters = {\n"
         "  %s  }\n"
         "  envmap = %s,\n"
-        "  denoiser = %s\n"
+        "  denoiser = %s,\n"
+        "  volumes {\n"
+        "  %s  }\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
         indent(shapes, 2),
-        indent(lights,2),
+        indent(lights, 2),
         m_envmap ? indent(m_envmap->toString()) : "nullptr",
-        m_denoiser ? indent(m_denoiser->toString()) : "nullptr"
-    );
+        m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
+        indent(volumes, 2));
 }
 
 NORI_REGISTER_CLASS(Scene, "scene");

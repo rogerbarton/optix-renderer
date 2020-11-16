@@ -23,6 +23,7 @@
 #include <nori/emitter.h>
 #include <nori/environmentmap.h>
 #include <nori/denoiser.h>
+#include <nori/volume.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -162,6 +163,7 @@ private:
     Denoiser *m_denoiser = nullptr;
 
     std::vector<Emitter *> m_emitters;
+    std::vector<Volume *> m_volumes;
 };
 
 NORI_NAMESPACE_END
