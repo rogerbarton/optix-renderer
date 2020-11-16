@@ -134,7 +134,7 @@ if(NORI_USE_GUI)
   add_subdirectory(${GLFW_DIR})
 
   add_subdirectory(ext/nanogui)
-#  add_subdirectory(ext/imgui)
+  add_subdirectory(ext/imgui)
 endif(NORI_USE_GUI)
 
 # Build lodepng
@@ -181,7 +181,7 @@ include_directories(
 # Link to several dependency libraries
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
-  list(APPEND extra_libs nanogui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
+  list(APPEND extra_libs nanogui imgui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
 endif()
 
 message(STATUS "extra_libs: ${extra_libs}")

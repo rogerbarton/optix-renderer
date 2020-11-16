@@ -128,6 +128,8 @@ if(NORI_USE_GUI)
   target_sources(nori PRIVATE
           include/nori/gui.h
           src/gui.cpp
+          include/nori/DebugGui.h
+          src/DebugGui.cpp
           )
 
   # The following lines build the warping test application
