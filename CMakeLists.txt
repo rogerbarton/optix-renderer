@@ -105,6 +105,7 @@ add_executable(nori
   src/PNGTexture.cpp
   src/denoiser.cpp
   src/volume.cpp
+  src/adaptive.cpp
 )
 
 add_executable(tonemapper

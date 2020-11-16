@@ -30,47 +30,74 @@ NORI_NAMESPACE_BEGIN
  * number generator. For more details on what sample generators do in
  * general, refer to the \ref Sampler class.
  */
-class Independent : public Sampler {
+class Independent : public Sampler
+{
 public:
-    Independent(const PropertyList &propList) {
-        m_sampleCount = (size_t) propList.getInteger("sampleCount", 1);
+    Independent(const PropertyList &propList)
+    {
+        m_sampleCount = (size_t)propList.getInteger("sampleCount", 1);
     }
 
-    virtual ~Independent() { }
+    virtual ~Independent() {}
 
-    std::unique_ptr<Sampler> clone() const {
+    std::unique_ptr<Sampler> clone() const
+    {
         std::unique_ptr<Independent> cloned(new Independent());
         cloned->m_sampleCount = m_sampleCount;
         cloned->m_random = m_random;
         return std::move(cloned);
     }
 
-    void prepare(const ImageBlock &block) {
+    void prepare(const ImageBlock &block)
+    {
         m_random.seed(
             block.getOffset().x(),
-            block.getOffset().y()
-        );
+            block.getOffset().y());
     }
 
-    void generate() { /* No-op for this sampler */ }
-    void advance()  { /* No-op for this sampler */ }
+    void generate()
+    { /* No-op for this sampler */
+    }
+    void advance()
+    { /* No-op for this sampler */
+    }
 
-    float next1D() {
+    float next1D()
+    {
         return m_random.nextFloat();
     }
-    
-    Point2f next2D() {
+
+    Point2f next2D()
+    {
         return Point2f(
             m_random.nextFloat(),
-            m_random.nextFloat()
-        );
+            m_random.nextFloat());
     }
 
-    virtual std::string toString() const override {
+    virtual std::string toString() const override
+    {
         return tfm::format("Independent[sampleCount=%i]", m_sampleCount);
     }
+
+    std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram&) override
+    {
+        // Independent sampler simply takes all pixels once
+        Vector2i size = block.getSize();
+        std::vector<std::pair<int, int>> result(size.x() * size.y());
+
+        for (int i = 0; i < size.x(); i++)
+        {
+            for (int j = 0; j < size.y(); j++)
+            {
+                result.push_back(std::make_pair(i, j));
+            }
+        }
+
+        return result;
+    }
+
 protected:
-    Independent() { }
+    Independent() {}
 
 private:
     pcg32 m_random;

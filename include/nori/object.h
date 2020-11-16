@@ -46,6 +46,7 @@ public:
         EIntegrator,
         ESampler,
         EEnvironmentMap,
+        EPixelSampler,
         EDenoiser,
         ETest,
         EReconstructionFilter,
@@ -81,6 +82,8 @@ public:
             return "environmentmap";
         case EDenoiser:
             return "denoiser";
+        case EPixelSampler:
+            return "pixelsampler";
         default:
             return "<unknown>";
         }

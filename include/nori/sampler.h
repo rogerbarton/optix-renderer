@@ -24,6 +24,22 @@
 
 NORI_NAMESPACE_BEGIN
 
+/*
+ * This struct is used to store a cumulative function distribution (CFD) of samples
+ */
+struct Histogram {
+    using upair = std::pair<int,int>;
+    using map_type = std::map<float, upair>;
+    
+    float cumulative;
+    map_type map;
+
+    void add_element(int i, int j, float value) {
+        cumulative += value;
+        map[cumulative] = upair(i, j);
+    }
+};
+
 class ImageBlock;
 
 /**
@@ -60,10 +76,11 @@ class ImageBlock;
  * first n components with respect to the other points that are sampled 
  * within a pixel.
  */
-class Sampler : public NoriObject {
+class Sampler : public NoriObject
+{
 public:
     /// Release all memory
-    virtual ~Sampler() { }
+    virtual ~Sampler() {}
 
     /// Create an exact clone of the current instance
     virtual std::unique_ptr<Sampler> clone() const = 0;
@@ -98,13 +115,23 @@ public:
     /// Return the number of configured pixel samples
     virtual size_t getSampleCount() const { return m_sampleCount; }
 
+    /// sets the current sample round
+    void setSampleRound(size_t sampleRound) { m_sampleRound = sampleRound; }
+
+    /// create pixels to sample based on cumulative variance probabilities
+    virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram& histogram) = 0;
+
+    virtual bool computeVariance() const { return false; }
+
     /**
      * \brief Return the type of object (i.e. Mesh/Sampler/etc.) 
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return ESampler; }
+
 protected:
     size_t m_sampleCount;
+    size_t m_sampleRound;
 };
 
 NORI_NAMESPACE_END

@@ -111,7 +111,7 @@ public:
 
     /// Divide by the filter weight and convert into a \ref Color3f value
     Color3f divideByFilterWeight() const {
-        if (w() != 0)
+        if (std::abs(w()) > Epsilon)
             return head<3>() / w();
         else
             return Color3f(0.0f);
