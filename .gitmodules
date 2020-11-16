@@ -1,6 +1,8 @@
 [submodule "ext/openvdb"]
 	path = ext/openvdb
 	url = https://github.com/AcademySoftwareFoundation/openvdb.git
+	ignore = untracked
 [submodule "ext/vcpkg"]
 	path = ext/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+	ignore = dirty
