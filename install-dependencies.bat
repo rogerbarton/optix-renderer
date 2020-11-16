@@ -1,3 +1,3 @@
 call .\ext\vcpkg\bootstrap-vcpkg.bat
 
-call .\ext\vcpkg\vcpkg install openvdb:x64-windows glew:x64-windows
+call .\ext\vcpkg\vcpkg install openvdb:x64-windows
