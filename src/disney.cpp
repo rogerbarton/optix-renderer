@@ -53,7 +53,7 @@ public:
 
         float FL = SchlickFresnel(NdotL);
         float FV = SchlickFresnel(NdotV);
-        float Fd90 = 0.5 + 2 * LdotH * LdotH * roughness;
+        float Fd90 = 0.5f + 2 * LdotH * LdotH * roughness;
         float Fd = mix<float>(1.0, Fd90, FL) * mix<float>(1.0, Fd90, FV);
 
         float Fss90 = LdotH * LdotH * roughness;
@@ -136,9 +136,9 @@ public:
 private:
     static Vector3f mon2lin(Color3f vec)
     {
-        return Vector3f(pow(vec.r(), 2.2),
-                        pow(vec.g(), 2.2),
-                        pow(vec.b(), 2.2));
+        return Vector3f(pow(vec.r(), 2.2f),
+                        pow(vec.g(), 2.2f),
+                        pow(vec.b(), 2.2f));
     }
 
     template <typename T>

@@ -23,6 +23,7 @@
 #include <nori/emitter.h>
 #include <nori/environmentmap.h>
 #include <nori/denoiser.h>
+#include <nori/volume.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -78,12 +79,25 @@ public:
         return m_emitters[index];
     }
 
+    const std::vector<Volume *> &getVolumes() const { return m_volumes; }
+    const Volume *getRandomVolume(float rnd) const
+    {
+        auto const &n = m_volumes.size();
+        size_t index = std::min(
+            static_cast<size_t>(std::floor(n * rnd)),
+            n - 1);
+        if (index >= m_volumes.size())
+            return nullptr;
+        return m_volumes[index];
+    }
+
     EnvironmentMap *getEnvMap() const
     {
         return m_envmap;
     }
 
-    Denoiser *getDenoiser() const {
+    Denoiser *getDenoiser() const
+    {
         return m_denoiser;
     }
 
@@ -162,6 +176,7 @@ private:
     Denoiser *m_denoiser = nullptr;
 
     std::vector<Emitter *> m_emitters;
+    std::vector<Volume *> m_volumes;
 };
 
 NORI_NAMESPACE_END

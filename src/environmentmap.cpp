@@ -151,7 +151,7 @@ private:
 		int isYPositive = y > 0 ? 1 : 0;
 		int isZPositive = z > 0 ? 1 : 0;
 
-		float maxAxis, uc, vc;
+		float maxAxis = 0, uc = 0, vc = 0;
 
 		// POSITIVE X
 		if (isXPositive && absX >= absY && absX >= absZ)

@@ -126,7 +126,7 @@ struct Frame {
 
     /// Equality test
     bool operator==(const Frame &frame) const {
-        return frame.s == s && frame.t == t && frame.n == n;
+        return frame.s.isApprox(s) && frame.t.isApprox(t) && frame.n.isApprox(n);
     }
 
     /// Inequality test

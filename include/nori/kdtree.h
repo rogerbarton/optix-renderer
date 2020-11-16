@@ -499,7 +499,7 @@ protected:
         );
 
         NodeType &splitNode = m_nodes[*split];
-        splitNode.setAxis(axis);
+        splitNode.setAxis(static_cast<uint8_t>(axis));
         splitNode.setLeaf(false);
 
         if (split+1 != rangeEnd)

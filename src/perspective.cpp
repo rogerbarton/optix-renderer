@@ -47,6 +47,10 @@ public:
         m_nearClip = propList.getFloat("nearClip", 1e-4f);
         m_farClip = propList.getFloat("farClip", 1e4f);
 
+        // Depth of Field
+        m_lensRadius    = propList.getFloat("lensRadius", 0.f);
+	    m_focalDistance = propList.getFloat("focalDistance", 1.f);
+
         m_rfilter = NULL;
     }
 
@@ -92,17 +96,40 @@ public:
             const Point2f &apertureSample) const {
         /* Compute the corresponding position on the 
            near plane (in local camera space) */
-        Point3f nearP = m_sampleToCamera * Point3f(
+        const Point3f nearP = m_sampleToCamera * Point3f(
             samplePosition.x() * m_invOutputSize.x(),
             samplePosition.y() * m_invOutputSize.y(), 0.0f);
 
         /* Turn into a normalized ray direction, and
            adjust the ray interval accordingly */
-        Vector3f d = nearP.normalized();
-        float invZ = 1.0f / d.z();
+        const Vector3f d = nearP.normalized();
 
-        ray.o = m_cameraToWorld * Point3f(0, 0, 0);
-        ray.d = m_cameraToWorld * d;
+        // Create local space ray
+        ray.d = d;
+	    ray.o = Point3f(0, 0, 0);
+
+	    // Depth of field, adjusts ray in local space
+        if(m_lensRadius > Epsilon)
+        {
+	        ray.update();
+
+	        static Sampler *const sampler = dynamic_cast<Sampler *>(
+			        NoriObjectFactory::createInstance("independent", PropertyList()));
+
+	        const Point2f pLens = m_lensRadius * Warp::squareToUniformDisk(sampler->next2D());
+	        const float ft = m_focalDistance / ray.d.z();
+	        // position of ray at time of intersection with the focal plane
+	        const Point3f pFocus = ray(ft);
+
+	        ray.o = Point3f(pLens.x(), pLens.y(), 0.f);
+	        // direction connecting aperture and focal plane points
+	        ray.d = (pFocus - ray.o).normalized();
+        }
+
+        ray.o = m_cameraToWorld * ray.o;
+        ray.d = m_cameraToWorld * ray.d;
+
+	    const float invZ = 1.0f / d.z();
         ray.mint = m_nearClip * invZ;
         ray.maxt = m_farClip * invZ;
         ray.update();
@@ -149,6 +176,10 @@ private:
     float m_fov;
     float m_nearClip;
     float m_farClip;
+
+    // Depth of Field
+    float m_lensRadius; // aka aperture
+    float m_focalDistance; // aka focal length
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");

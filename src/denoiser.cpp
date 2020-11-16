@@ -22,11 +22,11 @@ public:
     {
         std::cout << "Denoising the image..." << std::endl;
 
-        Bitmap *output = new Bitmap(Vector2i(bitmap->rows(), bitmap->cols()));
+        Bitmap *output = new Bitmap(Vector2i(static_cast<int>(bitmap->rows()), static_cast<int>(bitmap->cols())));
 
         // Bilateral Filter (https://en.wikipedia.org/wiki/Bilateral_filter)
 
-        tbb::blocked_range<int> range(0, bitmap->rows());
+        tbb::blocked_range<int> range(0, static_cast<int>(bitmap->rows()));
 
         auto map = [&](const tbb::blocked_range<int> &range) {
             int lower = -inner_range / 2;
@@ -42,8 +42,8 @@ public:
                     {
                         for (int l = lower; l < upper; l++)
                         {
-                            int k_ = clamp(i + k, 0, bitmap->rows() -1);
-                            int l_ = clamp(j + l, 0, bitmap->cols() -1);
+                            int k_ = clamp(i + k, 0, static_cast<int>(bitmap->rows() -1));
+                            int l_ = clamp(j + l, 0, static_cast<int>(bitmap->cols() -1));
                             if (k_ != i + k || l_ != j + l)
                                 continue; // we must skip this one
                             weight_ijkl = weight(i, j, k_, l_, (*bitmap)(i, j), (*bitmap)(k_, l_));
