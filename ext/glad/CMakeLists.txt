@@ -2,7 +2,7 @@ project(glad C)
 
 find_package(OpenGL REQUIRED)
 
-add_library(glad STATIC
+add_library(glad SHARED
     src/glad.c
     include/glad/glad.h
     include/KHR/khrplatform.h
