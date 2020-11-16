@@ -95,23 +95,31 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
     /* For each pixel and pixel sample sample */
     std::vector<std::pair<int, int>> sampleIndices = sampler->getSampleIndices(block, histogram);
 
-    for (std::pair<int, int> &pair : sampleIndices)
-    {
-        int x = pair.first;
-        int y = pair.second;
-        Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
-        Point2f apertureSample = sampler->next2D();
+    // add a tbb range to the index
+    tbb::blocked_range<int> range(0, sampleIndices.size());
 
-        /* Sample a ray from the camera */
-        Ray3f ray;
-        Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
+    auto map = [&](tbb::blocked_range<int> &range) {
+        for (int i = range.begin(); i < range.end(); i++)
+        {
+            std::pair<int, int> pair = sampleIndices[i];
+            int x = pair.second;
+            int y = pair.first;
+            Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
+            Point2f apertureSample = sampler->next2D();
 
-        /* Compute the incident radiance */
-        value *= integrator->Li(scene, sampler, ray);
+            /* Sample a ray from the camera */
+            Ray3f ray;
+            Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
 
-        /* Store in the image block */
-        block.put(pixelSample, value);
-    }
+            /* Compute the incident radiance */
+            value *= integrator->Li(scene, sampler, ray);
+
+            /* Store in the image block */
+            block.put(pixelSample, value);
+        }
+    };
+
+    tbb::parallel_for(range, map); // execute this in parallel (applicable if we render the whole block at once (adaptive sampling))
 }
 
 void RenderThread::renderScene(const std::string &filename)
@@ -177,78 +185,9 @@ void RenderThread::renderScene(const std::string &filename)
 
                 // calculate variance here
                 Eigen::MatrixXf variance(m_block.rows(), m_block.cols());
+                m_scene->getSampler()->setSampleRound(k);
+
                 Histogram histogram;
-                if (m_scene->getSampler()->computeVariance())
-                {
-
-                    // compute variance of the whole image, once for all samplers
-                    Eigen::Matrix<Color4f, -1, -1> padded(m_block.rows() + 2, m_block.cols() + 2);
-
-                    padded.setConstant(Color4f(0, 0, 0, 0));
-
-                    padded.block(1, 1, m_block.rows(), m_block.cols()) = m_block;
-
-                    Eigen::Matrix3f stencil;                                        // stencil of weights
-                    stencil << -1.f, -1.f, -1.f, -1.f, 8.f, -1.f, -1.f, -1.f, -1.f; // create a simple stencil
-
-                    // move over all pixels and perform the stencil operation
-
-                    tbb::blocked_range<int> im_range(0, m_block.rows());
-
-                    auto im_map = [&](const tbb::blocked_range<int> &range) {
-                        for (int i = range.begin(); i < range.end(); i++)
-                        {
-                            for (int j = 0; j < m_block.cols(); j++)
-                            {
-                                Color3f curr;
-                                for (int k = 0; k < 3; k++)
-                                {
-                                    for (int l = 0; l < 3; l++)
-                                    {
-                                        curr += stencil(k, l) * m_block(i + 1 + k, j + 1 + l).divideByFilterWeight();
-                                    }
-                                }
-                                curr = curr.cwiseAbs(); // take abs because we might have a negative color (because of stencil)
-                                if (curr.isValid())
-                                    variance(i, j) = Eigen::Vector3f(curr).norm();
-                                else
-                                {
-                                    variance(i, j) = 0.f;
-                                    std::cout << "Got invalid variance at pixel " << i << "/"
-                                              << j << ": " << curr.transpose() << std::endl;
-                                }
-                            }
-                        }
-                    };
-
-                    // compute variance in parallel
-                    tbb::parallel_for(im_range, im_map);
-
-                    // normalize variance
-                    if (variance.sum() > Epsilon)
-                        variance = variance / variance.sum(); // normalize to have prob 1 overall
-
-                    // build cumulative variance matrix
-                    for (int i = 0; i < variance.rows(); i++)
-                    {
-                        for (int j = 0; j < variance.cols(); j++)
-                        {
-                            histogram.add_element(i, j, variance(i, j));
-                        }
-                    }
-
-                    if (k == numSamples - 1 && m_scene->getSampler()->computeVariance())
-                    {
-                        // write variance to disk
-                        std::ofstream var_out(outputNameVariance);
-
-                        std::cout << std::endl
-                                  << "Writing variance to " << outputNameVariance << std::endl;
-
-                        var_out << variance << std::endl;
-                        var_out.close();
-                    }
-                }
 
                 auto map = [&](const tbb::blocked_range<int> &range) {
                     // Allocate memory for a small image block to be rendered by the current thread
@@ -279,11 +218,113 @@ void RenderThread::renderScene(const std::string &filename)
                     }
                 };
 
+                if (m_scene->getSampler()->computeVariance())
+                {
+
+                    // compute variance of the whole image, once for all samplers
+
+                    tbb::blocked_range<int> im_range(0, m_block.rows());
+
+                    auto im_map = [&](const tbb::blocked_range<int> &range) {
+                        for (int i = range.begin(); i < range.end(); i++)
+                        {
+                            for (int j = 0; j < m_block.cols(); j++)
+                            {
+                                Color3f curr(0.f);
+                                Color3f middleCol(0.f);
+                                int n = 0; // how many points are actually valid
+                                for (int k = 0; k < 3; k++)
+                                {
+                                    for (int l = 0; l < 3; l++)
+                                    {
+                                        int k_ = clamp(i + k, 0, m_block.rows() - 1);
+                                        int l_ = clamp(j + l, 0, m_block.cols() - 1);
+                                        if (k_ != i + k || l_ != j + l)
+                                            continue; // we must skip this one
+
+                                        n++;
+
+                                        if (k == 1 && l == 1)
+                                        {
+                                            middleCol = m_block(k_, l_).divideByFilterWeight();
+                                        }
+                                        curr -= m_block(k_, l_).divideByFilterWeight();
+                                        n++;
+                                    }
+                                }
+                                curr = curr / n + middleCol;
+
+                                curr = curr.cwiseAbs(); // take abs because we might have a negative color (because of stencil)
+                                if (curr.isValid())
+                                    variance(i, j) = Eigen::Vector3f(curr).norm();
+                                else
+                                {
+                                    variance(i, j) = 0.f;
+                                    std::cout << "Got invalid variance at pixel " << i << "/"
+                                              << j << ": " << curr.transpose() << std::endl;
+                                }
+                            }
+                        }
+                    };
+
+                    // compute variance in parallel
+                    tbb::parallel_for(im_range, im_map);
+
+                    // normalize variance
+
+                    /*
+                    // and remove top 5%
+                    float sum = variance.sum() * 0.95f;
+
+                    if (variance.sum() > Epsilon)
+                        variance = variance / sum;
+
+                    // clamp entries to 1 top
+                    for(int i = 0; i < variance.size(); i++) {
+                        variance(i) = clamp(variance(i), 0.f, 1.f);
+                    }*/
+
+                    // normalize to have prob 1 overall
+                    if (variance.sum() > Epsilon)
+                        variance = variance / variance.sum();
+
+                    // build cumulative variance matrix
+                    for (int i = 0; i < variance.rows(); i++)
+                    {
+                        for (int j = 0; j < variance.cols(); j++)
+                        {
+                            histogram.add_element(i, j, variance(i, j));
+                        }
+                    }
+
+                    if (k == numSamples - 1 && m_scene->getSampler()->computeVariance())
+                    {
+                        // write variance to disk
+                        std::ofstream var_out(outputNameVariance);
+
+                        std::cout << std::endl
+                                  << "Writing variance to " << outputNameVariance << std::endl;
+
+                        var_out << variance << std::endl;
+                        var_out.close();
+                    }
+
+                    ImageBlock block(m_block.getSize(),
+                                     camera->getReconstructionFilter());
+                    m_scene->getSampler()->setSampleRound(k);
+                    // Render all contained pixels
+                    renderBlock(m_scene, m_scene->getSampler(), block, histogram);
+                    m_block.put(block);
+                }
+                else
+                {
+                    tbb::parallel_for(range, map);
+                }
+
                 /// Uncomment the following line for single threaded rendering
                 //map(range);
 
                 /// Default: parallel rendering
-                tbb::parallel_for(range, map);
 
                 blockGenerator.reset();
             }

@@ -7,6 +7,9 @@ NORI_NAMESPACE_BEGIN
 /*
  * THis class implements adaptive sampling based on the variance of the current image
  * All functions except getSampleIndices are the same as for the independent sampler
+ * 
+ * This class is based on "Robust Adaptive Sampling for Monte-Carlo-Based Rendering",
+ * Anthony Pajot, Loic Barthe, Mathias Paulin from IRIT, Toulouse, France
  */
 class AdaptiveSampler : public Sampler
 {
@@ -14,13 +17,16 @@ public:
     AdaptiveSampler(const PropertyList &propList)
     {
         m_sampleCount = (size_t)propList.getInteger("sampleCount", 1);
+        uniform_every = (size_t)propList.getInteger("uniformEvery", 100);
     }
 
     std::unique_ptr<Sampler> clone() const override
     {
         std::unique_ptr<AdaptiveSampler> cloned(new AdaptiveSampler());
         cloned->m_sampleCount = m_sampleCount;
+        cloned->m_sampleRound = m_sampleRound;
         cloned->m_random = m_random;
+        cloned->uniform_every = uniform_every;
         return std::move(cloned);
     }
 
@@ -47,16 +53,26 @@ public:
 
     std::string toString() const override
     {
-        return tfm::format("AdaptiveSampler[sampleCount=%i]",
-                           m_sampleCount);
+        return tfm::format("AdaptiveSampler[\n"
+                           "  sampleCount = %i,\n"
+                           "  uniformEvery = %i\n"
+                           "  ]",
+                           m_sampleCount, uniform_every);
     }
 
     bool computeVariance() const override
     {
+        // filter out all cases were we don't compute the variance
         if (m_sampleRound < 2)
         {
             return false;
         }
+        else if (m_sampleRound % uniform_every == 0)
+        {
+            return false;
+        }
+
+        // compute the adaptive samples
         return true;
     }
 
@@ -69,7 +85,7 @@ public:
         std::vector<std::pair<int, int>> result;
         result.reserve(size.x() * size.y());
 
-        if (computeVariance())
+        if (!computeVariance())
         {
             // initially run twice over all pixels
             for (int i = 0; i < size.x(); i++)
@@ -110,6 +126,7 @@ protected:
 
 private:
     pcg32 m_random;
+    size_t uniform_every;
 };
 
 NORI_REGISTER_CLASS(AdaptiveSampler, "adaptive");
