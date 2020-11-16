@@ -137,6 +137,14 @@ if(NORI_USE_GUI)
 
   add_subdirectory(ext/nanogui)
   add_subdirectory(ext/imgui)
+
+  # TODO: Setup sutil or remove it
+
+  # Nvidia OptiX samples util lib
+  add_subdirectory(sutil)
+  # TODO: Link to glad and include dirs, do we need ext/KHR/khrplatform.h
+  add_subdirectory(glad)
+
 endif(NORI_USE_GUI)
 
 # Build lodepng
