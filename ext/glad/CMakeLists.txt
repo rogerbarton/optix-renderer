@@ -1,12 +1,16 @@
+project(glad C)
+
 find_package(OpenGL REQUIRED)
 
-add_library(glad SHARED
-    KHR/khrplatform.h
-    glad/glad.c
-    glad/glad.h
-    )
-target_compile_definitions(glad
-    PRIVATE GLAD_GLAPI_EXPORT_BUILD
-    PUBLIC GLAD_GLAPI_EXPORT)
-target_include_directories(glad PUBLIC .)
-target_link_libraries(glad PUBLIC ${OPENGL_LIBRARIES})
+add_library(glad STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/glad.c
+)
+
+target_include_directories(glad PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(glad 
+	${OPENGL_LIBRARIES} 
+	${CMAKE_DL_LIBS}
+)

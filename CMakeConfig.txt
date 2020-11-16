@@ -125,25 +125,48 @@ list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_
 
 # Build gui libs: nanogui, imgui, glfw, glew
 if(NORI_USE_GUI)
+  # GLAD
+  set(OpenGL_GL_PREFERENCE GLVND)
+  add_subdirectory(ext/glad)
+  include_directories(ext/glad/include)
+
+  # glfw
+  
+  set(GLFW_BUILD_EXAMPLES
+    OFF
+    CACHE BOOL "GLFW lib only"
+  )
+  set(GLFW_BUILD_TESTS
+      OFF
+      CACHE BOOL "GLFW lib only"
+  )
+  set(GLFW_BUILD_DOCS
+      OFF
+      CACHE BOOL "GLFW lib only"
+  )
+  set(GLFW_INSTALL
+      OFF
+      CACHE BOOL "GLFW lib only"
+  )
+  #include_directories(${GLFW_DIR}/include)
+  set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
+  add_subdirectory(${GLFW_DIR})
+
+  set(BUILD_SHARED_LIBS OFF)
+
+  # GLEW
   set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
   add_definitions(-DGLEW_STATIC)
   add_subdirectory(${GLEW_DIR})
   include_directories(${GLEW_DIR}/include)
 
-  set(BUILD_SHARED_LIBS OFF)
-  set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
-  include_directories(${GLFW_DIR}/include)
-  add_subdirectory(${GLFW_DIR})
-
   add_subdirectory(ext/nanogui)
+
   add_subdirectory(ext/imgui)
 
-  # TODO: Setup sutil or remove it
+  #target_link_libraries(imgui PUBLIC glfw glad)
 
-  # Nvidia OptiX samples util lib
-  add_subdirectory(sutil)
-  # TODO: Link to glad and include dirs, do we need ext/KHR/khrplatform.h
-  add_subdirectory(glad)
+  
 
 endif(NORI_USE_GUI)
 

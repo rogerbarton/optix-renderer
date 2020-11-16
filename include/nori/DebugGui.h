@@ -1,4 +1,5 @@
 #pragma once
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <nori/common.h>
 #include <nori/render.h>
@@ -10,13 +11,14 @@ NORI_NAMESPACE_BEGIN
  * It creates a glfw window, registers callbacks and sets up imgui.
  * WIP!
  */
-struct DebugGui
+class DebugGui
 {
-	DebugGui(ImageBlock& block);
-	bool uiShowDemoWindow  = false;
+public:
+	DebugGui(ImageBlock &block);
+	bool uiShowDemoWindow = false;
 	bool uiShowDebugWindow = true;
 
-	void initGlfw(const char* windowTitle, int width, int height);
+	void initGlfw(const char *windowTitle, int width, int height);
 	void initGl();
 	void initImGui();
 
@@ -24,8 +26,8 @@ struct DebugGui
 	void endFrame();
 
 	// -- Scene loading
-	void openXML(const std::string & filename);
-	void openEXR(const std::string & filename);
+	void openXML(const std::string &filename);
+	void openEXR(const std::string &filename);
 
 	// -- GLFW window callbacks
 	void mouseButtonCallback(int button, int action, int mods);
@@ -37,7 +39,7 @@ struct DebugGui
 
 private:
 	// -- Window state
-	GLFWwindow* glfwWindow;
+	GLFWwindow *glfwWindow;
 	bool _minimizedWindow = false;
 
 	// -- Input State
@@ -45,8 +47,8 @@ private:
 
 	// -- Render State
 	ImageBlock &m_block;
-	unsigned int& _imageWidth;
-	unsigned int& _imageHeight;
+	//unsigned int &_imageWidth;
+	//unsigned int &_imageHeight;
 	RenderThread m_renderThread;
 };
 

@@ -127,8 +127,10 @@ add_dependencies(tonemapper nori)
 if(NORI_USE_GUI)
   # Append additional gui sources
   target_sources(nori PRIVATE
+  
           include/nori/gui.h
           src/gui.cpp
+
           include/nori/DebugGui.h
           src/DebugGui.cpp
           )
