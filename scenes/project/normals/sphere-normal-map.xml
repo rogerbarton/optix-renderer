@@ -26,9 +26,9 @@
         <point name="center" value="0,0,3"/>
         <float name="radius" value="3"/>
         <bsdf type="diffuse">
-            <texture type="checkerboard_color" name="albedo">
+            <texture type="checkerboard_color" name="normal">
 				<vector name="scale" value="0.1,0.2"/>
-                <color name="value1" value="0.8,0.8,0.8"/>
+                <color name="value1" value="0.0,0.0,1.0"/>
                 <color name="value2" value="0.2,0.2,0.2"/>
             </texture>
         </bsdf>

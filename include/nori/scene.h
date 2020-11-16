@@ -24,6 +24,7 @@
 #include <nori/environmentmap.h>
 #include <nori/denoiser.h>
 #include <nori/volume.h>
+#include <nori/bsdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -117,7 +118,10 @@ public:
      */
     bool rayIntersect(const Ray3f &ray, Intersection &its) const
     {
-        return m_bvh->rayIntersect(ray, its, false);
+    	bool intersect = m_bvh->rayIntersect(ray, its, false);
+	    its.mesh->getBSDF()->normals(its);
+
+	    return intersect;
     }
 
     /**

@@ -20,6 +20,8 @@
 #define __NORI_BSDF_H
 
 #include <nori/object.h>
+#include <nori/texture.h>
+#include <nori/shape.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -27,98 +29,130 @@ NORI_NAMESPACE_BEGIN
  * \brief Convenience data structure used to pass multiple
  * parameters to the evaluation and sampling routines in \ref BSDF
  */
-struct BSDFQueryRecord {
-    /// Incident direction (in the local frame)
-    Vector3f wi;
+	struct BSDFQueryRecord
+	{
+		/// Incident direction (in the local frame)
+		Vector3f wi;
 
-    /// Outgoing direction (in the local frame)
-    Vector3f wo;
+		/// Outgoing direction (in the local frame)
+		Vector3f wo;
 
-    /// Relative refractive index in the sampled direction
-    float eta;
+		/// Relative refractive index in the sampled direction
+		float eta;
 
-    /// Measure associated with the sample
-    EMeasure measure;
+		/// Measure associated with the sample
+		EMeasure measure;
 
-    /// Create a new record for sampling the BSDF
-    BSDFQueryRecord(const Vector3f &wi)
-        : wi(wi), measure(EUnknownMeasure) { }
+		/// Create a new record for sampling the BSDF
+		BSDFQueryRecord(const Vector3f& wi)
+				: wi(wi), measure(EUnknownMeasure) {}
 
-    /// Create a new record for querying the BSDF
-    BSDFQueryRecord(const Vector3f &wi,
-            const Vector3f &wo, EMeasure measure)
-        : wi(wi), wo(wo), measure(measure) { }
+		/// Create a new record for querying the BSDF
+		BSDFQueryRecord(const Vector3f& wi,
+		                const Vector3f& wo, EMeasure measure)
+				: wi(wi), wo(wo), measure(measure) {}
 
 
-    /// Additional information possibly needed by the BSDF
-    /// UV associated with the point
-    Point2f uv;
-    /// Point associated with the point
-    Point3f p;
-};
+		/// Additional information possibly needed by the BSDF
+		/// UV associated with the point
+		Point2f uv;
+		/// Point associated with the point
+		Point3f p;
+	};
 
 /**
  * \brief Superclass of all bidirectional scattering distribution functions
  */
-class BSDF : public NoriObject {
-public:
-    /**
-     * \brief Sample the BSDF and return the importance weight (i.e. the
-     * value of the BSDF * cos(theta_o) divided by the probability density
-     * of the sample with respect to solid angles).
-     *
-     * \param bRec    A BSDF query record
-     * \param sample  A uniformly distributed sample on \f$[0,1]^2\f$
-     *
-     * \return The BSDF value divided by the probability density of the sample
-     *         sample. The returned value also includes the cosine
-     *         foreshortening factor associated with the outgoing direction,
-     *         when this is appropriate. A zero value means that sampling
-     *         failed.
-     */
-    virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const = 0;
+	class BSDF : public NoriObject
+	{
+	public:
+		/**
+		 * \brief Sample the BSDF and return the importance weight (i.e. the
+		 * value of the BSDF * cos(theta_o) divided by the probability density
+		 * of the sample with respect to solid angles).
+		 *
+		 * \param bRec    A BSDF query record
+		 * \param sample  A uniformly distributed sample on \f$[0,1]^2\f$
+		 *
+		 * \return The BSDF value divided by the probability density of the sample
+		 *         sample. The returned value also includes the cosine
+		 *         foreshortening factor associated with the outgoing direction,
+		 *         when this is appropriate. A zero value means that sampling
+		 *         failed.
+		 */
+		virtual Color3f sample(BSDFQueryRecord& bRec, const Point2f& sample) const = 0;
 
-    /**
-     * \brief Evaluate the BSDF for a pair of directions and measure
-     * specified in \code bRec
-     *
-     * \param bRec
-     *     A record with detailed information on the BSDF query
-     * \return
-     *     The BSDF value, evaluated for each color channel
-     */
-    virtual Color3f eval(const BSDFQueryRecord &bRec) const = 0;
+		/**
+		 * \brief Evaluate the BSDF for a pair of directions and measure
+		 * specified in \code bRec
+		 *
+		 * \param bRec
+		 *     A record with detailed information on the BSDF query
+		 * \return
+		 *     The BSDF value, evaluated for each color channel
+		 */
+		virtual Color3f eval(const BSDFQueryRecord& bRec) const = 0;
 
-    /**
-     * \brief Compute the probability of sampling \c bRec.wo
-     * (conditioned on \c bRec.wi).
-     *
-     * This method provides access to the probability density that
-     * is realized by the \ref sample() method.
-     *
-     * \param bRec
-     *     A record with detailed information on the BSDF query
-     *
-     * \return
-     *     A probability/density value expressed with respect
-     *     to the specified measure
-     */
+		/**
+		 * \brief Compute the probability of sampling \c bRec.wo
+		 * (conditioned on \c bRec.wi).
+		 *
+		 * This method provides access to the probability density that
+		 * is realized by the \ref sample() method.
+		 *
+		 * \param bRec
+		 *     A record with detailed information on the BSDF query
+		 *
+		 * \return
+		 *     A probability/density value expressed with respect
+		 *     to the specified measure
+		 */
 
-    virtual float pdf(const BSDFQueryRecord &bRec) const = 0;
+		virtual float pdf(const BSDFQueryRecord& bRec) const = 0;
 
-    /**
-     * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
-     * provided by this instance
-     * */
-    virtual EClassType getClassType() const override { return EBSDF; }
+		virtual void normals(Intersection& its) const
+		{
+			if (!m_normal) return;
 
-    /**
-     * \brief Return whether or not this BRDF is diffuse. This
-     * is primarily used by photon mapping to decide whether
-     * or not to store photons on a surface
-     */
-    virtual bool isDiffuse() const { return false; }
-};
+			// Get to range [-1,1]
+			const Vector3f nMap = (2.f * m_normal->eval(its.uv) - Vector3f::Ones());
+			its.shFrame = Frame(nMap).toWorld(its.shFrame.n);
+		}
+
+		/**
+		 * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
+		 * provided by this instance
+		 * */
+		virtual EClassType getClassType() const override { return EBSDF; }
+
+		/**
+		 * \brief Return whether or not this BRDF is diffuse. This
+		 * is primarily used by photon mapping to decide whether
+		 * or not to store photons on a surface
+		 */
+		virtual bool isDiffuse() const { return false; }
+
+		/// Add texture for the normal
+		virtual void addChild(NoriObject* obj) override
+		{
+			switch (obj->getClassType())
+			{
+				case ETexture:
+					if (obj->getIdName() == "normal")
+						m_normal = static_cast<Texture<Vector3f>*>(obj);
+					else
+						throw NoriException("The name of this texture does not match any field!");
+					break;
+
+				default:
+					throw NoriException("Diffuse::addChild(<%s>) is not supported!",
+					                    classTypeName(obj->getClassType()));
+			}
+		}
+
+	protected:
+		Texture<Vector3f>* m_normal;
+	};
 
 NORI_NAMESPACE_END
 
