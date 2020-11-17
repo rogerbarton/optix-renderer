@@ -141,6 +141,7 @@ if(NORI_USE_GUI)
     target_sources(nori PRIVATE
       include/nori/ImguiScreen.h
       src/ImguiScreen.cpp
+      include/nori/ImguiHelpers.h
 
       include/nori/glutil.h
       src/glutil.cpp

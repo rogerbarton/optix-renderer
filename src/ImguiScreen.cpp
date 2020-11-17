@@ -1,4 +1,5 @@
 #include <nori/ImguiScreen.h>
+#include <nori/ImguiHelpers.h>
 
 #include <nori/block.h>
 #include <nori/parser.h>
