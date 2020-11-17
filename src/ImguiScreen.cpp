@@ -83,7 +83,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	m_shader->uploadAttrib("position", positions);
 }
 
-void ImguiScreen::drop(const std::string& filename)
+void ImguiScreen::drop(const std::string &filename)
 {
 	filesystem::path path = filesystem::path(filename);
 
@@ -115,13 +115,17 @@ void ImguiScreen::openXML(const std::string &filename)
 
 	try
 	{
+
+		imageOffset = Vector2i(0);
+		imageZoom = 1.f;
+
 		m_renderThread.renderScene(filename);
 
 		m_block.lock();
 		Vector2i imageSize = m_block.getSize();
 		m_block.unlock();
 
-		glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
+		//glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
 	}
 	catch (const std::exception &e)
 	{
@@ -142,6 +146,8 @@ void ImguiScreen::openEXR(const std::string &filename)
 		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
 		return;
 	}
+	imageOffset = Vector2i(0);
+	imageZoom = 1.f;
 
 	Bitmap bitmap(filename);
 
@@ -150,7 +156,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 	m_block.fromBitmap(bitmap);
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
-	glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
+	//glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
 }
 
 void ImguiScreen::resizeWindow(int width, int height)
@@ -201,10 +207,6 @@ void ImguiScreen::drawAll()
 		ImGui::EndFrame();
 
 		ImGui::Render();
-		// Potentially needed when displaying the image
-		// int framebufResx, framebufResy;
-		// glfwGetFramebufferSize(glfwWindow, &framebufResx, &framebufResy);
-		// glViewport(0, 0, framebufResx, framebufResy);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -230,7 +232,7 @@ void ImguiScreen::render()
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	m_block.unlock();
 
-	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] *imageZoom);
+	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("source", 0);
@@ -483,14 +485,21 @@ void ImguiScreen::keyReleased(int key, int mods)
 
 void ImguiScreen::mouseButtonPressed(int button, int mods) {}
 void ImguiScreen::mouseButtonReleased(int button, int mods) {}
-void ImguiScreen::mouseMove(double xpos, double ypos) {
-	if(mouseState.dragging) {
+void ImguiScreen::mouseMove(double xpos, double ypos)
+{
+	if (mouseState.dragging)
+	{
 		imageOffset(0) -= (int)mouseState.mouseMoveX;
 		imageOffset(1) -= (int)mouseState.mouseMoveY;
 	}
 }
-void ImguiScreen::scrollWheel(double xoffset, double yoffset) {
-	imageZoom /= 1.f - 0.05f*yoffset;
+void ImguiScreen::scrollWheel(double xoffset, double yoffset)
+{
+	float scale = 1.f - 0.05f * yoffset;
+	imageZoom /= scale;
+
+	imageOffset(0) = (imageOffset(0) - mouseState.lastMouseX) / scale + mouseState.lastMouseX;
+	imageOffset(1) = (imageOffset(1) - height + mouseState.lastMouseY) / scale + height - mouseState.lastMouseY;
 }
 
 void ImguiScreen::initGl()
