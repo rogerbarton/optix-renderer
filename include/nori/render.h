@@ -34,6 +34,9 @@ public:
 
     void renderScene(const std::string & filename);
 
+	inline void renderThreadMain(const std::string &outputName, const std::string &outputNameDenoised,
+	                      const std::string &outputNameVariance);
+
     bool isBusy();
     void stopRendering();
 
