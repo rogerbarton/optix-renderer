@@ -93,6 +93,10 @@ void ImguiScreen::drawAll()
 		ImGui::EndFrame();
 
 		ImGui::Render();
+		// Potentially needed when displaying the image
+		// int framebufResx, framebufResy;
+		// glfwGetFramebufferSize(glfwWindow, &framebufResx, &framebufResy);
+		// glViewport(0, 0, framebufResx, framebufResy);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
@@ -100,6 +104,7 @@ void ImguiScreen::drawAll()
 		{
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(glfwWindow);
 		}
 
 		
@@ -247,7 +252,7 @@ void ImguiScreen::initImGui()
 	ImGuiIO &imGuiIo = ImGui::GetIO();
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // do not enable viewports for now
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
