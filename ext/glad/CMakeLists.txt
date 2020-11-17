@@ -21,3 +21,15 @@ target_link_libraries(glad PUBLIC
     ${OPENGL_LIBRARIES}
     ${CMAKE_DL_LIBS}
     )
+
+if(WIN32)
+  # Workaround for Windows not looking in subdirectories for .dlls
+  get_target_property(target_type glad TYPE)
+  if(target_type STREQUAL SHARED_LIBRARY)
+    add_custom_command(
+        TARGET glad POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_BINARY_DIR})
+  endif()
+endif()

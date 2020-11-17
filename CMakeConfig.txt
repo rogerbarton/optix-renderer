@@ -128,10 +128,6 @@ if(NORI_USE_GUI)
   # -- Dear Gui (imgui) libs
   # GLAD for imgui
   add_subdirectory(ext/glad)
-  if(WIN32)
-    # Workaround for cmake not copying OpenVDB dependencies to the binary folder in debug mode
-    configure_file(${CMAKE_BINARY_DIR}/ext/glad/glad.dll ${CMAKE_BINARY_DIR}/glad.dll COPYONLY)
-  endif()
 
   # GLFW window manager
   set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW lib only")
