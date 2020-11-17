@@ -85,10 +85,10 @@ public:
 	void keyPressed(int key, int mods);
 	void keyReleased(int key, int mods);
 
-	bool mouseButtonPressed(int button, int mods);
-    bool mouseButtonReleased(int button, int mods);
-    bool mouseMove(double xpos, double ypos);
-    bool scrollWheel(double xoffset, double yoffset);
+	void mouseButtonPressed(int button, int mods);
+    void mouseButtonReleased(int button, int mods);
+    void mouseMove(double xpos, double ypos);
+    void scrollWheel(double xoffset, double yoffset);
 
 	// -- Scene loading
 	void openXML(const std::string &filename);
@@ -123,6 +123,9 @@ private:
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
 	GLShader *m_shader;
+
+	Vector2i imageOffset = Vector2i(0);
+	float imageZoom = 1.f;
 
 	/**
 	 * Draws the editable scene tree with imgui

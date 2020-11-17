@@ -230,7 +230,7 @@ void ImguiScreen::render()
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	m_block.unlock();
 
-	glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
+	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] *imageZoom);
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("source", 0);
@@ -481,10 +481,17 @@ void ImguiScreen::keyReleased(int key, int mods)
 {
 }
 
-bool ImguiScreen::mouseButtonPressed(int button, int mods) {}
-bool ImguiScreen::mouseButtonReleased(int button, int mods) {}
-bool ImguiScreen::mouseMove(double xpos, double ypos) {}
-bool ImguiScreen::scrollWheel(double xoffset, double yoffset) {}
+void ImguiScreen::mouseButtonPressed(int button, int mods) {}
+void ImguiScreen::mouseButtonReleased(int button, int mods) {}
+void ImguiScreen::mouseMove(double xpos, double ypos) {
+	if(mouseState.dragging) {
+		imageOffset(0) -= (int)mouseState.mouseMoveX;
+		imageOffset(1) -= (int)mouseState.mouseMoveY;
+	}
+}
+void ImguiScreen::scrollWheel(double xoffset, double yoffset) {
+	imageZoom /= 1.f - 0.05f*yoffset;
+}
 
 void ImguiScreen::initGl()
 {
