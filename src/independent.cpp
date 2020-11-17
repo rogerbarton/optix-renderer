@@ -83,7 +83,8 @@ public:
     {
         // Independent sampler simply takes all pixels once
         Vector2i size = block.getSize();
-        std::vector<std::pair<int, int>> result(size.x() * size.y());
+        std::vector<std::pair<int, int>> result;
+        result.reserve(size.x() * size.y());
 
         for (int i = 0; i < size.x(); i++)
         {

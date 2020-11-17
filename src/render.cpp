@@ -87,7 +87,6 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
     const Integrator *integrator = scene->getIntegrator();
 
     Point2i offset = block.getOffset();
-    Vector2i size = block.getSize();
 
     /* Clear the block contents */
     block.clear();
@@ -102,8 +101,8 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
         for (int i = range.begin(); i < range.end(); i++)
         {
             std::pair<int, int> pair = sampleIndices[i];
-            int x = pair.second;
-            int y = pair.first;
+            int x = pair.first;
+            int y = pair.second;
             Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
             Point2f apertureSample = sampler->next2D();
 
@@ -320,11 +319,6 @@ void RenderThread::renderScene(const std::string &filename)
                 {
                     tbb::parallel_for(range, map);
                 }
-
-                /// Uncomment the following line for single threaded rendering
-                //map(range);
-
-                /// Default: parallel rendering
 
                 blockGenerator.reset();
             }
