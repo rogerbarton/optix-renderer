@@ -66,14 +66,6 @@ public:
 	void openXML(const std::string &filename);
 	void openEXR(const std::string &filename);
 
-	// -- GLFW window callbacks
-	void mouseButtonCallback(int button, int action, int mods);
-	void cursorPosCallback(double xpos, double ypos);
-	void windowSizeCallback(int32_t xres, int32_t yres);
-	void windowIconifyCallback(int32_t iconified);
-	void keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/);
-	void scrollCallback(double xscroll, double yscroll);
-
 private:
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
