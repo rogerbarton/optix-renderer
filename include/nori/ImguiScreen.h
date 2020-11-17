@@ -97,6 +97,8 @@ private:
 	KeyboardState keyboardState;
 
 	ImGui::FileBrowser filebrowser;
+
+	bool renderImage = false;
 };
 
 NORI_NAMESPACE_END

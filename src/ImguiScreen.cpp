@@ -52,6 +52,8 @@ void ImguiScreen::openEXR(const std::string &filename)
 	m_block.fromBitmap(bitmap);
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
+
+	renderImage = true;
 }
 
 void ImguiScreen::resizeWindow(int width, int height)
@@ -120,6 +122,9 @@ void ImguiScreen::drawAll()
 void ImguiScreen::render()
 {
 	// draws the tonemapped image to screen
+	if(renderImage) {
+		std::cout << "Render imge" << std::endl;
+	}
 }
 
 void ImguiScreen::draw()
@@ -162,10 +167,9 @@ void ImguiScreen::draw()
 	if (filebrowser.HasSelected())
 	{
 		std::string extension = filebrowser.GetSelected().extension();
-
-		if(extension == "xml") {
+		if(extension == ".xml") {
 			openXML(filebrowser.GetSelected().string());
-		} else if(extension == "exr") {
+		} else if(extension == ".exr") {
 			openEXR(filebrowser.GetSelected().string());
 		}
  		filebrowser.ClearSelected();
