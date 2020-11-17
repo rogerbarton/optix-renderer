@@ -1,15 +1,8 @@
-#include <nori/DebugGui.h>
+#include <nori/ImguiScreen.h>
 
 #include <nori/block.h>
 #include <nori/parser.h>
 #include <nori/bitmap.h>
-
-/*#include <imgui/imconfig.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
-*/
 #include <map>
 #include <algorithm>
 
@@ -28,7 +21,26 @@ float get_pixel_ratio()
 	return xscale;
 }
 
-DebugGui::DebugGui(ImageBlock &block) : m_block(block), m_renderThread(m_block)
+void ImguiScreen::mainloop()
+{
+	while (!glfwWindowShouldClose(glfwWindow))
+	{
+		draw();
+#ifdef SINGLE_BUFFER
+		glFlush();
+#else
+		glfwSwapBuffers(glfwWindow);
+#endif
+		glfwPollEvents();
+	}
+	glfwTerminate();
+}
+
+void ImguiScreen::draw(){
+
+}
+
+ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 {
 	width = block.cols();
 	height = block.rows();
@@ -37,7 +49,7 @@ DebugGui::DebugGui(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 	initImGui();
 }
 
-void DebugGui::newFrame()
+void ImguiScreen::newFrame()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -73,7 +85,7 @@ void DebugGui::newFrame()
 	}
 }
 
-void DebugGui::endFrame()
+void ImguiScreen::endFrame()
 {
 	if (uiShowDebugWindow)
 	{
@@ -121,10 +133,10 @@ static void errorCallback(int error, const char *description)
 // -- GLFW window callbacks
 static void keyCallbackStub(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
 {
-	static_cast<DebugGui *>(glfwGetWindowUserPointer(window))->keyCallback(key, scancode, action, mods);
+	static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window))->keyCallback(key, scancode, action, mods);
 }
 
-void DebugGui::keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/)
+void ImguiScreen::keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/)
 {
 	if (action == GLFW_PRESS)
 	{
@@ -134,7 +146,7 @@ void DebugGui::keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, in
 }
 // -- End of GLFW window callbacks
 
-void DebugGui::initGlfw(const char *windowTitle, int width, int height)
+void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 {
 	glfwWindow = nullptr;
 	glfwSetErrorCallback(errorCallback);
@@ -143,6 +155,11 @@ void DebugGui::initGlfw(const char *windowTitle, int width, int height)
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+#ifdef SINGLE_BUFFER
+	glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE); // turn off framerate limit
+#endif
+
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make Apple happy -- should not be needed
 #endif
@@ -160,9 +177,8 @@ void DebugGui::initGlfw(const char *windowTitle, int width, int height)
 	glfwSetKeyCallback(glfwWindow, keyCallbackStub);
 }
 
-void DebugGui::initGl()
+void ImguiScreen::initGl()
 {
-
 	// #if defined(WIN32)
 	// 	static bool glewInitialized = false;
 	// 	if (!glewInitialized)
@@ -175,12 +191,13 @@ void DebugGui::initGl()
 	// GL_CHECK(glClearColor(0.212f, 0.271f, 0.31f, 1.0f));
 	// GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
 	// #endif
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw std::runtime_error("Failed to initialize GLAD");
-    }
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		throw std::runtime_error("Failed to initialize GLAD");
+	}
 }
 
-void DebugGui::initImGui()
+void ImguiScreen::initImGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

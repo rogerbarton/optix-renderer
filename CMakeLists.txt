@@ -131,8 +131,8 @@ if(NORI_USE_GUI)
           include/nori/gui.h
           src/gui.cpp
 
-          include/nori/DebugGui.h
-          src/DebugGui.cpp
+          include/nori/ImguiScreen.h
+          src/ImguiScreen.cpp
           )
 
   # The following lines build the warping test application

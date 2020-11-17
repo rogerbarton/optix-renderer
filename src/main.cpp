@@ -18,99 +18,75 @@
 
 #include <nori/block.h>
 #ifndef DISABLE_NORI_GUI
+
+
 //#  define USE_NANOGUI   // Toggles betweeen the standard nanogui nori viewer and imgui viewer
-#  ifdef USE_NANOGUI
-#    include <nori/gui.h>
-#  else
-#    include <nori/DebugGui.h>
-#    include <GLFW/glfw3.h>
-#  endif
+
+#ifdef USE_NANOGUI
+  #include <nori/gui.h>
 #else
-  #include <nori/render.h>
-#endif
+  #include <nori/ImguiScreen.h>
+#endif /* USE_NANOGUI */
+
+
+#else /* DISABLE_NORI_GUI */
+#include <nori/render.h>
+#endif /* DISABLE_NORI_GUI */
 #include <filesystem/path.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     using namespace nori;
 
-    try {
+    try
+    {
 #ifndef DISABLE_NORI_GUI
-#  ifdef USE_NANOGUI
-        nanogui::init();
 
-        // Open the UI with a dummy image
         ImageBlock block(Vector2i(720, 720), nullptr);
+#ifdef USE_NANOGUI
+        nanogui::init();
         NoriScreen *screen = new NoriScreen(block);
+#else
+        ImguiScreen *screen = new ImguiScreen(block);
+#endif /* USE_NANOGUI */
 
         // if file is passed as argument, handle it
-        if (argc == 2) {
+        if (argc == 2)
+        {
             std::string filename = argv[1];
             filesystem::path path(filename);
 
-            if (path.extension() == "xml") {
+            if (path.extension() == "xml")
+            {
                 /* Render the XML scene file */
                 screen->openXML(filename);
-            } else if (path.extension() == "exr") {
+            }
+            else if (path.extension() == "exr")
+            {
                 /* Alternatively, provide a basic OpenEXR image viewer */
                 screen->openEXR(filename);
-            } else {
+            }
+            else
+            {
                 cerr << "Error: unknown file \"" << filename
-                << "\", expected an extension of type .xml or .exr" << endl;
+                     << "\", expected an extension of type .xml or .exr" << endl;
             }
         }
 
+#ifdef USE_NANOGUI
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();
-#  else
-        ImageBlock block(Vector2i(720, 720), nullptr);
-		DebugGui gui{block};
-
-	    // if file is passed as argument, handle it
-	    if (argc == 2) {
-		    std::string filename = argv[1];
-		    filesystem::path path(filename);
-
-		    if (path.extension() == "xml") {
-			    /* Render the XML scene file */
-			    gui.openXML(filename);
-		    } else if (path.extension() == "exr") {
-			    /* Alternatively, provide a basic OpenEXR image viewer */
-			    gui.openEXR(filename);
-		    } else {
-			    cerr << "Error: unknown file \"" << filename
-			         << "\", expected an extension of type .xml or .exr" << endl;
-		    }
-	    }
-
-	    // TODO: render and ui draw loop
-	    while(!glfwWindowShouldClose(gui.glfwWindow))
-        {
-            gui.newFrame();
-
-            gui.endFrame();
-        }
-#  endif
 #else
-        if (argc == 2) {
-            ImageBlock block(Vector2i(720, 720), nullptr);
-            RenderThread m_renderThread(block);
-            std::string filename = argv[1];
-            filesystem::path path(filename);
+        screen->mainloop();
+        delete screen;
 
-            if (path.extension() == "xml") {
-                /* Render the XML scene file */
-                m_renderThread.renderScene(filename);
-                // waiting until rendere is finished
-                while(m_renderThread.isBusy());
-            } else {
-                cerr << "Error: unknown file \"" << filename
-                << "\", expected an extension of type .xml" << endl;
-            }
-        }
-#endif
+#endif /* USE_NANOGUI */
 
-    } catch (const std::exception &e) {
+#endif /* DISABLE_NOR_GUI */
+    }
+    catch (const std::exception &e)
+    {
         cerr << "Fatal error: " << e.what() << endl;
         return -1;
     }
