@@ -120,7 +120,7 @@ void ImguiScreen::openXML(const std::string &filename)
 
 		m_block.lock();
 		Vector2i bsize = m_block.getSize();
-		imageZoom = std::min(std::min(width / (float)bsize(0), height / (float)bsize(1)), 1.f) - 0.05f;
+		imageZoom = std::max(std::min(width / (float)bsize(0), height / (float)bsize(1)), 0.1f) - 0.05f;
 
 		imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
 		imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
@@ -156,7 +156,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
 
-	imageZoom = std::min(std::min(width / (float)bsize(0), height / (float)bsize(1)), 1.f) - 0.05f;
+	imageZoom = std::max(std::min(width / (float)bsize(0), height / (float)bsize(1)), 0.1f) - 0.05f;
 
 	imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
 	imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
