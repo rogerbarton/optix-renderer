@@ -85,9 +85,15 @@ public:
 	void keyPressed(int key, int mods);
 	void keyReleased(int key, int mods);
 
+	bool mouseButtonPressed(int button, int mods);
+    bool mouseButtonReleased(int button, int mods);
+    bool mouseMove(double xpos, double ypos);
+    bool scrollWheel(double xoffset, double yoffset);
+
 	// -- Scene loading
 	void openXML(const std::string &filename);
 	void openEXR(const std::string &filename);
+	void drop(const std::string& filename);
 
 private:
 	// -- Window state, this must be public for the main.cpp file

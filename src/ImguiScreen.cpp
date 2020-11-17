@@ -5,6 +5,7 @@
 #include <nori/bitmap.h>
 #include <map>
 #include <algorithm>
+#include <filesystem/path.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -35,7 +36,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
 
 	filebrowser.SetTitle("Save as");
-	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
+	filebrowserSave.SetPwd(std::filesystem::relative("../scenes/project"));
 
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -80,6 +81,27 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	m_shader->bind();
 	m_shader->uploadIndices(indices);
 	m_shader->uploadAttrib("position", positions);
+}
+
+void ImguiScreen::drop(const std::string& filename)
+{
+	filesystem::path path = filesystem::path(filename);
+
+	if (path.extension() == "xml")
+	{
+		/* Render the XML scene file */
+		openXML(filename);
+	}
+	else if (path.extension() == "exr")
+	{
+		/* Alternatively, provide a basic OpenEXR image viewer */
+		openEXR(filename);
+	}
+	else
+	{
+		cerr << "Error: unknown file \"" << filename
+			 << "\", expected an extension of type .xml or .exr" << endl;
+	}
 }
 
 void ImguiScreen::openXML(const std::string &filename)
@@ -338,13 +360,70 @@ void ImguiScreen::setCallbacks()
 		if (action == GLFW_RELEASE)
 			app->keyReleased(key, mods);
 	});
+
+	glfwSetMouseButtonCallback(glfwWindow, [](GLFWwindow *window, int button,
+											  int action, int mods) {
+		double xPos, yPos;
+		glfwGetCursorPos(window, &xPos, &yPos);
+#if RETINA_SCREEN == 1
+		xPos *= 2;
+		yPos *= 2;
+#endif
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->mouseState.onMouseClick(xPos, yPos, button, action, mods);
+
+		if (ImGui::GetIO().WantCaptureMouse)
+		{
+			ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+			return;
+		}
+
+		if (action == GLFW_PRESS)
+			app->mouseButtonPressed(button, mods);
+
+		if (action == GLFW_RELEASE)
+			app->mouseButtonReleased(button, mods);
+	});
+
+	glfwSetCursorPosCallback(glfwWindow, [](GLFWwindow *window, double xpos,
+											double ypos) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+#if RETINA_SCREEN == 1
+		xpos *= 2;
+		ypos *= 2;
+#endif
+		app->mouseState.onMouseMove(xpos, ypos);
+
+		if (ImGui::GetIO().WantCaptureMouse)
+			return;
+
+		app->mouseMove(xpos, ypos);
+	});
+
+	glfwSetScrollCallback(glfwWindow, [](GLFWwindow *window, double xoffset,
+										 double yoffset) {
+		if (ImGui::GetIO().WantCaptureMouse)
+		{
+			ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+			return;
+		}
+
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->scrollWheel(xoffset, yoffset);
+	});
+
+	glfwSetDropCallback(glfwWindow, [](GLFWwindow *window, int count,
+									   const char **filenames) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		std::string file(filenames[0]);
+		app->drop(file);
+	});
 }
 
 static void errorCallback(int error, const char *description)
 {
 	std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
-// -- End of GLFW window callbacks
 
 void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 {
@@ -401,6 +480,11 @@ void ImguiScreen::keyPressed(int key, int mods)
 void ImguiScreen::keyReleased(int key, int mods)
 {
 }
+
+bool ImguiScreen::mouseButtonPressed(int button, int mods) {}
+bool ImguiScreen::mouseButtonReleased(int button, int mods) {}
+bool ImguiScreen::mouseMove(double xpos, double ypos) {}
+bool ImguiScreen::scrollWheel(double xoffset, double yoffset) {}
 
 void ImguiScreen::initGl()
 {
