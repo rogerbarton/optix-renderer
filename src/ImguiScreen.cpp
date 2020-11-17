@@ -61,9 +61,6 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 				   "    color *= scale / color.w;\n"
 				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
 				   "}");
-	MatrixXu indices(3, 2); /* Draw 2 triangles */
-	indices.col(0) << 0, 1, 2;
-	indices.col(1) << 2, 3, 0;
 
 	MatrixXf positions(2, 4);
 	positions.col(0) << 0, 0;
@@ -202,12 +199,12 @@ void ImguiScreen::render()
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	m_block.unlock();
 
-	glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
+	glViewport(drawOffset[0], drawOffset[1], get_pixel_ratio() * (size[0] + drawOffset[0]), get_pixel_ratio() * (size[1] + drawOffset[1]));
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("source", 0);
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, width, height); // reset viewport
 }
 
 void ImguiScreen::draw()
@@ -242,15 +239,17 @@ void ImguiScreen::draw()
 			ImGui::EndMenu();
 		}
 		ImGui::MenuItem("Scene", "D", &uiShowSceneWindow);
-		
-		if(ImGui::BeginMenu("Rendering")) {
+
+		if (ImGui::BeginMenu("Rendering"))
+		{
 			ImGui::ProgressBar(m_renderThread.getProgress());
-			if(ImGui::Button("Stop")) {
+			if (ImGui::Button("Stop"))
+			{
 				m_renderThread.stopRendering();
 			}
 			ImGui::EndMenu();
 		}
-		
+
 		ImGui::EndMainMenuBar();
 	}
 
@@ -352,6 +351,57 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
 		app->resizeWindow(width, height);
 	});
+
+	glfwSetMouseButtonCallback(glfwWindow, [](GLFWwindow *window, int button,
+											  int action, int mods) {
+		double xPos, yPos;
+		glfwGetCursorPos(window, &xPos, &yPos);
+#if RETINA_SCREEN == 1
+		xPos *= 2;
+		yPos *= 2;
+#endif
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->mouseState.onMouseClick(xPos, yPos, button, action, mods);
+
+		if (ImGui::GetIO().WantCaptureMouse)
+		{
+			ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+			return;
+		}
+
+		if (action == GLFW_PRESS)
+			app->mouseButtonPressed(button, mods);
+
+		if (action == GLFW_RELEASE)
+			app->mouseButtonReleased(button, mods);
+	});
+
+	glfwSetCursorPosCallback(glfwWindow, [](GLFWwindow *window, double xpos,
+											double ypos) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+#if RETINA_SCREEN == 1
+		xpos *= 2;
+		ypos *= 2;
+#endif
+		app->mouseState.onMouseMove(xpos, ypos);
+
+		if (ImGui::GetIO().WantCaptureMouse)
+			return;
+
+		app->mouseMove(xpos, ypos);
+	});
+
+	glfwSetScrollCallback(glfwWindow, [](GLFWwindow *window, double xoffset,
+										 double yoffset) {
+		if (ImGui::GetIO().WantCaptureMouse)
+		{
+			ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+			return;
+		}
+
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->scrollWheel(xoffset, yoffset);
+	});
 }
 
 void ImguiScreen::keyPressed(int key, int mods)
@@ -368,6 +418,22 @@ void ImguiScreen::keyPressed(int key, int mods)
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
+{
+}
+
+void ImguiScreen::scrollWheel(float xoffset, float yoffset)
+{
+	// use xoffset to control the zoom
+	m_scale += yoffset;
+}
+
+void ImguiScreen::mouseButtonPressed(int button, int mods)
+{
+}
+void ImguiScreen::mouseButtonReleased(int button, int mods)
+{
+}
+void ImguiScreen::mouseMove(float xpos, float ypos)
 {
 }
 
