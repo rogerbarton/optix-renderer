@@ -31,10 +31,30 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
+	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
 }
 
 void ImguiScreen::openXML(const std::string& filename) {
-	// TODO
+	if (m_renderThread.isBusy())
+	{
+		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
+		// TODO: stop rendering and load the xml?
+		return;
+	}
+
+	try
+	{
+		m_renderThread.renderScene(filename);
+
+		m_block.lock();
+		Vector2i imageSize = m_block.getSize();
+		m_block.unlock();
+
+		glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
+	} catch (const std::exception& e)
+	{
+		cerr << "Fatal error: " << e.what() << endl;
+	}
 }
 
 void ImguiScreen::openEXR(const std::string &filename)
@@ -145,13 +165,11 @@ void ImguiScreen::draw()
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("Open...", "Ctrl+O"))
-			{
 				filebrowser.Open();
-			}
-			if (ImGui::MenuItem("Save"))
+			if (ImGui::MenuItem("Save EXR"))
 			{
 			}
-			if (ImGui::MenuItem("Save As..."))
+			if (ImGui::MenuItem("Save PNG (tonemapped)"))
 			{
 			}
 			if (ImGui::MenuItem("Settings..."))
@@ -160,7 +178,7 @@ void ImguiScreen::draw()
 			ImGui::MenuItem("Gui Demo", "Alt+D", &uiShowDemoWindow);
 			ImGui::EndMenu();
 		}
-		ImGui::MenuItem("Debug", "D", &uiShowDebugWindow);
+		ImGui::MenuItem("Scene", "D", &uiShowSceneWindow);
 		ImGui::EndMainMenuBar();
 	}
 
@@ -169,13 +187,28 @@ void ImguiScreen::draw()
 
 	if (filebrowser.HasSelected())
 	{
-		std::string extension = filebrowser.GetSelected().extension();
+		std::string extension = filebrowser.GetSelected().extension().string();
 		if(extension == ".xml") {
 			openXML(filebrowser.GetSelected().string());
 		} else if(extension == ".exr") {
 			openEXR(filebrowser.GetSelected().string());
 		}
  		filebrowser.ClearSelected();
+	}
+
+	if(uiShowSceneWindow)
+	{
+		ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Hello There", &uiShowSceneWindow))
+		{
+			if (ImGui::Button("Reset Camera")){}
+
+			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+
+			}
+		}
+		ImGui::End();
 	}
 }
 
@@ -247,8 +280,16 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if (key == GLFW_KEY_D && mods == GLFW_MOD_ALT)
-		uiShowDemoWindow = !uiShowDemoWindow;
+	if(key == GLFW_KEY_O && mods == GLFW_MOD_CONTROL)
+		filebrowser.Open();
+	else if (key == GLFW_KEY_D)
+	{
+		if (mods == GLFW_MOD_ALT)
+			uiShowDemoWindow = !uiShowDemoWindow;
+		else
+			uiShowSceneWindow = !uiShowSceneWindow;
+	}
+
 }
 
 void ImguiScreen::keyReleased(int key, int mods)

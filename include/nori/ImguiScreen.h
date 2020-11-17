@@ -42,8 +42,8 @@ class ImguiScreen
 {
 public:
 	ImguiScreen(ImageBlock &block);
-	bool uiShowDemoWindow = false;
-	bool uiShowDebugWindow = true;
+	bool uiShowDemoWindow  = false;
+	bool uiShowSceneWindow = true;
 
 	void initGlfw(const char *windowTitle, int width, int height);
 	void initGl();
