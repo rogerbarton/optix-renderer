@@ -8,7 +8,6 @@
 
 NORI_NAMESPACE_BEGIN
 
-
 float get_pixel_ratio()
 {
 #if RETINA_SCREEN == 1
@@ -77,7 +76,6 @@ void ImguiScreen::drawAll()
 		draw();
 
 		ImGui::EndFrame();
-		ImGui::UpdatePlatformWindows();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
@@ -93,9 +91,9 @@ void ImguiScreen::draw()
 
 	if (uiShowDemoWindow)
 	{
-		//ImGui::ShowDemoWindow(&uiShowDemoWindow);
+		ImGui::ShowDemoWindow(&uiShowDemoWindow);
 
-		ImGui::ShowUserGuide();
+		//ImGui::ShowUserGuide();
 	}
 
 	if (ImGui::BeginMainMenuBar())
@@ -125,12 +123,6 @@ void ImguiScreen::draw()
 static void errorCallback(int error, const char *description)
 {
 	std::cerr << "GLFW Error " << error << ": " << description << std::endl;
-}
-
-// -- GLFW window callbacks
-static void keyCallbackStub(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
-{
-	static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window))->keyCallback(key, scancode, action, mods);
 }
 
 void ImguiScreen::keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/)
@@ -240,19 +232,9 @@ void ImguiScreen::initImGui()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO &imGuiIo = ImGui::GetIO();
-	(void)imGuiIo;
-	imGuiIo.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	imGuiIo.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	imGuiIo.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
 	ImGui::StyleColorsDark();
 
 	ImGuiStyle &imGuiStyle = ImGui::GetStyle();
-	if (imGuiIo.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		imGuiStyle.WindowRounding = 0.f;
-		imGuiStyle.Colors[ImGuiCol_WindowBg].w = 1.f;
-	}
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);
 	const char *glsl_version = "#version 150";
