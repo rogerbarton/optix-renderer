@@ -1,11 +1,14 @@
 #pragma once
-//#include <GL/glew.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/filebrowser.h>
+
 #include <nori/common.h>
 #include <nori/render.h>
 #include <map>
@@ -60,7 +63,7 @@ public:
 	void keyReleased(int key, int mods);
 
 	// -- Scene loading
-	void openXML(const std::string &filename) {}
+	void openXML(const std::string &filename);
 	void openEXR(const std::string &filename);
 
 	// -- GLFW window callbacks
@@ -92,6 +95,8 @@ private:
 	float clearColor[3] = {0.8f, 0.8f, 0.8f};
 
 	KeyboardState keyboardState;
+
+	ImGui::FileBrowser filebrowser;
 };
 
 NORI_NAMESPACE_END

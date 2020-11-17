@@ -28,21 +28,30 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	initGlfw("ENori - Enhanced Nori", width, height);
 	initGl();
 	initImGui();
+
+	filebrowser.SetTitle("Open File");
+	filebrowser.SetTypeFilters({".xml", ".exr"});
 }
 
-void ImguiScreen::openEXR(const std::string& filename) {
-	if(m_renderThread.isBusy()) {
-        cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
-        return;
-    }
+void ImguiScreen::openXML(const std::string& filename) {
+	// TODO
+}
 
-    Bitmap bitmap(filename);
+void ImguiScreen::openEXR(const std::string &filename)
+{
+	if (m_renderThread.isBusy())
+	{
+		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
+		return;
+	}
 
-    m_block.lock();
-    m_block.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
-    m_block.fromBitmap(bitmap);
-    Vector2i bsize = m_block.getSize();
-    m_block.unlock();
+	Bitmap bitmap(filename);
+
+	m_block.lock();
+	m_block.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
+	m_block.fromBitmap(bitmap);
+	Vector2i bsize = m_block.getSize();
+	m_block.unlock();
 }
 
 void ImguiScreen::resizeWindow(int width, int height)
@@ -99,15 +108,12 @@ void ImguiScreen::drawAll()
 		// glViewport(0, 0, framebufResx, framebufResy);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(glfwWindow);
 		}
-
-		
 	}
 }
 
@@ -132,6 +138,7 @@ void ImguiScreen::draw()
 		{
 			if (ImGui::MenuItem("Open...", "Ctrl+O"))
 			{
+				filebrowser.Open();
 			}
 			if (ImGui::MenuItem("Save"))
 			{
@@ -147,6 +154,21 @@ void ImguiScreen::draw()
 		}
 		ImGui::MenuItem("Debug", "D", &uiShowDebugWindow);
 		ImGui::EndMainMenuBar();
+	}
+
+	// handle filedialog
+	filebrowser.Display();
+
+	if (filebrowser.HasSelected())
+	{
+		std::string extension = filebrowser.GetSelected().extension();
+
+		if(extension == "xml") {
+			openXML(filebrowser.GetSelected().string());
+		} else if(extension == "exr") {
+			openEXR(filebrowser.GetSelected().string());
+		}
+ 		filebrowser.ClearSelected();
 	}
 }
 
