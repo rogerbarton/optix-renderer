@@ -31,6 +31,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
+	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
 
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -38,7 +39,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	// init shader
-	m_shader = new nanogui::GLShader();
+	m_shader = new GLShader();
 	m_shader->init("Tonemapper", "#version 330\n"
 								 "in vec2 position;\n"
 								 "out vec2 uv;\n"
@@ -62,6 +63,10 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
 				   "}");
 
+	MatrixXu indices(3, 2); /* Draw 2 triangles */
+	indices.col(0) << 0, 1, 2;
+	indices.col(1) << 2, 3, 0;
+
 	MatrixXf positions(2, 4);
 	positions.col(0) << 0, 0;
 	positions.col(1) << 1, 0;
@@ -71,6 +76,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	m_shader->bind();
 	m_shader->uploadIndices(indices);
 	m_shader->uploadAttrib("position", positions);
+
 }
 
 void ImguiScreen::openXML(const std::string &filename)
@@ -199,7 +205,7 @@ void ImguiScreen::render()
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	m_block.unlock();
 
-	glViewport(drawOffset[0], drawOffset[1], get_pixel_ratio() * (size[0] + drawOffset[0]), get_pixel_ratio() * (size[1] + drawOffset[1]));
+	glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("source", 0);
@@ -212,13 +218,6 @@ void ImguiScreen::draw()
 	// Enable docking in the main window, do not clear it so we can see the image behind
 	ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode |
 										   ImGuiDockNodeFlags_NoDockingInCentralNode);
-
-	if (uiShowDemoWindow)
-	{
-		ImGui::ShowDemoWindow(&uiShowDemoWindow);
-
-		//ImGui::ShowUserGuide();
-	}
 
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -235,20 +234,9 @@ void ImguiScreen::draw()
 			if (ImGui::MenuItem("Settings..."))
 			{
 			}
-			ImGui::MenuItem("Gui Demo", "Alt+D", &uiShowDemoWindow);
 			ImGui::EndMenu();
 		}
 		ImGui::MenuItem("Scene", "D", &uiShowSceneWindow);
-
-		if (ImGui::BeginMenu("Rendering"))
-		{
-			ImGui::ProgressBar(m_renderThread.getProgress());
-			if (ImGui::Button("Stop"))
-			{
-				m_renderThread.stopRendering();
-			}
-			ImGui::EndMenu();
-		}
 
 		ImGui::EndMainMenuBar();
 	}
@@ -258,7 +246,7 @@ void ImguiScreen::draw()
 
 	if (filebrowser.HasSelected())
 	{
-		std::string extension = filebrowser.GetSelected().extension();
+		std::string extension = filebrowser.GetSelected().extension().string();
 		if (extension == ".xml")
 		{
 			openXML(filebrowser.GetSelected().string());
@@ -273,11 +261,25 @@ void ImguiScreen::draw()
 	if (uiShowSceneWindow)
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("Hello There", &uiShowSceneWindow))
+		if (ImGui::Begin("Scene Controller", &uiShowSceneWindow))
 		{
-			if (ImGui::Button("Reset Camera"))
-			{
-			}
+			ImGui::Text("Render");
+			ImGui::SameLine();
+			ImGui::ProgressBar(m_renderThread.getProgress());
+
+			if(ImGui::Button("Stop Render"))
+				m_renderThread.stopRendering();
+
+			if (ImGui::Button("Reset Camera")){}
+
+			static float exposureLog = 0.5f;
+			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
+			ImGui::SameLine();
+			if(ImGui::Button("Reset"))
+				exposureLog = 0.5f;
+			m_scale = std::pow(2.f, (exposureLog - 0.5f) * 20);
+
+			drawSceneTree();
 
 			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
 			{
@@ -352,56 +354,36 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 		app->resizeWindow(width, height);
 	});
 
-	glfwSetMouseButtonCallback(glfwWindow, [](GLFWwindow *window, int button,
-											  int action, int mods) {
-		double xPos, yPos;
-		glfwGetCursorPos(window, &xPos, &yPos);
-#if RETINA_SCREEN == 1
-		xPos *= 2;
-		yPos *= 2;
-#endif
+	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
+									  int action, int mods) {
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->mouseState.onMouseClick(xPos, yPos, button, action, mods);
+		app->keyboardState[key] = (action != GLFW_RELEASE);
 
-		if (ImGui::GetIO().WantCaptureMouse)
+		if (ImGui::GetIO().WantCaptureKeyboard ||
+			ImGui::GetIO().WantTextInput)
 		{
-			ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+			return;
+		}
+
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			glfwSetWindowShouldClose(window, GL_TRUE);
 			return;
 		}
 
 		if (action == GLFW_PRESS)
-			app->mouseButtonPressed(button, mods);
-
+			app->keyPressed(key, mods);
 		if (action == GLFW_RELEASE)
-			app->mouseButtonReleased(button, mods);
+			app->keyReleased(key, mods);
 	});
 
-	glfwSetCursorPosCallback(glfwWindow, [](GLFWwindow *window, double xpos,
-											double ypos) {
+	glfwSetFramebufferSizeCallback(glfwWindow, [](GLFWwindow *window, int width,
+												  int height) {
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-#if RETINA_SCREEN == 1
-		xpos *= 2;
-		ypos *= 2;
-#endif
-		app->mouseState.onMouseMove(xpos, ypos);
-
-		if (ImGui::GetIO().WantCaptureMouse)
-			return;
-
-		app->mouseMove(xpos, ypos);
+		app->resizeWindow(width, height);
 	});
 
-	glfwSetScrollCallback(glfwWindow, [](GLFWwindow *window, double xoffset,
-										 double yoffset) {
-		if (ImGui::GetIO().WantCaptureMouse)
-		{
-			ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-			return;
-		}
-
-		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->scrollWheel(xoffset, yoffset);
-	});
 }
 
 void ImguiScreen::keyPressed(int key, int mods)
@@ -415,25 +397,12 @@ void ImguiScreen::keyPressed(int key, int mods)
 		else
 			uiShowSceneWindow = !uiShowSceneWindow;
 	}
+	else if(key == GLFW_KEY_Z && GLFW_MOD_CONTROL)
+		m_renderThread.stopRendering();
+
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
-{
-}
-
-void ImguiScreen::scrollWheel(float xoffset, float yoffset)
-{
-	// use xoffset to control the zoom
-	m_scale += yoffset;
-}
-
-void ImguiScreen::mouseButtonPressed(int button, int mods)
-{
-}
-void ImguiScreen::mouseButtonReleased(int button, int mods)
-{
-}
-void ImguiScreen::mouseMove(float xpos, float ypos)
 {
 }
 
@@ -465,6 +434,55 @@ void ImguiScreen::initImGui()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
+}
+
+void ImguiScreen::drawSceneTree()
+{
+	// Start columns
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Columns(2);
+
+	int uid = 0;
+	ImGui::PushID(uid);
+	ImGui::AlignTextToFramePadding();
+	bool node_open = ImGui::TreeNode("Object", "%s_%u", "Object", uid);
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::Text("my sailor is rich");
+	ImGui::NextColumn();
+	if (node_open)
+	{
+		static float placeholder_members[8] = {0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f};
+
+		for (int i = 0; i < 8; i++)
+		{
+			ImGui::PushID(i); // Use field index as identifier.
+			{
+				// Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
+				ImGui::AlignTextToFramePadding();
+				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+				                           ImGuiTreeNodeFlags_Bullet;
+				ImGui::TreeNodeEx("Field", flags, "Field_%d", i);
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+				if (i >= 5)
+					ImGui::InputFloat("##value", &placeholder_members[i], 1.0f);
+				else
+					ImGui::DragFloat("##value", &placeholder_members[i], 0.01f);
+				ImGui::NextColumn();
+			}
+			ImGui::PopID();
+		}
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+
+	// end columns
+	ImGui::Columns(1);
+	ImGui::Separator();
+	ImGui::PopStyleVar();
 }
 
 NORI_NAMESPACE_END

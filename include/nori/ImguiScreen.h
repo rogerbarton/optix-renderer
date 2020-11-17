@@ -11,7 +11,7 @@
 
 #include <nori/common.h>
 #include <nori/render.h>
-#include <nanogui/glutil.h>
+#include <nori/glutil.h>
 #include <map>
 
 NORI_NAMESPACE_BEGIN
@@ -67,9 +67,6 @@ public:
 	ImguiScreen(ImageBlock &block);
 	~ImguiScreen();
 
-	bool uiShowDemoWindow = false;
-	bool uiShowSceneWindow = true;
-
 	void initGlfw(const char *windowTitle, int width, int height);
 	void initGl();
 	void initImGui();
@@ -86,10 +83,6 @@ public:
 
 	void keyPressed(int key, int mods);
 	void keyReleased(int key, int mods);
-	void scrollWheel(float xoffset, float yoffset);
-	void mouseMove(float xpos, float ypos);
-	void mouseButtonPressed(int button, int mods);
-	void mouseButtonReleased(int button, int mods);
 
 	// -- Scene loading
 	void openXML(const std::string &filename);
@@ -98,8 +91,9 @@ public:
 private:
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
+	bool uiShowSceneWindow = true;
 
-	bool _minimizedWindow = false;
+	bool _minimizedWindow = false; // is this actually needed?
 
 	int width;
 	int height;
@@ -109,8 +103,6 @@ private:
 
 	// -- Render State
 	ImageBlock &m_block;
-	//unsigned int &_imageWidth;
-	//unsigned int &_imageHeight;
 	RenderThread m_renderThread;
 
 	float clearColor[3] = {0.8f, 0.8f, 0.8f};
@@ -122,8 +114,12 @@ private:
 
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
-	Vector2i drawOffset = Vector2i(0);
-	Shader *m_shader;
+	GLShader *m_shader;
+
+	/**
+	 * Draws the editable scene tree with imgui
+	 */
+	void drawSceneTree();
 };
 
 NORI_NAMESPACE_END
