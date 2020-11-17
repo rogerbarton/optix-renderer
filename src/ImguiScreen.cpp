@@ -39,7 +39,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	// init shader
-	m_shader = new nanogui::GLShader();
+	m_shader = new GLShader();
 	m_shader->init("Tonemapper", "#version 330\n"
 								 "in vec2 position;\n"
 								 "out vec2 uv;\n"

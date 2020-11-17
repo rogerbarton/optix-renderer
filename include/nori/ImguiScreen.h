@@ -11,8 +11,7 @@
 
 #include <nori/common.h>
 #include <nori/render.h>
-#include <nanogui/glutil.h>
-//#include <nori/shader.h>
+#include <nori/glutil.h>
 #include <map>
 
 NORI_NAMESPACE_BEGIN
@@ -96,7 +95,7 @@ private:
 
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
-	nanogui::GLShader* m_shader;
+	GLShader* m_shader;
 
 	/**
 	 * Draws the editable scene tree with imgui
