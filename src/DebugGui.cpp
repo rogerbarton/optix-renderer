@@ -4,20 +4,35 @@
 #include <nori/parser.h>
 #include <nori/bitmap.h>
 
-#include <imgui/imconfig.h>
+/*#include <imgui/imconfig.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-
+*/
 #include <map>
 #include <algorithm>
 
 NORI_NAMESPACE_BEGIN
 
+float get_pixel_ratio()
+{
+#if RETINA_SCREEN == 1
+	return 1.f;
+#endif
+	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+	if (monitor == nullptr)
+		throw "Primary monitor not found.";
+	float xscale, yscale;
+	glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+	return xscale;
+}
+
 DebugGui::DebugGui(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 {
-	initGlfw("ENori - Enhanced Nori", 800, 800);
+	width = block.cols();
+	height = block.rows();
+	initGlfw("ENori - Enhanced Nori", width, height);
 	initGl();
 	initImGui();
 }
@@ -128,7 +143,9 @@ void DebugGui::initGlfw(const char *windowTitle, int width, int height)
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make Apple happy -- should not be needed
+#endif
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwWindow = glfwCreateWindow(width, height, windowTitle, nullptr, nullptr);
@@ -146,18 +163,21 @@ void DebugGui::initGlfw(const char *windowTitle, int width, int height)
 void DebugGui::initGl()
 {
 
-// #if defined(WIN32)
-// 	static bool glewInitialized = false;
-// 	if (!glewInitialized)
-// 	{
-// 		glewExperimental = GL_TRUE;
-// 		glewInitialized = true;
-// 		if (glewInit() != GLEW_NO_ERROR)
-// 			throw std::runtime_error("Could not initialize GLEW.");
-// 	}
+	// #if defined(WIN32)
+	// 	static bool glewInitialized = false;
+	// 	if (!glewInitialized)
+	// 	{
+	// 		glewExperimental = GL_TRUE;
+	// 		glewInitialized = true;
+	// 		if (glewInit() != GLEW_NO_ERROR)
+	// 			throw std::runtime_error("Could not initialize GLEW.");
+	// 	}
 	// GL_CHECK(glClearColor(0.212f, 0.271f, 0.31f, 1.0f));
 	// GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
-// #endif
+	// #endif
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        throw std::runtime_error("Failed to initialize GLAD");
+    }
 }
 
 void DebugGui::initImGui()
@@ -180,7 +200,8 @@ void DebugGui::initImGui()
 	}
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);
-	ImGui_ImplOpenGL3_Init();
+	const char *glsl_version = "#version 150";
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
 }

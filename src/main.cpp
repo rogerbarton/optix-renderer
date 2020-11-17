@@ -18,7 +18,7 @@
 
 #include <nori/block.h>
 #ifndef DISABLE_NORI_GUI
-#  define USE_NANOGUI   // Toggles betweeen the standard nanogui nori viewer and imgui viewer
+//#  define USE_NANOGUI   // Toggles betweeen the standard nanogui nori viewer and imgui viewer
 #  ifdef USE_NANOGUI
 #    include <nori/gui.h>
 #  else
@@ -31,7 +31,6 @@
 #include <filesystem/path.h>
 
 int main(int argc, char **argv) {
-	std::cout << "Hello!" << std::endl;
     using namespace nori;
 
     try {
@@ -74,10 +73,10 @@ int main(int argc, char **argv) {
 
 		    if (path.extension() == "xml") {
 			    /* Render the XML scene file */
-			    gui->openXML(filename);
+			    gui.openXML(filename);
 		    } else if (path.extension() == "exr") {
 			    /* Alternatively, provide a basic OpenEXR image viewer */
-			    gui->openEXR(filename);
+			    gui.openEXR(filename);
 		    } else {
 			    cerr << "Error: unknown file \"" << filename
 			         << "\", expected an extension of type .xml or .exr" << endl;
@@ -85,7 +84,7 @@ int main(int argc, char **argv) {
 	    }
 
 	    // TODO: render and ui draw loop
-	    while(!glfwShouldClose(gui.glfwWindow))
+	    while(!glfwWindowShouldClose(gui.glfwWindow))
         {
             gui.newFrame();
 
