@@ -61,7 +61,7 @@ public:
 
 	// -- Scene loading
 	void openXML(const std::string &filename) {}
-	void openEXR(const std::string &filename) {}
+	void openEXR(const std::string &filename);
 
 	// -- GLFW window callbacks
 	void mouseButtonCallback(int button, int action, int mods);

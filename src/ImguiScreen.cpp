@@ -30,6 +30,21 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	initImGui();
 }
 
+void ImguiScreen::openEXR(const std::string& filename) {
+	if(m_renderThread.isBusy()) {
+        cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
+        return;
+    }
+
+    Bitmap bitmap(filename);
+
+    m_block.lock();
+    m_block.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
+    m_block.fromBitmap(bitmap);
+    Vector2i bsize = m_block.getSize();
+    m_block.unlock();
+}
+
 void ImguiScreen::resizeWindow(int width, int height)
 {
 	this->width = width;
