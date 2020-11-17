@@ -8,6 +8,7 @@
 
 NORI_NAMESPACE_BEGIN
 
+
 float get_pixel_ratio()
 {
 #if RETINA_SCREEN == 1
@@ -28,6 +29,19 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	initGlfw("ENori - Enhanced Nori", width, height);
 	initGl();
 	initImGui();
+}
+
+void ImguiScreen::resizeWindow(int width, int height)
+{
+	this->width = width;
+	this->height = height;
+
+#ifdef RETINA_SCREEN
+	this->width /= 2.0;
+	this->height /= 2.0;
+#endif
+
+	glViewport(0, 0, width, height);
 }
 
 void ImguiScreen::mainloop()
@@ -69,18 +83,20 @@ void ImguiScreen::drawAll()
 	}
 }
 
-void ImguiScreen::render() {
+void ImguiScreen::render()
+{
 	// draws the tonemapped image to screen
 }
 
 void ImguiScreen::draw()
 {
-	
-	if (uiShowDemoWindow)
-		ImGui::ShowDemoWindow(&uiShowDemoWindow);
 
-	ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode |
-										   ImGuiDockNodeFlags_NoDockingInCentralNode);
+	if (uiShowDemoWindow)
+	{
+		//ImGui::ShowDemoWindow(&uiShowDemoWindow);
+
+		ImGui::ShowUserGuide();
+	}
 
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -155,7 +171,46 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 	// -- window Callbacks
 	glfwSetWindowUserPointer(glfwWindow, this);
-	glfwSetKeyCallback(glfwWindow, keyCallbackStub);
+
+	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
+									  int action, int mods) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->keyboardState[key] = (action != GLFW_RELEASE);
+
+		if (ImGui::GetIO().WantCaptureKeyboard ||
+			ImGui::GetIO().WantTextInput)
+		{
+			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+			return;
+		}
+
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			return;
+		}
+
+		if (action == GLFW_PRESS)
+			app->keyPressed(key, mods);
+		if (action == GLFW_RELEASE)
+			app->keyReleased(key, mods);
+	});
+
+	glfwSetFramebufferSizeCallback(glfwWindow, [](GLFWwindow *window, int width,
+												  int height) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->resizeWindow(width, height);
+	});
+}
+
+void ImguiScreen::keyPressed(int key, int mods)
+{
+	std::cout << "Key pressed" << std::endl;
+}
+
+void ImguiScreen::keyReleased(int key, int mods)
+{
+	std::cout << "Key released" << std::endl;
 }
 
 void ImguiScreen::initGl()
@@ -176,6 +231,8 @@ void ImguiScreen::initGl()
 	{
 		throw std::runtime_error("Failed to initialize GLAD");
 	}
+
+	glEnable(GL_MULTISAMPLE);
 }
 
 void ImguiScreen::initImGui()

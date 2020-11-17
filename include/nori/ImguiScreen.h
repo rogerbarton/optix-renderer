@@ -8,14 +8,30 @@
 #include <imgui/imgui_internal.h>
 #include <nori/common.h>
 #include <nori/render.h>
+#include <map>
 
 NORI_NAMESPACE_BEGIN
 
-/**
- * Glfw and dear gui window, based on Nvidia OptiX samples so far.
- * It creates a glfw window, registers callbacks and sets up imgui.
- * WIP!
- */
+/*class MouseState {
+public:
+    // keep track of the last mouse position
+    double lastMouseX = 0, lastMouseY = 0;
+    double mouseMoveX = 0, mouseMoveY = 0;
+
+    bool rButtonPressed = false, lButtonPressed = false, mButtonPressed = false;
+    bool dragging = false;
+
+    int mods = 0;
+
+public:
+    MouseState();
+    ~MouseState();
+    void onMouseClick(double xPos, double yPos, int button, int action,
+                      int mods);
+    void onMouseMove(double xPos, double yPos);
+};
+*/
+typedef std::map<int, bool> KeyboardState;
 
 inline float get_pixel_ratio();
 
@@ -30,6 +46,8 @@ public:
 	void initGl();
 	void initImGui();
 
+	void resizeWindow(int width, int height);
+
 	void drawAll();
 
 	void draw();
@@ -37,6 +55,9 @@ public:
 	void mainloop();
 
 	void render();
+
+	void keyPressed(int key, int mods);
+	void keyReleased(int key, int mods);
 
 	// -- Scene loading
 	void openXML(const std::string &filename) {}
@@ -69,6 +90,8 @@ private:
 	RenderThread m_renderThread;
 
 	float clearColor[3] = {0.8f, 0.8f, 0.8f};
+
+	KeyboardState keyboardState;
 };
 
 NORI_NAMESPACE_END
