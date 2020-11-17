@@ -97,6 +97,11 @@ private:
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
 	nanogui::GLShader* m_shader;
+
+	/**
+	 * Draws the editable scene tree with imgui
+	 */
+	void drawSceneTree();
 };
 
 NORI_NAMESPACE_END

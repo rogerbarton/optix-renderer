@@ -31,6 +31,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
+	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
 
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -259,7 +260,7 @@ void ImguiScreen::draw()
 
 	if (filebrowser.HasSelected())
 	{
-		std::string extension = filebrowser.GetSelected().extension();
+		std::string extension = filebrowser.GetSelected().extension().string();
 		if (extension == ".xml")
 		{
 			openXML(filebrowser.GetSelected().string());
@@ -276,9 +277,23 @@ void ImguiScreen::draw()
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("Hello There", &uiShowSceneWindow))
 		{
-			if (ImGui::Button("Reset Camera"))
-			{
-			}
+			ImGui::Text("Render");
+			ImGui::SameLine();
+			ImGui::ProgressBar(m_renderThread.getProgress());
+
+			if(ImGui::Button("Stop Render"))
+				m_renderThread.stopRendering();
+
+			if (ImGui::Button("Reset Camera")){}
+
+			static float exposureLog = 0.5f;
+			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
+			ImGui::SameLine();
+			if(ImGui::Button("Reset"))
+				exposureLog = 0.5f;
+			const float exposure = std::pow(2.f, (exposureLog - 0.5f) * 20); // TODO: use this for the tonemapper
+
+			drawSceneTree();
 
 			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
 			{
@@ -365,6 +380,9 @@ void ImguiScreen::keyPressed(int key, int mods)
 		else
 			uiShowSceneWindow = !uiShowSceneWindow;
 	}
+	else if(key == GLFW_KEY_Z && GLFW_MOD_CONTROL)
+		m_renderThread.stopRendering();
+
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
@@ -399,6 +417,55 @@ void ImguiScreen::initImGui()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
+}
+
+void ImguiScreen::drawSceneTree()
+{
+	// Start columns
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Columns(2);
+
+	int uid = 0;
+	ImGui::PushID(uid);
+	ImGui::AlignTextToFramePadding();
+	bool node_open = ImGui::TreeNode("Object", "%s_%u", "Object", uid);
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::Text("my sailor is rich");
+	ImGui::NextColumn();
+	if (node_open)
+	{
+		static float placeholder_members[8] = {0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f};
+
+		for (int i = 0; i < 8; i++)
+		{
+			ImGui::PushID(i); // Use field index as identifier.
+			{
+				// Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
+				ImGui::AlignTextToFramePadding();
+				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+				                           ImGuiTreeNodeFlags_Bullet;
+				ImGui::TreeNodeEx("Field", flags, "Field_%d", i);
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+				if (i >= 5)
+					ImGui::InputFloat("##value", &placeholder_members[i], 1.0f);
+				else
+					ImGui::DragFloat("##value", &placeholder_members[i], 0.01f);
+				ImGui::NextColumn();
+			}
+			ImGui::PopID();
+		}
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+
+	// end columns
+	ImGui::Columns(1);
+	ImGui::Separator();
+	ImGui::PopStyleVar();
 }
 
 NORI_NAMESPACE_END
