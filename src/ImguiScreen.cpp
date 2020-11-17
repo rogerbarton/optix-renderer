@@ -27,9 +27,9 @@ float get_pixel_ratio()
 
 ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 {
-	width = block.cols();
-	height = block.rows();
-	initGlfw("ENori - Enhanced Nori", width, height);
+	windowWidth  = block.cols();
+	windowHeight = block.rows();
+	initGlfw("ENori - Enhanced Nori", windowWidth, windowHeight);
 	initGl();
 	initImGui();
 	setCallbacks();
@@ -110,26 +110,14 @@ void ImguiScreen::drop(const std::string &filename)
 void ImguiScreen::openXML(const std::string &filename)
 {
 	if (m_renderThread.isBusy())
-	{
-		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
-		// TODO: stop rendering and load the xml?
-		return;
-	}
+		m_renderThread.stopRendering();
 
 	try
 	{
-
 		m_renderThread.renderScene(filename);
 
-		m_block.lock();
-		Vector2i bsize = m_block.getSize();
-		imageZoom = std::max(std::min(width / (float)bsize(0), height / (float)bsize(1)), 0.1f) - 0.05f;
-
-		imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
-		imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
-		m_block.unlock();
-
-		//glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
+		imageZoom = 1.f;
+		centerImage(true);
 	}
 	catch (const std::exception &e)
 	{
@@ -146,35 +134,27 @@ ImguiScreen::~ImguiScreen()
 void ImguiScreen::openEXR(const std::string &filename)
 {
 	if (m_renderThread.isBusy())
-	{
-		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
-		return;
-	}
+		m_renderThread.stopRendering();
 
 	Bitmap bitmap(filename);
 
 	m_block.lock();
 	m_block.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
 	m_block.fromBitmap(bitmap);
-	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
 
-	imageZoom = std::max(std::min(width / (float)bsize(0), height / (float)bsize(1)), 0.1f) - 0.05f;
-
-	imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
-	imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
-
-	//glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
+	imageZoom = 1.f;
+	centerImage(true);
 }
 
-void ImguiScreen::resizeWindow(int width, int height)
+void ImguiScreen::windowResized(int width, int height)
 {
-	this->width = width;
-	this->height = height;
+	this->windowWidth  = width;
+	this->windowHeight = height;
 
 #ifdef RETINA_SCREEN
-	this->width /= 2.0;
-	this->height /= 2.0;
+	this->windowWidth /= 2.0;
+	this->windowHeight /= 2.0;
 #endif
 
 	glViewport(0, 0, width, height);
@@ -245,7 +225,7 @@ void ImguiScreen::render()
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("source", 0);
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
-	glViewport(0, 0, width, height); // reset viewport
+	glViewport(0, 0, windowWidth, windowHeight); // reset viewport
 }
 
 void ImguiScreen::draw()
@@ -270,6 +250,17 @@ void ImguiScreen::draw()
 			ImGui::EndMenu();
 		}
 		ImGui::MenuItem("Scene", "D", &uiShowSceneWindow);
+
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::MenuItem("Center Image", "0"))
+				centerImage();
+			if (ImGui::MenuItem("Reset Zoom", "1"))
+				setZoom(1.f, false);
+			if (ImGui::MenuItem("2x Zoom", "2"))
+				setZoom(2.f, false);
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMainMenuBar();
 	}
@@ -467,7 +458,7 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 	glfwSetFramebufferSizeCallback(glfwWindow, [](GLFWwindow *window, int width,
 												  int height) {
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->resizeWindow(width, height);
+		app->windowResized(width, height);
 	});
 
 	GLFWimage image;
@@ -490,6 +481,12 @@ void ImguiScreen::keyPressed(int key, int mods)
 	{
 		filebrowserSave.Open();
 	}
+	else if (key == GLFW_KEY_0)
+		centerImage();
+	else if (key == GLFW_KEY_1)
+		setZoom(1.f);
+	else if (key == GLFW_KEY_2)
+		setZoom(2.f);
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
@@ -506,13 +503,44 @@ void ImguiScreen::mouseMove(double xpos, double ypos)
 		imageOffset(1) -= (int)mouseState.mouseMoveY;
 	}
 }
+
+void ImguiScreen::setZoom(float value, bool centerOnMouse){
+
+	Vector2f zoomCenter{windowWidth / 2.f, windowHeight / 2.f};
+	if (centerOnMouse)
+	{
+		zoomCenter.x() = mouseState.lastMouseX;
+		zoomCenter.y() = windowHeight - mouseState.lastMouseY;
+	}
+
+	float scale = imageZoom / value;
+	imageOffset(0) = (imageOffset(0) - zoomCenter.x()) / scale + zoomCenter.x();
+	imageOffset(1) = (imageOffset(1) - zoomCenter.y()) / scale + zoomCenter.y();
+
+	imageZoom = value;
+}
+
+void ImguiScreen::centerImage(bool autoExpandWindow)
+{
+	m_block.lock();
+	const Vector2i bsize = m_block.getSize();
+	m_block.unlock();
+
+	if (autoExpandWindow && (windowWidth < bsize.x() || windowHeight < bsize.y()))
+	{
+		// bit hacky but it works, should have a resize function
+		glfwSetWindowSize(glfwWindow, std::max(windowWidth, bsize.x()), std::max(windowHeight, bsize.y()));
+		windowResized(bsize.x(), bsize.y());
+	}
+
+	imageOffset(0) = (windowWidth - imageZoom * bsize(0)) / 2;
+	imageOffset(1) = (windowHeight - imageZoom * bsize(1)) / 2;
+}
+
 void ImguiScreen::scrollWheel(double xoffset, double yoffset)
 {
 	float scale = 1.f - 0.05f * yoffset;
-	imageZoom /= scale;
-
-	imageOffset(0) = (imageOffset(0) - mouseState.lastMouseX) / scale + mouseState.lastMouseX;
-	imageOffset(1) = (imageOffset(1) - height + mouseState.lastMouseY) / scale + height - mouseState.lastMouseY;
+	setZoom(imageZoom / scale);
 }
 
 void ImguiScreen::initGl()

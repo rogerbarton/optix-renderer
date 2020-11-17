@@ -70,9 +70,6 @@ public:
 	void initGlfw(const char *windowTitle, int width, int height);
 	void initGl();
 	void initImGui();
-	void setCallbacks();
-
-	void resizeWindow(int width, int height);
 
 	void drawAll();
 
@@ -82,6 +79,20 @@ public:
 
 	void render();
 
+	/**
+	 * Set the image zoom and adapt zoom center. Do not use this when settin imageOffset manually.
+	 * @param centerOnMouse Zoom towards the mouse, else the center of the window is used.
+	 */
+	void setZoom(float value, bool centerOnMouse = true);
+
+	/**
+	 * Center the image within the view.
+	 * @param autoExpandWindow Ensure that that image fits inside the window
+	 */
+	void centerImage(bool autoExpandWindow = false);
+
+	// -- GLFW callbacks
+	void setCallbacks();
 	void keyPressed(int key, int mods);
 	void keyReleased(int key, int mods);
 
@@ -89,6 +100,7 @@ public:
     void mouseButtonReleased(int button, int mods);
     void mouseMove(double xpos, double ypos);
     void scrollWheel(double xoffset, double yoffset);
+	void windowResized(int width, int height);
 
 	// -- Scene loading
 	void openXML(const std::string &filename);
@@ -100,13 +112,8 @@ private:
 	GLFWwindow *glfwWindow;
 	bool uiShowSceneWindow = true;
 
-	bool _minimizedWindow = false; // is this actually needed?
-
-	int width;
-	int height;
-
-	// -- Input State
-	int32_t _mouseButton = -1;
+	int windowWidth;
+	int windowHeight;
 
 	// -- Render State
 	ImageBlock &m_block;
@@ -125,7 +132,7 @@ private:
 	GLShader *m_shader;
 
 	Vector2i imageOffset = Vector2i(0);
-	float imageZoom = 0.95f;
+	float imageZoom = 1.f;
 
 	/**
 	 * Draws the editable scene tree with imgui
