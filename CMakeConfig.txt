@@ -18,33 +18,33 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
+      "MinSizeRel" "RelWithDebInfo")
 endif()
 
 include(ExternalProject)
 set(CMAKE_EXTERNAL_ARGUMENTS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  -DCMAKE_GENERATOR=${CMAKE_GENERATOR} -Wno-dev
-  -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/ext_build/dist)
+    -DCMAKE_GENERATOR=${CMAKE_GENERATOR} -Wno-dev
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/ext_build/dist)
 
 
 # -- Setup platform specifics and GUI/window manager libraries
-if (MSVC)
+if(MSVC)
   # Windows-specific build flags
 
   # Don't advertise awkward and non-standard "secure" C++ functions
-  add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
+  add_definitions(/D "_CRT_SECURE_NO_WARNINGS")
 
   include_directories(ext/glew/include)
   set(gui_libs opengl32)
 
-#  set(gui_libs ${gui_libs} zlibstatic)
+  #  set(gui_libs ${gui_libs} zlibstatic)
 
   # Statically link against the C++ runtime library, also apply these settings to nested projects
   set(CompilerFlags
-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-        CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
+      CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+      CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
   foreach(CompilerFlag ${CompilerFlags})
     string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
     string(REPLACE "/MDd" "/MTd" ${CompilerFlag} "${${CompilerFlag}}")
@@ -125,28 +125,46 @@ list(APPEND CMAKE_EXTERNAL_ARGUMENTS -D CMAKE_EXTERNAL_ARGUMENTS:STRING=${CMAKE_
 
 # Build gui libs: nanogui, imgui, glfw, glew
 if(NORI_USE_GUI)
+  # -- Dear Gui (imgui) libs
+  # GLAD for imgui
+  add_subdirectory(ext/glad)
+  if(WIN32)
+    # Workaround for cmake not copying OpenVDB dependencies to the binary folder in debug mode
+    configure_file(${CMAKE_BINARY_DIR}/ext/glad/glad.dll ${CMAKE_BINARY_DIR}/glad.dll COPYONLY)
+  endif()
+
+  # GLFW window manager
+  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW lib only")
+  set(GLFW_BUILD_TESTS OFF CACHE BOOL "GLFW lib only")
+  set(GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW lib only")
+  set(GLFW_INSTALL OFF CACHE BOOL "GLFW lib only")
+  # Important: on windows glfw will be shared by default which causes linker errors
+  set(BUILD_SHARED_LIBS OFF)
+  set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
+  add_subdirectory(${GLFW_DIR})
+
+  add_subdirectory(ext/imgui) # uses glad and glfw
+
+  # -- Legacy GUI libs: nanogui and GLEW
   set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
+  #  add_definitions(-DGLEW_STATIC) # required when using with imgui
   add_subdirectory(${GLEW_DIR})
   include_directories(${GLEW_DIR}/include)
 
-  set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
-  include_directories(${GLFW_DIR}/include)
-  add_subdirectory(${GLFW_DIR})
-
   add_subdirectory(ext/nanogui)
-#  add_subdirectory(ext/imgui)
+
 endif(NORI_USE_GUI)
 
 # Build lodepng
 ExternalProject_Add(lodepng_p
-  URL             "${CMAKE_SOURCE_DIR}/ext/lodepng"
-  PREFIX          "ext_build"
-  CMAKE_ARGS      ${CMAKE_EXTERNAL_ARGUMENTS}
-)
+    URL "${CMAKE_SOURCE_DIR}/ext/lodepng"
+    PREFIX "ext_build"
+    CMAKE_ARGS ${CMAKE_EXTERNAL_ARGUMENTS}
+    )
 
 add_library(pugixml STATIC ext/pugixml/src/pugixml.cpp)
 set_target_properties(pugixml PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ext_build/dist/lib")
 
 # -- Compile Nori with compiler warnings turned on
 if(MSVC)
@@ -157,7 +175,7 @@ if(MSVC)
   endif()
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-deprecated-declarations")
-  if (APPLE)
+  if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-anonymous-struct -Wno-c99-extensions -Wno-nested-anon-types -Wno-deprecated-register -Wno-missing-braces")
   endif()
 endif()
@@ -167,21 +185,21 @@ endif()
 # Compile against & link to previously compiled external projects
 link_directories(${CMAKE_BINARY_DIR}/ext_build/dist/lib)
 include_directories(
-  ${CMAKE_BINARY_DIR}/ext_build/dist/include
-  ext/pcg32
-  ext/tinyformat
-  ext/pugixml/src
-  ext/hypothesis
-  ext/filesystem
-  ext/lodepng
-  ext/openvdb/nanovdb
-  include
+    ${CMAKE_BINARY_DIR}/ext_build/dist/include
+    ext/pcg32
+    ext/tinyformat
+    ext/pugixml/src
+    ext/hypothesis
+    ext/filesystem
+    ext/lodepng
+    ext/openvdb/nanovdb
+    include
 )
 
 # Link to several dependency libraries
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
-  list(APPEND extra_libs nanogui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
+  list(APPEND extra_libs nanogui imgui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
 endif()
 
 message(STATUS "extra_libs: ${extra_libs}")
