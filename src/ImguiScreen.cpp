@@ -124,6 +124,9 @@ void ImguiScreen::render()
 
 void ImguiScreen::draw()
 {
+	// Enable docking in the main window, do not clear it so we can see the image behind
+	ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode |
+	                                   ImGuiDockNodeFlags_NoDockingInCentralNode);
 
 	if (uiShowDemoWindow)
 	{
@@ -175,15 +178,6 @@ void ImguiScreen::draw()
 static void errorCallback(int error, const char *description)
 {
 	std::cerr << "GLFW Error " << error << ": " << description << std::endl;
-}
-
-void ImguiScreen::keyCallback(int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/)
-{
-	if (action == GLFW_PRESS)
-	{
-		if (key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE)
-			glfwSetWindowShouldClose(glfwWindow, true);
-	}
 }
 // -- End of GLFW window callbacks
 
@@ -249,12 +243,12 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	std::cout << "Key pressed" << std::endl;
+	if (key == GLFW_KEY_D && mods == GLFW_MOD_ALT)
+		uiShowDemoWindow = !uiShowDemoWindow;
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
 {
-	std::cout << "Key released" << std::endl;
 }
 
 void ImguiScreen::initGl()
