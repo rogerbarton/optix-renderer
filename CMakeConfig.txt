@@ -81,23 +81,27 @@ endif()
 
 
 # -- Build package manager libraries
-# Build openvdb
-find_package(OpenVDB REQUIRED)
-include_directories(${OpenVDB_INCLUDE_DIRS})
-link_directories(${OpenVDB_LIBRARY_DIRS})
-message(STATUS "OpenVDB libs: ${OpenVDB_LIBRARIES}")
+if(NORI_USE_VOLUMES)
+  # Build openvdb
+  find_package(OpenVDB REQUIRED)
+  include_directories(${OpenVDB_INCLUDE_DIRS})
+  link_directories(${OpenVDB_LIBRARY_DIRS})
+  message(STATUS "OpenVDB libs: ${OpenVDB_LIBRARIES}")
 
-if(CMAKE_BUILD_TYPE MATCHES Debug AND WIN32)
-  # Workaround for cmake not copying OpenVDB dependencies to the binary folder in debug mode
-  configure_file(${CMAKE_SOURCE_DIR}/ext/vcpkg/installed/x64-windows/bin/Half-2_5.dll ${CMAKE_BINARY_DIR}/Half-2_5.dll COPYONLY)
+  if(CMAKE_BUILD_TYPE MATCHES Debug AND WIN32)
+    # Workaround for cmake not copying OpenVDB dependencies to the binary folder in debug mode
+    configure_file(${CMAKE_SOURCE_DIR}/ext/vcpkg/installed/x64-windows/bin/Half-2_5.dll ${CMAKE_BINARY_DIR}/Half-2_5.dll COPYONLY)
+  endif()
+
+  include_directories(ext/openvdb/nanovdb)
+
+  # Optionally find Blosc for nanoVDB compression, (openVDB already finds this by itself)
+  find_package(Blosc)
+  if(Blosc_FOUND)
+    add_definitions(-DNANOVDB_USE_BLOSC)
+    include_directories(${Blosc_INCLUDE_DIRS})
+  endif(Blosc_FOUND)
 endif()
-
-# Optionally find Blosc for nanoVDB compression, (openVDB already finds this by itself)
-find_package(Blosc)
-if(Blosc_FOUND)
-  add_definitions(-DNANOVDB_USE_BLOSC)
-  include_directories(${Blosc_INCLUDE_DIRS})
-endif(Blosc_FOUND)
 
 find_package(TBB REQUIRED COMPONENTS tbb)
 include_directories(${Tbb_INCLUDE_DIRS})
@@ -141,15 +145,15 @@ if(NORI_USE_GUI)
 
   if(NORI_USE_IMGUI)
     add_subdirectory(ext/imgui) # uses glad and glfw
-  else()
-    # -- Legacy GUI libs: nanogui and GLEW
-    set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
-    #  add_definitions(-DGLEW_STATIC) # required when using with imgui
-    add_subdirectory(${GLEW_DIR})
-    include_directories(${GLEW_DIR}/include)
-
-    add_subdirectory(ext/nanogui)
   endif()
+
+  # -- Legacy GUI libs: nanogui and GLEW, still compile for warptest
+  set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
+  #  add_definitions(-DGLEW_STATIC) # required when using with imgui
+  add_subdirectory(${GLEW_DIR})
+  include_directories(${GLEW_DIR}/include)
+
+  add_subdirectory(ext/nanogui)
 
 endif(NORI_USE_GUI)
 
@@ -183,21 +187,19 @@ endif()
 # Compile against & link to previously compiled external projects
 link_directories(${CMAKE_BINARY_DIR}/ext_build/dist/lib)
 include_directories(
-    ${CMAKE_BINARY_DIR}/ext_build/dist/include
-    ext/pcg32
-    ext/tinyformat
-    ext/pugixml/src
-    ext/hypothesis
-    ext/filesystem
-    ext/lodepng
-    ext/openvdb/nanovdb
-    include
+  ${CMAKE_BINARY_DIR}/ext_build/dist/include
+  ext/pcg32
+  ext/tinyformat
+  ext/pugixml/src
+  ext/hypothesis
+  ext/filesystem
+  ext/lodepng
+  include
 )
 
 # Link to several dependency libraries
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
-
   if(NORI_USE_IMGUI)
     list(APPEND extra_libs imgui glfw ${GLFW_LIBRARIES} ${gui_libs})
   else()

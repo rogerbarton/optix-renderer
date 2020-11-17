@@ -2,9 +2,10 @@
 cmake_minimum_required (VERSION 2.8)
 project("nori")
 
-option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
-option(NORI_USE_GUI    "Build the GUI"   ON)
-option(NORI_USE_IMGUI "Build the ImGui Frame" ON)
+option(NORI_USE_GUI                "Build the GUI"               ON)
+option(NORI_USE_IMGUI              "Use ImGui instead of NanoGui, warptest always uses NanoGUI"       ON)
+option(NORI_USE_VOLUMES            "Enable Volumes"              ON)
+option(NORI_BUILD_DOCS             "Build Nori Docs"             OFF)
 
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
@@ -17,21 +18,26 @@ if(NORI_BUILD_DOCS)
 endif(NORI_BUILD_DOCS)
 
 if(NOT NORI_USE_GUI)
-    message("NORI_USE_GUI is off")
-    message("Make sure to use the right gcc version:")
-    message("module load new/gcc/4.9.2 cmake/3.9.2")
+    message(STATUS "NORI_USE_GUI is off")
+    message(STATUS "Make sure to use the right gcc version:")
+    message(STATUS "module load new gcc/4.9.2 cmake/3.13.5")
 
     # Disable flag for preprocessor
     add_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
 else()
-  message("NORI_USE_GUI is ON.")
+  if(NORI_USE_IMGUI)
+    message(STATUS "Nori uses ImGui")
+  else()
+    add_definitions(-DNORI_USE_NANOGUI)
+    message(STATUS "Nori uses Nanogui")
+  endif()
 endif()
 
-if(NORI_USE_IMGUI)
-  message("Nori uses ImGui")
+if(NORI_USE_VOLUMES)
+  message(STATUS "Nori uses Volumes")
+  add_definitions(-DNORI_USE_VOLUMES)
 else()
-  add_definitions(-DNORI_USE_NANOGUI)
-  message("Nori uses Nanogui")
+  message(STATUS "Nori doesn't use Volumes")
 endif()
 
 # The following lines build the main executable. If you add a source
@@ -115,9 +121,14 @@ add_executable(nori
   src/environmentmap.cpp
   src/PNGTexture.cpp
   src/denoiser.cpp
-  src/volume.cpp
   src/adaptive.cpp
 )
+
+if(NORI_USE_VOLUMES)
+  target_sources(nori PRIVATE
+     src/volume.cpp
+  )
+endif()
 
 add_executable(tonemapper
         include/nori/bitmap.h
@@ -152,21 +163,20 @@ if(NORI_USE_GUI)
       include/nori/gui.h
       src/gui.cpp
     )
-
-    add_executable(warptest
-      include/nori/warp.h
-      src/warp.cpp
-      src/warptest.cpp
-      src/microfacet.cpp
-      src/object.cpp
-      src/proplist.cpp
-      src/common.cpp
-      )
-    add_dependencies(warptest nori)
-    target_link_libraries(warptest ${extra_libs})
   endif(NORI_USE_IMGUI)
+
   # The following lines build the warping test application
-  
+  add_executable(warptest
+    include/nori/warp.h
+    src/warp.cpp
+    src/warptest.cpp
+    src/microfacet.cpp
+    src/object.cpp
+    src/proplist.cpp
+    src/common.cpp
+    )
+  add_dependencies(warptest nori)
+  target_link_libraries(warptest nanogui glew ${extra_libs})
 endif(NORI_USE_GUI)
 
 # Link to dependency libraries

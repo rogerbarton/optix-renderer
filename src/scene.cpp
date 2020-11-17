@@ -117,7 +117,10 @@ void Scene::addChild(NoriObject *obj)
         break;
 
     case EVolume:
+    	// Skip if volumes are disabled
+#ifdef NORI_USE_VOLUMES
         m_volumes.push_back(static_cast<Volume *>(obj));
+#endif
         break;
 
     default:
@@ -146,6 +149,7 @@ std::string Scene::toString() const
         lights += "\n";
     }
 
+#ifdef NORI_USE_VOLUMES
     std::string volumes;
     for (size_t i = 0; i < m_volumes.size(); ++i)
     {
@@ -154,6 +158,7 @@ std::string Scene::toString() const
             volumes += ",";
         volumes += "\n";
     }
+#endif
 
     return tfm::format(
         "Scene[\n"
@@ -176,7 +181,12 @@ std::string Scene::toString() const
         indent(lights, 2),
         m_envmap ? indent(m_envmap->toString()) : "nullptr",
         m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
-        indent(volumes, 2));
+#ifdef NORI_USE_VOLUMES
+		    indent(volumes, 2)
+#else
+			"Volumes disabled during compilation"
+#endif
+    );
 }
 
 NORI_REGISTER_CLASS(Scene, "scene");

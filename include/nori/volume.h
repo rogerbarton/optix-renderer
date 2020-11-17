@@ -1,4 +1,5 @@
 #pragma once
+#ifdef NORI_USE_VOLUMES
 
 #include <nori/object.h>
 #include <nanovdb/util/IO.h>
@@ -62,3 +63,5 @@ NORI_NAMESPACE_BEGIN
 	};
 
 NORI_NAMESPACE_END
+
+#endif // NORI_USE_VOLUMES
