@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
+#include <stb_image.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -466,6 +467,11 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
 		app->resizeWindow(width, height);
 	});
+
+	GLFWimage image;
+	image.pixels = stbi_load(std::filesystem::relative("../logo.png").string().c_str(), &image.width, &image.height, nullptr, 4);
+	glfwSetWindowIcon(glfwWindow, 1, &image);
+	stbi_image_free(image.pixels);
 }
 
 void ImguiScreen::keyPressed(int key, int mods)
