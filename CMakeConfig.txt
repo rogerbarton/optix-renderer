@@ -143,15 +143,17 @@ if(NORI_USE_GUI)
   set(GLFW_DIR ${CMAKE_SOURCE_DIR}/ext/GLFW)
   add_subdirectory(${GLFW_DIR})
 
-  add_subdirectory(ext/imgui) # uses glad and glfw
+  if(NORI_USE_IMGUI)
+    add_subdirectory(ext/imgui) # uses glad and glfw
+  else()
+    # -- Legacy GUI libs: nanogui and GLEW
+    set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
+    #  add_definitions(-DGLEW_STATIC) # required when using with imgui
+    add_subdirectory(${GLEW_DIR})
+    include_directories(${GLEW_DIR}/include)
 
-  # -- Legacy GUI libs: nanogui and GLEW
-  set(GLEW_DIR ${CMAKE_SOURCE_DIR}/ext/glew)
-  #  add_definitions(-DGLEW_STATIC) # required when using with imgui
-  add_subdirectory(${GLEW_DIR})
-  include_directories(${GLEW_DIR}/include)
-
-  add_subdirectory(ext/nanogui)
+    add_subdirectory(ext/nanogui)
+  endif()
 
 endif(NORI_USE_GUI)
 
@@ -199,7 +201,12 @@ include_directories(
 # Link to several dependency libraries
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
-  list(APPEND extra_libs nanogui imgui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
+
+  if(NORI_USE_IMGUI)
+    list(APPEND extra_libs imgui glfw ${GLFW_LIBRARIES} ${gui_libs})
+  else()
+    list(APPEND extra_libs nanogui glew ${gui_libs})
+  endif()
 else()
   if(NOT WIN32)
     list(APPEND extra_libs pthread)

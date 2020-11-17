@@ -4,6 +4,7 @@ project("nori")
 
 option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
 option(NORI_USE_GUI    "Build the GUI"   ON)
+option(NORI_USE_IMGUI "Build the ImGui Frame" ON)
 
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
@@ -24,6 +25,13 @@ if(NOT NORI_USE_GUI)
     add_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
 else()
   message("NORI_USE_GUI is ON.")
+endif()
+
+if(NORI_USE_IMGUI)
+  message("Nori uses ImGui")
+else()
+  add_definitions(-DNORI_USE_NANOGUI)
+  message("Nori uses Nanogui")
 endif()
 
 # The following lines build the main executable. If you add a source
@@ -129,30 +137,35 @@ add_dependencies(tonemapper nori)
 
 if(NORI_USE_GUI)
   # Append additional gui sources
-  target_sources(nori PRIVATE
-  
-          include/nori/gui.h
-          src/gui.cpp
+  if(NORI_USE_IMGUI)
+    target_sources(nori PRIVATE
+      include/nori/ImguiScreen.h
+      src/ImguiScreen.cpp
 
-          include/nori/ImguiScreen.h
-          src/ImguiScreen.cpp
-          
-          include/nori/glutil.h
-          src/glutil.cpp
-          )
+      include/nori/glutil.h
+      src/glutil.cpp
+    )
 
+  else(NORI_USE_IMGUI)
+    target_sources(nori PRIVATE
+      include/nori/gui.h
+      src/gui.cpp
+    )
+
+    add_executable(warptest
+      include/nori/warp.h
+      src/warp.cpp
+      src/warptest.cpp
+      src/microfacet.cpp
+      src/object.cpp
+      src/proplist.cpp
+      src/common.cpp
+      )
+    add_dependencies(warptest nori)
+    target_link_libraries(warptest ${extra_libs})
+  endif(NORI_USE_IMGUI)
   # The following lines build the warping test application
-  add_executable(warptest
-          include/nori/warp.h
-          src/warp.cpp
-          src/warptest.cpp
-          src/microfacet.cpp
-          src/object.cpp
-          src/proplist.cpp
-          src/common.cpp
-          )
-  add_dependencies(warptest nori)
-  target_link_libraries(warptest ${extra_libs})
+  
 endif(NORI_USE_GUI)
 
 # Link to dependency libraries

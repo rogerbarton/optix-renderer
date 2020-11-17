@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 NORI_NAMESPACE_BEGIN

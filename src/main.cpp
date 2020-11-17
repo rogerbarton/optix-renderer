@@ -19,13 +19,11 @@
 #include <nori/block.h>
 #ifndef DISABLE_NORI_GUI
 
-//#  define USE_NANOGUI   // Toggles betweeen the standard nanogui nori viewer and imgui viewer
-
-#ifdef USE_NANOGUI
+#ifdef NORI_USE_NANOGUI
 #include <nori/gui.h>
 #else
 #include <nori/ImguiScreen.h>
-#endif /* USE_NANOGUI */
+#endif /* NORI_USE_NANOGUI */
 
 #else /* DISABLE_NORI_GUI */
 #include <nori/render.h>
@@ -41,12 +39,12 @@ int main(int argc, char **argv)
 #ifndef DISABLE_NORI_GUI
 
         ImageBlock block(Vector2i(720, 720), nullptr);
-#ifdef USE_NANOGUI
+#ifdef NORI_USE_NANOGUI
         nanogui::init();
         NoriScreen *screen = new NoriScreen(block);
 #else
         ImguiScreen *screen = new ImguiScreen(block);
-#endif /* USE_NANOGUI */
+#endif /* NORI_USE_NANOGUI */
 
         // if file is passed as argument, handle it
         if (argc == 2)
@@ -71,7 +69,7 @@ int main(int argc, char **argv)
             }
         }
 
-#ifdef USE_NANOGUI
+#ifdef NORI_USE_NANOGUI
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();
@@ -79,7 +77,7 @@ int main(int argc, char **argv)
         screen->mainloop();
         delete screen;
 
-#endif /* USE_NANOGUI */
+#endif /* NORI_USE_NANOGUI */
 
 #else /* DISABLE_NORI_GUI */
         if (argc == 2)
