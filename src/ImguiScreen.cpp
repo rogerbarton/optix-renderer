@@ -79,6 +79,8 @@ void ImguiScreen::drawAll()
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
@@ -229,7 +231,8 @@ void ImguiScreen::initImGui()
 	ImGui::CreateContext();
 	ImGuiIO &imGuiIo = ImGui::GetIO();
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	// ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // do not enable viewports for now
 
 	ImGui::StyleColorsDark();
 
