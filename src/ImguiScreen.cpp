@@ -116,13 +116,14 @@ void ImguiScreen::openXML(const std::string &filename)
 	try
 	{
 
-		imageOffset = Vector2i(0);
-		imageZoom = 1.f;
-
 		m_renderThread.renderScene(filename);
 
 		m_block.lock();
-		Vector2i imageSize = m_block.getSize();
+		Vector2i bsize = m_block.getSize();
+		imageZoom = std::min(std::min(width / (float)bsize(0), height / (float)bsize(1)), 1.f) - 0.05f;
+
+		imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
+		imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
 		m_block.unlock();
 
 		//glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
@@ -146,8 +147,6 @@ void ImguiScreen::openEXR(const std::string &filename)
 		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
 		return;
 	}
-	imageOffset = Vector2i(0);
-	imageZoom = 1.f;
 
 	Bitmap bitmap(filename);
 
@@ -156,6 +155,12 @@ void ImguiScreen::openEXR(const std::string &filename)
 	m_block.fromBitmap(bitmap);
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
+
+	imageZoom = std::min(std::min(width / (float)bsize(0), height / (float)bsize(1)), 1.f) - 0.05f;
+
+	imageOffset(0) = (width - imageZoom * bsize(0)) / 2;
+	imageOffset(1) = (height - imageZoom * bsize(1)) / 2;
+
 	//glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
 }
 

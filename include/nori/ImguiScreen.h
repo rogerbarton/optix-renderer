@@ -125,7 +125,7 @@ private:
 	GLShader *m_shader;
 
 	Vector2i imageOffset = Vector2i(0);
-	float imageZoom = 1.f;
+	float imageZoom = 0.95f;
 
 	/**
 	 * Draws the editable scene tree with imgui
