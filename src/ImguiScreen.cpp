@@ -76,8 +76,16 @@ void ImguiScreen::drawAll()
 		draw();
 
 		ImGui::EndFrame();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
+
+		
 	}
 }
 
@@ -207,18 +215,6 @@ void ImguiScreen::keyReleased(int key, int mods)
 
 void ImguiScreen::initGl()
 {
-	// #if defined(WIN32)
-	// 	static bool glewInitialized = false;
-	// 	if (!glewInitialized)
-	// 	{
-	// 		glewExperimental = GL_TRUE;
-	// 		glewInitialized = true;
-	// 		if (glewInit() != GLEW_NO_ERROR)
-	// 			throw std::runtime_error("Could not initialize GLEW.");
-	// 	}
-	// GL_CHECK(glClearColor(0.212f, 0.271f, 0.31f, 1.0f));
-	// GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
-	// #endif
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		throw std::runtime_error("Failed to initialize GLAD");
@@ -232,6 +228,9 @@ void ImguiScreen::initImGui()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO &imGuiIo = ImGui::GetIO();
+
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
 	ImGui::StyleColorsDark();
 
 	ImGuiStyle &imGuiStyle = ImGui::GetStyle();
