@@ -63,7 +63,6 @@ add_executable(nori
   include/nori/environmentmap.h
   include/nori/HDRLoader.h
   include/nori/denoiser.h
-  include/nori/glutil.h
 
   # Source code files
   src/bitmap.cpp
@@ -110,7 +109,6 @@ add_executable(nori
   src/denoiser.cpp
   src/volume.cpp
   src/adaptive.cpp
-  src/glutil.cpp
 )
 
 add_executable(tonemapper
@@ -138,6 +136,9 @@ if(NORI_USE_GUI)
 
           include/nori/ImguiScreen.h
           src/ImguiScreen.cpp
+          
+          include/nori/glutil.h
+          src/glutil.cpp
           )
 
   # The following lines build the warping test application

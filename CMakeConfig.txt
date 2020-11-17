@@ -200,6 +200,10 @@ include_directories(
 set(extra_libs pugixml lodepng ${Tbb_LIBRARIES} ${IlmBase_LIBRARIES} ${OpenEXR_LIBRARIES} ${OpenVDB_LIBRARIES} ${Blosc_LIBRARIES} ${extra_libs})
 if(NORI_USE_GUI)
   list(APPEND extra_libs nanogui imgui glew glfw ${GLFW_LIBRARIES} ${gui_libs})
+else()
+  if(NOT WIN32)
+    list(APPEND extra_libs pthread)
+  endif()
 endif()
 
 message(STATUS "extra_libs: ${extra_libs}")
