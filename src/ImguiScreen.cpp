@@ -21,11 +21,20 @@ float get_pixel_ratio()
 	return xscale;
 }
 
+ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
+{
+	width = block.cols();
+	height = block.rows();
+	initGlfw("ENori - Enhanced Nori", width, height);
+	initGl();
+	initImGui();
+}
+
 void ImguiScreen::mainloop()
 {
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
-		draw();
+		drawAll();
 #ifdef SINGLE_BUFFER
 		glFlush();
 #else
@@ -36,25 +45,37 @@ void ImguiScreen::mainloop()
 	glfwTerminate();
 }
 
-void ImguiScreen::draw(){
+void ImguiScreen::drawAll()
+{
+	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+			GL_STENCIL_BUFFER_BIT);
 
+	// draw scene here
+	render();
+
+	// draw ImGui menu
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		draw();
+
+		ImGui::EndFrame();
+		ImGui::UpdatePlatformWindows();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 }
 
-ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
-{
-	width = block.cols();
-	height = block.rows();
-	initGlfw("ENori - Enhanced Nori", width, height);
-	initGl();
-	initImGui();
+void ImguiScreen::render() {
+	// draws the tonemapped image to screen
 }
 
-void ImguiScreen::newFrame()
+void ImguiScreen::draw()
 {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
+	
 	if (uiShowDemoWindow)
 		ImGui::ShowDemoWindow(&uiShowDemoWindow);
 
@@ -82,46 +103,6 @@ void ImguiScreen::newFrame()
 		}
 		ImGui::MenuItem("Debug", "D", &uiShowDebugWindow);
 		ImGui::EndMainMenuBar();
-	}
-}
-
-void ImguiScreen::endFrame()
-{
-	if (uiShowDebugWindow)
-	{
-		if (ImGui::Begin("Hello There", &uiShowDebugWindow))
-		{
-			// if (ImGui::Button("Reset Camera"))
-			// 	scene.resetCamera();
-
-			// uint32_t max = 1000u;
-			// ImGui::DragInt("Samples per Launch", reinterpret_cast<int*>(&params.samplesPerLaunch), 1.f, 1, max);
-			//
-			// ImGui::DragInt("Max Launches", reinterpret_cast<int*>(&state.guiParams.maxLaunches), 1.f, 1, max);
-			// ImGui::ColorEdit3("Background", reinterpret_cast<float*>(&state.params.bgColor));
-
-			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				// ImGui::DragInt("Subframes", reinterpret_cast<int*>(&state.params.subframeIndex), 1.f, 1, 1000,
-				//                "%d", ImGuiSliderFlags_ReadOnly | ImGuiSliderFlags_NoInput);
-				// displayStats(stateUpdateTime, renderTime, displayTime);
-			}
-		}
-		ImGui::End();
-	}
-
-	ImGui::Render();
-	int framebufResx, framebufResy;
-	glfwGetFramebufferSize(glfwWindow, &framebufResx, &framebufResy);
-	glViewport(0, 0, framebufResx, framebufResy);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	ImGuiIO &imGuiIo = ImGui::GetIO();
-	if (imGuiIo.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(glfwWindow);
 	}
 }
 

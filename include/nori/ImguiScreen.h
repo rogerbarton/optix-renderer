@@ -30,12 +30,13 @@ public:
 	void initGl();
 	void initImGui();
 
-	void newFrame();
-	void endFrame();
+	void drawAll();
+
+	void draw();
 
 	void mainloop();
 
-	void draw(); // performs all the drawing
+	void render();
 
 	// -- Scene loading
 	void openXML(const std::string &filename) {}
@@ -66,6 +67,8 @@ private:
 	//unsigned int &_imageWidth;
 	//unsigned int &_imageHeight;
 	RenderThread m_renderThread;
+
+	float clearColor[3] = {0.8f, 0.8f, 0.8f};
 };
 
 NORI_NAMESPACE_END
