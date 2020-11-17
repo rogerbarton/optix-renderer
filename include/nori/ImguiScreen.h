@@ -94,8 +94,6 @@ private:
 
 	ImGui::FileBrowser filebrowser;
 
-	bool renderImage = false;
-
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
 	nanogui::GLShader* m_shader;

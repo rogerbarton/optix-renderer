@@ -123,8 +123,6 @@ void ImguiScreen::openEXR(const std::string &filename)
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
 	glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
-
-	renderImage = true;
 }
 
 void ImguiScreen::resizeWindow(int width, int height)
@@ -193,26 +191,23 @@ void ImguiScreen::drawAll()
 void ImguiScreen::render()
 {
 	// draws the tonemapped image to screen
-	if (renderImage)
-	{
-		m_block.lock();
-		int borderSize = m_block.getBorderSize();
-		const Vector2i &size = m_block.getSize();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_texture);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_block.cols());
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
-					 0, GL_RGBA, GL_FLOAT, (uint8_t *)m_block.data() + (borderSize * m_block.cols() + borderSize) * sizeof(Color4f));
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		m_block.unlock();
+	m_block.lock();
+	int borderSize = m_block.getBorderSize();
+	const Vector2i &size = m_block.getSize();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, m_block.cols());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
+				 0, GL_RGBA, GL_FLOAT, (uint8_t *)m_block.data() + (borderSize * m_block.cols() + borderSize) * sizeof(Color4f));
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	m_block.unlock();
 
-		glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
-		m_shader->bind();
-		m_shader->setUniform("scale", m_scale);
-		m_shader->setUniform("source", 0);
-		m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
-		glViewport(0, 0, width, height);
-	}
+	glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
+	m_shader->bind();
+	m_shader->setUniform("scale", m_scale);
+	m_shader->setUniform("source", 0);
+	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
+	glViewport(0, 0, width, height);
 }
 
 void ImguiScreen::draw()
@@ -247,6 +242,15 @@ void ImguiScreen::draw()
 			ImGui::EndMenu();
 		}
 		ImGui::MenuItem("Scene", "D", &uiShowSceneWindow);
+		
+		if(ImGui::BeginMenu("Rendering")) {
+			ImGui::ProgressBar(m_renderThread.getProgress());
+			if(ImGui::Button("Stop")) {
+				m_renderThread.stopRendering();
+			}
+			ImGui::EndMenu();
+		}
+		
 		ImGui::EndMainMenuBar();
 	}
 
