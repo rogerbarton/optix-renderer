@@ -28,9 +28,13 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	initGlfw("ENori - Enhanced Nori", width, height);
 	initGl();
 	initImGui();
+	setCallbacks();
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
+	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
+
+	filebrowser.SetTitle("Save as");
 	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
 
 	glGenTextures(1, &m_texture);
@@ -76,7 +80,6 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 	m_shader->bind();
 	m_shader->uploadIndices(indices);
 	m_shader->uploadAttrib("position", positions);
-
 }
 
 void ImguiScreen::openXML(const std::string &filename)
@@ -225,11 +228,9 @@ void ImguiScreen::draw()
 		{
 			if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				filebrowser.Open();
-			if (ImGui::MenuItem("Save EXR"))
+			if (ImGui::MenuItem("Export Image"))
 			{
-			}
-			if (ImGui::MenuItem("Save PNG (tonemapped)"))
-			{
+				filebrowserSave.Open();
 			}
 			if (ImGui::MenuItem("Settings..."))
 			{
@@ -243,6 +244,7 @@ void ImguiScreen::draw()
 
 	// handle filedialog
 	filebrowser.Display();
+	filebrowserSave.Display();
 
 	if (filebrowser.HasSelected())
 	{
@@ -258,6 +260,26 @@ void ImguiScreen::draw()
 		filebrowser.ClearSelected();
 	}
 
+	if (filebrowserSave.HasSelected())
+	{
+		std::string extension = filebrowserSave.GetSelected().extension().string();
+		if (extension == ".png")
+		{
+			// write tonemapped png
+			Bitmap *bm = m_block.toBitmap();
+			bm->saveToLDR(filebrowserSave.GetSelected().string());
+			std::cout << "PNG file saved to " << filebrowserSave.GetSelected().string() << std::endl;
+		}
+		else if (extension == ".exr")
+		{
+			// write exr
+			Bitmap *bm = m_block.toBitmap();
+			bm->save(filebrowserSave.GetSelected().string());
+			std::cout << "EXR file saved to " << filebrowserSave.GetSelected().string() << std::endl;
+		}
+		filebrowserSave.ClearSelected();
+	}
+
 	if (uiShowSceneWindow)
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
@@ -267,15 +289,17 @@ void ImguiScreen::draw()
 			ImGui::SameLine();
 			ImGui::ProgressBar(m_renderThread.getProgress());
 
-			if(ImGui::Button("Stop Render"))
+			if (ImGui::Button("Stop Render"))
 				m_renderThread.stopRendering();
 
-			if (ImGui::Button("Reset Camera")){}
+			if (ImGui::Button("Reset Camera"))
+			{
+			}
 
 			static float exposureLog = 0.5f;
 			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
 			ImGui::SameLine();
-			if(ImGui::Button("Reset"))
+			if (ImGui::Button("Reset"))
 				exposureLog = 0.5f;
 			m_scale = std::pow(2.f, (exposureLog - 0.5f) * 20);
 
@@ -287,6 +311,33 @@ void ImguiScreen::draw()
 		}
 		ImGui::End();
 	}
+}
+
+void ImguiScreen::setCallbacks()
+{
+	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
+									  int action, int mods) {
+		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
+		app->keyboardState[key] = (action != GLFW_RELEASE);
+
+		if (ImGui::GetIO().WantCaptureKeyboard ||
+			ImGui::GetIO().WantTextInput)
+		{
+			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+			return;
+		}
+
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			return;
+		}
+
+		if (action == GLFW_PRESS)
+			app->keyPressed(key, mods);
+		if (action == GLFW_RELEASE)
+			app->keyReleased(key, mods);
+	});
 }
 
 static void errorCallback(int error, const char *description)
@@ -324,82 +375,27 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 	// -- window Callbacks
 	glfwSetWindowUserPointer(glfwWindow, this);
 
-	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
-									  int action, int mods) {
-		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->keyboardState[key] = (action != GLFW_RELEASE);
-
-		if (ImGui::GetIO().WantCaptureKeyboard ||
-			ImGui::GetIO().WantTextInput)
-		{
-			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-			return;
-		}
-
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			return;
-		}
-
-		if (action == GLFW_PRESS)
-			app->keyPressed(key, mods);
-		if (action == GLFW_RELEASE)
-			app->keyReleased(key, mods);
-	});
-
 	glfwSetFramebufferSizeCallback(glfwWindow, [](GLFWwindow *window, int width,
 												  int height) {
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
 		app->resizeWindow(width, height);
 	});
-
-	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
-									  int action, int mods) {
-		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->keyboardState[key] = (action != GLFW_RELEASE);
-
-		if (ImGui::GetIO().WantCaptureKeyboard ||
-			ImGui::GetIO().WantTextInput)
-		{
-			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-			return;
-		}
-
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			return;
-		}
-
-		if (action == GLFW_PRESS)
-			app->keyPressed(key, mods);
-		if (action == GLFW_RELEASE)
-			app->keyReleased(key, mods);
-	});
-
-	glfwSetFramebufferSizeCallback(glfwWindow, [](GLFWwindow *window, int width,
-												  int height) {
-		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->resizeWindow(width, height);
-	});
-
 }
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if (key == GLFW_KEY_O && mods == GLFW_MOD_CONTROL)
+	if (key == GLFW_KEY_O && mods & GLFW_MOD_CONTROL)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
 	{
-		if (mods == GLFW_MOD_ALT)
-			uiShowDemoWindow = !uiShowDemoWindow;
-		else
-			uiShowSceneWindow = !uiShowSceneWindow;
+		uiShowSceneWindow = !uiShowSceneWindow;
 	}
-	else if(key == GLFW_KEY_Z && GLFW_MOD_CONTROL)
+	else if (key == GLFW_KEY_Z && GLFW_MOD_CONTROL)
 		m_renderThread.stopRendering();
-
+	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
+	{
+		filebrowserSave.Open();
+	}
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
@@ -461,7 +457,7 @@ void ImguiScreen::drawSceneTree()
 				// Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
 				ImGui::AlignTextToFramePadding();
 				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-				                           ImGuiTreeNodeFlags_Bullet;
+										   ImGuiTreeNodeFlags_Bullet;
 				ImGui::TreeNodeEx("Field", flags, "Field_%d", i);
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(-1);
@@ -477,7 +473,6 @@ void ImguiScreen::drawSceneTree()
 	}
 
 	ImGui::PopID();
-
 
 	// end columns
 	ImGui::Columns(1);

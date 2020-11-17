@@ -70,6 +70,7 @@ public:
 	void initGlfw(const char *windowTitle, int width, int height);
 	void initGl();
 	void initImGui();
+	void setCallbacks();
 
 	void resizeWindow(int width, int height);
 
@@ -111,6 +112,7 @@ private:
 	MouseState mouseState;
 
 	ImGui::FileBrowser filebrowser;
+	ImGui::FileBrowser filebrowserSave = ImGui::FileBrowser(ImGuiFileBrowserFlags_::ImGuiFileBrowserFlags_EnterNewFilename);
 
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
