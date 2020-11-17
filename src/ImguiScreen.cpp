@@ -31,10 +31,53 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_b
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
-	filebrowser.SetPwd(std::filesystem::relative("../scenes/project"));
+
+	glGenTextures(1, &m_texture);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	// init shader
+	m_shader = new nanogui::GLShader();
+	m_shader->init("Tonemapper", "#version 330\n"
+								 "in vec2 position;\n"
+								 "out vec2 uv;\n"
+								 "void main() {\n"
+								 "    gl_Position = vec4(position.x*2-1, position.y*2-1, 0.0, 1.0);\n"
+								 "    uv = vec2(position.x, 1-position.y);\n"
+								 "}",
+				   "#version 330\n"
+				   "uniform sampler2D source;\n"
+				   "uniform float scale;\n"
+				   "in vec2 uv;\n"
+				   "out vec4 out_color;\n"
+				   "float toSRGB(float value) {\n"
+				   "    if (value < 0.0031308)\n"
+				   "        return 12.92 * value;\n"
+				   "    return 1.055 * pow(value, 0.41666) - 0.055;\n"
+				   "}\n"
+				   "void main() {\n"
+				   "    vec4 color = texture(source, uv);\n"
+				   "    color *= scale / color.w;\n"
+				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
+				   "}");
+	MatrixXu indices(3, 2); /* Draw 2 triangles */
+	indices.col(0) << 0, 1, 2;
+	indices.col(1) << 2, 3, 0;
+
+	MatrixXf positions(2, 4);
+	positions.col(0) << 0, 0;
+	positions.col(1) << 1, 0;
+	positions.col(2) << 1, 1;
+	positions.col(3) << 0, 1;
+
+	m_shader->bind();
+	m_shader->uploadIndices(indices);
+	m_shader->uploadAttrib("position", positions);
 }
 
-void ImguiScreen::openXML(const std::string& filename) {
+void ImguiScreen::openXML(const std::string &filename)
+{
 	if (m_renderThread.isBusy())
 	{
 		cerr << "Error: rendering in progress, you need to wait until it's done" << endl;
@@ -51,10 +94,17 @@ void ImguiScreen::openXML(const std::string& filename) {
 		m_block.unlock();
 
 		glfwSetWindowSize(glfwWindow, imageSize.x(), imageSize.y());
-	} catch (const std::exception& e)
+	}
+	catch (const std::exception &e)
 	{
 		cerr << "Fatal error: " << e.what() << endl;
 	}
+}
+
+ImguiScreen::~ImguiScreen()
+{
+	glDeleteTextures(1, &m_texture);
+	delete m_shader;
 }
 
 void ImguiScreen::openEXR(const std::string &filename)
@@ -72,6 +122,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 	m_block.fromBitmap(bitmap);
 	Vector2i bsize = m_block.getSize();
 	m_block.unlock();
+	glfwSetWindowSize(glfwWindow, bsize.x(), bsize.y());
 
 	renderImage = true;
 }
@@ -142,8 +193,25 @@ void ImguiScreen::drawAll()
 void ImguiScreen::render()
 {
 	// draws the tonemapped image to screen
-	if(renderImage) {
-		std::cout << "Render imge" << std::endl;
+	if (renderImage)
+	{
+		m_block.lock();
+		int borderSize = m_block.getBorderSize();
+		const Vector2i &size = m_block.getSize();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_block.cols());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
+					 0, GL_RGBA, GL_FLOAT, (uint8_t *)m_block.data() + (borderSize * m_block.cols() + borderSize) * sizeof(Color4f));
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		m_block.unlock();
+
+		glViewport(0, 0, get_pixel_ratio() * size[0], get_pixel_ratio() * size[1]);
+		m_shader->bind();
+		m_shader->setUniform("scale", m_scale);
+		m_shader->setUniform("source", 0);
+		m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
+		glViewport(0, 0, width, height);
 	}
 }
 
@@ -151,7 +219,7 @@ void ImguiScreen::draw()
 {
 	// Enable docking in the main window, do not clear it so we can see the image behind
 	ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode |
-	                                   ImGuiDockNodeFlags_NoDockingInCentralNode);
+										   ImGuiDockNodeFlags_NoDockingInCentralNode);
 
 	if (uiShowDemoWindow)
 	{
@@ -187,25 +255,29 @@ void ImguiScreen::draw()
 
 	if (filebrowser.HasSelected())
 	{
-		std::string extension = filebrowser.GetSelected().extension().string();
-		if(extension == ".xml") {
+		std::string extension = filebrowser.GetSelected().extension();
+		if (extension == ".xml")
+		{
 			openXML(filebrowser.GetSelected().string());
-		} else if(extension == ".exr") {
+		}
+		else if (extension == ".exr")
+		{
 			openEXR(filebrowser.GetSelected().string());
 		}
- 		filebrowser.ClearSelected();
+		filebrowser.ClearSelected();
 	}
 
-	if(uiShowSceneWindow)
+	if (uiShowSceneWindow)
 	{
-		ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("Hello There", &uiShowSceneWindow))
 		{
-			if (ImGui::Button("Reset Camera")){}
+			if (ImGui::Button("Reset Camera"))
+			{
+			}
 
 			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-
 			}
 		}
 		ImGui::End();
@@ -280,7 +352,7 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if(key == GLFW_KEY_O && mods == GLFW_MOD_CONTROL)
+	if (key == GLFW_KEY_O && mods == GLFW_MOD_CONTROL)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
 	{
@@ -289,7 +361,6 @@ void ImguiScreen::keyPressed(int key, int mods)
 		else
 			uiShowSceneWindow = !uiShowSceneWindow;
 	}
-
 }
 
 void ImguiScreen::keyReleased(int key, int mods)

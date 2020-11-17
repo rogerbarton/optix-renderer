@@ -11,6 +11,8 @@
 
 #include <nori/common.h>
 #include <nori/render.h>
+#include <nanogui/glutil.h>
+//#include <nori/shader.h>
 #include <map>
 
 NORI_NAMESPACE_BEGIN
@@ -42,7 +44,9 @@ class ImguiScreen
 {
 public:
 	ImguiScreen(ImageBlock &block);
-	bool uiShowDemoWindow  = false;
+	~ImguiScreen();
+
+	bool uiShowDemoWindow = false;
 	bool uiShowSceneWindow = true;
 
 	void initGlfw(const char *windowTitle, int width, int height);
@@ -91,6 +95,10 @@ private:
 	ImGui::FileBrowser filebrowser;
 
 	bool renderImage = false;
+
+	uint32_t m_texture = 0;
+	float m_scale = 1.f;
+	nanogui::GLShader* m_shader;
 };
 
 NORI_NAMESPACE_END
