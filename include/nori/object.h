@@ -37,7 +37,9 @@ public:
         EScene = 0,
         EMesh,
         ETexture,
+#ifndef NORI_DISABLE_VOLUME
         EVolume,
+#endif
         EBSDF,
         EPhaseFunction,
         EEmitter,
@@ -64,8 +66,10 @@ public:
             return "shape";
         case ETexture:
             return "texture";
+#ifndef NORI_DISABLE_VOLUME
         case EVolume:
             return "volume";
+#endif
         case EBSDF:
             return "bsdf";
         case EEmitter:

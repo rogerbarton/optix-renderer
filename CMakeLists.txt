@@ -4,6 +4,7 @@ project("nori")
 
 option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
 option(NORI_USE_GUI    "Build the GUI"   ON)
+option(NORI_DISABLE_VOLUME "Disable all Volumes" OFF)
 option(NORI_USE_IMGUI "Build the ImGui Frame" ON)
 
 # This file included below takes care of compiling dependencies
@@ -19,7 +20,7 @@ endif(NORI_BUILD_DOCS)
 if(NOT NORI_USE_GUI)
     message("NORI_USE_GUI is off")
     message("Make sure to use the right gcc version:")
-    message("module load new/gcc/4.9.2 cmake/3.9.2")
+    message("module load new gcc/4.9.2 cmake/3.13.5")
 
     # Disable flag for preprocessor
     add_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
@@ -32,6 +33,13 @@ if(NORI_USE_IMGUI)
 else()
   add_definitions(-DNORI_USE_NANOGUI)
   message("Nori uses Nanogui")
+endif()
+
+if(NOT NORI_DISABLE_VOLUME)
+  message("Nori uses Volumes")
+else()
+  add_definitions(-DNORI_DISABLE_VOLUME)
+  message("Nori don't uses VOLUMES")
 endif()
 
 # The following lines build the main executable. If you add a source
@@ -115,9 +123,14 @@ add_executable(nori
   src/environmentmap.cpp
   src/PNGTexture.cpp
   src/denoiser.cpp
-  src/volume.cpp
   src/adaptive.cpp
 )
+
+if(NOT NORI_DISABLE_VOLUME)
+  target_sources(nori PRIVATE
+     src/volume.cpp
+  )
+endif()
 
 add_executable(tonemapper
         include/nori/bitmap.h

@@ -22,7 +22,9 @@
 #include <nori/sampler.h>
 #include <nori/camera.h>
 #include <nori/emitter.h>
+#ifndef NORI_DISABLE_VOLUME
 #include <nori/volume.h>
+#endif
 
 NORI_NAMESPACE_BEGIN
 
@@ -115,10 +117,11 @@ void Scene::addChild(NoriObject *obj)
             throw NoriException("There can only be one denoiser per scene!");
         m_denoiser = static_cast<Denoiser *>(obj);
         break;
-
+#ifndef NORI_DISABLE_VOLUME
     case EVolume:
         m_volumes.push_back(static_cast<Volume *>(obj));
         break;
+#endif
 
     default:
         throw NoriException("Scene::addChild(<%s>) is not supported!",
@@ -145,7 +148,7 @@ std::string Scene::toString() const
             lights += ",";
         lights += "\n";
     }
-
+#ifndef NORI_DISABLE_VOLUME
     std::string volumes;
     for (size_t i = 0; i < m_volumes.size(); ++i)
     {
@@ -154,6 +157,7 @@ std::string Scene::toString() const
             volumes += ",";
         volumes += "\n";
     }
+#endif
 
     return tfm::format(
         "Scene[\n"
@@ -166,8 +170,10 @@ std::string Scene::toString() const
         "  %s  }\n"
         "  envmap = %s,\n"
         "  denoiser = %s,\n"
+#ifndef NORI_DISABLE_VOLUME
         "  volumes {\n"
         "  %s  }\n"
+#endif
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
@@ -175,8 +181,12 @@ std::string Scene::toString() const
         indent(shapes, 2),
         indent(lights, 2),
         m_envmap ? indent(m_envmap->toString()) : "nullptr",
-        m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
-        indent(volumes, 2));
+        m_denoiser ? indent(m_denoiser->toString()) : "nullptr"
+#ifndef NORI_DISABLE_VOLUME
+        ,
+        indent(volumes, 2)
+#endif
+    );
 }
 
 NORI_REGISTER_CLASS(Scene, "scene");
