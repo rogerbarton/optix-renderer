@@ -6,7 +6,30 @@ namespace ImGui
                                     float v, float v_min, float v_max,
                                     const char *fmt, ImGuiSliderFlags flags)
     {
-        return ImGui::DragFloat3(label, color->data(), v, v_min, v_max, fmt, flags);
+        nori::Vector3f col_val = nori::Vector3f(color->r(), color->g(), color->b());
+        float exponent = col_val.maxCoeff();
+        col_val /= col_val.maxCoeff();
+
+        bool ret = true;
+        
+        ImGui::PushID(42); 
+        ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.5f);
+        ret |= ImGui::ColorPicker3(label, col_val.data(), ImGuiColorEditFlags_DisplayRGB);
+        ImGui::PopItemWidth();
+        ImGui::PopID();
+
+        ImGui::PushID(1337);
+        ret |= ImGui::DragFloat("##value", &exponent, 0.1f, Epsilon, SLIDER_MAX_FLOAT, "Exponent: %.4f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::PopID();
+
+        // puzzle back the color
+        col_val /= col_val.maxCoeff();
+        col_val *= exponent;
+        color->r() = col_val.x();
+        color->g() = col_val.y();
+        color->b() = col_val.z();
+
+        return ret;
     }
     IMGUI_IMPL_API bool ColorPicker(const char *label, nori::Color3f *color)
     {
