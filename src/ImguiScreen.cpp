@@ -329,6 +329,23 @@ void ImguiScreen::draw()
 			{
 			}
 
+			ImGui::NewLine();
+
+			ImGui::Text("Image Offset");
+			ImGui::SameLine();
+			ImGui::PushID(1);
+			ImGui::DragVector2i("##value", &imageOffset);
+			ImGui::PopID();
+
+			ImGui::Text("Zoom Level");
+			ImGui::SameLine();
+			ImGui::PushID(2);
+			ImGui::SliderFloat("##value", &imageZoom, 1.f/30.f, 30.f, "%.3f", 0.5f);
+			ImGui::PopID();
+
+
+			ImGui::NewLine();
+
 			static float exposureLog = 0.5f;
 			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
 			ImGui::SameLine();
@@ -351,6 +368,9 @@ void ImguiScreen::setCallbacks()
 {
 	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
 									  int action, int mods) {
+		if(key == GLFW_KEY_ENTER) {
+			return;
+		}
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
 
 		if (ImGui::GetIO().WantCaptureKeyboard ||
@@ -553,7 +573,7 @@ void ImguiScreen::centerImage(bool autoExpandWindow)
 void ImguiScreen::scrollWheel(double xoffset, double yoffset)
 {
 	float scale = 1.f - 0.05f * yoffset;
-	setZoom(imageZoom / scale);
+	setZoom(clamp(imageZoom / scale, 1.f/30.f, 30.f));
 }
 
 void ImguiScreen::initGl()
