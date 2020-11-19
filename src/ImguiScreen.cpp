@@ -28,12 +28,14 @@ float get_pixel_ratio()
 
 ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 {
-	windowWidth = block.cols();
-	windowHeight = block.rows();
+	windowWidth = 1000;
+	windowHeight = 800;
 	initGlfw("ENori - Enhanced Nori", windowWidth, windowHeight);
 	initGl();
 	initImGui();
 	setCallbacks();
+
+	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
