@@ -381,7 +381,7 @@ void ImguiScreen::setCallbacks()
 
 		app->keyboardState[key] = (action != GLFW_RELEASE);
 
-		if (key == GLFW_KEY_ESCAPE)
+		if (key == GLFW_KEY_Q)
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			return;
@@ -503,11 +503,11 @@ void ImguiScreen::keyPressed(int key, int mods)
 	if (key == GLFW_KEY_O && mods & GLFW_MOD_CONTROL)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
-	{
 		uiShowSceneWindow = !uiShowSceneWindow;
-	}
-	else if (key == GLFW_KEY_Z && GLFW_MOD_CONTROL)
+	else if (key == GLFW_KEY_ESCAPE)
 		m_renderThread.stopRendering();
+	else if(key == GLFW_KEY_F5)
+		m_renderThread.rerenderScene(renderingFilename);
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
 	{
 		filebrowserSave.Open();

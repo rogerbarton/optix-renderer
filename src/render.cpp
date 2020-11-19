@@ -121,7 +121,7 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
 
 void RenderThread::rerenderScene(const std::string &filename)
 {
-	if(isBusy()) {
+	if(isBusy() && m_scene) {
 		return;
 	}
 	// use the old scene to rerender
