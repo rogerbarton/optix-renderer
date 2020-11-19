@@ -368,9 +368,6 @@ void ImguiScreen::setCallbacks()
 {
 	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
 									  int action, int mods) {
-		if(key == GLFW_KEY_ENTER) {
-			return;
-		}
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
 
 		if (ImGui::GetIO().WantCaptureKeyboard ||
