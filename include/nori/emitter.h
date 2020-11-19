@@ -142,7 +142,7 @@ public:
     ImGui::TreeNodeEx("Position", flags, "Position");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragPoint3f("##value", &m_position);
+    ImGui::DragPoint3f("##value", &m_position, 0.1f);
     ImGui::NextColumn();
     ImGui::PopID();
   }

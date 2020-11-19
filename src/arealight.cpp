@@ -140,7 +140,7 @@ public:
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ImGui::DragColor3f("##value", &m_radiance, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
   }
 #endif

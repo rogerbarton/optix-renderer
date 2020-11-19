@@ -63,7 +63,7 @@ public:
         ImGui::TreeNodeEx("Shape", flags, "Shape");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_radius, 1.f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
     }

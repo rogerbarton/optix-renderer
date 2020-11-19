@@ -208,7 +208,7 @@ public:
         ImGui::TreeNodeEx("lensRadius", flags, "Lens Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_lensRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -217,7 +217,7 @@ public:
         ImGui::TreeNodeEx("focalDistance", flags, "Focal Distance");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_focalDistance, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
     }
