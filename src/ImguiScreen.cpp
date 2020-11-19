@@ -338,7 +338,9 @@ void ImguiScreen::draw()
 
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
+				ImGui::BeginChild(42);
 				drawSceneTree();
+				ImGui::EndChild();
 			}
 		}
 		ImGui::End();
