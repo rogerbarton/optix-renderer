@@ -12,7 +12,7 @@ void Camera::getImGuiNodes()
     ImGui::TreeNodeEx("outputSize", flags, "Output Size");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragVector2i("Output Size", &m_outputSize, 1, 0, SLIDER_MAX_INT, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragVector2i("##value", &m_outputSize, 1, 0, SLIDER_MAX_INT, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
 
     bool node_open = ImGui::TreeNode("Reconstruction Filter");

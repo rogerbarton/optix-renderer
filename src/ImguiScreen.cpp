@@ -352,7 +352,6 @@ void ImguiScreen::setCallbacks()
 	glfwSetKeyCallback(glfwWindow, [](GLFWwindow *window, int key, int scancode,
 									  int action, int mods) {
 		auto app = static_cast<ImguiScreen *>(glfwGetWindowUserPointer(window));
-		app->keyboardState[key] = (action != GLFW_RELEASE);
 
 		if (ImGui::GetIO().WantCaptureKeyboard ||
 			ImGui::GetIO().WantTextInput)
@@ -360,6 +359,8 @@ void ImguiScreen::setCallbacks()
 			ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 			return;
 		}
+
+		app->keyboardState[key] = (action != GLFW_RELEASE);
 
 		if (key == GLFW_KEY_ESCAPE)
 		{
@@ -607,7 +608,6 @@ void ImguiScreen::drawSceneTree()
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 	ImGui::Columns(2);
 
-
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
 							   ImGuiTreeNodeFlags_Bullet;
 
@@ -619,7 +619,7 @@ void ImguiScreen::drawSceneTree()
 	ImGui::NextColumn();
 
 	// Start recursion
-	m_renderThread.m_scene->getImGuiNodes();	
+	m_renderThread.m_scene->getImGuiNodes();
 
 	// end columns
 	ImGui::Columns(1);

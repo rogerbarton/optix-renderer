@@ -122,14 +122,14 @@ public:
         ImGui::TreeNodeEx("center", flags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragPoint3f("Center", &m_position);
+        ImGui::DragPoint3f("##value", &m_position);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("radius", flags, "radius");
+        ImGui::TreeNodeEx("radius", flags, "Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("radius", &m_radius, 0.1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("##value", &m_radius, 0.1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
         if (m_bsdf)
