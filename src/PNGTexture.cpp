@@ -122,7 +122,7 @@ public:
 		ImGui::TreeNodeEx("fileName", flags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		ImGui::Text(filename.str().c_str());
+		ImGui::Text(filename.filename().c_str());
 		ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();

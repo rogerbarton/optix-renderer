@@ -117,17 +117,6 @@ public:
     {
         ImGui::PushID(EMesh);
         Shape::getImGuiNodes();
-        
-        // get ImGuiNodes for all children and own
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("name", flags, "Filename");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::Text(m_name.c_str());
-        ImGui::NextColumn();
         ImGui::PopID();
     }
 #endif

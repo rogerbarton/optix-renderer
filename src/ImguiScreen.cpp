@@ -613,7 +613,7 @@ void ImguiScreen::drawSceneTree()
 	ImGui::TreeNodeEx("fileName", flags, "Filename");
 	ImGui::NextColumn();
 	ImGui::SetNextItemWidth(-1);
-	ImGui::Text(renderingFilename.c_str());
+	ImGui::Text(filesystem::path(renderingFilename).filename().c_str());
 	ImGui::NextColumn();
 
 	// Start recursion
