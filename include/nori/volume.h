@@ -31,13 +31,14 @@ public:
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
 								   ImGuiTreeNodeFlags_Bullet;
-
+		ImGui::PushID(EVolume);
 		ImGui::AlignTextToFramePadding();
 		ImGui::TreeNodeEx("fileName", flags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
 		ImGui::Text(filename.str().c_str());
 		ImGui::NextColumn();
+		ImGui::PopID();
 	}
 #endif
 

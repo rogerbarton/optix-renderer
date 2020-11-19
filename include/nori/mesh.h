@@ -115,6 +115,7 @@ public:
     virtual const char *getImGuiName() const override { return "Mesh"; }
     virtual void getImGuiNodes() override
     {
+        ImGui::PushID(EMesh);
         Shape::getImGuiNodes();
         
         // get ImGuiNodes for all children and own
@@ -127,6 +128,7 @@ public:
         ImGui::SetNextItemWidth(-1);
         ImGui::Text(m_name.c_str());
         ImGui::NextColumn();
+        ImGui::PopID();
     }
 #endif
 protected:

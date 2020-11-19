@@ -192,6 +192,7 @@ std::string Scene::toString() const
 #ifndef NORI_USE_NANOGUI
 void Scene::getImGuiNodes()
 {
+    ImGui::PushID(EScene);
     if (m_camera)
     {
         bool node_open_camera = ImGui::TreeNode("Camera");
@@ -325,6 +326,8 @@ void Scene::getImGuiNodes()
 
         ImGui::TreePop();
     }
+
+    ImGui::PopID();
 }
 #endif
 

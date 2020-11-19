@@ -56,6 +56,7 @@ public:
     virtual const char *getImGuiName() const override { return "Reconstruction Filter"; }
     virtual void getImGuiNodes() override
     {
+        ImGui::PushID(EReconstructionFilter);
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
         ImGui::AlignTextToFramePadding();
@@ -64,6 +65,7 @@ public:
         ImGui::SetNextItemWidth(-1);
         ImGui::DragFloat("Radius", &m_radius, 1.f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
+        ImGui::PopID();
     }
     #endif
 

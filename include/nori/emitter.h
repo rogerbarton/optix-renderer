@@ -136,27 +136,15 @@ public:
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
 
-    if (m_shape)
-    {
-      ImGui::AlignTextToFramePadding();
-      bool node_open = ImGui::TreeNode("shape");
-      ImGui::NextColumn();
-      ImGui::SetNextItemWidth(-1);
-      ImGui::Text(m_shape->getImGuiName());
-      ImGui::NextColumn();
-      if (node_open)
-      {
-        m_shape->getImGuiNodes();
-        ImGui::TreePop();
-      }
-    }
+    ImGui::PushID(EEmitter);
 
     ImGui::AlignTextToFramePadding();
-    bool node_open = ImGui::TreeNode("Position");
+    ImGui::TreeNodeEx("Position", flags, "Position");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragPoint3f("Position", &m_position);
+    ImGui::DragPoint3f("##value", &m_position);
     ImGui::NextColumn();
+    ImGui::PopID();
   }
   #endif
 

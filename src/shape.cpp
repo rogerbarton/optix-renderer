@@ -90,6 +90,7 @@ std::string Intersection::toString() const
 #ifndef NORI_USE_NANOGUI
 void Shape::getImGuiNodes()
 {
+    ImGui::PushID(EMesh);
     if (m_bsdf)
     {
         bool node_open_bsdf = ImGui::TreeNode("BSDF");
@@ -119,6 +120,7 @@ void Shape::getImGuiNodes()
             ImGui::TreePop();
         }
     }
+    ImGui::PopID();
 }
 #endif
 
