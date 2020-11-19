@@ -10,7 +10,11 @@ namespace ImGui
     }
     IMGUI_IMPL_API bool ColorPicker(const char *label, nori::Color3f *color)
     {
-        return ImGui::ColorPicker3(label, color->data(), ImGuiColorEditFlags_DisplayRGB);
+
+        ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.5f);
+        bool ret = ImGui::ColorPicker3(label, color->data(), ImGuiColorEditFlags_DisplayRGB);
+        ImGui::PopItemWidth();
+        return ret;
     }
 
     IMGUI_IMPL_API bool DragColor4f(const char *label, nori::Color4f *color,

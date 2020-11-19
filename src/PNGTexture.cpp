@@ -157,7 +157,6 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
 
-
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
         ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
