@@ -136,6 +136,57 @@ public:
 		}
 	}
 
+	virtual const char *getImGuiName() const override { return "PNGEnvMap"; }
+	virtual void getImGuiNodes() override
+	{
+		EnvironmentMap::getImGuiNodes();
+
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+		if (m_map)
+		{
+			bool node_open = ImGui::TreeNode("Texture");
+			ImGui::NextColumn();
+			ImGui::AlignTextToFramePadding();
+
+			ImGui::Text(m_map->getImGuiName());
+			ImGui::NextColumn();
+			if (node_open)
+			{
+				m_map->getImGuiNodes();
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("scale U", flags, "Scale U");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::PushID(3);
+        ImGui::TreeNodeEx("SphereTexture", flags, "Sphere Texture");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::Checkbox("##value", &sphereTexture);
+        ImGui::NextColumn();
+        ImGui::PopID();
+	}
+
 private:
 	Texture<Color3f> *m_map = nullptr;
 	bool sphereTexture = false;

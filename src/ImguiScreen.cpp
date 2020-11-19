@@ -1,17 +1,9 @@
 #include <nori/ImguiScreen.h>
 
-// TODO: remove this one
-#include <nori/ImguiHelpers.h>
-
 #include <nori/block.h>
 #include <nori/parser.h>
 #include <nori/bitmap.h>
 #include <nori/scene.h>
-#include <nori/sampler.h>
-#include <nori/integrator.h>
-#include <nori/emitter.h>
-#include <nori/shape.h>
-#include <nori/bsdf.h>
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
@@ -609,114 +601,23 @@ void ImguiScreen::drawSceneTree()
 							ImGui::GetStyle().Alpha * 0.5f);
 	}
 
-	// get all scene objects
-	Sampler *sampler = m_renderThread.m_scene->getSampler();
-	Integrator *integrator = m_renderThread.m_scene->getIntegrator();
-	std::vector<Shape *> shapes = m_renderThread.m_scene->getShapes();
-
 	// Start columns
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 	ImGui::Columns(2);
 
-	ImGui::AlignTextToFramePadding();
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
 							   ImGuiTreeNodeFlags_Bullet;
 
+	ImGui::AlignTextToFramePadding();
 	ImGui::TreeNodeEx("fileName", flags, "Filename");
 	ImGui::NextColumn();
 	ImGui::SetNextItemWidth(-1);
 	ImGui::Text(renderingFilename.c_str());
 	ImGui::NextColumn();
 
-	bool node_open_integrator = ImGui::TreeNode("Integrator");
-	ImGui::NextColumn();
-	ImGui::AlignTextToFramePadding();
-	ImGui::Text(integrator->getImGuiName());
-	ImGui::NextColumn();
-	if (node_open_integrator)
-	{
-		integrator->getImGuiNodes();
-		ImGui::TreePop();
-	}
-
-	bool node_open_sampler = ImGui::TreeNode("Sampler");
-	ImGui::NextColumn();
-	ImGui::AlignTextToFramePadding();
-	ImGui::Text(sampler->getImGuiName());
-	ImGui::NextColumn();
-	if (node_open_sampler)
-	{
-		sampler->getImGuiNodes();
-		ImGui::TreePop();
-	}
-
-	bool node_open_shapes = ImGui::TreeNode("Shapes");
-	ImGui::NextColumn();
-	ImGui::AlignTextToFramePadding();
-	ImGui::Text("%d Shapes", (int)shapes.size());
-	ImGui::NextColumn();
-	if (node_open_shapes)
-	{
-		for (int i = 0; i < shapes.size(); i++)
-		{
-			ImGui::PushID(i);
-
-			// for each shape, add a tree node
-			bool node_open_shape = ImGui::TreeNode("Shape", "%s %d", "Shape", i + 1);
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-
-			ImGui::Text(shapes[i]->getImGuiName());
-			ImGui::NextColumn();
-
-			if (node_open_shape)
-			{
-				// for now, only bsdf
-				bool node_open_bsdf = ImGui::TreeNode("BSDF");
-				ImGui::NextColumn();
-				ImGui::AlignTextToFramePadding();
-
-				ImGui::Text(shapes[i]->getBSDF()->getImGuiName());
-				ImGui::NextColumn();
-
-				if (node_open_bsdf)
-				{
-					shapes[i]->getBSDFNonConst()->getImGuiNodes();
-					ImGui::TreePop();
-				}
-
-				ImGui::TreePop();
-			}
-
-			ImGui::PopID();
-		}
-
-		ImGui::TreePop();
-	}
-
-	// Other stuff... // TODO
-
-	/*for (int i = 0; i < 8; i++)
-		{
-			ImGui::PushID(i); // Use field index as identifier.
-			{
-				// Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
-				ImGui::AlignTextToFramePadding();
-				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-										   ImGuiTreeNodeFlags_Bullet;
-				ImGui::TreeNodeEx("Field", flags, "Field_%d", i);
-				ImGui::NextColumn();
-				ImGui::SetNextItemWidth(-1);
-				if (i >= 5)
-					ImGui::InputFloat("##value", &placeholder_members[i], 1.0f);
-				else
-					ImGui::DragFloat("##value", &placeholder_members[i], 0.01f);
-				ImGui::NextColumn();
-			}
-			ImGui::PopID();
-		}
-		*/
+	// Start recursion
+	m_renderThread.m_scene->getImGuiNodes();	
 
 	// end columns
 	ImGui::Columns(1);

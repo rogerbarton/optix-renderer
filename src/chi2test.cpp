@@ -213,6 +213,10 @@ public:
     }
 
     virtual EClassType getClassType() const override { return ETest; }
+
+    virtual const char* getImGuiName() const override { return "Chi2 Test"; }
+    virtual void getImGuiNodes() override {}
+
 private:
     int m_cosThetaResolution;
     int m_phiResolution;

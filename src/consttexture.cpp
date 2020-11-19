@@ -21,42 +21,86 @@
 NORI_NAMESPACE_BEGIN
 
 template <typename T>
-class ConstantTexture : public Texture<T> {
+class ConstantTexture : public Texture<T>
+{
 public:
     ConstantTexture(const PropertyList &props);
 
     virtual std::string toString() const override;
 
-    virtual T eval(const Point2f & uv) override {
+    virtual T eval(const Point2f &uv) override
+    {
         return m_value;
     }
+
+    virtual const char *getImGuiName() const override { return "Constant"; }
+    virtual void getImGuiNodes() override {}
 
 protected:
     T m_value;
 };
 
 template <>
-ConstantTexture<float>::ConstantTexture(const PropertyList &props) {
-    m_value = props.getFloat("value",0.f);
+ConstantTexture<float>::ConstantTexture(const PropertyList &props)
+{
+    m_value = props.getFloat("value", 0.f);
 }
 template <>
-ConstantTexture<Color3f>::ConstantTexture(const PropertyList &props) {
-    m_value = props.getColor("value",Color3f(0.f));
+ConstantTexture<Color3f>::ConstantTexture(const PropertyList &props)
+{
+    m_value = props.getColor("value", Color3f(0.f));
 }
 
-
 template <>
-std::string ConstantTexture<float>::toString() const {
+std::string ConstantTexture<float>::toString() const
+{
     return tfm::format(
-            "ConstantTexture[ %f ]",
-            m_value);
+        "ConstantTexture[ %f ]",
+        m_value);
 }
 
 template <>
-std::string ConstantTexture<Color3f>::toString() const {
+std::string ConstantTexture<Color3f>::toString() const
+{
     return tfm::format(
-            "ConstantTexture[ %s ]",
-            m_value.toString());
+        "ConstantTexture[ %s ]",
+        m_value.toString());
+}
+
+template <>
+void ConstantTexture<float>::getImGuiNodes()
+{
+    Texture::getImGuiNodes();
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
+
+    int id = 1;
+
+    ImGui::AlignTextToFramePadding();
+
+    ImGui::TreeNodeEx("Float", flags, "Float");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+
+    ImGui::DragFloat("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
+}
+
+template <>
+void ConstantTexture<Color3f>::getImGuiNodes()
+{
+    Texture::getImGuiNodes();
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
+
+    ImGui::AlignTextToFramePadding();
+
+    ImGui::TreeNodeEx("Color", flags, "Color");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+
+    ImGui::DragColor3f("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
 }
 
 NORI_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float")

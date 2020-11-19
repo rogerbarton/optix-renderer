@@ -32,13 +32,14 @@ NORI_NAMESPACE_BEGIN
  * the specifics of how to create its contents (e.g. by loading from an
  * external file)
  */
-class Mesh : public Shape {
+class Mesh : public Shape
+{
 public:
     /// Initialize internal data structures (called once by the XML parser)
     virtual void activate() override;
 
     /// Return the total number of triangles in this shape
-    virtual uint32_t getPrimitiveCount() const override { return (uint32_t) m_F.cols(); }
+    virtual uint32_t getPrimitiveCount() const override { return (uint32_t)m_F.cols(); }
 
     //// Return an axis-aligned bounding box containing the given triangle
     virtual BoundingBox3f getBoundingBox(uint32_t index) const override;
@@ -74,23 +75,23 @@ public:
     virtual bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override;
 
     /// Set intersection information: hit point, shading frame, UVs
-    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection & its) const override;
+    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
 
     /// Return the total number of vertices in this shape
-    uint32_t getVertexCount() const { return (uint32_t) m_V.cols(); }
+    uint32_t getVertexCount() const { return (uint32_t)m_V.cols(); }
 
     /**
      * \brief Uniformly sample a position on the mesh with
      * respect to surface area.
      */
-    virtual void sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const override;
-    virtual float pdfSurface(const ShapeQueryRecord & sRec) const override;
+    virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override;
+    virtual float pdfSurface(const ShapeQueryRecord &sRec) const override;
 
     /// Return the surface area of the given triangle
     float surfaceArea(uint32_t index) const;
 
-    Point3f getInterpolatedVertex(uint32_t index, const Vector3f & bc) const;
-    Normal3f getInterpolatedNormal(uint32_t index, const Vector3f & bc) const;
+    Point3f getInterpolatedVertex(uint32_t index, const Vector3f &bc) const;
+    Normal3f getInterpolatedNormal(uint32_t index, const Vector3f &bc) const;
 
     /// Return a pointer to the vertex positions
     const MatrixXf &getVertexPositions() const { return m_V; }
@@ -104,23 +105,39 @@ public:
     /// Return a pointer to the triangle vertex index list
     const MatrixXu &getIndices() const { return m_F; }
 
-
     /// Return the name of this mesh
     const std::string &getName() const { return m_name; }
 
     /// Return a human-readable summary of this instance
     virtual std::string toString() const override;
 
+    virtual const char *getImGuiName() const override { return "Mesh"; }
+    virtual void getImGuiNodes() override
+    {
+        Shape::getImGuiNodes();
+        
+        // get ImGuiNodes for all children and own
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("name", flags, "Filename");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::Text(m_name.c_str());
+        ImGui::NextColumn();
+    }
+
 protected:
     /// Create an empty mesh
     Mesh();
 
 protected:
-    std::string m_name;                  ///< Identifying name
-    MatrixXf      m_V;                   ///< Vertex positions
-    MatrixXf      m_N;                   ///< Vertex normals
-    MatrixXf      m_UV;                  ///< Vertex texture coordinates
-    MatrixXu      m_F;                   ///< Faces
+    std::string m_name; ///< Identifying name
+    MatrixXf m_V;       ///< Vertex positions
+    MatrixXf m_N;       ///< Vertex normals
+    MatrixXf m_UV;      ///< Vertex texture coordinates
+    MatrixXu m_F;       ///< Faces
 
     DiscretePDF m_pdf;
 };

@@ -142,6 +142,51 @@ public:
                        m_alpha, m_intIOR, m_extIOR, m_kd.toString(), m_ks);
   }
 
+  virtual const char* getImGuiName() const override { return "Microfacet"; }
+    virtual void getImGuiNodes() override {
+
+      BSDF::getImGuiNodes();
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("alpha", flags, "Alpha");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_alpha, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(3);
+        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(3);
+        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragColor3f("##value", &m_kd, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+
 private:
   float m_alpha;
   float m_intIOR, m_extIOR;

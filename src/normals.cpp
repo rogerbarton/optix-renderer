@@ -34,6 +34,9 @@ public:
     {
         return "NormalIntegrator[]";
     }
+
+    virtual const char *getImGuiName() const override { return "Normals"; }
+    virtual void getImGuiNodes() override { Integrator::getImGuiNodes(); }
 };
 
 NORI_REGISTER_CLASS(NormalIntegrator, "normals");

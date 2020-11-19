@@ -69,6 +69,9 @@ public:
 
   std::string toString() const { return tfm::format("DirectIntegrator[]"); }
 
+  virtual const char *getImGuiName() const override { return "Direct"; }
+  virtual void getImGuiNodes() override {}
+
 protected:
 };
 

@@ -20,6 +20,7 @@
 #define __NORI_EMITTER_H
 
 #include <nori/object.h>
+#include <nori/shape.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -28,7 +29,8 @@ struct Intersection;
  * \brief Data record for conveniently querying and sampling the
  * direct illumination technique implemented by a emitter
  */
-struct EmitterQueryRecord {
+struct EmitterQueryRecord
+{
   /// Origin point from which we sample the emitter
   Point3f ref;
   /// Sampled point on the emitter
@@ -53,7 +55,8 @@ struct EmitterQueryRecord {
    * sampling density after having intersected an area emitter
    */
   EmitterQueryRecord(const Point3f &ref, const Point3f &p, const Normal3f &n)
-      : ref(ref), p(p), n(n) {
+      : ref(ref), p(p), n(n)
+  {
     wi = (p - ref).normalized();
   }
 };
@@ -61,7 +64,8 @@ struct EmitterQueryRecord {
 /**
  * \brief Superclass of all emitters
  */
-class Emitter : public NoriObject {
+class Emitter : public NoriObject
+{
 public:
   /**
    * \brief Sample the emitter and return the importance weight (i.e. the
@@ -103,7 +107,8 @@ public:
 
   /// Sample a photon
   virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
-                               const Point2f &sample2) const {
+                               const Point2f &sample2) const
+  {
     throw NoriException("Emitter::samplePhoton(): not implemented!");
   }
 
@@ -124,6 +129,35 @@ public:
   void setShape(Shape *shape) { m_shape = shape; }
 
   Point3f getPosition() const { return m_position; }
+
+  virtual const char *getImGuiName() const override { return "Emitter Base"; }
+  virtual void getImGuiNodes() override
+  {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
+
+    if (m_shape)
+    {
+      ImGui::AlignTextToFramePadding();
+      bool node_open = ImGui::TreeNode("shape");
+      ImGui::NextColumn();
+      ImGui::SetNextItemWidth(-1);
+      ImGui::Text(m_shape->getImGuiName());
+      ImGui::NextColumn();
+      if (node_open)
+      {
+        m_shape->getImGuiNodes();
+        ImGui::TreePop();
+      }
+    }
+
+    ImGui::AlignTextToFramePadding();
+    bool node_open = ImGui::TreeNode("shape");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ImGui::DragPoint3f("Position", &m_position);
+    ImGui::NextColumn();
+  }
 
 protected:
   /// Pointer to the shape if the emitter is attached to a shape

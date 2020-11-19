@@ -56,6 +56,9 @@ public:
 	virtual unsigned int getHeight() {
 		return 1;
 	}
+
+    virtual const char *getImGuiName() const override { return "Texture Base"; }
+    virtual void getImGuiNodes() override {}
 };
 
 NORI_NAMESPACE_END

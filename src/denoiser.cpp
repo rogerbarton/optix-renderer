@@ -42,8 +42,8 @@ public:
                     {
                         for (int l = lower; l < upper; l++)
                         {
-                            int k_ = clamp(i + k, 0, static_cast<int>(bitmap->rows() -1));
-                            int l_ = clamp(j + l, 0, static_cast<int>(bitmap->cols() -1));
+                            int k_ = clamp(i + k, 0, static_cast<int>(bitmap->rows() - 1));
+                            int l_ = clamp(j + l, 0, static_cast<int>(bitmap->cols() - 1));
                             if (k_ != i + k || l_ != j + l)
                                 continue; // we must skip this one
                             weight_ijkl = weight(i, j, k_, l_, (*bitmap)(i, j), (*bitmap)(k_, l_));
@@ -75,8 +75,44 @@ public:
                            sigma_r, sigma_d, inner_range);
     }
 
+    virtual const char *getImGuiName() const override { return "SimpleDenoiser"; }
+    virtual void getImGuiNodes() override
+    {
+        Denoiser::getImGuiNodes();
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("Sigma R", flags, "Sigma R");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &sigma_r, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("Sigma D", flags, "Sigma D");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &sigma_d, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("Inner Range", flags, "Inner Range");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+
 private:
-    float weight(int i_, int j_, int k_, int l_, const Color3f& Iij, const Color3f& Ikl) const
+    float weight(int i_, int j_, int k_, int l_, const Color3f &Iij, const Color3f &Ikl) const
     {
         // source https://en.wikipedia.org/wiki/Bilateral_filter
         float i = static_cast<float>(i_);

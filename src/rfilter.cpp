@@ -25,25 +25,44 @@ NORI_NAMESPACE_BEGIN
  * and standard deviation. Often produces pleasing 
  * results, but may introduce too much blurring.
  */
-class GaussianFilter : public ReconstructionFilter {
+class GaussianFilter : public ReconstructionFilter
+{
 public:
-    GaussianFilter(const PropertyList &propList) {
+    GaussianFilter(const PropertyList &propList)
+    {
         /* Half filter size */
         m_radius = propList.getFloat("radius", 2.0f);
         /* Standard deviation of the Gaussian */
         m_stddev = propList.getFloat("stddev", 0.5f);
     }
 
-    float eval(float x) const {
-        float alpha = -1.0f / (2.0f * m_stddev*m_stddev);
-        return std::max(0.0f, 
-            std::exp(alpha * x * x) - 
-            std::exp(alpha * m_radius * m_radius));
+    float eval(float x) const
+    {
+        float alpha = -1.0f / (2.0f * m_stddev * m_stddev);
+        return std::max(0.0f,
+                        std::exp(alpha * x * x) -
+                            std::exp(alpha * m_radius * m_radius));
     }
 
-    virtual std::string toString() const override {
+    virtual std::string toString() const override
+    {
         return tfm::format("GaussianFilter[radius=%f, stddev=%f]", m_radius, m_stddev);
     }
+
+    virtual const char *getImGuiName() const override { return "Gaussian Filter"; }
+    virtual void getImGuiNodes() override
+    {
+        ReconstructionFilter::getImGuiNodes();
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("Stddev", flags, "Standard Deviation");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+    }
+
 protected:
     float m_stddev;
 };
@@ -54,9 +73,11 @@ protected:
  * D. Mitchell, A. Netravali, Reconstruction filters for computer graphics, 
  * Proceedings of SIGGRAPH 88, Computer Graphics 22(4), pp. 221-228, 1988.
  */
-class MitchellNetravaliFilter : public ReconstructionFilter {
+class MitchellNetravaliFilter : public ReconstructionFilter
+{
 public:
-    MitchellNetravaliFilter(const PropertyList &propList) {
+    MitchellNetravaliFilter(const PropertyList &propList)
+    {
         /* Filter size in pixels */
         m_radius = propList.getFloat("radius", 2.0f);
         /* B parameter from the paper */
@@ -65,57 +86,108 @@ public:
         m_C = propList.getFloat("C", 1.0f / 3.0f);
     }
 
-    float eval(float x) const {
+    float eval(float x) const
+    {
         x = std::abs(2.0f * x / m_radius);
-        float x2 = x*x, x3 = x2*x;
+        float x2 = x * x, x3 = x2 * x;
 
-        if (x < 1) {
-            return 1.0f/6.0f * ((12-9*m_B-6*m_C)*x3 
-                    + (-18+12*m_B+6*m_C) * x2 + (6-2*m_B));
-        } else if (x < 2) {
-            return 1.0f/6.0f * ((-m_B-6*m_C)*x3 + (6*m_B+30*m_C) * x2
-                    + (-12*m_B-48*m_C)*x + (8*m_B + 24*m_C));
-        } else {
+        if (x < 1)
+        {
+            return 1.0f / 6.0f * ((12 - 9 * m_B - 6 * m_C) * x3 + (-18 + 12 * m_B + 6 * m_C) * x2 + (6 - 2 * m_B));
+        }
+        else if (x < 2)
+        {
+            return 1.0f / 6.0f * ((-m_B - 6 * m_C) * x3 + (6 * m_B + 30 * m_C) * x2 + (-12 * m_B - 48 * m_C) * x + (8 * m_B + 24 * m_C));
+        }
+        else
+        {
             return 0.0f;
         }
     }
 
-    virtual std::string toString() const override {
+    virtual std::string toString() const override
+    {
         return tfm::format("MitchellNetravaliFilter[radius=%f, B=%f, C=%f]", m_radius, m_B, m_C);
     }
+
+    virtual const char *getImGuiName() const override { return "Mitchell-Netravali Filter"; }
+    virtual void getImGuiNodes() override
+    {
+        ReconstructionFilter::getImGuiNodes();
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("m_B", flags, "B");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_B, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("m_C", flags, "C");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_C, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+
 protected:
     float m_B, m_C;
 };
 
-/// Tent filter 
-class TentFilter : public ReconstructionFilter {
+/// Tent filter
+class TentFilter : public ReconstructionFilter
+{
 public:
-    TentFilter(const PropertyList &) {
+    TentFilter(const PropertyList &)
+    {
         m_radius = 1.0f;
     }
 
-    float eval(float x) const {
+    float eval(float x) const
+    {
         return std::max(0.0f, 1.0f - std::abs(x));
     }
-    
-    virtual std::string toString() const override {
+
+    virtual std::string toString() const override
+    {
         return "TentFilter[]";
+    }
+
+    virtual const char *getImGuiName() const override { return "Tent Filter"; }
+    virtual void getImGuiNodes() override
+    {
+        ReconstructionFilter::getImGuiNodes();
     }
 };
 
 /// Box filter -- fastest, but prone to aliasing
-class BoxFilter : public ReconstructionFilter {
+class BoxFilter : public ReconstructionFilter
+{
 public:
-    BoxFilter(const PropertyList &) {
+    BoxFilter(const PropertyList &)
+    {
         m_radius = 0.5f;
     }
 
-    float eval(float) const {
+    float eval(float) const
+    {
         return 1.0f;
     }
-    
-    virtual std::string toString() const override {
+
+    virtual std::string toString() const override
+    {
         return "BoxFilter[]";
+    }
+
+    virtual const char *getImGuiName() const override { return "Box Filter"; }
+    virtual void getImGuiNodes() override
+    {
+        ReconstructionFilter::getImGuiNodes();
     }
 };
 

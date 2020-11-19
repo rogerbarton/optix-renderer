@@ -5,6 +5,17 @@
 
 NORI_NAMESPACE_BEGIN
 
+// this helper macro adds the ImGui code for one of the 10 variables
+#define ImGuiValue(variable, varName)                                                        \
+    ImGui::AlignTextToFramePadding();                                                        \
+    ImGui::TreeNodeEx(varName, flags, varName);                                              \
+    ImGui::NextColumn();                                                                     \
+    ImGui::SetNextItemWidth(-1);                                                             \
+    ImGui::PushID(id++);                                                                     \
+    ImGui::DragFloat("##value", &variable, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
+    ImGui::PopID();                                                                          \
+    ImGui::NextColumn();
+
 class Disney : public BSDF
 {
 public:
@@ -133,124 +144,37 @@ public:
         return true;
     }
 
-    virtual const char* getImGuiName() const override { return "Disney BSDF"; }
-    virtual void getImGuiNodes() override {
-
+    virtual const char *getImGuiName() const override { return "Disney BSDF"; }
+    virtual void getImGuiNodes() override
+    {
+        BSDF::getImGuiNodes();
+        
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
 
+        int id = 1;
+
         ImGui::AlignTextToFramePadding();
 
-        int id = 1;
-        
         ImGui::TreeNodeEx("baseColor", flags, "Base Color");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(id++);
-        
-        ImGui::DragFloat3("##value", baseColor.data(), 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+
+        ImGui::DragColor3f("##value", &baseColor, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
         ImGui::NextColumn();
 
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("metallic", flags, "Metallic");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &metallic, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("subsurface", flags, "Subsurface");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &subsurface, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("specular", flags, "Specular");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &specular, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("roughness", flags, "Roughness");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &roughness, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("specularTint", flags, "Specular Tint");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &specularTint, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("anisotropic", flags, "Anisotropic");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &anisotropic, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("sheen", flags, "Sheen");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &sheen, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("sheenTint", flags, "Sheen Tint");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &sheenTint, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("clearcoat", flags, "Clearcoat");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &clearcoat, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("clearcoatGloss", flags, "Clearcoat Gloss");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        ImGui::DragFloat("##value", &clearcoatGloss, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
+        ImGuiValue(metallic, "Metallic");
+        ImGuiValue(subsurface, "Subsurface");
+        ImGuiValue(specular, "Specular");
+        ImGuiValue(roughness, "Roughness");
+        ImGuiValue(specularTint, "Specular Tint");
+        ImGuiValue(anisotropic, "Anisotropic");
+        ImGuiValue(sheen, "Sheen");
+        ImGuiValue(sheenTint, "Sheen Tint");
+        ImGuiValue(clearcoat, "Clearcoat");
+        ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
     }
 
 private:

@@ -104,16 +104,7 @@ public:
 
     void getImGuiNodes() override
     {
-        ImGui::AlignTextToFramePadding();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        
-        ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        
-        ImGui::NextColumn();
+        Sampler::getImGuiNodes();
     }
 
 protected:

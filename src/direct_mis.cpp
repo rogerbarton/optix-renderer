@@ -132,6 +132,9 @@ public:
     return std::string("DirectMISIntegrator[]");
   }
 
+  virtual const char *getImGuiName() const override { return "Direct MIS"; }
+  virtual void getImGuiNodes() override {}
+
 protected:
 };
 

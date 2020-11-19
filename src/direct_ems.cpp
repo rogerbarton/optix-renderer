@@ -72,6 +72,9 @@ public:
     return std::string("DirectEMSIntegrator[]");
   }
 
+  virtual const char *getImGuiName() const override { return "Direct EMS"; }
+  virtual void getImGuiNodes() override {}
+
 protected:
 };
 

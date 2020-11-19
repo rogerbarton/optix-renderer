@@ -25,7 +25,6 @@
 
 NORI_NAMESPACE_BEGIN
 
-
 /**
  * \brief Intersection data structure
  *
@@ -34,7 +33,8 @@ NORI_NAMESPACE_BEGIN
  * as well as two local coordinate frames (one that corresponds to the true
  * geometry, and one that is used for shading computations).
  */
-struct Intersection {
+struct Intersection
+{
     /// Position of the surface intersection
     Point3f p;
     /// Unoccluded distance along the ray
@@ -49,15 +49,17 @@ struct Intersection {
     const Shape *mesh;
 
     /// Create an uninitialized intersection record
-    Intersection() : mesh(nullptr) { }
+    Intersection() : mesh(nullptr) {}
 
     /// Transform a direction vector into the local shading frame
-    Vector3f toLocal(const Vector3f &d) const {
+    Vector3f toLocal(const Vector3f &d) const
+    {
         return shFrame.toLocal(d);
     }
 
     /// Transform a direction vector from local to world coordinates
-    Vector3f toWorld(const Vector3f &d) const {
+    Vector3f toWorld(const Vector3f &d) const
+    {
         return shFrame.toWorld(d);
     }
 
@@ -65,13 +67,12 @@ struct Intersection {
     std::string toString() const;
 };
 
-
-
 /**
  * \brief Data record for conveniently querying and sampling the
  * a point on a shape
  */
-struct ShapeQueryRecord {
+struct ShapeQueryRecord
+{
     /// Reference point
     Point3f ref;
     /// Sampled point
@@ -84,17 +85,16 @@ struct ShapeQueryRecord {
     /// Empty constructor
     ShapeQueryRecord() {}
     /// Data structure with ref to call sampleSurface()
-    ShapeQueryRecord(const Point3f & ref_) : ref(ref_) {}
+    ShapeQueryRecord(const Point3f &ref_) : ref(ref_) {}
     /// Data structure with ref and p to call pdfSurface()
-    ShapeQueryRecord(const Point3f & ref_, const Point3f & p_) : ref(ref_), p(p_) {}
-
+    ShapeQueryRecord(const Point3f &ref_, const Point3f &p_) : ref(ref_), p(p_) {}
 };
-
 
 /**
  * \brief Superclass of all shapes
  */
-class Shape : public NoriObject {
+class Shape : public NoriObject
+{
 public:
     /// Release all memory
     virtual ~Shape();
@@ -118,8 +118,7 @@ public:
 
     /// Return a pointer to the BSDF associated with this mesh
     const BSDF *getBSDF() const { return m_bsdf; }
-    BSDF* getBSDFNonConst() { return m_bsdf; }
-
+    BSDF *getBSDFNonConst() { return m_bsdf; }
 
     /// Return the total number of primitives in this shape
     virtual uint32_t getPrimitiveCount() const { return 1; }
@@ -134,19 +133,19 @@ public:
     virtual bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const = 0;
 
     /// Set the intersection information: hit point, shading frame, UVs, etc.
-    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection & its) const = 0;
+    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const = 0;
 
     /**
      * \brief Sample a point on the surface (potentially using the point sRec.ref to importance sample)
      * This method should set sRec.p, sRec.n and sRec.pdf
      * Probability should be with respect to area
      * */
-    virtual void sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const = 0;
+    virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const = 0;
     /**
      * \brief Return the probability of sampling a point sRec.p by the sampleSurface() method (sRec.ref should be set before)
      * sRec.n and sRec.pdf are ignored
      * */
-    virtual float pdfSurface(const ShapeQueryRecord & sRec) const = 0;
+    virtual float pdfSurface(const ShapeQueryRecord &sRec) const = 0;
 
     /**
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
@@ -154,14 +153,13 @@ public:
      * */
     virtual EClassType getClassType() const override { return EMesh; }
 
-    virtual const char* getImGuiName() const override { return "Shape Base"; }
-    virtual void getImGuiNodes() override {}
+    virtual const char *getImGuiName() const override { return "Shape Base"; }
+    virtual void getImGuiNodes() override;
 
 protected:
-    BSDF *m_bsdf = nullptr;      ///< BSDF of the surface
-    Emitter *m_emitter = nullptr;     ///< Associated emitter, if any
-    BoundingBox3f m_bbox;                ///< Bounding box of the mesh
-
+    BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
+    Emitter *m_emitter = nullptr; ///< Associated emitter, if any
+    BoundingBox3f m_bbox;         ///< Bounding box of the mesh
 };
 
 NORI_NAMESPACE_END

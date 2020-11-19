@@ -110,6 +110,63 @@ public:
 		return height;
 	}
 
+	virtual const char* getImGuiName() const override { return "PNG Texture"; }
+    virtual void getImGuiNodes() override {
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+								   ImGuiTreeNodeFlags_Bullet;
+
+		Texture::getImGuiNodes();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("fileName", flags, "Filename");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text(filename.str().c_str());
+		ImGui::NextColumn();
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("width", flags, "Width");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::Text("%d Pixels", width);
+        ImGui::NextColumn();
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("height", flags, "height");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::Text("%d Pixels", height);
+        ImGui::NextColumn();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::PushID(3);
+        ImGui::TreeNodeEx("scale U", flags, "Scale U");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+
+		ImGui::AlignTextToFramePadding();
+        ImGui::PushID(4);
+        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragVector3f("##value", &eulerAngles, 0.01, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+	}
+
 private:
 	filesystem::path filename;
 	unsigned int width, height;

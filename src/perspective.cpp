@@ -169,6 +169,58 @@ public:
             indent(m_rfilter->toString())
         );
     }
+
+    virtual const char* getImGuiName() const override { return "Perspective"; }
+    virtual void getImGuiNodes() override {
+        Camera::getImGuiNodes();
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("fov", flags, "Field Of View");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("nearCLip", flags, "Near Clip");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(3);
+        ImGui::TreeNodeEx("fov", flags, "Far Clip");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(4);
+        ImGui::TreeNodeEx("lensRadius", flags, "Lens Radius");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_lensRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(5);
+        ImGui::TreeNodeEx("focalDistance", flags, "Focal Distance");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_focalDistance, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
 private:
     Vector2f m_invOutputSize;
     Transform m_sampleToCamera;

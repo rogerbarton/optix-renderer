@@ -6,15 +6,18 @@ NORI_NAMESPACE_BEGIN
  * http://www.pbr-book.org/3ed-2018/Light_Sources/Point_Lights.html
  */
 
-class PointLight : public Emitter {
+class PointLight : public Emitter
+{
 public:
-  PointLight(const PropertyList &propList) {
+  PointLight(const PropertyList &propList)
+  {
     m_power = propList.getColor("power"); // we store power, not intensity
     m_position = propList.getPoint3("position");
   }
 
   Color3f sample(EmitterQueryRecord &lRec,
-                 const Point2f &sample) const override {
+                 const Point2f &sample) const override
+  {
     // store sample data inside the query record
     // shadow ray is ray from the light to the original first intersection
     // add a little bit to the initial position (move a bit in
@@ -29,7 +32,8 @@ public:
     return eval(lRec) / pdf(lRec);
   }
 
-  Color3f eval(const EmitterQueryRecord &lRec) const override {
+  Color3f eval(const EmitterQueryRecord &lRec) const override
+  {
     // intensity divided by squared distance
     // since we store power, we need to convert to intensity (solid angles)
     Color3f Color =
@@ -37,17 +41,34 @@ public:
     return Color3f(Color.x(), Color.y(), Color.z());
   }
 
-  float pdf(const EmitterQueryRecord &lRec) const override {
+  float pdf(const EmitterQueryRecord &lRec) const override
+  {
     // http://www.pbr-book.org/3ed-2018/Light_Sources/Point_Lights.html
     return 1.f; // all directions uniform, taken from webpage of book
   }
 
-  virtual std::string toString() const override {
+  virtual std::string toString() const override
+  {
     return tfm::format("PointLight[\n"
                        "  power = %s,\n"
                        "  position = %s,\n"
                        "]",
                        m_power.toString(), m_position.toString());
+  }
+
+  virtual const char *getImGuiName() const override { return "Pointlight"; }
+  virtual void getImGuiNodes() override
+  {
+    Emitter::getImGuiNodes();
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::TreeNodeEx("power", flags, "Power");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
   }
 
 protected:

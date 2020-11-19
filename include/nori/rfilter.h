@@ -38,7 +38,8 @@ NORI_NAMESPACE_BEGIN
  *
  * http://graphics.stanford.edu/~mmp/chapters/pbrt_chapter7.pdf
  */
-class ReconstructionFilter : public NoriObject {
+class ReconstructionFilter : public NoriObject
+{
 public:
     /// Return the filter radius in fractional pixels
     float getRadius() const { return m_radius; }
@@ -51,6 +52,20 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EReconstructionFilter; }
+
+    virtual const char *getImGuiName() const override { return "Reconstruction Filter"; }
+    virtual void getImGuiNodes() override
+    {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("Shape", flags, "Shape");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("Radius", &m_radius, 1.f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+    }
+
 protected:
     float m_radius;
 };

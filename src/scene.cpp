@@ -23,6 +23,7 @@
 #include <nori/camera.h>
 #include <nori/emitter.h>
 #include <nori/volume.h>
+#include <nori/bsdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -117,7 +118,7 @@ void Scene::addChild(NoriObject *obj)
         break;
 
     case EVolume:
-    	// Skip if volumes are disabled
+        // Skip if volumes are disabled
 #ifdef NORI_USE_VOLUMES
         m_volumes.push_back(static_cast<Volume *>(obj));
 #endif
@@ -182,11 +183,148 @@ std::string Scene::toString() const
         m_envmap ? indent(m_envmap->toString()) : "nullptr",
         m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
 #ifdef NORI_USE_VOLUMES
-		    indent(volumes, 2)
+        indent(volumes, 2)
 #else
-			"Volumes disabled during compilation"
+        "Volumes disabled during compilation"
 #endif
     );
+}
+
+void Scene::getImGuiNodes()
+{
+    if (m_camera)
+    {
+        bool node_open_camera = ImGui::TreeNode("Camera");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text(m_camera->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_camera)
+        {
+            m_camera->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    if (m_integrator)
+    {
+        bool node_open_integrator = ImGui::TreeNode("Integrator");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text(m_integrator->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_integrator)
+        {
+            m_integrator->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    if (m_sampler)
+    {
+        bool node_open_sampler = ImGui::TreeNode("Sampler");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text(m_sampler->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_sampler)
+        {
+            m_sampler->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    if (m_envmap)
+    {
+        bool node_open_envmap = ImGui::TreeNode("Environment Map");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text(m_envmap->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_envmap)
+        {
+            m_envmap->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    if (m_denoiser)
+    {
+        bool node_open_denoiser = ImGui::TreeNode("Denoiser");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text(m_denoiser->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_denoiser)
+        {
+            m_denoiser->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    bool node_open_shapes = ImGui::TreeNode("Shapes");
+    ImGui::NextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("%d Shapes", (int)m_shapes.size());
+    ImGui::NextColumn();
+    if (node_open_shapes)
+    {
+        for (int i = 0; i < m_shapes.size(); i++)
+        {
+            ImGui::PushID(i);
+
+            // for each shape, add a tree node
+            bool node_open_shape = ImGui::TreeNode("Shape", "%s %d", "Shape", i + 1);
+            ImGui::NextColumn();
+            ImGui::AlignTextToFramePadding();
+
+            ImGui::Text(m_shapes[i]->getImGuiName());
+            ImGui::NextColumn();
+
+            if (node_open_shape)
+            {
+                m_shapes[i]->getImGuiNodes();
+
+                ImGui::TreePop();
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::TreePop();
+    }
+
+    bool node_open_emitter = ImGui::TreeNode("Emitter");
+    ImGui::NextColumn();
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("%d Emitters", (int)m_emitters.size());
+    ImGui::NextColumn();
+    if (node_open_emitter)
+    {
+        for (int i = 0; i < m_emitters.size(); i++)
+        {
+            ImGui::PushID(i);
+
+            // for each shape, add a tree node
+            bool node_open_emitter = ImGui::TreeNode("Emitter", "%s %d", "Emitter", i + 1);
+            ImGui::NextColumn();
+            ImGui::AlignTextToFramePadding();
+
+            ImGui::Text(m_emitters[i]->getImGuiName());
+            ImGui::NextColumn();
+
+            if (node_open_emitter)
+            {
+                m_emitters[i]->getImGuiNodes();
+
+                ImGui::TreePop();
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::TreePop();
+    }
 }
 
 NORI_REGISTER_CLASS(Scene, "scene");

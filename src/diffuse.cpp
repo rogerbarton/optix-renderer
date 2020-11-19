@@ -26,41 +26,51 @@ NORI_NAMESPACE_BEGIN
 /**
  * \brief Diffuse / Lambertian BRDF model
  */
-class Diffuse : public BSDF {
+class Diffuse : public BSDF
+{
 public:
-    Diffuse(const PropertyList &propList) : m_albedo(nullptr) {
-        if(propList.has("albedo")) {
+    Diffuse(const PropertyList &propList) : m_albedo(nullptr)
+    {
+        if (propList.has("albedo"))
+        {
             PropertyList l;
             l.setColor("value", propList.getColor("albedo"));
             m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
         }
     }
-    virtual ~Diffuse() {
+    virtual ~Diffuse()
+    {
         delete m_albedo;
     }
 
     /// Add texture for the albedo
-    virtual void addChild(NoriObject *obj) override {
-        switch (obj->getClassType()) {
-            case ETexture:
-                if(obj->getIdName() == "albedo") {
-                    if (m_albedo)
-                        throw NoriException("There is already an albedo defined!");
-                    m_albedo = static_cast<Texture<Color3f> *>(obj);
-                }
-                else {
-                    throw NoriException("The name of this texture does not match any field!");
-                }
-                break;
+    virtual void addChild(NoriObject *obj) override
+    {
+        switch (obj->getClassType())
+        {
+        case ETexture:
+            if (obj->getIdName() == "albedo")
+            {
+                if (m_albedo)
+                    throw NoriException("There is already an albedo defined!");
+                m_albedo = static_cast<Texture<Color3f> *>(obj);
+            }
+            else
+            {
+                throw NoriException("The name of this texture does not match any field!");
+            }
+            break;
 
-            default:
-                throw NoriException("Diffuse::addChild(<%s>) is not supported!",
-                                    classTypeName(obj->getClassType()));
+        default:
+            throw NoriException("Diffuse::addChild(<%s>) is not supported!",
+                                classTypeName(obj->getClassType()));
         }
     }
 
-    virtual void activate() override {
-        if(!m_albedo) {
+    virtual void activate() override
+    {
+        if (!m_albedo)
+        {
             PropertyList l;
             l.setColor("value", Color3f(0.5f));
             m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
@@ -69,12 +79,11 @@ public:
     }
 
     /// Evaluate the BRDF model
-    virtual Color3f eval(const BSDFQueryRecord &bRec) const override {
+    virtual Color3f eval(const BSDFQueryRecord &bRec) const override
+    {
         /* This is a smooth BRDF -- return zero if the measure
            is wrong, or when queried for illumination on the backside */
-        if (bRec.measure != ESolidAngle
-            || Frame::cosTheta(bRec.wi) <= 0
-            || Frame::cosTheta(bRec.wo) <= 0)
+        if (bRec.measure != ESolidAngle || Frame::cosTheta(bRec.wi) <= 0 || Frame::cosTheta(bRec.wo) <= 0)
             return Color3f(0.0f);
 
         /* The BRDF is simply the albedo / pi */
@@ -82,14 +91,12 @@ public:
     }
 
     /// Compute the density of \ref sample() wrt. solid angles
-    virtual float pdf(const BSDFQueryRecord &bRec) const override {
+    virtual float pdf(const BSDFQueryRecord &bRec) const override
+    {
         /* This is a smooth BRDF -- return zero if the measure
            is wrong, or when queried for illumination on the backside */
-        if (bRec.measure != ESolidAngle
-            || Frame::cosTheta(bRec.wi) <= 0
-            || Frame::cosTheta(bRec.wo) <= 0)
+        if (bRec.measure != ESolidAngle || Frame::cosTheta(bRec.wi) <= 0 || Frame::cosTheta(bRec.wo) <= 0)
             return 0.0f;
-
 
         /* Importance sampling density wrt. solid angles:
            cos(theta) / pi.
@@ -101,7 +108,8 @@ public:
     }
 
     /// Draw a a sample from the BRDF model
-    virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override {
+    virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override
+    {
         if (Frame::cosTheta(bRec.wi) <= 0)
             return Color3f(0.0f);
 
@@ -119,24 +127,41 @@ public:
         return m_albedo->eval(bRec.uv);
     }
 
-    bool isDiffuse() const {
+    bool isDiffuse() const
+    {
         return true;
     }
 
     /// Return a human-readable summary
-    virtual std::string toString() const override {
+    virtual std::string toString() const override
+    {
         return tfm::format(
             "Diffuse[\n"
             "  albedo = %s\n"
             "]",
-            m_albedo ? indent(m_albedo->toString()) : std::string("null")
-        );
+            m_albedo ? indent(m_albedo->toString()) : std::string("null"));
     }
 
     virtual EClassType getClassType() const override { return EBSDF; }
 
+    virtual const char *getImGuiName() const override { return "Diffuse"; }
+    virtual void getImGuiNodes() override
+    {
+        bool node_open = ImGui::TreeNode("Texture");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::Text(m_albedo->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open)
+        {
+            m_albedo->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
 private:
-    Texture<Color3f> * m_albedo;
+    Texture<Color3f> *m_albedo;
 };
 
 NORI_REGISTER_CLASS(Diffuse, "diffuse");

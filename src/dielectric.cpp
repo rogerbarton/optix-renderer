@@ -109,6 +109,32 @@ public:
             m_intIOR, m_extIOR);
     }
 
+    virtual const char* getImGuiName() const override { return "Dielectric"; }
+    virtual void getImGuiNodes() override {
+        BSDF::getImGuiNodes();
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+
 private:
     float m_intIOR, m_extIOR;
 };

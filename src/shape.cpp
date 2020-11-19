@@ -88,4 +88,37 @@ std::string Intersection::toString() const
         mesh ? mesh->toString() : std::string("null"));
 }
 
+void Shape::getImGuiNodes()
+{
+    if (m_bsdf)
+    {
+        bool node_open_bsdf = ImGui::TreeNode("BSDF");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::Text(m_bsdf->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_bsdf)
+        {
+            m_bsdf->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+
+    if (m_emitter)
+    {
+        bool node_open_emitter = ImGui::TreeNode("Emitter");
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::Text(m_emitter->getImGuiName());
+        ImGui::NextColumn();
+        if (node_open_emitter)
+        {
+            m_emitter->getImGuiNodes();
+            ImGui::TreePop();
+        }
+    }
+}
+
 NORI_NAMESPACE_END

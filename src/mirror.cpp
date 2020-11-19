@@ -57,6 +57,11 @@ public:
     virtual std::string toString() const override {
         return "Mirror[]";
     }
+
+    virtual const char* getImGuiName() const override { return "Mirror"; }
+    virtual void getImGuiNodes() override {
+        BSDF::getImGuiNodes();
+    }
 };
 
 NORI_REGISTER_CLASS(Mirror, "mirror");

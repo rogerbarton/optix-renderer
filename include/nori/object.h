@@ -21,11 +21,9 @@
 
 #include <nori/proplist.h>
 #include <imgui/imgui.h>
+#include <nori/ImguiHelpers.h>
 
 NORI_NAMESPACE_BEGIN
-
-#define SLIDER_MAX_INT 1000000
-#define SLIDER_MAX_FLOAT 1000000.f
 
 /**
  * \brief Base class of all objects
@@ -148,12 +146,8 @@ public:
     void setIdName(const std::string &name) { m_idname = name; }
     const std::string &getIdName() const { return m_idname; }
 
-    virtual void getImGuiNodes() {
-        ImGui::Text("NOT IMPLEMENTED");
-    }
-    virtual const char* getImGuiName() const {
-        return "No Name...";
-    }
+    virtual void getImGuiNodes() = 0;
+    virtual const char* getImGuiName() const = 0;
 
 protected:
     std::string m_idname;

@@ -22,35 +22,43 @@
 
 NORI_NAMESPACE_BEGIN
 
-class AreaEmitter : public Emitter {
+class AreaEmitter : public Emitter
+{
 public:
-  AreaEmitter(const PropertyList &props) {
+  AreaEmitter(const PropertyList &props)
+  {
     // store the radiance
     m_radiance = props.getColor("radiance");
   }
 
-  virtual std::string toString() const override {
+  virtual std::string toString() const override
+  {
     return tfm::format("AreaLight[\n"
                        "  radiance = %s,\n"
                        "]",
                        m_radiance.toString());
   }
 
-  virtual Color3f eval(const EmitterQueryRecord &lRec) const override {
+  virtual Color3f eval(const EmitterQueryRecord &lRec) const override
+  {
     // we need a shape for the arealight to work
     if (!m_shape)
       throw NoriException("There is no shape attached to this Area light!");
     // check the normal if we are on the back
     // we use -lRec.wi because wi goes into the emitter (convention)
-    if (lRec.n.dot(-lRec.wi) < 0.f) {
+    if (lRec.n.dot(-lRec.wi) < 0.f)
+    {
       return Color3f(0.f); // we are on the back, return black
-    } else {
+    }
+    else
+    {
       return m_radiance; // we are on the front, return the radiance
     }
   }
 
   virtual Color3f sample(EmitterQueryRecord &lRec,
-                         const Point2f &sample) const override {
+                         const Point2f &sample) const override
+  {
     if (!m_shape)
       throw NoriException("There is no shape attached to this Area light!");
 
@@ -69,7 +77,8 @@ public:
     lRec.pdf = probs;
 
     // check for it being near zero
-    if (std::abs(probs) < Epsilon) {
+    if (std::abs(probs) < Epsilon)
+    {
       return Color3f(0.f);
     }
 
@@ -77,12 +86,14 @@ public:
     return eval(lRec) / probs;
   }
 
-  virtual float pdf(const EmitterQueryRecord &lRec) const override {
+  virtual float pdf(const EmitterQueryRecord &lRec) const override
+  {
     if (!m_shape)
       throw NoriException("There is no shape attached to this Area light!");
 
     // if we are on the back, return 0
-    if (lRec.n.dot(-lRec.wi) < 0.f) {
+    if (lRec.n.dot(-lRec.wi) < 0.f)
+    {
       return 0.f;
     }
     // create a shape query record and get the pdf of the surface
@@ -98,7 +109,8 @@ public:
   }
 
   virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
-                               const Point2f &sample2) const override {
+                               const Point2f &sample2) const override
+  {
     // first: choose a location on the surface
     if (!m_shape)
       throw NoriException("There is no shape attached to this Area light!");
@@ -113,6 +125,23 @@ public:
     ray = Ray3f(sqr.p, Frame(sqr.n).toWorld(wi));
 
     return M_PI / sqr.pdf * m_radiance; // divide by pdf == multiply by area
+  }
+
+  virtual const char *getImGuiName() const override { return "Arealight"; }
+  virtual void getImGuiNodes() override
+  {
+    Emitter::getImGuiNodes();
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
+
+    ImGui::AlignTextToFramePadding();
+
+    ImGui::TreeNodeEx("Radiance", flags, "Radiance");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+
+    ImGui::DragColor3f("##value", &m_radiance, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
   }
 
 protected:

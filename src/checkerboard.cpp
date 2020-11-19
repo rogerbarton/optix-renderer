@@ -21,13 +21,16 @@
 
 NORI_NAMESPACE_BEGIN
 
-template <typename T> class Checkerboard : public Texture<T> {
+template <typename T>
+class Checkerboard : public Texture<T>
+{
 public:
   Checkerboard(const PropertyList &props);
 
   virtual std::string toString() const override;
 
-  virtual T eval(const Point2f &uv) override {
+  virtual T eval(const Point2f &uv) override
+  {
     Point2f origin;
     origin.x() = uv.x() / m_scale.x() - m_delta.x();
     origin.y() = uv.y() / m_scale.y() - m_delta.y();
@@ -36,12 +39,18 @@ public:
     int y = int(origin.y()) + (origin.y() < 0.f);
 
     // checkerboard check
-    if ((x + y) % 2 == 0) {
+    if ((x + y) % 2 == 0)
+    {
       return m_value1;
-    } else {
+    }
+    else
+    {
       return m_value2;
     }
   }
+
+  virtual const char *getImGuiName() const override { return "Checkerboard"; }
+  virtual void getImGuiNodes() override {}
 
 protected:
   T m_value1;
@@ -51,21 +60,27 @@ protected:
   Vector2f m_scale;
 };
 
-template <> Checkerboard<float>::Checkerboard(const PropertyList &props) {
+template <>
+Checkerboard<float>::Checkerboard(const PropertyList &props)
+{
   m_delta = props.getPoint2("delta", Point2f(0));
   m_scale = props.getVector2("scale", Vector2f(1));
   m_value1 = props.getFloat("value1", 0.f);
   m_value2 = props.getFloat("value2", 1.f);
 }
 
-template <> Checkerboard<Color3f>::Checkerboard(const PropertyList &props) {
+template <>
+Checkerboard<Color3f>::Checkerboard(const PropertyList &props)
+{
   m_delta = props.getPoint2("delta", Point2f(0));
   m_scale = props.getVector2("scale", Vector2f(1));
   m_value1 = props.getColor("value1", Color3f(0));
   m_value2 = props.getColor("value2", Color3f(1));
 }
 
-template <> std::string Checkerboard<float>::toString() const {
+template <>
+std::string Checkerboard<float>::toString() const
+{
   return tfm::format("Checkerboard[\n"
                      "  delta = %s,\n"
                      "  scale = %s,\n"
@@ -76,7 +91,9 @@ template <> std::string Checkerboard<float>::toString() const {
                      m_value2);
 }
 
-template <> std::string Checkerboard<Color3f>::toString() const {
+template <>
+std::string Checkerboard<Color3f>::toString() const
+{
   return tfm::format("Checkerboard[\n"
                      "  delta = %s,\n"
                      "  scale = %s,\n"
@@ -85,6 +102,87 @@ template <> std::string Checkerboard<Color3f>::toString() const {
                      "]",
                      m_delta.toString(), m_scale.toString(),
                      m_value1.toString(), m_value2.toString());
+}
+
+template <>
+void Checkerboard<float>::getImGuiNodes()
+{
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                             ImGuiTreeNodeFlags_Bullet;
+
+  ImGui::PushID(1);
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Float 1", flags, "Float 1");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragFloat("##value", &m_value1, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+  ImGui::PopID();
+
+  ImGui::PushID(2);
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Float 2", flags, "Float 2");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragFloat("##value", &m_value2, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+  ImGui::PopID();
+
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Delta", flags, "Delta");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Scale", flags, "Scale");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+}
+
+template <>
+void Checkerboard<Color3f>::getImGuiNodes()
+{
+
+  Texture::getImGuiNodes();
+
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                             ImGuiTreeNodeFlags_Bullet;
+
+  ImGui::PushID(1);
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Color 1", flags, "Color 1");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragColor3f("##value", &m_value1, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+  ImGui::PopID();
+
+  ImGui::PushID(2);
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Color 2", flags, "Color 2");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragColor3f("##value", &m_value2, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+  ImGui::PopID();
+
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Delta", flags, "Delta");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
+
+  ImGui::AlignTextToFramePadding();
+  ImGui::TreeNodeEx("Scale", flags, "Scale");
+  ImGui::NextColumn();
+  ImGui::SetNextItemWidth(-1);
+  ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::NextColumn();
 }
 
 NORI_REGISTER_TEMPLATED_CLASS(Checkerboard, float, "checkerboard_float")

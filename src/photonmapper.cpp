@@ -255,6 +255,32 @@ public:
             m_photonRadius);
     }
 
+    virtual const char* getImGuiName() const override { return "Photonmapper"; }
+    virtual void getImGuiNodes() override {
+        Integrator::getImGuiNodes();
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(1);
+        ImGui::TreeNodeEx("photonCount", flags, "Photon Count");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT*100, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushID(2);
+        ImGui::TreeNodeEx("photonRadius", flags, "Photon Radius");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+
 private:
     /* 
      * Important: m_photonCount is the total number of photons deposited in the photon map,

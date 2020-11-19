@@ -25,54 +25,64 @@
 
 NORI_NAMESPACE_BEGIN
 
-Mesh::Mesh() { }
+Mesh::Mesh() {}
 
-void Mesh::activate() {
+void Mesh::activate()
+{
     Shape::activate();
 
     m_pdf.reserve(getPrimitiveCount());
-    for(uint32_t i = 0 ; i < getPrimitiveCount() ; ++i) {
+    for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
+    {
         m_pdf.append(surfaceArea(i));
     }
     m_pdf.normalize();
 }
 
-void Mesh::sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const {
+void Mesh::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
+{
     Point2f s = sample;
     size_t idT = m_pdf.sampleReuse(s.x());
 
     Vector3f bc = Warp::squareToUniformTriangle(s);
 
-    sRec.p = getInterpolatedVertex(static_cast<uint32_t>(idT),bc);
-    if (m_N.size() > 0) {
+    sRec.p = getInterpolatedVertex(static_cast<uint32_t>(idT), bc);
+    if (m_N.size() > 0)
+    {
         sRec.n = getInterpolatedNormal(static_cast<uint32_t>(idT), bc);
     }
-    else {
+    else
+    {
         Point3f p0 = m_V.col(m_F(0, idT));
         Point3f p1 = m_V.col(m_F(1, idT));
         Point3f p2 = m_V.col(m_F(2, idT));
-        Normal3f n = (p1-p0).cross(p2-p0).normalized();
+        Normal3f n = (p1 - p0).cross(p2 - p0).normalized();
         sRec.n = n;
     }
     sRec.pdf = m_pdf.getNormalization();
 }
-float Mesh::pdfSurface(const ShapeQueryRecord & sRec) const {
+float Mesh::pdfSurface(const ShapeQueryRecord &sRec) const
+{
     return m_pdf.getNormalization();
 }
 
-Point3f Mesh::getInterpolatedVertex(uint32_t index, const Vector3f &bc) const {
+Point3f Mesh::getInterpolatedVertex(uint32_t index, const Vector3f &bc) const
+{
     return (bc.x() * m_V.col(m_F(0, index)) +
             bc.y() * m_V.col(m_F(1, index)) +
             bc.z() * m_V.col(m_F(2, index)));
 }
 
-Normal3f Mesh::getInterpolatedNormal(uint32_t index, const Vector3f &bc) const {
+Normal3f Mesh::getInterpolatedNormal(uint32_t index, const Vector3f &bc) const
+{
     return (bc.x() * m_N.col(m_F(0, index)) +
             bc.y() * m_N.col(m_F(1, index)) +
-            bc.z() * m_N.col(m_F(2, index))).normalized();
+            bc.z() * m_N.col(m_F(2, index)))
+        .normalized();
 }
 
-float Mesh::surfaceArea(uint32_t index) const {
+float Mesh::surfaceArea(uint32_t index) const
+{
     uint32_t i0 = m_F(0, index), i1 = m_F(1, index), i2 = m_F(2, index);
 
     const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
@@ -80,7 +90,8 @@ float Mesh::surfaceArea(uint32_t index) const {
     return 0.5f * Vector3f((p1 - p0).cross(p2 - p0)).norm();
 }
 
-bool Mesh::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const {
+bool Mesh::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const
+{
     uint32_t i0 = m_F(0, index), i1 = m_F(1, index), i2 = m_F(2, index);
     const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
 
@@ -119,10 +130,11 @@ bool Mesh::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, fl
     return t >= ray.mint && t <= ray.maxt;
 }
 
-void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection & its) const {
+void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+{
     /* Find the barycentric coordinates */
     Vector3f bary;
-    bary << 1-its.uv.sum(), its.uv;
+    bary << 1 - its.uv.sum(), its.uv;
 
     /* Vertex indices of the triangle */
     uint32_t idx0 = m_F(0, index), idx1 = m_F(1, index), idx2 = m_F(2, index);
@@ -140,9 +152,10 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection & it
                  bary.z() * m_UV.col(idx2);
 
     /* Compute the geometry frame */
-    its.geoFrame = Frame((p1-p0).cross(p2-p0).normalized());
+    its.geoFrame = Frame((p1 - p0).cross(p2 - p0).normalized());
 
-    if (m_N.size() > 0) {
+    if (m_N.size() > 0)
+    {
         /* Compute the shading frame. Note that for simplicity,
            the current implementation doesn't attempt to provide
            tangents that are continuous across the surface. That
@@ -150,30 +163,35 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection & it
            use anisotropic BRDFs, which need tangent continuity */
 
         its.shFrame = Frame(
-                (bary.x() * m_N.col(idx0) +
-                 bary.y() * m_N.col(idx1) +
-                 bary.z() * m_N.col(idx2)).normalized());
-    } else {
+            (bary.x() * m_N.col(idx0) +
+             bary.y() * m_N.col(idx1) +
+             bary.z() * m_N.col(idx2))
+                .normalized());
+    }
+    else
+    {
         its.shFrame = its.geoFrame;
     }
 }
 
-BoundingBox3f Mesh::getBoundingBox(uint32_t index) const {
+BoundingBox3f Mesh::getBoundingBox(uint32_t index) const
+{
     BoundingBox3f result(m_V.col(m_F(0, index)));
     result.expandBy(m_V.col(m_F(1, index)));
     result.expandBy(m_V.col(m_F(2, index)));
     return result;
 }
 
-Point3f Mesh::getCentroid(uint32_t index) const {
+Point3f Mesh::getCentroid(uint32_t index) const
+{
     return (1.0f / 3.0f) *
-        (m_V.col(m_F(0, index)) +
-         m_V.col(m_F(1, index)) +
-         m_V.col(m_F(2, index)));
+           (m_V.col(m_F(0, index)) +
+            m_V.col(m_F(1, index)) +
+            m_V.col(m_F(2, index)));
 }
 
-
-std::string Mesh::toString() const {
+std::string Mesh::toString() const
+{
     return tfm::format(
         "Mesh[\n"
         "  name = \"%s\",\n"
@@ -186,8 +204,7 @@ std::string Mesh::toString() const {
         m_V.cols(),
         m_F.cols(),
         m_bsdf ? indent(m_bsdf->toString()) : std::string("null"),
-        m_emitter ? indent(m_emitter->toString()) : std::string("null")
-    );
+        m_emitter ? indent(m_emitter->toString()) : std::string("null"));
 }
 
 NORI_NAMESPACE_END

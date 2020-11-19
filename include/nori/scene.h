@@ -169,6 +169,9 @@ public:
 
     virtual EClassType getClassType() const override { return EScene; }
 
+    virtual const char *getImGuiName() const override { return "Scene"; }
+    virtual void getImGuiNodes() override;
+
 private:
     std::vector<Shape *> m_shapes;
     Integrator *m_integrator = nullptr;

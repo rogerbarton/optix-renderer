@@ -76,6 +76,9 @@ public:
         return std::string("PathMATSIntegrator[]");
     }
 
+    virtual const char* getImGuiName() const override { return "Path MATS"; }
+    virtual void getImGuiNodes() override {}
+
 protected:
 };
 

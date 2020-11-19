@@ -146,6 +146,9 @@ public:
         return "PathMISIntegrator[]";
     }
 
+    virtual const char* getImGuiName() const override { return "Path MIS"; }
+    virtual void getImGuiNodes() override {}
+
 protected:
 };
 

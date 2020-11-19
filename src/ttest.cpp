@@ -207,6 +207,9 @@ public:
     }
 
     virtual EClassType getClassType() const override { return ETest; }
+
+    virtual const char *getImGuiName() const override { return "TTest"; }
+    virtual void getImGuiNodes() override {}
 private:
     std::vector<BSDF *> m_bsdfs;
     std::vector<Scene *> m_scenes;

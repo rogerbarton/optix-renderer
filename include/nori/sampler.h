@@ -129,7 +129,17 @@ public:
      * */
     virtual EClassType getClassType() const override { return ESampler; }
 
-    virtual void getImGuiNodes() override {}
+    virtual void getImGuiNodes() override {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+    }
     virtual const char* getImGuiName() const override { return "Sampler base"; }
 
 protected:

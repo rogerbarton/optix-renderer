@@ -13,6 +13,9 @@ public:
     {
         return tfm::format("EnvironmentMap[]");
     }
+
+    virtual const char *getImGuiName() const override { return "EnvironmentMap Base"; }
+    virtual void getImGuiNodes() override {}
 };
 
 NORI_NAMESPACE_END

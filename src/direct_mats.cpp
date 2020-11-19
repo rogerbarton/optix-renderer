@@ -79,6 +79,9 @@ public:
     return std::string("DirectMATSIntegrator[]");
   }
 
+  virtual const char *getImGuiName() const override { return "Direct MATS"; }
+  virtual void getImGuiNodes() override {}
+
 protected:
 };
 

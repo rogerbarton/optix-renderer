@@ -122,6 +122,7 @@ add_executable(nori
   src/PNGTexture.cpp
   src/denoiser.cpp
   src/adaptive.cpp
+  src/camera.cpp
 )
 
 if(NORI_USE_VOLUMES)
@@ -136,23 +137,15 @@ add_executable(tonemapper
         src/common.cpp
         src/hdrToLdr.cpp)
 
-# Nori depends on some libraries created in CMakeConfig.txt. The following two
-# lines ensure that Nori is built *after* those libraries have been created.
-#add_dependencies(nori OpenEXR_p)
-#add_dependencies(nori tbb_p)
-add_dependencies(nori pugixml)
-add_dependencies(nori lodepng_p)
-#add_dependencies(nori openvdb_p)
-
-add_dependencies(tonemapper nori)
-
 if(NORI_USE_GUI)
   # Append additional gui sources
   if(NORI_USE_IMGUI)
     target_sources(nori PRIVATE
       include/nori/ImguiScreen.h
       src/ImguiScreen.cpp
+
       include/nori/ImguiHelpers.h
+      src/ImGuiHelpers.cpp
 
       include/nori/glutil.h
       src/glutil.cpp
@@ -178,6 +171,16 @@ if(NORI_USE_GUI)
   add_dependencies(warptest nori)
   target_link_libraries(warptest nanogui glew ${extra_libs})
 endif(NORI_USE_GUI)
+
+# Nori depends on some libraries created in CMakeConfig.txt. The following two
+# lines ensure that Nori is built *after* those libraries have been created.
+#add_dependencies(nori OpenEXR_p)
+#add_dependencies(nori tbb_p)
+add_dependencies(nori pugixml)
+add_dependencies(nori lodepng_p)
+#add_dependencies(nori openvdb_p)
+
+add_dependencies(tonemapper nori)
 
 # Link to dependency libraries
 target_link_libraries(tonemapper ${extra_libs})

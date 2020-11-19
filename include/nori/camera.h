@@ -32,7 +32,8 @@ NORI_NAMESPACE_BEGIN
  * implement other types (e.g. an environment camera, or a physically-based 
  * camera model that simulates the behavior actual lenses)
  */
-class Camera : public NoriObject {
+class Camera : public NoriObject
+{
 public:
     /**
      * \brief Importance sample a ray according to the camera's response function
@@ -55,8 +56,8 @@ public:
      *    function and the sampling density.
      */
     virtual Color3f sampleRay(Ray3f &ray,
-        const Point2f &samplePosition,
-        const Point2f &apertureSample) const = 0;
+                              const Point2f &samplePosition,
+                              const Point2f &apertureSample) const = 0;
 
     /// Return the size of the output image in pixels
     const Vector2i &getOutputSize() const { return m_outputSize; }
@@ -69,6 +70,9 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return ECamera; }
+
+    virtual const char *getImGuiName() const override { return "Camera Base"; }
+    virtual void getImGuiNodes() override;
 protected:
     Vector2i m_outputSize;
     ReconstructionFilter *m_rfilter;

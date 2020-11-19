@@ -128,27 +128,15 @@ public:
 
     void getImGuiNodes() override
     {
+        Sampler::getImGuiNodes();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
-                                   
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(1);
-        ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
-
         ImGui::TreeNodeEx("uniformEvery", flags, "Uniform Every");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(2);
         ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
         ImGui::NextColumn();
     }
 

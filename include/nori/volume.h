@@ -8,59 +8,73 @@
 
 NORI_NAMESPACE_BEGIN
 
-	class Volume : public NoriObject
+class Volume : public NoriObject
+{
+public:
+	Volume(const PropertyList &props);
+
+	EClassType getClassType() const override { return EVolume; }
+
+	std::string toString() const override;
+
+	filesystem::path filename;
+	nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
+	nanovdb::NanoGrid<float> *densityGrid;
+	nanovdb::NanoGrid<float> *heatGrid;
+
+	virtual const char *getImGuiName() const override { return "Volume"; }
+	virtual void getImGuiNodes() override
 	{
-	public:
-		Volume(const PropertyList& props);
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+								   ImGuiTreeNodeFlags_Bullet;
 
-		EClassType getClassType() const override { return EVolume; }
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("fileName", flags, "Filename");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text(filename.str().c_str());
+		ImGui::NextColumn();
+	}
 
-		std::string toString() const override;
-
-		filesystem::path                         filename;
-		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
-		nanovdb::NanoGrid<float>* densityGrid;
-		nanovdb::NanoGrid<float>* heatGrid;
-
-	private:
-		/**
+private:
+	/**
 		 * Loads a .nvdb (NanoVDB) file directly
 		 */
-		void loadNanoVdb();
+	void loadNanoVdb();
 
-		/**
+	/**
 		 * Loads a .vdb (OpenVDB) file and converts it to the NanoVDB format.
 		 * Currently the only function that uses the OpenVDB lib
 		 */
-		void loadOpenVdbAndCacheNanoVdb(const std::filesystem::path& cacheFilename) const;
+	void loadOpenVdbAndCacheNanoVdb(const std::filesystem::path &cacheFilename) const;
 
-		/**
+	/**
 		 * Writes the .nvdb (NanoVDB) file to disk. Use this to prevent formats converting each time.
 		 */
-		void writeToNanoVdb(const std::string& outfile) const;
+	void writeToNanoVdb(const std::string &outfile) const;
 
-		// -- Helpers
-		/**
+	// -- Helpers
+	/**
 		 * Reads and processes a single grid from an nvdb file
 		 * @param file .nvdb file
 		 * @param gridId id of the grid within the file
 		 * @param gridHandle OUT
 		 * @param grid OUT
 		 */
-		void readGrid(filesystem::path& file, uint64_t gridId,
-		              nanovdb::GridHandle<nanovdb::HostBuffer>& gridHandle, nanovdb::NanoGrid<float>*& grid);
+	void readGrid(filesystem::path &file, uint64_t gridId,
+				  nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle, nanovdb::NanoGrid<float> *&grid);
 
-		/**
+	/**
 		 * Prints information about the grid handle metadata, e.g. type, class
 		 * @param gridHandle
 		 */
-		static void printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer>& gridHandle);
+	static void printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle);
 
-		/**
+	/**
 		 * Prints information about the loaded grid, e.g. active voxels, voxel size
 		 */
-		static void printGridData(const nanovdb::NanoGrid<float>* grid);
-	};
+	static void printGridData(const nanovdb::NanoGrid<float> *grid);
+};
 
 NORI_NAMESPACE_END
 
