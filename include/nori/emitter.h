@@ -152,7 +152,7 @@ public:
     }
 
     ImGui::AlignTextToFramePadding();
-    bool node_open = ImGui::TreeNode("shape");
+    bool node_open = ImGui::TreeNode("Position");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
     ImGui::DragPoint3f("Position", &m_position);

@@ -161,7 +161,7 @@ public:
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(id++);
 
-        ImGui::DragColor3f("##value", &baseColor, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::ColorPicker("##value", &baseColor);
         ImGui::PopID();
         ImGui::NextColumn();
 

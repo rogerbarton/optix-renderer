@@ -99,7 +99,7 @@ void ConstantTexture<Color3f>::getImGuiNodes()
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ImGui::DragColor3f("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::ColorPicker("##value", &m_value);
     ImGui::NextColumn();
 }
 #endif

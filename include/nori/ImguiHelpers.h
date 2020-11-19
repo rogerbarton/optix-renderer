@@ -20,6 +20,7 @@ namespace ImGui
     IMGUI_API bool DragColor3f(const char *label, nori::Color3f *color,
                                float v = 1.f, float v_min = 0.f, float v_max = 0.f,
                                const char *fmt = "%.3f", ImGuiSliderFlags flags = 0);
+    IMGUI_API bool ColorPicker(const char *label, nori::Color3f *color);
     IMGUI_API bool DragColor4f(const char *label, nori::Color4f *color,
                                float v = 1.f, float v_min = 0.f, float v_max = 0.f,
                                const char *fmt = "%.3f", ImGuiSliderFlags flags = 0);

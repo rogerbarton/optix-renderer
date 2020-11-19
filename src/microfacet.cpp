@@ -179,10 +179,10 @@ public:
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
+        ImGui::TreeNodeEx("Albedo of Diffuse Base", flags, "Albedo of Diffuse Base");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragColor3f("##value", &m_kd, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::ColorPicker("##value", &m_kd);
         ImGui::NextColumn();
         ImGui::PopID();
     }

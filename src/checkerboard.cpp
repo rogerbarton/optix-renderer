@@ -157,7 +157,7 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::TreeNodeEx("Color 1", flags, "Color 1");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragColor3f("##value", &m_value1, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::ColorPicker("##value", &m_value1);
   ImGui::NextColumn();
   ImGui::PopID();
 
@@ -166,7 +166,7 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::TreeNodeEx("Color 2", flags, "Color 2");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragColor3f("##value", &m_value2, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::ColorPicker("##value", &m_value2);
   ImGui::NextColumn();
   ImGui::PopID();
 
