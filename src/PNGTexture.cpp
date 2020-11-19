@@ -160,10 +160,10 @@ public:
 
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
-        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragVector3f("##value", &eulerAngles, 0.01, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragVector3f("##value", &eulerAngles, 0.1, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 	}
