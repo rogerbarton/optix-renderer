@@ -120,7 +120,7 @@ public:
 
         return result;
     }
-
+#ifndef NORI_USE_NANOGUI
     const char *getImGuiName() const override
     {
         return "Adaptive";
@@ -139,6 +139,7 @@ public:
         ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
     }
+    #endif
 
 protected:
     AdaptiveSampler() {}

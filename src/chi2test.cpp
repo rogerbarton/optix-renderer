@@ -213,10 +213,10 @@ public:
     }
 
     virtual EClassType getClassType() const override { return ETest; }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Chi2 Test"; }
     virtual void getImGuiNodes() override {}
-
+#endif
 private:
     int m_cosThetaResolution;
     int m_phiResolution;

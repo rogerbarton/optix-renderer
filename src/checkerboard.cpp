@@ -48,10 +48,10 @@ public:
       return m_value2;
     }
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Checkerboard"; }
   virtual void getImGuiNodes() override {}
-
+#endif
 protected:
   T m_value1;
   T m_value2;
@@ -103,7 +103,7 @@ std::string Checkerboard<Color3f>::toString() const
                      m_delta.toString(), m_scale.toString(),
                      m_value1.toString(), m_value2.toString());
 }
-
+#ifndef NORI_USE_NANOGUI
 template <>
 void Checkerboard<float>::getImGuiNodes()
 {
@@ -184,6 +184,7 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
 }
+#endif
 
 NORI_REGISTER_TEMPLATED_CLASS(Checkerboard, float, "checkerboard_float")
 NORI_REGISTER_TEMPLATED_CLASS(Checkerboard, Color3f, "checkerboard_color")

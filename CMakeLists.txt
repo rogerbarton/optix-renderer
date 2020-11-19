@@ -156,20 +156,20 @@ if(NORI_USE_GUI)
       include/nori/gui.h
       src/gui.cpp
     )
+  
+    # The following lines build the warping test application
+    add_executable(warptest
+      include/nori/warp.h
+      src/warp.cpp
+      src/warptest.cpp
+      src/microfacet.cpp
+      src/object.cpp
+      src/proplist.cpp
+      src/common.cpp
+      )
+    add_dependencies(warptest nori)
+    target_link_libraries(warptest nanogui glew ${extra_libs})
   endif(NORI_USE_IMGUI)
-
-  # The following lines build the warping test application
-  add_executable(warptest
-    include/nori/warp.h
-    src/warp.cpp
-    src/warptest.cpp
-    src/microfacet.cpp
-    src/object.cpp
-    src/proplist.cpp
-    src/common.cpp
-    )
-  add_dependencies(warptest nori)
-  target_link_libraries(warptest nanogui glew ${extra_libs})
 endif(NORI_USE_GUI)
 
 # Nori depends on some libraries created in CMakeConfig.txt. The following two

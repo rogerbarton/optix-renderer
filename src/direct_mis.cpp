@@ -131,11 +131,10 @@ public:
   {
     return std::string("DirectMISIntegrator[]");
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Direct MIS"; }
   virtual void getImGuiNodes() override {}
-
-protected:
+#endif
 };
 
 NORI_REGISTER_CLASS(DirectMISIntegrator, "direct_mis");

@@ -168,10 +168,10 @@ public:
     virtual std::string toString() const override;
 
     virtual EClassType getClassType() const override { return EScene; }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Scene"; }
     virtual void getImGuiNodes() override;
-
+#endif
 private:
     std::vector<Shape *> m_shapes;
     Integrator *m_integrator = nullptr;

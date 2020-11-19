@@ -71,11 +71,10 @@ public:
   {
     return std::string("DirectEMSIntegrator[]");
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Direct EMS"; }
   virtual void getImGuiNodes() override {}
-
-protected:
+#endif
 };
 
 NORI_REGISTER_CLASS(DirectEMSIntegrator, "direct_ems");

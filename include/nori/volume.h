@@ -22,7 +22,11 @@ public:
 	nanovdb::NanoGrid<float> *densityGrid;
 	nanovdb::NanoGrid<float> *heatGrid;
 
-	virtual const char *getImGuiName() const override { return "Volume"; }
+#ifndef NORI_USE_NANOGUI
+	virtual const char *getImGuiName() const override
+	{
+		return "Volume";
+	}
 	virtual void getImGuiNodes() override
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -35,6 +39,7 @@ public:
 		ImGui::Text(filename.str().c_str());
 		ImGui::NextColumn();
 	}
+#endif
 
 private:
 	/**

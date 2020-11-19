@@ -169,7 +169,7 @@ public:
             indent(m_rfilter->toString())
         );
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Perspective"; }
     virtual void getImGuiNodes() override {
         Camera::getImGuiNodes();
@@ -221,6 +221,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
+#endif
 private:
     Vector2f m_invOutputSize;
     Transform m_sampleToCamera;

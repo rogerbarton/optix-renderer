@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef NORI_USE_NANOGUI
 #include <imgui/imgui.h>
 #include <nori/vector.h>
 #include <nori/color.h>
@@ -38,3 +39,5 @@ namespace ImGui
                                 float v = 1.f, float v_min = 0.f, float v_max = 0.f,
                                 const char *fmt = "%.3f", ImGuiSliderFlags flags = 0);
 } // namespace ImGui
+
+#endif

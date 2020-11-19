@@ -129,7 +129,7 @@ public:
   void setShape(Shape *shape) { m_shape = shape; }
 
   Point3f getPosition() const { return m_position; }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Emitter Base"; }
   virtual void getImGuiNodes() override
   {
@@ -158,6 +158,7 @@ public:
     ImGui::DragPoint3f("Position", &m_position);
     ImGui::NextColumn();
   }
+  #endif
 
 protected:
   /// Pointer to the shape if the emitter is attached to a shape

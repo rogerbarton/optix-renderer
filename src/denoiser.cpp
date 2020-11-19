@@ -74,7 +74,7 @@ public:
                            "]",
                            sigma_r, sigma_d, inner_range);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "SimpleDenoiser"; }
     virtual void getImGuiNodes() override
     {
@@ -110,6 +110,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
+#endif
 
 private:
     float weight(int i_, int j_, int k_, int l_, const Color3f &Iij, const Color3f &Ikl) const

@@ -254,7 +254,7 @@ public:
             m_photonCount,
             m_photonRadius);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Photonmapper"; }
     virtual void getImGuiNodes() override {
         Integrator::getImGuiNodes();
@@ -280,7 +280,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
-
+#endif
 private:
     /* 
      * Important: m_photonCount is the total number of photons deposited in the photon map,

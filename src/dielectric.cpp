@@ -108,7 +108,7 @@ public:
             "]",
             m_intIOR, m_extIOR);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Dielectric"; }
     virtual void getImGuiNodes() override {
         BSDF::getImGuiNodes();
@@ -134,7 +134,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
-
+#endif
 private:
     float m_intIOR, m_extIOR;
 };

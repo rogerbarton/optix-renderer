@@ -32,10 +32,10 @@ public:
     {
         return m_value;
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Constant"; }
     virtual void getImGuiNodes() override {}
-
+#endif
 protected:
     T m_value;
 };
@@ -66,7 +66,7 @@ std::string ConstantTexture<Color3f>::toString() const
         "ConstantTexture[ %s ]",
         m_value.toString());
 }
-
+#ifndef NORI_USE_NANOGUI
 template <>
 void ConstantTexture<float>::getImGuiNodes()
 {
@@ -102,6 +102,7 @@ void ConstantTexture<Color3f>::getImGuiNodes()
     ImGui::DragColor3f("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
 }
+#endif
 
 NORI_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float")
 NORI_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color")

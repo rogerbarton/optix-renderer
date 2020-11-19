@@ -143,7 +143,7 @@ public:
     {
         return true;
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Disney BSDF"; }
     virtual void getImGuiNodes() override
     {
@@ -176,7 +176,7 @@ public:
         ImGuiValue(clearcoat, "Clearcoat");
         ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
     }
-
+#endif
 private:
     static Vector3f mon2lin(Color3f vec)
     {

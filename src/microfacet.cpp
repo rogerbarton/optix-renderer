@@ -141,7 +141,7 @@ public:
                        "]",
                        m_alpha, m_intIOR, m_extIOR, m_kd.toString(), m_ks);
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char* getImGuiName() const override { return "Microfacet"; }
     virtual void getImGuiNodes() override {
 
@@ -186,6 +186,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
+  #endif
 
 private:
   float m_alpha;

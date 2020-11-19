@@ -143,7 +143,7 @@ public:
     }
 
     virtual EClassType getClassType() const override { return EBSDF; }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Diffuse"; }
     virtual void getImGuiNodes() override
     {
@@ -159,6 +159,7 @@ public:
             ImGui::TreePop();
         }
     }
+#endif
 
 private:
     Texture<Color3f> *m_albedo;

@@ -145,10 +145,10 @@ public:
     {
         return "PathMISIntegrator[]";
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Path MIS"; }
     virtual void getImGuiNodes() override {}
-
+#endif
 protected:
 };
 

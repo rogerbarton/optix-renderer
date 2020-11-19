@@ -47,7 +47,7 @@ public:
             "]",
             m_length);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "AV"; }
 
     virtual void getImGuiNodes() override
@@ -66,7 +66,7 @@ public:
         ImGui::PopID();
         ImGui::NextColumn();
     }
-
+#endif
 protected:
     float m_length = 0.0;
 };

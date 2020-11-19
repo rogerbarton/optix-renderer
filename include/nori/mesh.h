@@ -110,6 +110,7 @@ public:
 
     /// Return a human-readable summary of this instance
     virtual std::string toString() const override;
+#ifndef NORI_USE_NANOGUI
 
     virtual const char *getImGuiName() const override { return "Mesh"; }
     virtual void getImGuiNodes() override
@@ -127,7 +128,7 @@ public:
         ImGui::Text(m_name.c_str());
         ImGui::NextColumn();
     }
-
+#endif
 protected:
     /// Create an empty mesh
     Mesh();

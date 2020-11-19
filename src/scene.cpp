@@ -189,7 +189,7 @@ std::string Scene::toString() const
 #endif
     );
 }
-
+#ifndef NORI_USE_NANOGUI
 void Scene::getImGuiNodes()
 {
     if (m_camera)
@@ -326,6 +326,7 @@ void Scene::getImGuiNodes()
         ImGui::TreePop();
     }
 }
+#endif
 
 NORI_REGISTER_CLASS(Scene, "scene");
 NORI_NAMESPACE_END

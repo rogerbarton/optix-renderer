@@ -110,7 +110,7 @@ public:
             m_bsdf ? indent(m_bsdf->toString()) : std::string("null"),
             m_emitter ? indent(m_emitter->toString()) : std::string("null"));
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Sphere"; }
     virtual void getImGuiNodes() override
     {
@@ -162,6 +162,7 @@ public:
             }
         }
     }
+    #endif
 
 protected:
     Point3f m_position;

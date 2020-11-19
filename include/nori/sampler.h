@@ -128,7 +128,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return ESampler; }
-
+#ifndef NORI_USE_NANOGUI
     virtual void getImGuiNodes() override {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -141,7 +141,7 @@ public:
         ImGui::NextColumn();
     }
     virtual const char* getImGuiName() const override { return "Sampler base"; }
-
+#endif
 protected:
     int m_sampleCount;
     int m_sampleRound;

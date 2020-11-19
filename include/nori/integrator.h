@@ -59,10 +59,10 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EIntegrator; }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Integrator Base"; }
     virtual void getImGuiNodes() override {}
-
+#endif
 };
 
 NORI_NAMESPACE_END

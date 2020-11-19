@@ -75,10 +75,10 @@ public:
     {
         return std::string("PathMATSIntegrator[]");
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Path MATS"; }
     virtual void getImGuiNodes() override {}
-
+#endif
 protected:
 };
 

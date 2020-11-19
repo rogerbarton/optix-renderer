@@ -126,7 +126,7 @@ public:
 
     return M_PI / sqr.pdf * m_radiance; // divide by pdf == multiply by area
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Arealight"; }
   virtual void getImGuiNodes() override
   {
@@ -143,7 +143,7 @@ public:
     ImGui::DragColor3f("##value", &m_radiance, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
   }
-
+#endif
 protected:
   Color3f m_radiance;
 };

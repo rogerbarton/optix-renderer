@@ -110,6 +110,7 @@ public:
 		return height;
 	}
 
+#ifndef NORI_USE_NANOGUI
 	virtual const char* getImGuiName() const override { return "PNG Texture"; }
     virtual void getImGuiNodes() override {
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -166,6 +167,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
 	}
+#endif
 
 private:
 	filesystem::path filename;

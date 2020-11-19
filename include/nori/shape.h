@@ -153,8 +153,10 @@ public:
      * */
     virtual EClassType getClassType() const override { return EMesh; }
 
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Shape Base"; }
     virtual void getImGuiNodes() override;
+#endif
 
 protected:
     BSDF *m_bsdf = nullptr;       ///< BSDF of the surface

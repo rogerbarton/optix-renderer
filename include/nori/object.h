@@ -145,9 +145,10 @@ public:
     /// Allow to assign a name to the object
     void setIdName(const std::string &name) { m_idname = name; }
     const std::string &getIdName() const { return m_idname; }
-
+#ifndef NORI_USE_NANOGUI
     virtual void getImGuiNodes() = 0;
     virtual const char* getImGuiName() const = 0;
+#endif
 
 protected:
     std::string m_idname;

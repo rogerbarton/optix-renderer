@@ -135,7 +135,7 @@ public:
 			return m_map->eval(uv);
 		}
 	}
-
+#ifndef NORI_USE_NANOGUI
 	virtual const char *getImGuiName() const override { return "PNGEnvMap"; }
 	virtual void getImGuiNodes() override
 	{
@@ -186,7 +186,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
 	}
-
+#endif
 private:
 	Texture<Color3f> *m_map = nullptr;
 	bool sphereTexture = false;

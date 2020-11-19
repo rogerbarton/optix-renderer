@@ -68,11 +68,10 @@ public:
   }
 
   std::string toString() const { return tfm::format("DirectIntegrator[]"); }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Direct"; }
   virtual void getImGuiNodes() override {}
-
-protected:
+#endif
 };
 
 NORI_REGISTER_CLASS(DirectIntegrator, "direct");

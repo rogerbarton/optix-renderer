@@ -17,9 +17,10 @@ public:
     {
         return tfm::format("Denoiser[]");
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Denoiser Base"; }
     virtual void getImGuiNodes() override {}
+#endif
 };
 
 NORI_NAMESPACE_END

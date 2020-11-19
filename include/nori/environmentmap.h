@@ -13,9 +13,13 @@ public:
     {
         return tfm::format("EnvironmentMap[]");
     }
-
-    virtual const char *getImGuiName() const override { return "EnvironmentMap Base"; }
+#ifndef NORI_USE_NANOGUI
+    virtual const char *getImGuiName() const override
+    {
+        return "EnvironmentMap Base";
+    }
     virtual void getImGuiNodes() override {}
+#endif
 };
 
 NORI_NAMESPACE_END

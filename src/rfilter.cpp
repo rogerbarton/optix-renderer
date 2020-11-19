@@ -48,7 +48,7 @@ public:
     {
         return tfm::format("GaussianFilter[radius=%f, stddev=%f]", m_radius, m_stddev);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Gaussian Filter"; }
     virtual void getImGuiNodes() override
     {
@@ -62,6 +62,7 @@ public:
         ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
     }
+#endif
 
 protected:
     float m_stddev;
@@ -109,7 +110,7 @@ public:
     {
         return tfm::format("MitchellNetravaliFilter[radius=%f, B=%f, C=%f]", m_radius, m_B, m_C);
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Mitchell-Netravali Filter"; }
     virtual void getImGuiNodes() override
     {
@@ -134,7 +135,7 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
     }
-
+#endif
 protected:
     float m_B, m_C;
 };
@@ -157,12 +158,13 @@ public:
     {
         return "TentFilter[]";
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Tent Filter"; }
     virtual void getImGuiNodes() override
     {
         ReconstructionFilter::getImGuiNodes();
     }
+#endif
 };
 
 /// Box filter -- fastest, but prone to aliasing
@@ -183,12 +185,13 @@ public:
     {
         return "BoxFilter[]";
     }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Box Filter"; }
     virtual void getImGuiNodes() override
     {
         ReconstructionFilter::getImGuiNodes();
     }
+#endif
 };
 
 NORI_REGISTER_CLASS(GaussianFilter, "gaussian");

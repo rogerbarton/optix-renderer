@@ -87,7 +87,7 @@ std::string Intersection::toString() const
         indent(geoFrame.toString()),
         mesh ? mesh->toString() : std::string("null"));
 }
-
+#ifndef NORI_USE_NANOGUI
 void Shape::getImGuiNodes()
 {
     if (m_bsdf)
@@ -120,5 +120,6 @@ void Shape::getImGuiNodes()
         }
     }
 }
+#endif
 
 NORI_NAMESPACE_END

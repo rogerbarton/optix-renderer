@@ -2,7 +2,7 @@
 #include <nori/rfilter.h>
 
 NORI_NAMESPACE_BEGIN
-
+#ifndef NORI_USE_NANOGUI
 void Camera::getImGuiNodes()
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -28,5 +28,6 @@ void Camera::getImGuiNodes()
         ImGui::TreePop();
     }
 }
+#endif
 
 NORI_NAMESPACE_END

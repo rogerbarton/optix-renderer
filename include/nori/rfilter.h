@@ -52,7 +52,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EReconstructionFilter; }
-
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Reconstruction Filter"; }
     virtual void getImGuiNodes() override
     {
@@ -65,6 +65,7 @@ public:
         ImGui::DragFloat("Radius", &m_radius, 1.f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
     }
+    #endif
 
 protected:
     float m_radius;

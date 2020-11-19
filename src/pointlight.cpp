@@ -55,7 +55,7 @@ public:
                        "]",
                        m_power.toString(), m_position.toString());
   }
-
+#ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Pointlight"; }
   virtual void getImGuiNodes() override
   {
@@ -70,6 +70,7 @@ public:
     ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
   }
+#endif
 
 protected:
   Color3f m_power;
