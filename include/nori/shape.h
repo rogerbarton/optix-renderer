@@ -118,6 +118,7 @@ public:
 
     /// Return a pointer to the BSDF associated with this mesh
     const BSDF *getBSDF() const { return m_bsdf; }
+    BSDF* getBSDFNonConst() { return m_bsdf; }
 
 
     /// Return the total number of primitives in this shape
@@ -152,6 +153,9 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EMesh; }
+
+    virtual const char* getImGuiName() const override { return "Shape Base"; }
+    virtual void getImGuiNodes() override {}
 
 protected:
     BSDF *m_bsdf = nullptr;      ///< BSDF of the surface

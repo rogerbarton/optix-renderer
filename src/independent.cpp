@@ -35,7 +35,7 @@ class Independent : public Sampler
 public:
     Independent(const PropertyList &propList)
     {
-        m_sampleCount = (size_t)propList.getInteger("sampleCount", 1);
+        m_sampleCount = propList.getInteger("sampleCount", 1);
     }
 
     virtual ~Independent() {}
@@ -79,7 +79,7 @@ public:
         return tfm::format("Independent[sampleCount=%i]", m_sampleCount);
     }
 
-    std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram&) override
+    std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram &) override
     {
         // Independent sampler simply takes all pixels once
         Vector2i size = block.getSize();
@@ -95,6 +95,25 @@ public:
         }
 
         return result;
+    }
+
+    const char* getImGuiName() const override
+    {
+        return "Independent";
+    }
+
+    void getImGuiNodes() override
+    {
+        ImGui::AlignTextToFramePadding();
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        
+        ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        
+        ImGui::NextColumn();
     }
 
 protected:

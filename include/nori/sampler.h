@@ -113,10 +113,10 @@ public:
     virtual Point2f next2D() = 0;
 
     /// Return the number of configured pixel samples
-    virtual size_t getSampleCount() const { return m_sampleCount; }
+    virtual int getSampleCount() const { return m_sampleCount; }
 
     /// sets the current sample round
-    void setSampleRound(size_t sampleRound) { m_sampleRound = sampleRound; }
+    void setSampleRound(int sampleRound) { m_sampleRound = sampleRound; }
 
     /// create pixels to sample based on cumulative variance probabilities
     virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram& histogram) = 0;
@@ -129,9 +129,12 @@ public:
      * */
     virtual EClassType getClassType() const override { return ESampler; }
 
+    virtual void getImGuiNodes() override {}
+    virtual const char* getImGuiName() const override { return "Sampler base"; }
+
 protected:
-    size_t m_sampleCount;
-    size_t m_sampleRound;
+    int m_sampleCount;
+    int m_sampleRound;
 };
 
 NORI_NAMESPACE_END

@@ -1,12 +1,21 @@
 #include <nori/ImguiScreen.h>
+
+// TODO: remove this one
 #include <nori/ImguiHelpers.h>
 
 #include <nori/block.h>
 #include <nori/parser.h>
 #include <nori/bitmap.h>
+#include <nori/scene.h>
+#include <nori/sampler.h>
+#include <nori/integrator.h>
+#include <nori/emitter.h>
+#include <nori/shape.h>
+#include <nori/bsdf.h>
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -27,7 +36,7 @@ float get_pixel_ratio()
 
 ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
 {
-	windowWidth  = block.cols();
+	windowWidth = block.cols();
 	windowHeight = block.rows();
 	initGlfw("ENori - Enhanced Nori", windowWidth, windowHeight);
 	initGl();
@@ -114,6 +123,7 @@ void ImguiScreen::openXML(const std::string &filename)
 
 	try
 	{
+		renderingFilename = filename;
 		m_renderThread.renderScene(filename);
 
 		imageZoom = 1.f;
@@ -127,14 +137,18 @@ void ImguiScreen::openXML(const std::string &filename)
 
 ImguiScreen::~ImguiScreen()
 {
-	glDeleteTextures(1, &m_texture);
-	delete m_shader;
+	if (m_shader)
+		delete m_shader;
 }
 
 void ImguiScreen::openEXR(const std::string &filename)
 {
 	if (m_renderThread.isBusy())
 		m_renderThread.stopRendering();
+
+	if (m_renderThread.m_scene)
+		delete m_renderThread.m_scene;
+	m_renderThread.m_scene = nullptr; // nullify scene for Tree viewer
 
 	Bitmap bitmap(filename);
 
@@ -149,7 +163,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 
 void ImguiScreen::windowResized(int width, int height)
 {
-	this->windowWidth  = width;
+	this->windowWidth = width;
 	this->windowHeight = height;
 
 #ifdef RETINA_SCREEN
@@ -315,6 +329,10 @@ void ImguiScreen::draw()
 			if (ImGui::Button("Stop Render"))
 				m_renderThread.stopRendering();
 
+			// show restart button if m_scene is valid
+			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
+				m_renderThread.rerenderScene(renderingFilename);
+
 			if (ImGui::Button("Reset Camera"))
 			{
 			}
@@ -326,10 +344,9 @@ void ImguiScreen::draw()
 				exposureLog = 0.5f;
 			m_scale = std::pow(2.f, (exposureLog - 0.5f) * 20);
 
-			drawSceneTree();
-
-			if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
+				drawSceneTree();
 			}
 		}
 		ImGui::End();
@@ -504,7 +521,8 @@ void ImguiScreen::mouseMove(double xpos, double ypos)
 	}
 }
 
-void ImguiScreen::setZoom(float value, bool centerOnMouse){
+void ImguiScreen::setZoom(float value, bool centerOnMouse)
+{
 
 	Vector2f zoomCenter{windowWidth / 2.f, windowHeight / 2.f};
 	if (centerOnMouse)
@@ -575,23 +593,111 @@ void ImguiScreen::initImGui()
 
 void ImguiScreen::drawSceneTree()
 {
+	// check if a scene exists
+	if (!m_renderThread.m_scene)
+	{
+		ImGui::Text("No scene loaded...");
+		return;
+	}
+
+	bool renderThreadBusy = m_renderThread.isBusy();
+
+	if (renderThreadBusy)
+	{
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha,
+							ImGui::GetStyle().Alpha * 0.5f);
+	}
+
+	// get all scene objects
+	Sampler *sampler = m_renderThread.m_scene->getSampler();
+	Integrator *integrator = m_renderThread.m_scene->getIntegrator();
+	std::vector<Shape *> shapes = m_renderThread.m_scene->getShapes();
+
 	// Start columns
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 	ImGui::Columns(2);
 
-	int uid = 0;
-	ImGui::PushID(uid);
 	ImGui::AlignTextToFramePadding();
-	bool node_open = ImGui::TreeNode("Object", "%s_%u", "Object", uid);
-	ImGui::NextColumn();
-	ImGui::AlignTextToFramePadding();
-	ImGui::Text("my sailor is rich");
-	ImGui::NextColumn();
-	if (node_open)
-	{
-		static float placeholder_members[8] = {0.0f, 0.0f, 1.0f, 3.1416f, 100.0f, 999.0f};
 
-		for (int i = 0; i < 8; i++)
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+							   ImGuiTreeNodeFlags_Bullet;
+
+	ImGui::TreeNodeEx("fileName", flags, "Filename");
+	ImGui::NextColumn();
+	ImGui::SetNextItemWidth(-1);
+	ImGui::Text(renderingFilename.c_str());
+	ImGui::NextColumn();
+
+	bool node_open_integrator = ImGui::TreeNode("Integrator");
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::Text(integrator->getImGuiName());
+	ImGui::NextColumn();
+	if (node_open_integrator)
+	{
+		integrator->getImGuiNodes();
+		ImGui::TreePop();
+	}
+
+	bool node_open_sampler = ImGui::TreeNode("Sampler");
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::Text(sampler->getImGuiName());
+	ImGui::NextColumn();
+	if (node_open_sampler)
+	{
+		sampler->getImGuiNodes();
+		ImGui::TreePop();
+	}
+
+	bool node_open_shapes = ImGui::TreeNode("Shapes");
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::Text("%d Shapes", (int)shapes.size());
+	ImGui::NextColumn();
+	if (node_open_shapes)
+	{
+		for (int i = 0; i < shapes.size(); i++)
+		{
+			ImGui::PushID(i);
+
+			// for each shape, add a tree node
+			bool node_open_shape = ImGui::TreeNode("Shape", "%s %d", "Shape", i + 1);
+			ImGui::NextColumn();
+			ImGui::AlignTextToFramePadding();
+
+			ImGui::Text(shapes[i]->getImGuiName());
+			ImGui::NextColumn();
+
+			if (node_open_shape)
+			{
+				// for now, only bsdf
+				bool node_open_bsdf = ImGui::TreeNode("BSDF");
+				ImGui::NextColumn();
+				ImGui::AlignTextToFramePadding();
+
+				ImGui::Text(shapes[i]->getBSDF()->getImGuiName());
+				ImGui::NextColumn();
+
+				if (node_open_bsdf)
+				{
+					shapes[i]->getBSDFNonConst()->getImGuiNodes();
+					ImGui::TreePop();
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::TreePop();
+	}
+
+	// Other stuff... // TODO
+
+	/*for (int i = 0; i < 8; i++)
 		{
 			ImGui::PushID(i); // Use field index as identifier.
 			{
@@ -610,15 +716,19 @@ void ImguiScreen::drawSceneTree()
 			}
 			ImGui::PopID();
 		}
-		ImGui::TreePop();
-	}
-
-	ImGui::PopID();
+		*/
 
 	// end columns
 	ImGui::Columns(1);
 	ImGui::Separator();
 	ImGui::PopStyleVar();
+
+	// pop disable flags
+	if (renderThreadBusy)
+	{
+		ImGui::PopItemFlag();
+		ImGui::PopStyleVar();
+	}
 }
 
 NORI_NAMESPACE_END

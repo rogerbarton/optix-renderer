@@ -118,6 +118,9 @@ public:
      * or not to store photons on a surface
      */
     virtual bool isDiffuse() const { return false; }
+
+    virtual const char* getImGuiName() const override { return "BSDF Base"; }
+    virtual void getImGuiNodes() override {}
 };
 
 NORI_NAMESPACE_END

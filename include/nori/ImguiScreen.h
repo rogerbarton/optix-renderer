@@ -127,6 +127,8 @@ private:
 	ImGui::FileBrowser filebrowser;
 	ImGui::FileBrowser filebrowserSave = ImGui::FileBrowser(ImGuiFileBrowserFlags_::ImGuiFileBrowserFlags_EnterNewFilename);
 
+	std::string renderingFilename;
+
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
 	GLShader *m_shader;

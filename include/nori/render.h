@@ -33,6 +33,7 @@ public:
     ~RenderThread();
 
     void renderScene(const std::string & filename);
+    void rerenderScene(const std::string& filename);
 
 	inline void renderThreadMain(const std::string &outputName, const std::string &outputNameDenoised,
 	                      const std::string &outputNameVariance);
@@ -42,8 +43,9 @@ public:
 
     float getProgress();
 
-protected:
     Scene* m_scene = nullptr;
+protected:
+    
     ImageBlock & m_block;
     std::thread m_render_thread;
     std::atomic<int> m_render_status; // 0: free, 1: busy, 2: interruption, 3: done

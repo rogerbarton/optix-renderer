@@ -24,13 +24,16 @@
 
 NORI_NAMESPACE_BEGIN
 
-Shape::~Shape() {
+Shape::~Shape()
+{
     delete m_bsdf;
     //delete m_emitter; // scene is responsible for deleting the emitter
 }
 
-void Shape::activate() {
-    if (!m_bsdf) {
+void Shape::activate()
+{
+    if (!m_bsdf)
+    {
         /* If no material was assigned, instantiate a diffuse BRDF */
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
@@ -38,30 +41,33 @@ void Shape::activate() {
     }
 }
 
-void Shape::addChild(NoriObject *obj) {
-    switch (obj->getClassType()) {
-        case EBSDF:
-            if (m_bsdf)
-                throw NoriException(
-                    "Shape: tried to register multiple BSDF instances!");
-            m_bsdf = static_cast<BSDF *>(obj);
-            break;
+void Shape::addChild(NoriObject *obj)
+{
+    switch (obj->getClassType())
+    {
+    case EBSDF:
+        if (m_bsdf)
+            throw NoriException(
+                "Shape: tried to register multiple BSDF instances!");
+        m_bsdf = static_cast<BSDF *>(obj);
+        break;
 
-        case EEmitter:
-            if (m_emitter)
-                throw NoriException(
-                    "Shape: tried to register multiple Emitter instances!");
-            m_emitter = static_cast<Emitter *>(obj);
-            m_emitter->setShape(static_cast<Shape*>(this));
-            break;
+    case EEmitter:
+        if (m_emitter)
+            throw NoriException(
+                "Shape: tried to register multiple Emitter instances!");
+        m_emitter = static_cast<Emitter *>(obj);
+        m_emitter->setShape(static_cast<Shape *>(this));
+        break;
 
-        default:
-            throw NoriException("Shape::addChild(<%s>) is not supported!",
-                                classTypeName(obj->getClassType()));
+    default:
+        throw NoriException("Shape::addChild(<%s>) is not supported!",
+                            classTypeName(obj->getClassType()));
     }
 }
 
-std::string Intersection::toString() const {
+std::string Intersection::toString() const
+{
     if (!mesh)
         return "Intersection[invalid]";
 
@@ -79,8 +85,7 @@ std::string Intersection::toString() const {
         uv.toString(),
         indent(shFrame.toString()),
         indent(geoFrame.toString()),
-        mesh ? mesh->toString() : std::string("null")
-    );
+        mesh ? mesh->toString() : std::string("null"));
 }
 
 NORI_NAMESPACE_END

@@ -16,8 +16,8 @@ class AdaptiveSampler : public Sampler
 public:
     AdaptiveSampler(const PropertyList &propList)
     {
-        m_sampleCount = (size_t)propList.getInteger("sampleCount", 1);
-        uniform_every = (size_t)propList.getInteger("uniformEvery", 100);
+        m_sampleCount = propList.getInteger("sampleCount", 1);
+        uniform_every = propList.getInteger("uniformEvery", 100);
     }
 
     std::unique_ptr<Sampler> clone() const override
@@ -121,12 +121,43 @@ public:
         return result;
     }
 
+    const char *getImGuiName() const override
+    {
+        return "Adaptive";
+    }
+
+    void getImGuiNodes() override
+    {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+                                   
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::PushID(1);
+        ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::PopID();
+        ImGui::NextColumn();
+
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::TreeNodeEx("uniformEvery", flags, "Uniform Every");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::PushID(2);
+        ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::PopID();
+        ImGui::NextColumn();
+    }
+
 protected:
     AdaptiveSampler() {}
 
 private:
     pcg32 m_random;
-    size_t uniform_every;
+    int uniform_every;
 };
 
 NORI_REGISTER_CLASS(AdaptiveSampler, "adaptive");

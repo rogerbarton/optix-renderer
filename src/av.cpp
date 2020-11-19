@@ -42,6 +42,21 @@ public:
         );
     }
 
+    virtual const char* getImGuiName() const override { return "AV"; }
+
+    virtual void getImGuiNodes() override {
+        ImGui::AlignTextToFramePadding();
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::TreeNodeEx("length", flags, "Length");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::PushID(1);
+        ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::PopID();
+        ImGui::NextColumn();
+    }
+
 protected:
     float m_length = 0.0;
 };
