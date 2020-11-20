@@ -27,14 +27,16 @@ NORI_NAMESPACE_BEGIN
 /*
  * This struct is used to store a cumulative function distribution (CFD) of samples
  */
-struct Histogram {
-    using upair = std::pair<int,int>;
+struct Histogram
+{
+    using upair = std::pair<int, int>;
     using map_type = std::map<float, upair>;
-    
+
     float cumulative;
     map_type map;
 
-    void add_element(int i, int j, float value) {
+    void add_element(int i, int j, float value)
+    {
         cumulative += value;
         map[cumulative] = upair(i, j);
     }
@@ -117,9 +119,10 @@ public:
 
     /// sets the current sample round
     void setSampleRound(int sampleRound) { m_sampleRound = sampleRound; }
+    void setSampleCount(int sampleCount) { m_sampleCount = sampleCount; }
 
     /// create pixels to sample based on cumulative variance probabilities
-    virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram& histogram) = 0;
+    virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram &histogram) = 0;
 
     virtual bool computeVariance() const { return false; }
 
@@ -129,7 +132,8 @@ public:
      * */
     virtual EClassType getClassType() const override { return ESampler; }
 #ifndef NORI_USE_NANOGUI
-    virtual bool getImGuiNodes() override {
+    virtual bool getImGuiNodes() override
+    {
         ImGui::PushID(ESampler);
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -143,7 +147,7 @@ public:
         ImGui::PopID();
         return ret;
     }
-    virtual const char* getImGuiName() const override { return "Sampler base"; }
+    virtual const char *getImGuiName() const override { return "Sampler base"; }
 #endif
 protected:
     int m_sampleCount;

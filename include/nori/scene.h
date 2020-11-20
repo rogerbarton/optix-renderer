@@ -47,7 +47,13 @@ public:
     const BVH *getBVH() const { return m_bvh; }
 
     /// Return a pointer to the scene's integrator
-    const Integrator *getIntegrator() const { return m_integrator; }
+    const Integrator *getIntegrator() const
+    {
+        if (m_preview_mode)
+            return m_previewIntegrator;
+        else
+            return m_integrator;
+    }
 
     /// Return a pointer to the scene's integrator
     Integrator *getIntegrator() { return m_integrator; }
@@ -66,6 +72,9 @@ public:
 
     /// Return a reference to an array containing all lights
     const std::vector<Emitter *> &getLights() const { return m_emitters; }
+
+    void setPreviewMode(bool previewMode) { m_preview_mode = previewMode; }
+    bool isPreviewMode() const { return m_preview_mode; }
 
     /// Return a random emitter
     const Emitter *getRandomEmitter(float rnd) const
@@ -169,12 +178,19 @@ public:
 
     virtual EClassType getClassType() const override { return EScene; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Scene"; }
+    virtual const char *getImGuiName() const override
+    {
+        return "Scene";
+    }
     virtual bool getImGuiNodes() override;
 #endif
 private:
     std::vector<Shape *> m_shapes;
     Integrator *m_integrator = nullptr;
+    Integrator *m_previewIntegrator = nullptr;
+
+    bool m_preview_mode = false;
+
     Sampler *m_sampler = nullptr;
     Camera *m_camera = nullptr;
     BVH *m_bvh = nullptr;

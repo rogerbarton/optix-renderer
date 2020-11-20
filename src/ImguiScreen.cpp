@@ -4,6 +4,7 @@
 #include <nori/parser.h>
 #include <nori/bitmap.h>
 #include <nori/scene.h>
+#include <nori/sampler.h>
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
@@ -226,6 +227,7 @@ void ImguiScreen::render()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
 				 0, GL_RGBA, GL_FLOAT, (uint8_t *)m_block.data() + (borderSize * m_block.cols() + borderSize) * sizeof(Color4f));
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
 	m_block.unlock();
 
 	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
@@ -327,8 +329,27 @@ void ImguiScreen::draw()
 			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
 				m_renderThread.rerenderScene(renderingFilename);
 
-			if (ImGui::Button("Reset Camera"))
+			if (m_renderThread.m_scene)
 			{
+				if (ImGui::Button((currentLayer == RENDER) ? "Change to Preview" : "Change to Render View"))
+				{
+					currentLayer = (currentLayer == RENDER) ? PREVIEW : RENDER;
+
+					if (currentLayer == PREVIEW)
+					{
+						// save sample count
+						oldSampleCount = m_renderThread.m_scene->getSampler()->getSampleCount();
+						m_renderThread.m_scene->getSampler()->setSampleCount(1);
+						m_renderThread.m_scene->setPreviewMode(true);
+						needsRerender = true;
+					}
+					else
+					{
+						// copy back old integrator
+						m_renderThread.m_scene->setPreviewMode(false);
+						m_renderThread.m_scene->getSampler()->setSampleCount(oldSampleCount);
+					}
+				}
 			}
 
 			ImGui::NewLine();
@@ -342,7 +363,7 @@ void ImguiScreen::draw()
 			ImGui::Text("Zoom Level");
 			ImGui::SameLine();
 			ImGui::PushID(2);
-			ImGui::SliderFloat("##value", &imageZoom, 1.f/30.f, 30.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
+			ImGui::SliderFloat("##value", &imageZoom, 1.f / 30.f, 30.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
 			ImGui::PopID();
 
 			ImGui::NewLine();
@@ -357,7 +378,7 @@ void ImguiScreen::draw()
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::BeginChild(42);
-				drawSceneTree();
+				needsRerender |= drawSceneTree();
 				ImGui::EndChild();
 			}
 		}
@@ -505,7 +526,7 @@ void ImguiScreen::keyPressed(int key, int mods)
 		uiShowSceneWindow = !uiShowSceneWindow;
 	else if (key == GLFW_KEY_ESCAPE)
 		m_renderThread.stopRendering();
-	else if(key == GLFW_KEY_F5)
+	else if (key == GLFW_KEY_F5)
 		m_renderThread.rerenderScene(renderingFilename);
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
 	{
@@ -571,7 +592,7 @@ void ImguiScreen::centerImage(bool autoExpandWindow)
 void ImguiScreen::scrollWheel(double xoffset, double yoffset)
 {
 	float scale = 1.f - 0.05f * yoffset;
-	setZoom(clamp(imageZoom / scale, 1.f/30.f, 30.f));
+	setZoom(clamp(imageZoom / scale, 1.f / 30.f, 30.f));
 }
 
 void ImguiScreen::initGl()
@@ -615,6 +636,8 @@ bool ImguiScreen::drawSceneTree()
 
 	bool renderThreadBusy = m_renderThread.isBusy();
 
+	bool ret = false;
+
 	if (renderThreadBusy)
 	{
 		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -637,7 +660,7 @@ bool ImguiScreen::drawSceneTree()
 	ImGui::NextColumn();
 
 	// Start recursion
-	bool ret = m_renderThread.m_scene->getImGuiNodes();
+	ret |= m_renderThread.m_scene->getImGuiNodes();
 
 	// end columns
 	ImGui::Columns(1);
@@ -649,6 +672,14 @@ bool ImguiScreen::drawSceneTree()
 	{
 		ImGui::PopItemFlag();
 		ImGui::PopStyleVar();
+	}
+	else
+	{
+		if (currentLayer == PREVIEW && needsRerender)
+		{
+			m_renderThread.rerenderScene(renderingFilename);
+			needsRerender = false;
+		}
 	}
 
 	return ret;

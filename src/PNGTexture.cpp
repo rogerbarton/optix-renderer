@@ -157,14 +157,16 @@ public:
         ImGui::NextColumn();
         ImGui::PopID();
 
+		eulerAngles *= 180.f * INV_PI;
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
         ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.1, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.5, -360, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+		eulerAngles *= M_PI / 180.f;
 
 		return ret;
 	}

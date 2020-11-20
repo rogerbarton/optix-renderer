@@ -24,12 +24,14 @@
 #include <nori/emitter.h>
 #include <nori/volume.h>
 #include <nori/bsdf.h>
+#include <nori/normals.h>
 
 NORI_NAMESPACE_BEGIN
 
 Scene::Scene(const PropertyList &)
 {
     m_bvh = new BVH();
+    m_previewIntegrator = new NormalIntegrator(PropertyList());
 }
 
 Scene::~Scene()
@@ -46,6 +48,8 @@ Scene::~Scene()
         delete m_envmap;
     if (m_denoiser)
         delete m_denoiser;
+
+    delete m_previewIntegrator;
 }
 
 void Scene::activate()

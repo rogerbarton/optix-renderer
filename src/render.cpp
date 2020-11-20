@@ -121,7 +121,8 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
 
 void RenderThread::rerenderScene(const std::string &filename)
 {
-	if(isBusy() && m_scene) {
+	if (isBusy() && m_scene)
+	{
 		return;
 	}
 	// use the old scene to rerender
@@ -373,6 +374,12 @@ void RenderThread::renderThreadMain(
 	}
 
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
+
+	if(m_scene->isPreviewMode()) {
+		// stop the rendering here, don't save
+		m_render_status = 3;
+		return;
+	}
 
 	/* Now turn the rendered image block into
 	   a properly normalized bitmap */

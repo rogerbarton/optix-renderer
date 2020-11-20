@@ -43,7 +43,7 @@ bool Transform::getImGuiNodes()
     ImGui::TreeNodeEx("eulerAngles", flags, "Euler Angles");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragVector3f("##value", &eulerAngles);
+    ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.5f, -360, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::PopID();
     ImGui::NextColumn();
 
