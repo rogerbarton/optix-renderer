@@ -93,7 +93,7 @@ public:
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
+        ImGui::PushID(2);
         ImGui::TreeNodeEx("Sigma D", flags, "Sigma D");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
@@ -102,7 +102,7 @@ public:
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
+        ImGui::PushID(3);
         ImGui::TreeNodeEx("Inner Range", flags, "Inner Range");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
