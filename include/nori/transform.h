@@ -91,6 +91,11 @@ public:
 
     /// Return a string representation
     std::string toString() const;
+
+#ifndef NORI_USE_NANOGUI
+    void getImGuiNodes();
+#endif
+
 private:
     Eigen::Matrix4f m_transform;
     Eigen::Matrix4f m_inverse;

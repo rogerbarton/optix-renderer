@@ -10,9 +10,9 @@ namespace ImGui
         float exponent = col_val.maxCoeff();
         col_val /= col_val.maxCoeff();
 
-        bool ret = true;
-        
-        ImGui::PushID(42); 
+        bool ret = false;
+
+        ImGui::PushID(42);
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.5f);
         ret |= ImGui::ColorPicker3(label, col_val.data(), ImGuiColorEditFlags_DisplayRGB);
         ImGui::PopItemWidth();

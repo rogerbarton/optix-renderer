@@ -177,6 +177,19 @@ public:
                                    ImGuiTreeNodeFlags_Bullet;
 
         ImGui::AlignTextToFramePadding();
+        ImGui::PushID(0);
+        bool node_open = ImGui::TreeNode("Transform");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::Text("To World");
+        ImGui::NextColumn();
+        if(node_open) {
+            m_cameraToWorld.getImGuiNodes();
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+
+        ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
         ImGui::TreeNodeEx("fov", flags, "Field Of View");
         ImGui::NextColumn();
