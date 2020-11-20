@@ -139,7 +139,7 @@ private:
 	/**
 	 * Draws the editable scene tree with imgui
 	 */
-	void drawSceneTree();
+	bool drawSceneTree();
 };
 
 NORI_NAMESPACE_END

@@ -22,9 +22,11 @@
 
 NORI_NAMESPACE_BEGIN
 
-class Microfacet : public BSDF {
+class Microfacet : public BSDF
+{
 public:
-  Microfacet(const PropertyList &propList) {
+  Microfacet(const PropertyList &propList)
+  {
     /* RMS surface roughness */
     m_alpha = propList.getFloat("alpha", 0.1f);
 
@@ -49,7 +51,8 @@ public:
   }
 
   /// Evaluate the microfacet normal distribution D
-  float evalBeckmann(const Normal3f &m) const {
+  float evalBeckmann(const Normal3f &m) const
+  {
     float temp = Frame::tanTheta(m) / m_alpha, ct = Frame::cosTheta(m),
           ct2 = ct * ct;
 
@@ -57,7 +60,8 @@ public:
   }
 
   /// Evaluate Smith's shadowing-masking function G1
-  float smithBeckmannG1(const Vector3f &v, const Normal3f &m) const {
+  float smithBeckmannG1(const Vector3f &v, const Normal3f &m) const
+  {
     float tanTheta = Frame::tanTheta(v);
 
     /* Perpendicular incidence -- no shadowing/masking */
@@ -79,7 +83,8 @@ public:
   }
 
   /// Evaluate the BRDF for the given pair of directions
-  virtual Color3f eval(const BSDFQueryRecord &bRec) const override {
+  virtual Color3f eval(const BSDFQueryRecord &bRec) const override
+  {
     if (bRec.wo.z() < 0.f)
       return Color3f(0.f);
     // calculate w_h
@@ -89,12 +94,13 @@ public:
         m_ks * evalBeckmann(wh) * fresnel(wh.dot(bRec.wi), m_extIOR, m_intIOR) *
         smithBeckmannG1(bRec.wi, wh) * smithBeckmannG1(bRec.wo, wh);
     float numerator = 4.f * bRec.wi.z() * bRec.wo.z();
-    
+
     return m_kd * INV_PI + denominator / numerator;
   }
 
   /// Evaluate the sampling density of \ref sample() wrt. solid angles
-  virtual float pdf(const BSDFQueryRecord &bRec) const override {
+  virtual float pdf(const BSDFQueryRecord &bRec) const override
+  {
     // check if below surface
     if (bRec.wo.z() <= 0)
       return 0.f;
@@ -108,13 +114,15 @@ public:
 
   /// Sample the BRDF
   virtual Color3f sample(BSDFQueryRecord &bRec,
-                         const Point2f &_sample) const override {
+                         const Point2f &_sample) const override
+  {
     if (bRec.wi.z() < 0)
       return Color3f(0.f);
 
     Point2f sample_ = _sample;
 
-    if (sample_.y() < m_ks) {
+    if (sample_.y() < m_ks)
+    {
       sample_.y() /= m_ks;
       // randomly generate wh with PDF prop to D
       Vector3f wh = Warp::squareToBeckmann(sample_, m_alpha);
@@ -123,7 +131,9 @@ public:
       bRec.wo = wo;
       return bRec.wo.z() <= 0.f ? Color3f(0.f)
                                 : eval(bRec) / pdf(bRec) * bRec.wo.z();
-    } else {
+    }
+    else
+    {
       sample_.y() = (sample_.y() - m_ks) / (1.f - m_ks);
       bRec.wo = Warp::squareToCosineHemisphere(sample_);
       return bRec.wo.z() <= 0.f ? Color3f(0.f)
@@ -131,7 +141,8 @@ public:
     }
   }
 
-  virtual std::string toString() const override {
+  virtual std::string toString() const override
+  {
     return tfm::format("Microfacet[\n"
                        "  alpha = %f,\n"
                        "  intIOR = %f,\n"
@@ -142,51 +153,57 @@ public:
                        m_alpha, m_intIOR, m_extIOR, m_kd.toString(), m_ks);
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char* getImGuiName() const override { return "Microfacet"; }
-    virtual void getImGuiNodes() override {
+  virtual const char *getImGuiName() const override
+  {
+    return "Microfacet";
+  }
+  virtual bool getImGuiNodes() override
+  {
 
-      BSDF::getImGuiNodes();
+    bool ret = BSDF::getImGuiNodes();
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                               ImGuiTreeNodeFlags_Bullet;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("alpha", flags, "Alpha");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_alpha, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushID(1);
+    ImGui::TreeNodeEx("alpha", flags, "Alpha");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ret |= ImGui::DragFloat("##value", &m_alpha, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
+    ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushID(2);
+    ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ret |= ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
+    ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(3);
-        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushID(3);
+    ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ret |= ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::NextColumn();
+    ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(3);
-        ImGui::TreeNodeEx("Albedo of Diffuse Base", flags, "Albedo of Diffuse Base");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::ColorPicker("##value", &m_kd);
-        ImGui::NextColumn();
-        ImGui::PopID();
-    }
-  #endif
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushID(3);
+    ImGui::TreeNodeEx("Albedo of Diffuse Base", flags, "Albedo of Diffuse Base");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    ret |= ImGui::ColorPicker("##value", &m_kd);
+    ImGui::NextColumn();
+    ImGui::PopID();
+    
+    return ret;
+  }
+#endif
 
 private:
   float m_alpha;

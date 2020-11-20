@@ -72,7 +72,7 @@ public:
     virtual EClassType getClassType() const override { return ECamera; }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Camera Base"; }
-    virtual void getImGuiNodes() override;
+    virtual bool getImGuiNodes() override;
 #endif
 protected:
     Vector2i m_outputSize;

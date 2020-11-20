@@ -58,7 +58,7 @@ public:
 	}
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Texture Base"; }
-    virtual void getImGuiNodes() override {}
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 };
 

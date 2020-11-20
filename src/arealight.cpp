@@ -128,9 +128,9 @@ public:
   }
 #ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Arealight"; }
-  virtual void getImGuiNodes() override
+  virtual bool getImGuiNodes() override
   {
-    Emitter::getImGuiNodes();
+    bool ret = Emitter::getImGuiNodes();
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
 
@@ -140,8 +140,9 @@ public:
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ret |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
+    return ret;
   }
 #endif
 protected:

@@ -27,7 +27,7 @@ public:
 	{
 		return "Volume";
 	}
-	virtual void getImGuiNodes() override
+	virtual bool getImGuiNodes() override
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
 								   ImGuiTreeNodeFlags_Bullet;
@@ -39,6 +39,7 @@ public:
 		ImGui::Text(filename.filename().c_str());
 		ImGui::NextColumn();
 		ImGui::PopID();
+		return false;
 	}
 #endif
 

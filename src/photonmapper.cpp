@@ -256,8 +256,8 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Photonmapper"; }
-    virtual void getImGuiNodes() override {
-        Integrator::getImGuiNodes();
+    virtual bool getImGuiNodes() override {
+        bool ret = Integrator::getImGuiNodes();
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -267,7 +267,7 @@ public:
         ImGui::TreeNodeEx("photonCount", flags, "Photon Count");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT*100, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT*100, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -276,7 +276,7 @@ public:
         ImGui::TreeNodeEx("photonRadius", flags, "Photon Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
     }

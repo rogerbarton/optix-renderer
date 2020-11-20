@@ -113,11 +113,12 @@ public:
 #ifndef NORI_USE_NANOGUI
 
     virtual const char *getImGuiName() const override { return "Mesh"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ImGui::PushID(EMesh);
-        Shape::getImGuiNodes();
+        bool ret = Shape::getImGuiNodes();
         ImGui::PopID();
+        return ret;
     }
 #endif
 protected:

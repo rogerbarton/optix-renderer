@@ -76,9 +76,9 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "SimpleDenoiser"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
-        Denoiser::getImGuiNodes();
+        bool ret = Denoiser::getImGuiNodes();
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -88,7 +88,7 @@ public:
         ImGui::TreeNodeEx("Sigma R", flags, "Sigma R");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &sigma_r, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &sigma_r, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -97,7 +97,7 @@ public:
         ImGui::TreeNodeEx("Sigma D", flags, "Sigma D");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &sigma_d, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &sigma_d, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -106,9 +106,10 @@ public:
         ImGui::TreeNodeEx("Inner Range", flags, "Inner Range");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+        return ret;
     }
 #endif
 

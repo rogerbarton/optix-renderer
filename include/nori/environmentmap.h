@@ -18,7 +18,7 @@ public:
     {
         return "EnvironmentMap Base";
     }
-    virtual void getImGuiNodes() override {}
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 };
 

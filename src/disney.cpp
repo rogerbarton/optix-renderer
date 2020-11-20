@@ -6,14 +6,14 @@
 NORI_NAMESPACE_BEGIN
 
 // this helper macro adds the ImGui code for one of the 10 variables
-#define ImGuiValue(variable, varName)                                                        \
-    ImGui::AlignTextToFramePadding();                                                        \
-    ImGui::TreeNodeEx(varName, flags, varName);                                              \
-    ImGui::NextColumn();                                                                     \
-    ImGui::SetNextItemWidth(-1);                                                             \
-    ImGui::PushID(id++);                                                                     \
-    ImGui::DragFloat("##value", &variable, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
-    ImGui::PopID();                                                                          \
+#define ImGuiValue(variable, varName)                                                               \
+    ImGui::AlignTextToFramePadding();                                                               \
+    ImGui::TreeNodeEx(varName, flags, varName);                                                     \
+    ImGui::NextColumn();                                                                            \
+    ImGui::SetNextItemWidth(-1);                                                                    \
+    ImGui::PushID(id++);                                                                            \
+    ret |= ImGui::DragFloat("##value", &variable, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
+    ImGui::PopID();                                                                                 \
     ImGui::NextColumn();
 
 class Disney : public BSDF
@@ -144,11 +144,14 @@ public:
         return true;
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Disney BSDF"; }
-    virtual void getImGuiNodes() override
+    virtual const char *getImGuiName() const override
     {
-        BSDF::getImGuiNodes();
-        
+        return "Disney BSDF";
+    }
+    virtual bool getImGuiNodes() override
+    {
+        bool ret = BSDF::getImGuiNodes();
+
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
 
@@ -160,8 +163,7 @@ public:
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(id++);
-
-        ImGui::ColorPicker("##value", &baseColor);
+        ret |= ImGui::ColorPicker("##value", &baseColor);
         ImGui::PopID();
         ImGui::NextColumn();
 
@@ -175,6 +177,8 @@ public:
         ImGuiValue(sheenTint, "Sheen Tint");
         ImGuiValue(clearcoat, "Clearcoat");
         ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
+
+        return ret;
     }
 #endif
 private:

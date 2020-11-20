@@ -126,9 +126,9 @@ public:
         return "Adaptive";
     }
 
-    void getImGuiNodes() override
+    bool getImGuiNodes() override
     {
-        Sampler::getImGuiNodes();
+        bool ret = Sampler::getImGuiNodes();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
 
@@ -136,8 +136,9 @@ public:
         ImGui::TreeNodeEx("uniformEvery", flags, "Uniform Every");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
+        return ret;
     }
     #endif
 

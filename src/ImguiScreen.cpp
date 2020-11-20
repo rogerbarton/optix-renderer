@@ -604,13 +604,13 @@ void ImguiScreen::initImGui()
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
 }
 
-void ImguiScreen::drawSceneTree()
+bool ImguiScreen::drawSceneTree()
 {
 	// check if a scene exists
 	if (!m_renderThread.m_scene)
 	{
 		ImGui::Text("No scene loaded...");
-		return;
+		return false;
 	}
 
 	bool renderThreadBusy = m_renderThread.isBusy();
@@ -637,7 +637,7 @@ void ImguiScreen::drawSceneTree()
 	ImGui::NextColumn();
 
 	// Start recursion
-	m_renderThread.m_scene->getImGuiNodes();
+	bool ret = m_renderThread.m_scene->getImGuiNodes();
 
 	// end columns
 	ImGui::Columns(1);
@@ -650,6 +650,8 @@ void ImguiScreen::drawSceneTree()
 		ImGui::PopItemFlag();
 		ImGui::PopStyleVar();
 	}
+
+	return ret;
 }
 
 NORI_NAMESPACE_END

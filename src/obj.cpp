@@ -148,10 +148,10 @@ public:
              << ")" << endl;
     }
 
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ImGui::PushID(EMesh);
-        Shape::getImGuiNodes();
+        bool ret = Shape::getImGuiNodes();
         // get ImGuiNodes for all children and own
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -164,6 +164,8 @@ public:
         ImGui::NextColumn();
 
         ImGui::PopID();
+
+        return ret;
     }
 
 protected:

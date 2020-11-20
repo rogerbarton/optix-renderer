@@ -54,7 +54,7 @@ public:
     virtual EClassType getClassType() const override { return EReconstructionFilter; }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Reconstruction Filter"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ImGui::PushID(EReconstructionFilter);
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -63,9 +63,10 @@ public:
         ImGui::TreeNodeEx("Shape", flags, "Shape");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        bool ret = ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+        return ret;
     }
     #endif
 

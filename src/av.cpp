@@ -50,9 +50,9 @@ public:
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "AV"; }
 
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
-        Integrator::getImGuiNodes();
+        bool ret = Integrator::getImGuiNodes();
         
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
@@ -62,7 +62,7 @@ public:
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(1);
-        ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
         ImGui::NextColumn();
     }

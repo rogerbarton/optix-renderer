@@ -170,7 +170,7 @@ public:
     virtual EClassType getClassType() const override { return EScene; }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Scene"; }
-    virtual void getImGuiNodes() override;
+    virtual bool getImGuiNodes() override;
 #endif
 private:
     std::vector<Shape *> m_shapes;

@@ -171,8 +171,8 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Perspective"; }
-    virtual void getImGuiNodes() override {
-        Camera::getImGuiNodes();
+    virtual bool getImGuiNodes() override {
+        bool ret = Camera::getImGuiNodes();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
 
@@ -184,7 +184,7 @@ public:
         ImGui::Text("To World");
         ImGui::NextColumn();
         if(node_open) {
-            m_cameraToWorld.getImGuiNodes();
+            ret |= m_cameraToWorld.getImGuiNodes();
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -194,7 +194,7 @@ public:
         ImGui::TreeNodeEx("fov", flags, "Field Of View");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -203,7 +203,7 @@ public:
         ImGui::TreeNodeEx("nearCLip", flags, "Near Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -212,7 +212,7 @@ public:
         ImGui::TreeNodeEx("fov", flags, "Far Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -221,7 +221,7 @@ public:
         ImGui::TreeNodeEx("lensRadius", flags, "Lens Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -230,9 +230,11 @@ public:
         ImGui::TreeNodeEx("focalDistance", flags, "Focal Distance");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+
+        return ret;
     }
 #endif
 private:

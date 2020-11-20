@@ -190,8 +190,9 @@ std::string Scene::toString() const
     );
 }
 #ifndef NORI_USE_NANOGUI
-void Scene::getImGuiNodes()
+bool Scene::getImGuiNodes()
 {
+    bool ret = false;
     ImGui::PushID(EScene);
     if (m_camera)
     {
@@ -202,7 +203,7 @@ void Scene::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_camera)
         {
-            m_camera->getImGuiNodes();
+            ret |= m_camera->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -216,7 +217,7 @@ void Scene::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_integrator)
         {
-            m_integrator->getImGuiNodes();
+            ret |= m_integrator->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -230,7 +231,7 @@ void Scene::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_sampler)
         {
-            m_sampler->getImGuiNodes();
+            ret |= m_sampler->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -244,7 +245,7 @@ void Scene::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_envmap)
         {
-            m_envmap->getImGuiNodes();
+            ret |= m_envmap->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -258,7 +259,7 @@ void Scene::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_denoiser)
         {
-            m_denoiser->getImGuiNodes();
+            ret |= m_denoiser->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -284,7 +285,7 @@ void Scene::getImGuiNodes()
 
             if (node_open_shape)
             {
-                m_shapes[i]->getImGuiNodes();
+                ret |= m_shapes[i]->getImGuiNodes();
 
                 ImGui::TreePop();
             }
@@ -316,7 +317,7 @@ void Scene::getImGuiNodes()
 
             if (node_open_emitter)
             {
-                m_emitters[i]->getImGuiNodes();
+                ret |= m_emitters[i]->getImGuiNodes();
 
                 ImGui::TreePop();
             }
@@ -328,6 +329,8 @@ void Scene::getImGuiNodes()
     }
 
     ImGui::PopID();
+
+    return ret;
 }
 #endif
 

@@ -50,16 +50,16 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Gaussian Filter"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
-        ReconstructionFilter::getImGuiNodes();
+        bool ret = ReconstructionFilter::getImGuiNodes();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("Stddev", flags, "Standard Deviation");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
     }
 #endif
@@ -112,7 +112,7 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Mitchell-Netravali Filter"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ReconstructionFilter::getImGuiNodes();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -160,7 +160,7 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Tent Filter"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ReconstructionFilter::getImGuiNodes();
     }
@@ -187,7 +187,7 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Box Filter"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         ReconstructionFilter::getImGuiNodes();
     }

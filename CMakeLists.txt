@@ -123,6 +123,7 @@ add_executable(nori
   src/denoiser.cpp
   src/adaptive.cpp
   src/camera.cpp
+  src/transform.cpp
 )
 
 if(NORI_USE_VOLUMES)

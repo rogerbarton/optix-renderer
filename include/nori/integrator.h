@@ -61,7 +61,7 @@ public:
     virtual EClassType getClassType() const override { return EIntegrator; }
 #ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Integrator Base"; }
-    virtual void getImGuiNodes() override {}
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 };
 

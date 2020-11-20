@@ -102,9 +102,9 @@ public:
         return "Independent";
     }
 
-    void getImGuiNodes() override
+    bool getImGuiNodes() override
     {
-        Sampler::getImGuiNodes();
+        return Sampler::getImGuiNodes();
     }
 #endif
 protected:

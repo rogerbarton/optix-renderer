@@ -93,7 +93,7 @@ public:
     std::string toString() const;
 
 #ifndef NORI_USE_NANOGUI
-    void getImGuiNodes();
+    bool getImGuiNodes();
 #endif
 
 private:

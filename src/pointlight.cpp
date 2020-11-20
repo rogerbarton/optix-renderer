@@ -57,9 +57,9 @@ public:
   }
 #ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Pointlight"; }
-  virtual void getImGuiNodes() override
+  virtual bool getImGuiNodes() override
   {
-    Emitter::getImGuiNodes();
+    bool ret = Emitter::getImGuiNodes();
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
 
@@ -67,7 +67,7 @@ public:
     ImGui::TreeNodeEx("power", flags, "Power");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ret |= ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
   }
 #endif

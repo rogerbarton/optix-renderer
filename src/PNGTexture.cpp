@@ -112,11 +112,11 @@ public:
 
 #ifndef NORI_USE_NANOGUI
 	virtual const char* getImGuiName() const override { return "PNG Texture"; }
-    virtual void getImGuiNodes() override {
+    virtual bool getImGuiNodes() override {
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
 								   ImGuiTreeNodeFlags_Bullet;
 
-		Texture::getImGuiNodes();
+		bool ret = Texture::getImGuiNodes();
 
 		ImGui::AlignTextToFramePadding();
 		ImGui::TreeNodeEx("fileName", flags, "Filename");
@@ -144,7 +144,7 @@ public:
         ImGui::TreeNodeEx("scale V", flags, "Scale V");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -153,7 +153,7 @@ public:
         ImGui::TreeNodeEx("scale U", flags, "Scale U");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -162,9 +162,11 @@ public:
         ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragVector3f("##value", &eulerAngles, 0.1, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.1, 0, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+
+		return ret;
 	}
 #endif
 

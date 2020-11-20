@@ -209,7 +209,7 @@ public:
     virtual EClassType getClassType() const override { return ETest; }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "TTest"; }
-    virtual void getImGuiNodes() override {}
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 private:
     std::vector<BSDF *> m_bsdfs;

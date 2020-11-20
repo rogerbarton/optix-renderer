@@ -3,16 +3,16 @@
 
 NORI_NAMESPACE_BEGIN
 #ifndef NORI_USE_NANOGUI
-void Camera::getImGuiNodes()
+bool Camera::getImGuiNodes()
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
-
+    bool ret = false;
     ImGui::AlignTextToFramePadding();
     ImGui::TreeNodeEx("outputSize", flags, "Output Size");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragVector2i("##value", &m_outputSize, 1, 0, SLIDER_MAX_INT, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ret |= ImGui::DragVector2i("##value", &m_outputSize, 1, 0, SLIDER_MAX_INT, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
 
     bool node_open = ImGui::TreeNode("Reconstruction Filter");
@@ -24,9 +24,11 @@ void Camera::getImGuiNodes()
 
     if (node_open)
     {
-        m_rfilter->getImGuiNodes();
+        ret |= m_rfilter->getImGuiNodes();
         ImGui::TreePop();
     }
+
+    return ret;
 }
 #endif
 

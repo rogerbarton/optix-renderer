@@ -131,20 +131,21 @@ public:
   Point3f getPosition() const { return m_position; }
 #ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Emitter Base"; }
-  virtual void getImGuiNodes() override
+  virtual bool getImGuiNodes() override
   {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
-
+    bool ret = false;
     ImGui::PushID(EEmitter);
 
     ImGui::AlignTextToFramePadding();
     ImGui::TreeNodeEx("Position", flags, "Position");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::DragPoint3f("##value", &m_position, 0.1f);
+    ret |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
     ImGui::NextColumn();
     ImGui::PopID();
+    return ret;
   }
   #endif
 

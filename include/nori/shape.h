@@ -155,7 +155,7 @@ public:
 
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Shape Base"; }
-    virtual void getImGuiNodes() override;
+    virtual bool getImGuiNodes() override;
 #endif
 
 protected:

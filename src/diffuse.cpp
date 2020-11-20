@@ -145,7 +145,7 @@ public:
     virtual EClassType getClassType() const override { return EBSDF; }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Diffuse"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         bool node_open = ImGui::TreeNode("Texture");
         ImGui::NextColumn();
@@ -153,11 +153,13 @@ public:
 
         ImGui::Text(m_albedo->getImGuiName());
         ImGui::NextColumn();
+        bool ret = false;
         if (node_open)
         {
-            m_albedo->getImGuiNodes();
+            ret |= m_albedo->getImGuiNodes();
             ImGui::TreePop();
         }
+        return ret;
     }
 #endif
 

@@ -50,7 +50,7 @@ public:
   }
 #ifndef NORI_USE_NANOGUI
   virtual const char *getImGuiName() const override { return "Checkerboard"; }
-  virtual void getImGuiNodes() override {}
+  virtual bool getImGuiNodes() override { return false; }
 #endif
 protected:
   T m_value1;
@@ -105,17 +105,17 @@ std::string Checkerboard<Color3f>::toString() const
 }
 #ifndef NORI_USE_NANOGUI
 template <>
-void Checkerboard<float>::getImGuiNodes()
+bool Checkerboard<float>::getImGuiNodes()
 {
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                              ImGuiTreeNodeFlags_Bullet;
-
+  bool ret = false;
   ImGui::PushID(1);
   ImGui::AlignTextToFramePadding();
   ImGui::TreeNodeEx("Float 1", flags, "Float 1");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragFloat("##value", &m_value1, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragFloat("##value", &m_value1, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
   ImGui::PopID();
 
@@ -124,7 +124,7 @@ void Checkerboard<float>::getImGuiNodes()
   ImGui::TreeNodeEx("Float 2", flags, "Float 2");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragFloat("##value", &m_value2, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragFloat("##value", &m_value2, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
   ImGui::PopID();
 
@@ -132,22 +132,23 @@ void Checkerboard<float>::getImGuiNodes()
   ImGui::TreeNodeEx("Delta", flags, "Delta");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
 
   ImGui::AlignTextToFramePadding();
   ImGui::TreeNodeEx("Scale", flags, "Scale");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
+  return ret;
 }
 
 template <>
-void Checkerboard<Color3f>::getImGuiNodes()
+bool Checkerboard<Color3f>::getImGuiNodes()
 {
 
-  Texture::getImGuiNodes();
+  bool ret = Texture::getImGuiNodes();
 
   ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                              ImGuiTreeNodeFlags_Bullet;
@@ -157,7 +158,7 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::TreeNodeEx("Color 1", flags, "Color 1");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::ColorPicker("##value", &m_value1);
+  ret |= ImGui::ColorPicker("##value", &m_value1);
   ImGui::NextColumn();
   ImGui::PopID();
 
@@ -166,7 +167,7 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::TreeNodeEx("Color 2", flags, "Color 2");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::ColorPicker("##value", &m_value2);
+  ret |= ImGui::ColorPicker("##value", &m_value2);
   ImGui::NextColumn();
   ImGui::PopID();
 
@@ -174,15 +175,16 @@ void Checkerboard<Color3f>::getImGuiNodes()
   ImGui::TreeNodeEx("Delta", flags, "Delta");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragPoint2f("##value", &m_delta, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
 
   ImGui::AlignTextToFramePadding();
   ImGui::TreeNodeEx("Scale", flags, "Scale");
   ImGui::NextColumn();
   ImGui::SetNextItemWidth(-1);
-  ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
+  ret |= ImGui::DragVector2f("##value", &m_scale, 0.02, 0, 5, "%f%", ImGuiSliderFlags_AlwaysClamp);
   ImGui::NextColumn();
+  return ret;
 }
 #endif
 

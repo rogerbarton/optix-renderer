@@ -112,55 +112,28 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Sphere"; }
-    virtual void getImGuiNodes() override
+    virtual bool getImGuiNodes() override
     {
         // get ImGuiNodes for all children and own
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                    ImGuiTreeNodeFlags_Bullet;
-
+        bool ret = Shape::getImGuiNodes();
+        
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("center", flags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragPoint3f("##value", &m_position);
+        ret |= ImGui::DragPoint3f("##value", &m_position);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("radius", flags, "Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_radius, 0.1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_radius, 0.1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
-        if (m_bsdf)
-        {
-            bool node_open_bsdf = ImGui::TreeNode("BSDF");
-            ImGui::NextColumn();
-            ImGui::AlignTextToFramePadding();
-
-            ImGui::Text(m_bsdf->getImGuiName());
-            ImGui::NextColumn();
-            if (node_open_bsdf)
-            {
-                m_bsdf->getImGuiNodes();
-                ImGui::TreePop();
-            }
-        }
-
-        if (m_emitter)
-        {
-            bool node_open_emitter = ImGui::TreeNode("Emitter");
-            ImGui::NextColumn();
-            ImGui::AlignTextToFramePadding();
-
-            ImGui::Text(m_emitter->getImGuiName());
-            ImGui::NextColumn();
-            if (node_open_emitter)
-            {
-                m_emitter->getImGuiNodes();
-                ImGui::TreePop();
-            }
-        }
+        return ret;
     }
     #endif
 

@@ -34,7 +34,7 @@ public:
     }
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Constant"; }
-    virtual void getImGuiNodes() override {}
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 protected:
     T m_value;
@@ -68,9 +68,9 @@ std::string ConstantTexture<Color3f>::toString() const
 }
 #ifndef NORI_USE_NANOGUI
 template <>
-void ConstantTexture<float>::getImGuiNodes()
+bool ConstantTexture<float>::getImGuiNodes()
 {
-    Texture::getImGuiNodes();
+    bool ret = Texture::getImGuiNodes();
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
 
@@ -82,14 +82,15 @@ void ConstantTexture<float>::getImGuiNodes()
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ImGui::DragFloat("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+    ret |= ImGui::DragFloat("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
+    return ret;
 }
 
 template <>
-void ConstantTexture<Color3f>::getImGuiNodes()
+bool ConstantTexture<Color3f>::getImGuiNodes()
 {
-    Texture::getImGuiNodes();
+    bool ret = Texture::getImGuiNodes();
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
                                ImGuiTreeNodeFlags_Bullet;
 
@@ -99,8 +100,9 @@ void ConstantTexture<Color3f>::getImGuiNodes()
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ImGui::ColorPicker("##value", &m_value);
+    ret |= ImGui::ColorPicker("##value", &m_value);
     ImGui::NextColumn();
+    return ret;
 }
 #endif
 
