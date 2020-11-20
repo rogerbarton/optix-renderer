@@ -124,6 +124,7 @@ add_executable(nori
   src/adaptive.cpp
   src/camera.cpp
   src/transform.cpp
+  src/PreviewIntegrator.cpp
 )
 
 if(NORI_USE_VOLUMES)

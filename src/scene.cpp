@@ -24,14 +24,14 @@
 #include <nori/emitter.h>
 #include <nori/volume.h>
 #include <nori/bsdf.h>
-#include <nori/normals.h>
+#include <nori/PreviewIntegrator.h>
 
 NORI_NAMESPACE_BEGIN
 
 Scene::Scene(const PropertyList &)
 {
     m_bvh = new BVH();
-    m_previewIntegrator = new NormalIntegrator(PropertyList());
+    m_previewIntegrator = new PreviewIntegrator(PropertyList());
 }
 
 Scene::~Scene()
