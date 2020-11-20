@@ -342,9 +342,8 @@ void ImguiScreen::draw()
 			ImGui::Text("Zoom Level");
 			ImGui::SameLine();
 			ImGui::PushID(2);
-			ImGui::SliderFloat("##value", &imageZoom, 1.f/30.f, 30.f, "%.3f", 0.5f);
+			ImGui::SliderFloat("##value", &imageZoom, 1.f/30.f, 30.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
 			ImGui::PopID();
-
 
 			ImGui::NewLine();
 
