@@ -56,32 +56,54 @@
 
             <h2>Our features</h2>
             <h3>Roger Barton (17-948-324)</h3>
-            <ul>
-                <li>Blender (5)</li>
-                <li>Depth of Field (5)</li>
-                <li>Bump Mapping or Normal Mapping (5)</li>
-                <li>Emissive Participating Media (10)</li>
-                <li>Heterogenous Participating Media (30)</li>
-                <li>Anisotropic Phase Function (e.g. Henyey-Greenstein) (5)</li>
-            </ul>
-            
+            <h4>Blender (5)</h4>
+            <p>TODO</p>
+            <h4>Depth of Field (5)</h4>
+            <p>TODO</p>
+            <h4>Anisotropic Phase Function (e.g. Henyey-Greenstein) (5)</h4>
+            <p>TODO</p>
+            <h4>Bump Mapping or Normal Mapping (5)</h4>
+            <p>TODO</p>
+            <h4>Emissive Participating Media (10)</h4>
+            <p>TODO</p>
+            <h4>Heterogenous Participating Media (30)</h4>
+            <p>TODO</p>
+
             <h3>Matthias Busenhart (17-918-160)</h3>
-            <ul>
-                <li>Images as Textures (5)</li>
-                <li>Simple Extra Emitters (5)</li>
-                <li>Simple Denoising (10)</li>
-                <li>Adaptive Sampling (10)</li>
-                <li>Disney BSDF (15)</li>
-                <li>Environment Map Emitter (15)</li>
-            </ul>
+            <h4>Images as Textures (5)</h4>
+            <p>This can be easy verified. Images should be mappable to objects using the uv coordinates.</p>
+            <p>For example on spheres, images should be "turnable", meaning an arbitrary rotation should be possible.
+            </p>
+            <h4>Simple Extra Emitters (5)</h4>
+            <p>I plan to add the following emitter: spotlight</p>
+            <p>Validation is done by rendering images as already seen in project 3.</p>
+            <h4>Simple Denoising (10)</h4>
+            <p>Denoising Variation is done by a comparison (side by side) of a denoised image an the original image.</p>
+            <h4>Adaptive Sampling (10)</h4>
+            <p>Validation is done by visual inspection. The rendered image should look correct and in addition a
+                variance plot can be shown.</p>
+            <h4>Disney BSDF (15)</h4>
+            <p>Validation is done by comparing our implementation with the image found on <a
+                    href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">this</a>
+                presentation (slide 3).</p>
+            <h4>Environment Map Emitter (15)</h4>
+            <p>This feature is easy to verify, since it is clear by a glance if the environment map works. Possibly the
+                same scene from different angles will be done in order to show that for example an image as an envmap
+                will turn with the scene.</p>
 
             <h3>Comments on some Features</h3>
-            <p>We like to use Blender to model the fluid splashing out of the bottle. This will be exported as a normal triangle mesh.</p>
-            <p>We like to add a smoke, which comes out from the bottle (which appears if you open a bottle under pressure). This will be done using the OpenVDB format, which blender can produce for us.</p>
+            <p>We like to use Blender to model the fluid splashing out of the bottle. This will be exported as a normal
+                triangle mesh.</p>
+            <p>We like to add a smoke, which comes out from the bottle (which appears if you open a bottle under
+                pressure). This will be done using the OpenVDB format, which blender can produce for us.</p>
             <p>The candle wax will be melted and modeled as coloured glass (dielectric) to avoid a BSSDF.</p>
 
             <h3>Sources</h3>
-            <p>The images are from <a href="https://www.alamy.de/stockfoto-nahaufnahme-der-explosion-der-flasche-champagner-korken-31634118.html">Alamy</a> and <a href="https://www.shutterstock.com/video/clip-7870795-many-small-flaming-candles-on-black-table">Shutterstock</a>.</p>
+            <p>The images are from <a
+                    href="https://www.alamy.de/stockfoto-nahaufnahme-der-explosion-der-flasche-champagner-korken-31634118.html">Alamy</a>
+                and <a
+                    href="https://www.shutterstock.com/video/clip-7870795-many-small-flaming-candles-on-black-table">Shutterstock</a>.
+            </p>
         </div>
     </div>
 
