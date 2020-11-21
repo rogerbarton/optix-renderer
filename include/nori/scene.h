@@ -34,185 +34,187 @@ NORI_NAMESPACE_BEGIN
  * coordinating rendering jobs. It also provides useful query routines that
  * are mostly used by the \ref Integrator implementations.
  */
-class Scene : public NoriObject
-{
-	enum class ESceneUpdateFlags : unsigned int{
-		Initialize = 0,
-		RebuildBVH = 1,
-		All = static_cast<unsigned int>(-1)
-	};
+	class Scene : public NoriObject
+	{
+		enum class ESceneUpdateFlags : unsigned int
+		{
+			Initialize = 0,
+			RebuildBVH = 1,
+			All        = static_cast<unsigned int>(-1)
+		};
 
-public:
-    /// Construct a new scene object
-    Scene(const PropertyList &);
+	public:
+		/// Construct a new scene object
+		Scene(const PropertyList &);
 
-    /// Release all memory
-    virtual ~Scene();
+		/// Release all memory
+		virtual ~Scene();
 
-    /// Return a pointer to the scene's kd-tree
-    const BVH *getBVH() const { return m_bvh; }
+		/// Return a pointer to the scene's kd-tree
+		const BVH *getBVH() const { return m_bvh; }
 
-    /// Return a pointer to the scene's integrator
-    const Integrator *getIntegrator() const
-    {
-        if (m_preview_mode)
-            return m_previewIntegrator;
-        else
-            return m_integrator;
-    }
+		/// Return a pointer to the scene's integrator
+		const Integrator *getIntegrator() const
+		{
+			if (m_preview_mode)
+				return m_previewIntegrator;
+			else
+				return m_integrator;
+		}
 
-    /// Return a pointer to the scene's integrator
-    Integrator *getIntegrator() { return m_integrator; }
+		/// Return a pointer to the scene's integrator
+		Integrator *getIntegrator() { return m_integrator; }
 
-    /// Return a pointer to the scene's camera
-    const Camera *getCamera() const { return m_camera; }
+		/// Return a pointer to the scene's camera
+		const Camera *getCamera() const { return m_camera; }
 
-    /// Return a pointer to the scene's sample generator (const version)
-    const Sampler *getSampler() const { return m_sampler; }
+		/// Return a pointer to the scene's sample generator (const version)
+		const Sampler *getSampler() const { return m_sampler; }
 
-    /// Return a pointer to the scene's sample generator
-    Sampler *getSampler() { return m_sampler; }
+		/// Return a pointer to the scene's sample generator
+		Sampler *getSampler() { return m_sampler; }
 
-    /// Return a reference to an array containing all shapes
-    const std::vector<Shape *> &getShapes() const { return m_shapes; }
+		/// Return a reference to an array containing all shapes
+		const std::vector<Shape *> &getShapes() const { return m_shapes; }
 
-    /// Return a reference to an array containing all lights
-    const std::vector<Emitter *> &getLights() const { return m_emitters; }
+		/// Return a reference to an array containing all lights
+		const std::vector<Emitter *> &getLights() const { return m_emitters; }
 
-    void setPreviewMode(bool previewMode) { m_preview_mode = previewMode; }
-    bool isPreviewMode() const { return m_preview_mode; }
+		void setPreviewMode(bool previewMode) { m_preview_mode = previewMode; }
+		bool isPreviewMode() const { return m_preview_mode; }
 
-    /// Return a random emitter
-    const Emitter *getRandomEmitter(float rnd) const
-    {
-        auto const &n = m_emitters.size();
-        size_t index = std::min(
-            static_cast<size_t>(std::floor(n * rnd)),
-            n - 1);
-        if (index >= m_emitters.size())
-            return nullptr;
-        return m_emitters[index];
-    }
+		/// Return a random emitter
+		const Emitter *getRandomEmitter(float rnd) const
+		{
+			auto const &n    = m_emitters.size();
+			size_t     index = std::min(
+					static_cast<size_t>(std::floor(n * rnd)),
+					n - 1);
+			if (index >= m_emitters.size())
+				return nullptr;
+			return m_emitters[index];
+		}
 #ifdef NORI_USE_VOLUMES
-    const std::vector<Volume *> &getVolumes() const
-    {
-        return m_volumes;
-    }
-    const Volume *getRandomVolume(float rnd) const
-    {
-        auto const &n = m_volumes.size();
-        size_t index = std::min(
-            static_cast<size_t>(std::floor(n * rnd)),
-            n - 1);
-        if (index >= m_volumes.size())
-            return nullptr;
-        return m_volumes[index];
-    }
+		const std::vector<Volume *> &getVolumes() const
+		{
+			return m_volumes;
+		}
+		const Volume *getRandomVolume(float rnd) const
+		{
+			auto const &n    = m_volumes.size();
+			size_t     index = std::min(
+					static_cast<size_t>(std::floor(n * rnd)),
+					n - 1);
+			if (index >= m_volumes.size())
+				return nullptr;
+			return m_volumes[index];
+		}
 #endif
 
-    EnvironmentMap *getEnvMap() const
-    {
-        return m_envmap;
-    }
+		EnvironmentMap *getEnvMap() const
+		{
+			return m_envmap;
+		}
 
-    Denoiser *getDenoiser() const
-    {
-        return m_denoiser;
-    }
+		Denoiser *getDenoiser() const
+		{
+			return m_denoiser;
+		}
 
-    /**
-     * \brief Intersect a ray against all triangles stored in the scene
-     * and return detailed intersection information
-     *
-     * \param ray
-     *    A 3-dimensional ray data structure with minimum/maximum
-     *    extent information
-     *
-     * \param its
-     *    A detailed intersection record, which will be filled by the
-     *    intersection query
-     *
-     * \return \c true if an intersection was found
-     */
-    bool rayIntersect(const Ray3f &ray, Intersection &its) const
-    {
-        return m_bvh->rayIntersect(ray, its, false);
-    }
+		/**
+		 * \brief Intersect a ray against all triangles stored in the scene
+		 * and return detailed intersection information
+		 *
+		 * \param ray
+		 *    A 3-dimensional ray data structure with minimum/maximum
+		 *    extent information
+		 *
+		 * \param its
+		 *    A detailed intersection record, which will be filled by the
+		 *    intersection query
+		 *
+		 * \return \c true if an intersection was found
+		 */
+		bool rayIntersect(const Ray3f &ray, Intersection &its) const
+		{
+			return m_bvh->rayIntersect(ray, its, false);
+		}
 
-    /**
-     * \brief Intersect a ray against all triangles stored in the scene
-     * and \a only determine whether or not there is an intersection.
-     *
-     * This method much faster than the other ray tracing function,
-     * but the performance comes at the cost of not providing any
-     * additional information about the detected intersection
-     * (not even its position).
-     *
-     * \param ray
-     *    A 3-dimensional ray data structure with minimum/maximum
-     *    extent information
-     *
-     * \return \c true if an intersection was found
-     */
-    bool rayIntersect(const Ray3f &ray) const
-    {
-        Intersection its; /* Unused */
-        return m_bvh->rayIntersect(ray, its, true);
-    }
+		/**
+		 * \brief Intersect a ray against all triangles stored in the scene
+		 * and \a only determine whether or not there is an intersection.
+		 *
+		 * This method much faster than the other ray tracing function,
+		 * but the performance comes at the cost of not providing any
+		 * additional information about the detected intersection
+		 * (not even its position).
+		 *
+		 * \param ray
+		 *    A 3-dimensional ray data structure with minimum/maximum
+		 *    extent information
+		 *
+		 * \return \c true if an intersection was found
+		 */
+		bool rayIntersect(const Ray3f &ray) const
+		{
+			Intersection its; /* Unused */
+			return m_bvh->rayIntersect(ray, its, true);
+		}
 
-    /**
-     * \brief Return an axis-aligned box that bounds the scene
-     */
-    const BoundingBox3f &getBoundingBox() const
-    {
-        return m_bvh->getBoundingBox();
-    }
+		/**
+		 * \brief Return an axis-aligned box that bounds the scene
+		 */
+		const BoundingBox3f &getBoundingBox() const
+		{
+			return m_bvh->getBoundingBox();
+		}
 
-    /**
-     * \brief Inherited from \ref NoriObject::initialize()
-     *
-     * Initializes the internal data structures (kd-tree,
-     * emitter sampling data structures, etc.)
-     */
-    virtual void initialize() override;
+		/**
+		 * \brief Inherited from \ref NoriObject::initialize()
+		 *
+		 * Initializes the internal data structures (kd-tree,
+		 * emitter sampling data structures, etc.)
+		 */
+		virtual void initialize() override;
 
-    /// Add a child object to the scene (meshes, integrators etc.)
-    virtual void addChild(NoriObject *obj) override;
+		/// Add a child object to the scene (meshes, integrators etc.)
+		virtual void addChild(NoriObject *obj) override;
 
-    /// Return a string summary of the scene (for debugging purposes)
-    virtual std::string toString() const override;
+		/// Return a string summary of the scene (for debugging purposes)
+		virtual std::string toString() const override;
 
-    virtual EClassType getClassType() const override { return EScene; }
+		virtual EClassType getClassType() const override { return EScene; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override
-    {
-        return "Scene";
-    }
-    virtual bool getImGuiNodes() override;
+		virtual const char *getImGuiName() const override
+		{
+			return "Scene";
+		}
+		virtual bool getImGuiNodes() override;
 #endif
 
-	ESceneUpdateFlags updateFlags = ESceneUpdateFlags::All;
-private:
 
-    std::vector<Shape *> m_shapes;
-    Integrator *m_integrator = nullptr;
-    Integrator *m_previewIntegrator = nullptr;
+	private:
+		ESceneUpdateFlags updateFlags             = ESceneUpdateFlags::All;
 
-    bool m_preview_mode = false;
+		std::vector<Shape *> m_shapes;
+		Integrator           *m_integrator        = nullptr;
+		Integrator           *m_previewIntegrator = nullptr;
 
-    Sampler *m_sampler = nullptr;
-    Camera *m_camera = nullptr;
-    BVH *m_bvh = nullptr;
+		bool m_preview_mode = false;
 
-    EnvironmentMap *m_envmap = nullptr;
-    Denoiser *m_denoiser = nullptr;
+		Sampler *m_sampler = nullptr;
+		Camera  *m_camera  = nullptr;
+		BVH     *m_bvh     = nullptr;
 
-    std::vector<Emitter *> m_emitters;
+		EnvironmentMap *m_envmap   = nullptr;
+		Denoiser       *m_denoiser = nullptr;
+
+		std::vector<Emitter *> m_emitters;
 
 #ifdef NORI_USE_VOLUMES
-    std::vector<Volume *> m_volumes;
+		std::vector<Volume *> m_volumes;
 #endif
-};
+	};
 
 NORI_NAMESPACE_END
 
