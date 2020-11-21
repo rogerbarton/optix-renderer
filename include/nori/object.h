@@ -135,7 +135,7 @@ public:
      * constructed an object and added all of its children
      * using \ref addChild().
      */
-    virtual void activate()
+    virtual void initialize()
     { /* Do nothing */
     }
 

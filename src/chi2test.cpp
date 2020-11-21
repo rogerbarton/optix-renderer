@@ -90,7 +90,7 @@ public:
     }
 
     /// Execute the chi-square test
-    virtual void activate() override {
+    virtual void initialize() override {
         int passed = 0, total = 0, res = m_cosThetaResolution*m_phiResolution;
         pcg32 random; /* Pseudorandom number generator */
 

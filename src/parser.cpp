@@ -230,7 +230,7 @@ NoriObject *loadFromXML(const std::string &filename)
                 }
 
                 /* Activate / configure the object */
-                result->activate();
+	            result->initialize();
             }
             else
             {

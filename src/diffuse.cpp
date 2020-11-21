@@ -67,14 +67,14 @@ public:
         }
     }
 
-    virtual void activate() override
+    virtual void initialize() override
     {
         if (!m_albedo)
         {
             PropertyList l;
             l.setColor("value", Color3f(0.5f));
             m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-            m_albedo->activate();
+	        m_albedo->initialize();
         }
     }
 

@@ -154,7 +154,6 @@ void RenderThread::rerenderScene(const std::string &filename)
 
 void RenderThread::renderScene(const std::string &filename)
 {
-
 	filesystem::path path(filename);
 
 	/* Add the parent directory of the scene file to the
@@ -175,6 +174,9 @@ void RenderThread::renderScene(const std::string &filename)
 	if (root->getClassType() == NoriObject::EScene)
 	{
 		m_scene = static_cast<Scene *>(root);
+
+		// TODO: Copy scene to scene instance, keep current scene for gui
+		// TODO: call initialize here? call inverse recursively, initialize children first.
 
 		const Camera *camera_ = m_scene->getCamera();
 		m_scene->getIntegrator()->preprocess(m_scene);

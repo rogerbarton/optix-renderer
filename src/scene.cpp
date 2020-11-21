@@ -52,7 +52,7 @@ Scene::~Scene()
     delete m_previewIntegrator;
 }
 
-void Scene::activate()
+void Scene::initialize()
 {
     m_bvh->build();
 
@@ -66,7 +66,7 @@ void Scene::activate()
         /* Create a default (independent) sampler */
         m_sampler = static_cast<Sampler *>(
             NoriObjectFactory::createInstance("independent", PropertyList()));
-        m_sampler->activate();
+	    m_sampler->initialize();
     }
 
     cout << endl;

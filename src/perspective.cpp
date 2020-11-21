@@ -54,7 +54,7 @@ public:
         m_rfilter = NULL;
     }
 
-    virtual void activate() override {
+    virtual void initialize() override {
         float aspect = m_outputSize.x() / (float) m_outputSize.y();
 
         /* Project vectors in camera space onto a plane at z=1:
@@ -87,7 +87,7 @@ public:
         if (!m_rfilter) {
             m_rfilter = static_cast<ReconstructionFilter *>(
                     NoriObjectFactory::createInstance("gaussian", PropertyList()));
-            m_rfilter->activate();
+	        m_rfilter->initialize();
         }
     }
 

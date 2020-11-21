@@ -163,12 +163,12 @@ public:
     }
 
     /**
-     * \brief Inherited from \ref NoriObject::activate()
+     * \brief Inherited from \ref NoriObject::initialize()
      *
      * Initializes the internal data structures (kd-tree,
      * emitter sampling data structures, etc.)
      */
-    virtual void activate() override;
+    virtual void initialize() override;
 
     /// Add a child object to the scene (meshes, integrators etc.)
     virtual void addChild(NoriObject *obj) override;

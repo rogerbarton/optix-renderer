@@ -27,9 +27,9 @@ NORI_NAMESPACE_BEGIN
 
 Mesh::Mesh() {}
 
-void Mesh::activate()
+void Mesh::initialize()
 {
-    Shape::activate();
+	Shape::initialize();
 
     m_pdf.reserve(getPrimitiveCount());
     for (uint32_t i = 0; i < getPrimitiveCount(); ++i)

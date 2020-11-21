@@ -100,7 +100,7 @@ public:
     }
 
     /// Invoke a series of t-tests on the provided input
-    virtual void activate() override {
+    virtual void initialize() override {
         int total = 0, passed = 0;
         pcg32 random;
 

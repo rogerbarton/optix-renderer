@@ -57,7 +57,7 @@ public:
 			PropertyList l;
 			l.setColor("value", Color3f(0.5f));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-			m_map->activate();
+			m_map->initialize();
 		}
 	}
 
