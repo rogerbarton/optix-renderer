@@ -29,28 +29,44 @@ NORI_NAMESPACE_BEGIN
 class RenderThread {
 
 public:
-    RenderThread(ImageBlock & block);
+	RenderThread(ImageBlock &block) : m_block(block) {}
     ~RenderThread();
 
-    void renderScene(const std::string & filename);
-    void rerenderScene(const std::string& filename);
+    void loadScene(const std::string & filename);
+    void restartRender(const std::string& filename);
 
 	inline void renderThreadMain(const std::string &outputName, const std::string &outputNameDenoised,
 	                      const std::string &outputNameVariance);
 
     bool isBusy();
     void stopRendering();
+	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 
-    float getProgress();
+    void drawGui();
 
-    Scene* m_scene = nullptr;
+    Scene* m_guiScene = nullptr;
+    Scene* m_renderScene = nullptr;
 protected:
-    
+
+	enum class ERenderStatus : int {
+		Idle      = 0,
+		Busy      = 1,
+		Interrupt = 2,
+		Done      = 3
+	};
+
     ImageBlock & m_block;
     std::thread m_render_thread;
-    std::atomic<int> m_render_status; // 0: free, 1: busy, 2: interruption, 3: done
-    std::atomic<float> m_progress;
+    std::atomic<ERenderStatus> m_render_status = ERenderStatus::Idle;
+    std::atomic<float> m_progress = 1.f;
 
+    // Update flags
+    enum class ERenderThreadUpdateFlags : int{
+    	RestartRender = 0,
+    	ReloadScene = 1
+    };
+
+    ERenderThreadUpdateFlags updateFlags;
 };
 
 NORI_NAMESPACE_END

@@ -36,6 +36,12 @@ NORI_NAMESPACE_BEGIN
  */
 class Scene : public NoriObject
 {
+	enum class ESceneUpdateFlags : unsigned int{
+		Initialize = 0,
+		RebuildBVH = 1,
+		All = static_cast<unsigned int>(-1)
+	};
+
 public:
     /// Construct a new scene object
     Scene(const PropertyList &);
@@ -184,7 +190,10 @@ public:
     }
     virtual bool getImGuiNodes() override;
 #endif
+
+	ESceneUpdateFlags updateFlags = ESceneUpdateFlags::All;
 private:
+
     std::vector<Shape *> m_shapes;
     Integrator *m_integrator = nullptr;
     Integrator *m_previewIntegrator = nullptr;

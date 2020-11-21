@@ -35,26 +35,23 @@
 
 NORI_NAMESPACE_BEGIN
 
-RenderThread::RenderThread(ImageBlock &block) : m_block(block)
-{
-	m_render_status = 0;
-	m_progress = 1.f;
-}
+static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, const Histogram &histogram);
+
 RenderThread::~RenderThread()
 {
 	stopRendering();
-	if (m_scene)
-		delete m_scene; // free old scene
+	delete m_guiScene;
+	delete m_renderScene;
 }
 
 bool RenderThread::isBusy()
 {
-	if (m_render_status == 3)
+	if (m_render_status == ERenderStatus::Done)
 	{
 		m_render_thread.join();
-		m_render_status = 0;
+		m_render_status = ERenderStatus::Idle;
 	}
-	return m_render_status != 0;
+	return m_render_status != ERenderStatus::Idle;
 }
 
 void RenderThread::stopRendering()
@@ -62,74 +59,48 @@ void RenderThread::stopRendering()
 	if (isBusy())
 	{
 		cout << "Requesting interruption of the current rendering" << endl;
-		m_render_status = 2;
+		m_render_status = ERenderStatus::Interrupt;
 		m_render_thread.join();
-		m_render_status = 0;
+		m_render_status = ERenderStatus::Idle;
 		cout << "Rendering successfully aborted" << endl;
 	}
 }
 
-float RenderThread::getProgress()
+void RenderThread::loadScene(const std::string &filename)
 {
-	if (isBusy())
+	filesystem::path path(filename);
+
+	/* Add the parent directory of the scene file to the
+       file resolver. That way, the XML file can reference
+       resources (OBJ files, textures) using relative paths */
+	getFileResolver()->prepend(path.parent_path());
+
+	NoriObject *root = loadFromXML(filename);
+
+	if (root->getClassType() != NoriObject::EScene)
 	{
-		return m_progress;
-	}
-	else
-		return 1.f;
-}
-
-static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, const Histogram &histogram)
-{
-	const Camera *camera = scene->getCamera();
-	const Integrator *integrator = scene->getIntegrator();
-
-	Point2i offset = block.getOffset();
-
-	/* Clear the block contents */
-	block.clear();
-
-	/* For each pixel and pixel sample sample */
-	std::vector<std::pair<int, int>> sampleIndices = sampler->getSampleIndices(block, histogram);
-
-	// add a tbb range to the index
-	tbb::blocked_range<int> range(0, sampleIndices.size());
-
-	auto map = [&](tbb::blocked_range<int> &range) {
-		for (int i = range.begin(); i < range.end(); i++)
-		{
-			std::pair<int, int> pair = sampleIndices[i];
-			int x = pair.first;
-			int y = pair.second;
-			Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
-			Point2f apertureSample = sampler->next2D();
-
-			/* Sample a ray from the camera */
-			Ray3f ray;
-			Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
-
-			/* Compute the incident radiance */
-			value *= integrator->Li(scene, sampler, ray);
-
-			/* Store in the image block */
-			block.put(pixelSample, value);
-		}
-	};
-
-	tbb::parallel_for(range, map); // execute this in parallel (applicable if we render the whole block at once (adaptive sampling))
-}
-
-void RenderThread::rerenderScene(const std::string &filename)
-{
-	if (isBusy() && m_scene)
-	{
+		delete root;
 		return;
 	}
-	// use the old scene to rerender
-	filesystem::path path(filename);
-	getFileResolver()->prepend(path.parent_path());
-	const Camera *camera_ = m_scene->getCamera();
-	m_scene->getIntegrator()->preprocess(m_scene);
+
+	// Delete old scene if exists
+	if (m_guiScene)
+	{
+		delete m_guiScene;
+		m_guiScene = nullptr;
+		delete m_renderScene;
+		m_renderScene = nullptr;
+	}
+
+	// Create gui/properties scene first
+	m_guiScene = dynamic_cast<Scene *>(root);
+	m_renderScene = new Scene(*m_guiScene);
+	m_renderScene->initialize();
+
+	// TODO: Copy scene to scene instance, keep current scene for gui
+	// TODO: call initialize here? call inverse recursively, initialize children first.
+
+	const Camera *camera_ = m_renderScene->getCamera();
 
 	/* Allocate memory for the entire output image and clear it */
 	m_block.init(camera_->getOutputSize(), camera_->getReconstructionFilter());
@@ -146,40 +117,23 @@ void RenderThread::rerenderScene(const std::string &filename)
 	outputName += ".exr";
 
 	/* Do the following in parallel and asynchronously */
-	m_render_status = 1;
+	m_render_status = ERenderStatus::Busy;
 	m_render_thread = std::thread([this, outputName, outputNameDenoised, outputNameVariance] {
 		renderThreadMain(outputName, outputNameDenoised, outputNameVariance);
 	});
 }
 
-void RenderThread::renderScene(const std::string &filename)
-{
-	filesystem::path path(filename);
-
-	/* Add the parent directory of the scene file to the
-       file resolver. That way, the XML file can reference
-       resources (OBJ files, textures) using relative paths */
-	getFileResolver()->prepend(path.parent_path());
-
-	NoriObject *root = loadFromXML(filename);
-
-	// Delete old scene if exists
-	if (m_scene)
+	void RenderThread::restartRender(const std::string &filename)
 	{
-		delete m_scene;
-		m_scene = nullptr;
-	}
+		if (isBusy() && !m_guiScene)
+			return;
 
-	// When the XML root object is a scene, start rendering it ..
-	if (root->getClassType() == NoriObject::EScene)
-	{
-		m_scene = static_cast<Scene *>(root);
+		// TODO: copy guiScene to renderScene and update it
 
-		// TODO: Copy scene to scene instance, keep current scene for gui
-		// TODO: call initialize here? call inverse recursively, initialize children first.
-
-		const Camera *camera_ = m_scene->getCamera();
-		m_scene->getIntegrator()->preprocess(m_scene);
+		// use the old scene to rerender
+		filesystem::path path(filename);
+		getFileResolver()->prepend(path.parent_path());
+		const Camera *camera_ = m_guiScene->getCamera();
 
 		/* Allocate memory for the entire output image and clear it */
 		m_block.init(camera_->getOutputSize(), camera_->getReconstructionFilter());
@@ -196,21 +150,16 @@ void RenderThread::renderScene(const std::string &filename)
 		outputName += ".exr";
 
 		/* Do the following in parallel and asynchronously */
-		m_render_status = 1;
+		m_render_status = ERenderStatus::Busy;
 		m_render_thread = std::thread([this, outputName, outputNameDenoised, outputNameVariance] {
 			renderThreadMain(outputName, outputNameDenoised, outputNameVariance);
 		});
 	}
-	else
-	{
-		delete root;
-	}
-}
 
 void RenderThread::renderThreadMain(
 	const std::string &outputName, const std::string &outputNameDenoised, const std::string &outputNameVariance)
 {
-	const Camera *camera = m_scene->getCamera();
+	const Camera *camera = m_renderScene->getCamera();
 	Vector2i outputSize = camera->getOutputSize();
 
 	/* Create a block generator (i.e. a work scheduler) */
@@ -220,7 +169,9 @@ void RenderThread::renderThreadMain(
 	cout.flush();
 	Timer timer;
 
-	auto numSamples = m_scene->getSampler()->getSampleCount();
+	m_renderScene->getIntegrator()->preprocess(m_renderScene);
+
+	auto numSamples = m_renderScene->getSampler()->getSampleCount();
 	auto numBlocks = blockGenerator.getBlockCount();
 
 	tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
@@ -229,14 +180,14 @@ void RenderThread::renderThreadMain(
 	for (uint32_t k = 0; k < numSamples; ++k)
 	{
 		m_progress = k / float(numSamples);
-		if (m_render_status == 2)
+		if (m_render_status == ERenderStatus::Interrupt)
 			break;
 
 		tbb::blocked_range<int> range(0, numBlocks);
 
 		// calculate variance here
 		Eigen::MatrixXf variance(m_block.rows(), m_block.cols());
-		m_scene->getSampler()->setSampleRound(k);
+		m_renderScene->getSampler()->setSampleRound(k);
 
 		Histogram histogram;
 
@@ -254,7 +205,7 @@ void RenderThread::renderThreadMain(
 				auto blockId = block.getBlockId();
 				if (k == 0)
 				{ // Initialize the sampler for the first sample
-					std::unique_ptr<Sampler> sampler(m_scene->getSampler()->clone());
+					std::unique_ptr<Sampler> sampler(m_renderScene->getSampler()->clone());
 					sampler->prepare(block);
 					samplers.at(blockId) = std::move(sampler);
 				}
@@ -262,14 +213,14 @@ void RenderThread::renderThreadMain(
 				samplers.at(blockId)->setSampleRound(k);
 
 				// Render all contained pixels
-				renderBlock(m_scene, samplers.at(blockId).get(), block, histogram);
+				renderBlock(m_renderScene, samplers.at(blockId).get(), block, histogram);
 
 				// The image block has been processed. Now add it to the "big" block that represents the entire image
 				m_block.put(block); // save to master block
 			}
 		};
 
-		if (m_scene->getSampler()->computeVariance())
+		if (m_renderScene->getSampler()->computeVariance())
 		{
 
 			// compute variance of the whole image, once for all samplers
@@ -348,7 +299,7 @@ void RenderThread::renderThreadMain(
 				}
 			}
 
-			if (k == numSamples - 1 && m_scene->getSampler()->computeVariance())
+			if (k == numSamples - 1 && m_renderScene->getSampler()->computeVariance())
 			{
 				// write variance to disk
 				std::ofstream var_out(outputNameVariance);
@@ -362,9 +313,9 @@ void RenderThread::renderThreadMain(
 
 			ImageBlock block(m_block.getSize(),
 							 camera->getReconstructionFilter());
-			m_scene->getSampler()->setSampleRound(k);
+			m_renderScene->getSampler()->setSampleRound(k);
 			// Render all contained pixels
-			renderBlock(m_scene, m_scene->getSampler(), block, histogram);
+			renderBlock(m_renderScene, m_renderScene->getSampler(), block, histogram);
 			m_block.put(block);
 		}
 		else
@@ -377,9 +328,9 @@ void RenderThread::renderThreadMain(
 
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
 
-	if(m_scene->isPreviewMode()) {
+	if(m_renderScene->isPreviewMode()) {
 		// stop the rendering here, don't save
-		m_render_status = 3;
+		m_render_status = ERenderStatus::Done;
 		return;
 	}
 
@@ -390,9 +341,9 @@ void RenderThread::renderThreadMain(
 	m_block.unlock();
 
 	/* apply the denoiser */
-	if (m_scene->getDenoiser())
+	if (m_renderScene->getDenoiser())
 	{
-		std::unique_ptr<Bitmap> bitmap_denoised(m_scene->getDenoiser()->denoise(bitmap.get()));
+		std::unique_ptr<Bitmap> bitmap_denoised(m_renderScene->getDenoiser()->denoise(bitmap.get()));
 		bitmap_denoised->save(outputNameDenoised);
 	}
 
@@ -402,7 +353,52 @@ void RenderThread::renderThreadMain(
 	//delete m_scene;
 	//m_scene = nullptr;
 
-	m_render_status = 3;
+	m_render_status = ERenderStatus::Done;
 }
+
+	static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, const Histogram &histogram)
+	{
+		const Camera *camera = scene->getCamera();
+		const Integrator *integrator = scene->getIntegrator();
+
+		Point2i offset = block.getOffset();
+
+		/* Clear the block contents */
+		block.clear();
+
+		/* For each pixel and pixel sample sample */
+		std::vector<std::pair<int, int>> sampleIndices = sampler->getSampleIndices(block, histogram);
+
+		// add a tbb range to the index
+		tbb::blocked_range<int> range(0, sampleIndices.size());
+
+		auto map = [&](tbb::blocked_range<int> &range) {
+			for (int i = range.begin(); i < range.end(); i++)
+			{
+				std::pair<int, int> pair = sampleIndices[i];
+				int x = pair.first;
+				int y = pair.second;
+				Point2f pixelSample = Point2f((float)(x + offset.x()), (float)(y + offset.y())) + sampler->next2D();
+				Point2f apertureSample = sampler->next2D();
+
+				/* Sample a ray from the camera */
+				Ray3f ray;
+				Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
+
+				/* Compute the incident radiance */
+				value *= integrator->Li(scene, sampler, ray);
+
+				/* Store in the image block */
+				block.put(pixelSample, value);
+			}
+		};
+
+		tbb::parallel_for(range, map); // execute this in parallel (applicable if we render the whole block at once (adaptive sampling))
+	}
+
+	void RenderThread::drawGui()
+	{
+
+	}
 
 NORI_NAMESPACE_END

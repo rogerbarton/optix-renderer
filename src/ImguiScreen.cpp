@@ -27,7 +27,7 @@ float get_pixel_ratio()
 	return xscale;
 }
 
-ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
+ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_block}
 {
 	windowWidth = 1000;
 	windowHeight = 800;
@@ -119,7 +119,7 @@ void ImguiScreen::openXML(const std::string &filename)
 	try
 	{
 		renderingFilename = filename;
-		m_renderThread.renderScene(filename);
+		m_renderThread.loadScene(filename);
 
 		imageZoom = 1.f;
 		centerImage(true);
@@ -327,7 +327,7 @@ void ImguiScreen::draw()
 
 			// show restart button if m_scene is valid
 			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
-				m_renderThread.rerenderScene(renderingFilename);
+				m_renderThread.restartRender(renderingFilename);
 
 			if (m_renderThread.m_scene)
 			{
@@ -527,7 +527,7 @@ void ImguiScreen::keyPressed(int key, int mods)
 	else if (key == GLFW_KEY_ESCAPE)
 		m_renderThread.stopRendering();
 	else if (key == GLFW_KEY_F5)
-		m_renderThread.rerenderScene(renderingFilename);
+		m_renderThread.restartRender(renderingFilename);
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
 	{
 		filebrowserSave.Open();
@@ -677,7 +677,7 @@ bool ImguiScreen::drawSceneTree()
 	{
 		if (currentLayer == PREVIEW && needsRerender)
 		{
-			m_renderThread.rerenderScene(renderingFilename);
+			m_renderThread.restartRender(renderingFilename);
 			needsRerender = false;
 		}
 	}

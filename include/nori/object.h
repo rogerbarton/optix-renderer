@@ -124,19 +124,13 @@ public:
     { /* Do nothing */
     }
 
+    bool isInitialized = false;
     /**
-     * \brief Perform some action associated with the object
-     *
-     * The default implementation throws an exception. Certain objects
-     * may choose to override it, e.g. to implement initialization, 
-     * testing, or rendering functionality.
-     *
-     * This function is called by the XML parser once it has
-     * constructed an object and added all of its children
-     * using \ref addChild().
+     * Initialize the object when the scene has changed before rendering.
      */
     virtual void initialize()
-    { /* Do nothing */
+    {
+    	isInitialized = true;
     }
 
     /// Return a brief string summary of the instance (for debugging purposes)
