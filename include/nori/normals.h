@@ -8,10 +8,8 @@ NORI_NAMESPACE_BEGIN
 class NormalIntegrator : public Integrator
 {
 public:
-    NormalIntegrator(const PropertyList &props)
-    {
-        /* No parameters this time */
-    }
+	explicit NormalIntegrator(const PropertyList &props) {}
+	NORI_OBJECT_DEFAULT_CLONE(NormalIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {

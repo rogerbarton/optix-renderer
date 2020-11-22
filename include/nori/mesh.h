@@ -36,7 +36,7 @@ class Mesh : public Shape
 {
 public:
     /// Initialize internal data structures (called once by the XML parser)
-    virtual void initialize() override;
+    virtual void update(const NoriObject *guiObject) override;
 
     /// Return the total number of triangles in this shape
     virtual uint32_t getPrimitiveCount() const override { return (uint32_t)m_F.cols(); }

@@ -30,14 +30,14 @@ Shape::~Shape()
     //delete m_emitter; // scene is responsible for deleting the emitter
 }
 
-void Shape::initialize()
+void Shape::update(const NoriObject *guiObject)
 {
     if (!m_bsdf)
     {
         /* If no material was assigned, instantiate a diffuse BRDF */
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
-	    m_bsdf->initialize();
+	    m_bsdf->update(guiObject);
     }
 }
 

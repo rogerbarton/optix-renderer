@@ -25,11 +25,12 @@ NORI_NAMESPACE_BEGIN
 class AreaEmitter : public Emitter
 {
 public:
-  AreaEmitter(const PropertyList &props)
+  explicit AreaEmitter(const PropertyList &props)
   {
     // store the radiance
     m_radiance = props.getColor("radiance");
   }
+  NORI_OBJECT_DEFAULT_CLONE(AreaEmitter)
 
   virtual std::string toString() const override
   {

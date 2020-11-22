@@ -24,7 +24,8 @@ template <typename T>
 class ConstantTexture : public Texture<T>
 {
 public:
-    ConstantTexture(const PropertyList &props);
+    explicit ConstantTexture(const PropertyList &props);
+    NORI_OBJECT_DEFAULT_CLONE(ConstantTexture<T>);
 
     virtual std::string toString() const override;
 

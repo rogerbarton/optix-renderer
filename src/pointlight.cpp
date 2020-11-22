@@ -9,13 +9,14 @@ NORI_NAMESPACE_BEGIN
 class PointLight : public Emitter
 {
 public:
-  PointLight(const PropertyList &propList)
+  explicit PointLight(const PropertyList &propList)
   {
     m_power = propList.getColor("power"); // we store power, not intensity
     m_position = propList.getPoint3("position");
   }
+  NORI_OBJECT_DEFAULT_CLONE(PointLight)
 
-  Color3f sample(EmitterQueryRecord &lRec,
+	Color3f sample(EmitterQueryRecord &lRec,
                  const Point2f &sample) const override
   {
     // store sample data inside the query record

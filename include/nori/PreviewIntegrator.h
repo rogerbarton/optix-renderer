@@ -11,10 +11,8 @@ NORI_NAMESPACE_BEGIN
 class PreviewIntegrator : public Integrator
 {
 public:
-    PreviewIntegrator(const PropertyList &props)
-    {
-        /* No parameters this time */
-    }
+	PreviewIntegrator(const PropertyList &props) {}
+	NORI_OBJECT_DEFAULT_CLONE(PointLight)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
@@ -56,7 +54,7 @@ public:
         return result;
     }
 
-    std::string toString() const
+	std::string toString() const
     {
         return "NormalIntegrator[]";
     }

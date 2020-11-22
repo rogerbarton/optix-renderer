@@ -30,8 +30,6 @@ NORI_NAMESPACE_BEGIN
 
 	Scene::Scene(const PropertyList &)
 	{
-		m_bvh               = new BVH();
-		m_previewIntegrator = new PreviewIntegrator(PropertyList());
 	}
 
 	Scene::~Scene()
@@ -44,18 +42,17 @@ NORI_NAMESPACE_BEGIN
 			delete e;
 		m_emitters.clear();
 
-		if (m_envmap)
-			delete m_envmap;
-		if (m_denoiser)
-			delete m_denoiser;
+		delete m_envmap;
+		delete m_denoiser;
 
 		delete m_previewIntegrator;
 	}
 
-	void Scene::initialize()
+	NoriObject *Scene::cloneAndInit()
 	{
-		m_bvh->build();
+		Scene* clone = new Scene(*this);
 
+		// -- Validate scene before cloning, TODO: move to finalizeDeserialize?
 		if (!m_integrator)
 			throw NoriException("No integrator was specified!");
 		if (!m_camera)
@@ -63,15 +60,74 @@ NORI_NAMESPACE_BEGIN
 
 		if (!m_sampler)
 		{
-			/* Create a default (independent) sampler */
-			m_sampler = static_cast<Sampler *>(
+			// Create a default (independent) sampler
+			m_sampler = dynamic_cast<Sampler *>(
 					NoriObjectFactory::createInstance("independent", PropertyList()));
-			m_sampler->initialize();
 		}
 
-		cout << endl;
-		cout << "Configuration: " << toString() << endl;
-		cout << endl;
+		// -- Deep copy children
+		clone->m_integrator = dynamic_cast<Integrator*>(m_integrator->cloneAndInit());
+		clone->m_previewIntegrator = dynamic_cast<Integrator*>(m_previewIntegrator->cloneAndInit());
+		// clone->m_preview_mode = m_preview_mode; // already copied?
+
+		clone->m_sampler = dynamic_cast<Sampler*>(m_sampler->cloneAndInit());
+		clone->m_camera  = dynamic_cast<Camera*>(m_camera->cloneAndInit());
+
+		clone->m_envmap   = dynamic_cast<EnvironmentMap*>(m_envmap->cloneAndInit());
+		clone->m_denoiser = dynamic_cast<Denoiser*>(m_denoiser->cloneAndInit());
+
+		clone->m_shapes.reserve(m_shapes.size());
+		for (int i = 0; i < m_shapes.size(); ++i)
+			clone->m_shapes[i] = dynamic_cast<Shape*>(m_shapes[i]->cloneAndInit());
+
+		clone->m_emitters.reserve(m_emitters.size());
+		for (int i = 0; i < m_emitters.size(); ++i)
+			clone->m_emitters[i] = dynamic_cast<Emitter*>(m_emitters[i]->cloneAndInit());
+
+#ifdef NORI_USE_VOLUMES
+		clone->m_volumes.reserve(m_volumes.size());
+		for (int i = 0; i < m_volumes.size(); ++i)
+			clone->m_volumes[i] = dynamic_cast<Volume*>(m_volumes[i]->cloneAndInit());
+#endif
+
+		// -- Init clone
+		clone->m_bvh               = new BVH();
+		clone->m_previewIntegrator = new PreviewIntegrator(PropertyList());
+
+		cout << endl<< "Configuration: " << clone->toString() << endl << endl;
+
+		return clone;
+	}
+
+	void Scene::update(const NoriObject *guiObject)
+	{
+		const Scene* gui = dynamic_cast<const Scene*>(guiObject);
+
+		// -- Update children
+		m_integrator->update(gui->m_integrator);
+		m_previewIntegrator->update(gui->m_previewIntegrator);
+		m_preview_mode = gui->m_preview_mode;
+
+		m_sampler->update(gui->m_sampler);
+		m_camera->update(gui->m_camera);
+
+		m_envmap ->update(gui->m_envmap);
+		m_denoiser->update(gui->m_denoiser);
+
+		for (int i = 0; i < gui->m_shapes.size(); ++i)
+			m_shapes[i]->update(gui->m_shapes[i]);
+
+		for (int i = 0; i < gui->m_emitters.size(); ++i)
+			m_emitters[i]->update(gui->m_emitters[i]);
+
+#ifdef NORI_USE_VOLUMES
+		for (int i = 0; i < gui->m_volumes.size(); ++i)
+			m_volumes[i]->update(gui->m_volumes[i]);
+#endif
+
+		// -- Update this
+		if(gui->rebuildBvh)
+			m_bvh->build();
 	}
 
 	void Scene::addChild(NoriObject *obj)
@@ -80,7 +136,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			case EMesh:
 			{
-				Shape *mesh = static_cast<Shape *>(obj);
+				Shape *mesh = dynamic_cast<Shape *>(obj);
 				m_bvh->addShape(mesh);
 				m_shapes.push_back(mesh);
 				if (mesh->isEmitter())
@@ -89,42 +145,42 @@ NORI_NAMESPACE_BEGIN
 				break;
 
 			case EEmitter:
-				m_emitters.push_back(static_cast<Emitter *>(obj));
+				m_emitters.push_back(dynamic_cast<Emitter *>(obj));
 				break;
 
 			case ESampler:
 				if (m_sampler)
 					throw NoriException("There can only be one sampler per scene!");
-				m_sampler = static_cast<Sampler *>(obj);
+				m_sampler = dynamic_cast<Sampler *>(obj);
 				break;
 
 			case ECamera:
 				if (m_camera)
 					throw NoriException("There can only be one camera per scene!");
-				m_camera = static_cast<Camera *>(obj);
+				m_camera = dynamic_cast<Camera *>(obj);
 				break;
 
 			case EIntegrator:
 				if (m_integrator)
 					throw NoriException("There can only be one integrator per scene!");
-				m_integrator = static_cast<Integrator *>(obj);
+				m_integrator = dynamic_cast<Integrator *>(obj);
 				break;
 
 			case EEnvironmentMap:
 				if (m_envmap)
 					throw NoriException("There can only be one environment map per scene!");
-				m_envmap = static_cast<EnvironmentMap *>(obj);
+				m_envmap = dynamic_cast<EnvironmentMap *>(obj);
 				break;
 			case EDenoiser:
 				if (m_denoiser)
 					throw NoriException("There can only be one denoiser per scene!");
-				m_denoiser = static_cast<Denoiser *>(obj);
+				m_denoiser = dynamic_cast<Denoiser *>(obj);
 				break;
 
 			case EVolume:
 				// Skip if volumes are disabled
 #ifdef NORI_USE_VOLUMES
-				m_volumes.push_back(static_cast<Volume *>(obj));
+				m_volumes.push_back(dynamic_cast<Volume *>(obj));
 #endif
 				break;
 
@@ -338,7 +394,6 @@ NORI_NAMESPACE_BEGIN
 
 		return ret;
 	}
-
 #endif
 
 	NORI_REGISTER_CLASS(Scene, "scene");

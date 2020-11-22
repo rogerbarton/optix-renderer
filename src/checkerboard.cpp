@@ -25,7 +25,8 @@ template <typename T>
 class Checkerboard : public Texture<T>
 {
 public:
-  Checkerboard(const PropertyList &props);
+  explicit Checkerboard(const PropertyList &props);
+  NORI_OBJECT_DEFAULT_CLONE(Checkerboard<T>);
 
   virtual std::string toString() const override;
 

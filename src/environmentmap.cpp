@@ -7,7 +7,7 @@ NORI_NAMESPACE_BEGIN
 class PNGEnvMap : public EnvironmentMap
 {
 public:
-	PNGEnvMap(const PropertyList &props)
+	explicit PNGEnvMap(const PropertyList &props)
 	{
 		if (props.has("envmap"))
 		{
@@ -21,6 +21,11 @@ public:
 
 		sphereTexture = props.getBoolean("sphereTexture", false);
 	};
+	NoriObject *cloneAndInit() override {
+		auto clone = new PNGEnvMap(*this);
+		clone->m_map = dynamic_cast<Texture<Color3f>*>(m_map->cloneAndInit());
+		return clone;
+	}
 
 	~PNGEnvMap()
 	{
@@ -57,7 +62,7 @@ public:
 			PropertyList l;
 			l.setColor("value", Color3f(0.5f));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-			m_map->initialize();
+			m_map->update(nullptr);
 		}
 	}
 

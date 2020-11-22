@@ -37,6 +37,7 @@ public:
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
     }
+	NORI_OBJECT_DEFAULT_CLONE(Independent)
 
     virtual ~Independent() {}
 

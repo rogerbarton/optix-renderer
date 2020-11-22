@@ -26,9 +26,10 @@
 #include <nori/sampler.h>
 #include <nori/integrator.h>
 
+#include <nori/ImguiHelpers.h>
+
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
-#include <filesystem/resolver.h>
 #include <tbb/concurrent_vector.h>
 #include <filesystem/resolver.h>
 #include <fstream>
@@ -83,6 +84,9 @@ NORI_NAMESPACE_BEGIN
 			return;
 		}
 
+		// New scene accepted
+		sceneFilename = filename;
+
 		// Delete old scene if exists
 		if (m_guiScene)
 		{
@@ -92,87 +96,60 @@ NORI_NAMESPACE_BEGIN
 			m_renderScene = nullptr;
 		}
 
-		// Create gui/properties scene first
+		// Create gui/properties scene first, then deep copy to render scene
 		m_guiScene    = dynamic_cast<Scene *>(root);
-		m_renderScene = new Scene(*m_guiScene);
-		m_renderScene->initialize();
+		m_renderScene = dynamic_cast<Scene *>(m_guiScene->cloneAndInit());
 
-		// TODO: Copy scene to scene instance, keep current scene for gui
-		// TODO: call initialize here? call inverse recursively, initialize children first.
-
-		const Camera *camera_ = m_renderScene->getCamera();
-
-		/* Allocate memory for the entire output image and clear it */
-		m_block.init(camera_->getOutputSize(), camera_->getReconstructionFilter());
-		m_block.clear();
-
-		/* Determine the filename of the output bitmap */
-		std::string outputName = filename;
+		// Determine the filename of the output bitmap
+		outputName = sceneFilename;
 		size_t      lastdot    = outputName.find_last_of(".");
 		if (lastdot != std::string::npos)
 			outputName.erase(lastdot, std::string::npos);
 
-		std::string outputNameDenoised = outputName + "_denoised.exr";
-		std::string outputNameVariance = outputName + "_variance.dat";
+		outputNameDenoised = outputName + "_denoised.exr";
+		outputNameVariance = outputName + "_variance.dat";
 		outputName += ".exr";
 
-		/* Do the following in parallel and asynchronously */
+		// Start the actual thread
 		m_render_status = ERenderStatus::Busy;
-		m_render_thread = std::thread([this, outputName, outputNameDenoised, outputNameVariance] {
-			renderThreadMain(outputName, outputNameDenoised, outputNameVariance);
-		});
+		m_render_thread = std::thread([this] { renderThreadMain(); });
 	}
 
-	void RenderThread::restartRender(const std::string &filename)
+	void RenderThread::restartRender()
 	{
-		if (isBusy() && !m_guiScene)
+		if (!m_guiScene)
 			return;
 
-		// TODO: copy guiScene to renderScene and update it
+		stopRendering();
 
-		// use the old scene to rerender
-		filesystem::path path(filename);
-		getFileResolver()->prepend(path.parent_path());
-		const Camera *camera_ = m_guiScene->getCamera();
+		m_renderScene->update(m_guiScene); // reinitialize it
 
-		/* Allocate memory for the entire output image and clear it */
-		m_block.init(camera_->getOutputSize(), camera_->getReconstructionFilter());
-		m_block.clear();
-
-		/* Determine the filename of the output bitmap */
-		std::string outputName = filename;
-		size_t      lastdot    = outputName.find_last_of(".");
-		if (lastdot != std::string::npos)
-			outputName.erase(lastdot, std::string::npos);
-
-		std::string outputNameDenoised = outputName + "_denoised.exr";
-		std::string outputNameVariance = outputName + "_variance.dat";
-		outputName += ".exr";
-
-		/* Do the following in parallel and asynchronously */
 		m_render_status = ERenderStatus::Busy;
-		m_render_thread = std::thread([this, outputName, outputNameDenoised, outputNameVariance] {
-			renderThreadMain(outputName, outputNameDenoised, outputNameVariance);
-		});
+		m_render_thread = std::thread([this] { renderThreadMain(); });
 	}
 
-	void RenderThread::renderThreadMain(
-			const std::string &outputName, const std::string &outputNameDenoised, const std::string &outputNameVariance)
+	void RenderThread::renderThreadMain()
 	{
+		// call initialize here? call inverse recursively, initialize children first.
+		m_renderScene->update(nullptr);
+
+		/* Allocate memory for the entire output image and clear it */
 		const Camera *camera    = m_renderScene->getCamera();
-		Vector2i     outputSize = camera->getOutputSize();
+		m_block.init(camera->getOutputSize(), camera->getReconstructionFilter());
+		m_block.clear();
+
+		cout << "Rendering .. " << std::flush;
 
 		/* Create a block generator (i.e. a work scheduler) */
+		Vector2i     outputSize = camera->getOutputSize();
 		BlockGenerator blockGenerator(outputSize, NORI_BLOCK_SIZE);
 
-		cout << "Rendering .. ";
-		cout.flush();
 		Timer timer;
 
 		m_renderScene->getIntegrator()->preprocess(m_renderScene);
 
-		auto numSamples = m_renderScene->getSampler()->getSampleCount();
-		auto numBlocks  = blockGenerator.getBlockCount();
+		const auto numSamples = m_renderScene->getSampler()->getSampleCount();
+		const auto numBlocks  = blockGenerator.getBlockCount();
 
 		tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
 		samplers.resize(numBlocks);
@@ -401,7 +378,29 @@ NORI_NAMESPACE_BEGIN
 
 	void RenderThread::drawGui()
 	{
+		// Start columns
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
 
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text(filesystem::path(sceneFilename).filename().c_str());
+		ImGui::NextColumn();
+
+		guiSceneDirty |= m_guiScene->getImGuiNodes();
+
+		// end columns
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		if(guiSceneDirty)
+		{
+			restartRender();
+		}
 	}
+
 
 NORI_NAMESPACE_END

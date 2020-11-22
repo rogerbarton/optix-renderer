@@ -9,7 +9,8 @@ NORI_NAMESPACE_BEGIN
 class PathMATSIntegrator : public Integrator
 {
 public:
-    PathMATSIntegrator(const PropertyList &propList) {}
+    explicit PathMATSIntegrator(const PropertyList &propList) {}
+	NORI_OBJECT_DEFAULT_CLONE(PathMATSIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {

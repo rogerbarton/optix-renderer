@@ -28,15 +28,16 @@ NORI_NAMESPACE_BEGIN
 class GaussianFilter : public ReconstructionFilter
 {
 public:
-    GaussianFilter(const PropertyList &propList)
+    explicit GaussianFilter(const PropertyList &propList)
     {
         /* Half filter size */
         m_radius = propList.getFloat("radius", 2.0f);
         /* Standard deviation of the Gaussian */
         m_stddev = propList.getFloat("stddev", 0.5f);
     }
+	NORI_OBJECT_DEFAULT_CLONE(GaussianFilter)
 
-    float eval(float x) const
+	float eval(float x) const
     {
         float alpha = -1.0f / (2.0f * m_stddev * m_stddev);
         return std::max(0.0f,
@@ -77,7 +78,7 @@ protected:
 class MitchellNetravaliFilter : public ReconstructionFilter
 {
 public:
-    MitchellNetravaliFilter(const PropertyList &propList)
+    explicit MitchellNetravaliFilter(const PropertyList &propList)
     {
         /* Filter size in pixels */
         m_radius = propList.getFloat("radius", 2.0f);
@@ -86,8 +87,9 @@ public:
         /* C parameter from the paper */
         m_C = propList.getFloat("C", 1.0f / 3.0f);
     }
+	NORI_OBJECT_DEFAULT_CLONE(MitchellNetravaliFilter)
 
-    float eval(float x) const
+	float eval(float x) const
     {
         x = std::abs(2.0f * x / m_radius);
         float x2 = x * x, x3 = x2 * x;
@@ -144,12 +146,13 @@ protected:
 class TentFilter : public ReconstructionFilter
 {
 public:
-    TentFilter(const PropertyList &)
+    explicit TentFilter(const PropertyList &)
     {
         m_radius = 1.0f;
     }
+	NORI_OBJECT_DEFAULT_CLONE(TentFilter)
 
-    float eval(float x) const
+	float eval(float x) const
     {
         return std::max(0.0f, 1.0f - std::abs(x));
     }
@@ -171,12 +174,13 @@ public:
 class BoxFilter : public ReconstructionFilter
 {
 public:
-    BoxFilter(const PropertyList &)
+    explicit BoxFilter(const PropertyList &)
     {
         m_radius = 0.5f;
     }
+	NORI_OBJECT_DEFAULT_CLONE(BoxFilter)
 
-    float eval(float) const
+	float eval(float) const
     {
         return 1.0f;
     }

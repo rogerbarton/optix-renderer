@@ -19,7 +19,7 @@ NORI_NAMESPACE_BEGIN
 class Disney : public BSDF
 {
 public:
-    Disney(const PropertyList &props)
+    explicit Disney(const PropertyList &props)
     {
         baseColor = props.getColor("baseColor", Color3f(0.f));
 
@@ -35,6 +35,7 @@ public:
         clearcoat = clamp(props.getFloat("clearcoat", 0.f), 0.f, 1.f);
         clearcoatGloss = clamp(props.getFloat("clearcoatGloss", 1.f), 0.f, 1.f);
     }
+	NORI_OBJECT_DEFAULT_CLONE(Disney)
 
     Color3f eval(const BSDFQueryRecord &bRec) const override
     {

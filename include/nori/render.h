@@ -33,10 +33,9 @@ public:
     ~RenderThread();
 
     void loadScene(const std::string & filename);
-    void restartRender(const std::string& filename);
+    void restartRender();
 
-	inline void renderThreadMain(const std::string &outputName, const std::string &outputNameDenoised,
-	                      const std::string &outputNameVariance);
+	inline void renderThreadMain();
 
     bool isBusy();
     void stopRendering();
@@ -44,7 +43,7 @@ public:
 
     void drawGui();
 
-    Scene* m_guiScene = nullptr;
+	Scene* m_guiScene = nullptr;
     Scene* m_renderScene = nullptr;
 protected:
 
@@ -67,6 +66,14 @@ protected:
     };
 
     ERenderThreadUpdateFlags updateFlags;
+    bool guiSceneDirty;
+
+	std::string sceneFilename;
+	std::string outputName;
+	std::string outputNameDenoised;
+	std::string outputNameVariance;
+
+	void initializeFromScene();
 };
 
 NORI_NAMESPACE_END

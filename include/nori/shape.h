@@ -102,7 +102,7 @@ public:
     virtual void addChild(NoriObject *child) override;
 
     /// Initialize internal data structures (called once by the XML parser)
-    virtual void initialize() override;
+    virtual void update(const NoriObject *guiObject) override;
 
     //// Return an axis-aligned bounding box of the entire mesh
     const BoundingBox3f &getBoundingBox() const { return m_bbox; }

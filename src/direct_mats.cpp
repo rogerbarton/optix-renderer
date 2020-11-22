@@ -10,6 +10,8 @@ class DirectMATSIntegrator : public Integrator
 {
 public:
   DirectMATSIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectMATSIntegrator)
+
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
     Intersection its;

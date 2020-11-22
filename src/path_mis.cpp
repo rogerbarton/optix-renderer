@@ -9,7 +9,9 @@ NORI_NAMESPACE_BEGIN
 class PathMISIntegrator : public Integrator
 {
 public:
-    PathMISIntegrator(const PropertyList &propList) {}
+    explicit PathMISIntegrator(const PropertyList &propList) {}
+	NORI_OBJECT_DEFAULT_CLONE(PathMISIntegrator)
+
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
         Color3f Li = Color3f(0.f); // initial radiance

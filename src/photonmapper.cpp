@@ -31,14 +31,14 @@ public:
     /// Photon map data structure
     typedef PointKDTree<Photon> PhotonMap;
 
-    PhotonMapper(const PropertyList &props)
+    explicit PhotonMapper(const PropertyList &props)
     {
         /* Lookup parameters */
         m_photonCount = props.getInteger("photonCount", 1000000);
         m_photonRadius = props.getFloat("photonRadius", 0.0f /* Default: automatic */);
     }
 
-    virtual void preprocess(const Scene *scene) override
+	virtual void preprocess(const Scene *scene) override
     {
         cout << "Gathering " << m_photonCount << " photons .. ";
         cout.flush();

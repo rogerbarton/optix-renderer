@@ -14,11 +14,12 @@ NORI_NAMESPACE_BEGIN
 class AdaptiveSampler : public Sampler
 {
 public:
-    AdaptiveSampler(const PropertyList &propList)
+    explicit AdaptiveSampler(const PropertyList &propList)
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
         uniform_every = propList.getInteger("uniformEvery", 100);
     }
+	NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
 
     std::unique_ptr<Sampler> clone() const override
     {

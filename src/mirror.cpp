@@ -24,7 +24,8 @@ NORI_NAMESPACE_BEGIN
 /// Ideal mirror BRDF
 class Mirror : public BSDF {
 public:
-    Mirror(const PropertyList &) { }
+    explicit Mirror(const PropertyList &) { }
+	NORI_OBJECT_DEFAULT_CLONE(Mirror)
 
     virtual Color3f eval(const BSDFQueryRecord &) const override {
         /* Discrete BRDFs always evaluate to zero in Nori */

@@ -41,7 +41,7 @@ NORI_NAMESPACE_BEGIN
  */
 class ChiSquareTest : public NoriObject {
 public:
-    ChiSquareTest(const PropertyList &propList) {
+    explicit ChiSquareTest(const PropertyList &propList) {
         /* The null hypothesis will be rejected when the associated
            p-value is below the significance level specified here. */
         m_significanceLevel = propList.getFloat("significanceLevel", 0.01f);
@@ -71,6 +71,7 @@ public:
         if (m_sampleCount < 0) // ~5K samples per bin
             m_sampleCount = m_cosThetaResolution * m_phiResolution * 5000;
     }
+	NORI_OBJECT_DEFAULT_CLONE(ChiSquareTest)
 
     virtual ~ChiSquareTest() {
         for (auto bsdf : m_bsdfs)
@@ -90,7 +91,7 @@ public:
     }
 
     /// Execute the chi-square test
-    virtual void initialize() override {
+    virtual void update(const NoriObject *guiObject) override {
         int passed = 0, total = 0, res = m_cosThetaResolution*m_phiResolution;
         pcg32 random; /* Pseudorandom number generator */
 

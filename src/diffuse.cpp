@@ -29,16 +29,23 @@ NORI_NAMESPACE_BEGIN
 class Diffuse : public BSDF
 {
 public:
-    Diffuse(const PropertyList &propList) : m_albedo(nullptr)
+    explicit Diffuse(const PropertyList &propList) : m_albedo(nullptr)
     {
         if (propList.has("albedo"))
         {
             PropertyList l;
             l.setColor("value", propList.getColor("albedo"));
-            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+            m_albedo = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
         }
     }
-    virtual ~Diffuse()
+
+	NoriObject *cloneAndInit() override {
+    	auto clone = new Diffuse(*this);
+    	clone->m_albedo = dynamic_cast<Texture<Color3f>*>(m_albedo->cloneAndInit());
+    	return clone;
+    }
+
+    ~Diffuse() override
     {
         delete m_albedo;
     }
@@ -67,14 +74,14 @@ public:
         }
     }
 
-    virtual void initialize() override
+    virtual void update(const NoriObject *guiObject) override
     {
         if (!m_albedo)
         {
             PropertyList l;
             l.setColor("value", Color3f(0.5f));
             m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-	        m_albedo->initialize();
+	        m_albedo->update(nullptr);
         }
     }
 

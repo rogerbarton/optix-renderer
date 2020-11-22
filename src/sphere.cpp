@@ -27,7 +27,7 @@ NORI_NAMESPACE_BEGIN
 class Sphere : public Shape
 {
 public:
-    Sphere(const PropertyList &propList)
+    explicit Sphere(const PropertyList &propList)
     {
         m_position = propList.getPoint3("center", Point3f());
         m_radius = propList.getFloat("radius", 1.f);
@@ -35,8 +35,9 @@ public:
         m_bbox.expandBy(m_position - Vector3f(m_radius));
         m_bbox.expandBy(m_position + Vector3f(m_radius));
     }
+	NORI_OBJECT_DEFAULT_CLONE(Sphere)
 
-    virtual BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
+	virtual BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
 
     virtual Point3f getCentroid(uint32_t index) const override { return m_position; }
 

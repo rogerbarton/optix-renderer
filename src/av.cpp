@@ -7,12 +7,14 @@ NORI_NAMESPACE_BEGIN
 class AverageVisibilityIntegrator : public Integrator
 {
 public:
-    AverageVisibilityIntegrator(const PropertyList &props)
+    explicit AverageVisibilityIntegrator(const PropertyList &props)
     {
         m_length = props.getFloat("length");
     }
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+	NORI_OBJECT_DEFAULT_CLONE(AverageVisibilityIntegrator)
+
+	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
         Intersection its;
         if (!scene->rayIntersect(ray, its))
@@ -39,7 +41,7 @@ public:
         }
     }
 
-    std::string toString() const
+    std::string toString() const override
     {
         return tfm::format(
             "AverageVisibilityIntegrator[\n"

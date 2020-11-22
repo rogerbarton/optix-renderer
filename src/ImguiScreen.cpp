@@ -327,7 +327,7 @@ void ImguiScreen::draw()
 
 			// show restart button if m_scene is valid
 			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
-				m_renderThread.restartRender(renderingFilename);
+				m_renderThread.restartRender();
 
 			if (m_renderThread.m_scene)
 			{
@@ -378,7 +378,7 @@ void ImguiScreen::draw()
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::BeginChild(42);
-				needsRerender |= drawSceneTree();
+				drawSceneTree();
 				ImGui::EndChild();
 			}
 		}
@@ -527,7 +527,7 @@ void ImguiScreen::keyPressed(int key, int mods)
 	else if (key == GLFW_KEY_ESCAPE)
 		m_renderThread.stopRendering();
 	else if (key == GLFW_KEY_F5)
-		m_renderThread.restartRender(renderingFilename);
+		m_renderThread.restartRender();
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
 	{
 		filebrowserSave.Open();
@@ -625,64 +625,13 @@ void ImguiScreen::initImGui()
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
 }
 
-bool ImguiScreen::drawSceneTree()
+void ImguiScreen::drawSceneTree()
 {
 	// check if a scene exists
-	if (!m_renderThread.m_scene)
-	{
+	if (!m_renderThread.m_guiScene)
 		ImGui::Text("No scene loaded...");
-		return false;
-	}
 
-	bool renderThreadBusy = m_renderThread.isBusy();
-
-	bool ret = false;
-
-	if (renderThreadBusy)
-	{
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha,
-							ImGui::GetStyle().Alpha * 0.5f);
-	}
-
-	// Start columns
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-	ImGui::Columns(2);
-
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-							   ImGuiTreeNodeFlags_Bullet;
-
-	ImGui::AlignTextToFramePadding();
-	ImGui::TreeNodeEx("fileName", flags, "Filename");
-	ImGui::NextColumn();
-	ImGui::SetNextItemWidth(-1);
-	ImGui::Text(filesystem::path(renderingFilename).filename().c_str());
-	ImGui::NextColumn();
-
-	// Start recursion
-	ret |= m_renderThread.m_scene->getImGuiNodes();
-
-	// end columns
-	ImGui::Columns(1);
-	ImGui::Separator();
-	ImGui::PopStyleVar();
-
-	// pop disable flags
-	if (renderThreadBusy)
-	{
-		ImGui::PopItemFlag();
-		ImGui::PopStyleVar();
-	}
-	else
-	{
-		if (currentLayer == PREVIEW && needsRerender)
-		{
-			m_renderThread.restartRender(renderingFilename);
-			needsRerender = false;
-		}
-	}
-
-	return ret;
+	m_renderThread.drawGui();
 }
 
 NORI_NAMESPACE_END

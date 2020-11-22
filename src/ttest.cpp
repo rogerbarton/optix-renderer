@@ -57,7 +57,7 @@ NORI_NAMESPACE_BEGIN
  */
 class StudentsTTest : public NoriObject {
 public:
-    StudentsTTest(const PropertyList &propList) {
+    explicit StudentsTTest(const PropertyList &propList) {
         /* The null hypothesis will be rejected when the associated
            p-value is below the significance level specified here. */
         m_significanceLevel = propList.getFloat("significanceLevel", 0.01f);
@@ -75,8 +75,9 @@ public:
         /* Number of BSDF samples that should be generated (default: 100K) */
         m_sampleCount = propList.getInteger("sampleCount", 100000);
     }
+	NORI_OBJECT_DEFAULT_CLONE(StudentsTTest)
 
-    virtual ~StudentsTTest() {
+	virtual ~StudentsTTest() {
         for (auto bsdf : m_bsdfs)
             delete bsdf;
         for (auto scene : m_scenes)
@@ -100,7 +101,7 @@ public:
     }
 
     /// Invoke a series of t-tests on the provided input
-    virtual void initialize() override {
+    virtual void update(const NoriObject *guiObject) override {
         int total = 0, passed = 0;
         pcg32 random;
 

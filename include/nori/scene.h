@@ -27,21 +27,15 @@
 
 NORI_NAMESPACE_BEGIN
 
-/**
- * \brief Main scene data structure
- *
- * This class holds information on scene objects and is responsible for
- * coordinating rendering jobs. It also provides useful query routines that
- * are mostly used by the \ref Integrator implementations.
- */
+	/**
+	 * \brief Main scene data structure
+	 *
+	 * This class holds information on scene objects and is responsible for
+	 * coordinating rendering jobs. It also provides useful query routines that
+	 * are mostly used by the \ref Integrator implementations.
+	 */
 	class Scene : public NoriObject
 	{
-		enum class ESceneUpdateFlags : unsigned int
-		{
-			Initialize = 0,
-			RebuildBVH = 1,
-			All        = static_cast<unsigned int>(-1)
-		};
 
 	public:
 		/// Construct a new scene object
@@ -49,6 +43,8 @@ NORI_NAMESPACE_BEGIN
 
 		/// Release all memory
 		virtual ~Scene();
+
+		Scene(Scene& other);
 
 		/// Return a pointer to the scene's kd-tree
 		const BVH *getBVH() const { return m_bvh; }
@@ -169,13 +165,15 @@ NORI_NAMESPACE_BEGIN
 			return m_bvh->getBoundingBox();
 		}
 
+		virtual NoriObject *cloneAndInit() override;
+
 		/**
-		 * \brief Inherited from \ref NoriObject::initialize()
+		 * \brief Inherited from \ref NoriObject::update()
 		 *
 		 * Initializes the internal data structures (kd-tree,
 		 * emitter sampling data structures, etc.)
 		 */
-		virtual void initialize() override;
+		virtual void update(const NoriObject *other) override;
 
 		/// Add a child object to the scene (meshes, integrators etc.)
 		virtual void addChild(NoriObject *obj) override;
@@ -194,7 +192,7 @@ NORI_NAMESPACE_BEGIN
 
 
 	private:
-		ESceneUpdateFlags updateFlags             = ESceneUpdateFlags::All;
+		bool rebuildBvh = true;
 
 		std::vector<Shape *> m_shapes;
 		Integrator           *m_integrator        = nullptr;

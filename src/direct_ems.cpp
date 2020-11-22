@@ -8,7 +8,9 @@ NORI_NAMESPACE_BEGIN
 class DirectEMSIntegrator : public Integrator
 {
 public:
-  DirectEMSIntegrator(const PropertyList &propList) {}
+  explicit DirectEMSIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectEMSIntegrator)
+
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
     Intersection its;

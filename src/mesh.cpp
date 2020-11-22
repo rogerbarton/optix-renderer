@@ -27,9 +27,9 @@ NORI_NAMESPACE_BEGIN
 
 Mesh::Mesh() {}
 
-void Mesh::initialize()
+void Mesh::update(const NoriObject *guiObject)
 {
-	Shape::initialize();
+	Shape::update(guiObject);
 
     m_pdf.reserve(getPrimitiveCount());
     for (uint32_t i = 0; i < getPrimitiveCount(); ++i)

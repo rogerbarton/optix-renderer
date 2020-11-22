@@ -9,7 +9,8 @@ NORI_NAMESPACE_BEGIN
 class DirectIntegrator : public Integrator
 {
 public:
-  DirectIntegrator(const PropertyList &propList) {}
+  explicit DirectIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectIntegrator)
 
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {

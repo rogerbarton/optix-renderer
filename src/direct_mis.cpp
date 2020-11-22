@@ -8,7 +8,9 @@ NORI_NAMESPACE_BEGIN
 class DirectMISIntegrator : public Integrator
 {
 public:
-  DirectMISIntegrator(const PropertyList &propList) {}
+  explicit DirectMISIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectMISIntegrator)
+
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
     Intersection its;

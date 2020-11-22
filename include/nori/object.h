@@ -124,13 +124,28 @@ public:
     { /* Do nothing */
     }
 
-    bool isInitialized = false;
+    /**
+     * Clones the object, initializes the copy and returns the new copy. Does a deep copy.
+     */
+	virtual NoriObject *cloneAndInit() = 0;
+
+	/**
+	 * Creates a copy constructor for the derived class.
+	 * Can be used in most cases where there are no pointer members, as this function should perform a deep copy.
+	 * See also: https://stackoverflow.com/questions/12255546/c-deep-copying-a-base-class-pointer
+	 */
+#   define NORI_OBJECT_DEFAULT_CLONE(cls) \
+	NoriObject *cloneAndInit() override { \
+		return new cls(*this);            \
+	}                                     \
+
+    bool touched = true; // if the gui has modified the object, optionally add for children
     /**
      * Initialize the object when the scene has changed before rendering.
      */
-    virtual void initialize()
+    virtual void update(const NoriObject *guiObject)
     {
-    	isInitialized = true;
+	    touched = false;
     }
 
     /// Return a brief string summary of the instance (for debugging purposes)

@@ -25,7 +25,7 @@ NORI_NAMESPACE_BEGIN
 class Microfacet : public BSDF
 {
 public:
-  Microfacet(const PropertyList &propList)
+  explicit Microfacet(const PropertyList &propList)
   {
     /* RMS surface roughness */
     m_alpha = propList.getFloat("alpha", 0.1f);
@@ -49,6 +49,7 @@ public:
        of this BRDF. */
     m_ks = 1 - m_kd.maxCoeff();
   }
+  NORI_OBJECT_DEFAULT_CLONE(Microfacet)
 
   /// Evaluate the microfacet normal distribution D
   float evalBeckmann(const Normal3f &m) const
