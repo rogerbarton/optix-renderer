@@ -159,13 +159,12 @@ public:
 
         ImGui::Text(m_albedo->getImGuiName());
         ImGui::NextColumn();
-        bool ret = false;
         if (node_open)
         {
-            ret |= m_albedo->getImGuiNodes();
+            touched |= m_albedo->getImGuiNodes();
             ImGui::TreePop();
         }
-        return ret;
+        return touched;
     }
 #endif
 
