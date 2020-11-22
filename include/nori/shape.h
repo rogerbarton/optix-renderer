@@ -175,9 +175,9 @@ public:
 	 * Has the shape geometry been modified that the BVH, specifically GAS, needs to be reconstructed?
 	 */
 	mutable bool geometryTouched = true;
+    Emitter *m_emitter = nullptr; ///< Associated emitter, if any
 protected:
     BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
-    Emitter *m_emitter = nullptr; ///< Associated emitter, if any
     BoundingBox3f m_bbox;         ///< Bounding box of the mesh
 };
 

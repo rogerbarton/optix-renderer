@@ -122,14 +122,16 @@ NORI_NAMESPACE_BEGIN
 		void cloneAndInit(Emitter *clone)
 		{
 			// Shape already cloned
-			// clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
+			// if(m_shape)
+			// 	clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
 		}
 
 		void update(const NoriObject *guiObject) override
 		{
 			const auto *gui = static_cast<const Emitter *>(guiObject);
 			m_position = gui->m_position;
-			m_shape->update(gui->m_shape);
+			// if(m_shape)
+			// 	m_shape->update(gui->m_shape);
 		}
 
 		/**
@@ -148,6 +150,8 @@ NORI_NAMESPACE_BEGIN
 		 * */
 		void setShape(Shape *shape) { m_shape = shape; }
 
+		bool hasShape() { return m_shape != nullptr; }
+
 		Point3f getPosition() const { return m_position; }
 #ifndef NORI_USE_NANOGUI
 		virtual const char *getImGuiName() const override { return "Emitter Base"; }
@@ -162,6 +166,7 @@ NORI_NAMESPACE_BEGIN
 			touched |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
 			ImGui::NextColumn();
 			ImGui::PopID();
+
 			return touched;
 		}
 #endif

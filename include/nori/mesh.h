@@ -35,6 +35,7 @@ NORI_NAMESPACE_BEGIN
 class Mesh : public Shape
 {
 public:
+	Mesh() : m_pdf() {}
     /// Initialize internal data structures (called once by the XML parser)
     virtual void update(const NoriObject *guiObject) override;
 

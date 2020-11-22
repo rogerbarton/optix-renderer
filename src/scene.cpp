@@ -40,7 +40,8 @@ NORI_NAMESPACE_BEGIN
 		for (auto s : m_shapes)
 			delete s;
 		for (auto e : m_emitters)
-			delete e;
+			if (!e->hasShape())
+				delete e;
 		m_emitters.clear();
 
 		delete m_envmap;
@@ -86,14 +87,27 @@ NORI_NAMESPACE_BEGIN
 		if (m_denoiser)
 			clone->m_denoiser = static_cast<Denoiser *>(m_denoiser->cloneAndInit());
 
+		// Workaround for having a pointer cycle
+		// Create map from emitter ids to shape ids
+		std::map<int, int> shapeToEmitter{};
+		for (int           i = 0; i < m_emitters.size(); ++i)
+			if (!m_emitters[i]->hasShape())
+				clone->m_emitters[i] = static_cast<Emitter *>(m_emitters[i]->cloneAndInit());
+			else
+			{
+				int m = 0;
+				while(m_emitters[i] != m_shapes[m]->getEmitter())
+					m++;
+				shapeToEmitter.insert({m, i});
+			}
+
 		for (int i = 0; i < m_shapes.size(); ++i)
 		{
 			clone->m_shapes[i] = static_cast<Shape *>(m_shapes[i]->cloneAndInit());
-			if (m_shapes[i]->isEmitter())
-			{
-				m_emitters.push_back(m_shapes[i]->getEmitter());
-				clone->m_emitters.push_back(clone->m_shapes[i]->getEmitter());
-			}
+
+			// Update shape pointer in emitter (!)
+			if (clone->m_shapes[i]->isEmitter())
+				m_emitters[shapeToEmitter[i]]->setShape(clone->m_shapes[i]);
 		}
 
 #ifdef NORI_USE_VOLUMES
@@ -129,6 +143,7 @@ NORI_NAMESPACE_BEGIN
 			m_shapes[i]->update(gui->m_shapes[i]);
 
 		for (int i = 0; i < gui->m_emitters.size(); ++i)
+			// if (!m_emitters[i]->hasShape())
 			m_emitters[i]->update(gui->m_emitters[i]);
 
 #ifdef NORI_USE_VOLUMES
@@ -146,7 +161,7 @@ NORI_NAMESPACE_BEGIN
 			m_bvh->build();
 		}
 
-		gui->geometryTouched = false;
+		gui->geometryTouched  = false;
 		gui->transformTouched = false;
 	}
 
@@ -158,6 +173,8 @@ NORI_NAMESPACE_BEGIN
 			{
 				Shape *shape = static_cast<Shape *>(obj);
 				m_shapes.push_back(shape);
+				if (shape->isEmitter())
+					m_emitters.push_back(shape->getEmitter());
 			}
 				break;
 
@@ -365,7 +382,7 @@ NORI_NAMESPACE_BEGIN
 				{
 					touched |= m_shapes[i]->getImGuiNodes();
 					transformTouched |= m_shapes[i]->transformTouched;
-					geometryTouched  |= m_shapes[i]->geometryTouched;
+					geometryTouched |= m_shapes[i]->geometryTouched;
 
 					ImGui::TreePop();
 				}

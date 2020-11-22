@@ -43,13 +43,15 @@ void Shape::update(const NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const Shape *>(guiObject);
 	m_bsdf->update(gui->m_bsdf);
+	if(m_emitter)
+		m_emitter->update(gui->m_emitter);
     // Note: Emitter updated by scene
 }
 
 Shape::~Shape()
 {
 	delete m_bsdf;
-	//delete m_emitter; // scene is responsible for deleting the emitter
+	//delete m_emitter; // Emitter is parent of Shape
 }
 
 void Shape::addChild(NoriObject *obj)

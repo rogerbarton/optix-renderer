@@ -32,9 +32,7 @@ void Mesh::update(const NoriObject *guiObject)
 	{
 		m_pdf.reserve(getPrimitiveCount());
 		for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
-		{
 			m_pdf.append(surfaceArea(i));
-		}
 		m_pdf.normalize();
 	}
 
