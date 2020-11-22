@@ -133,8 +133,10 @@ NORI_NAMESPACE_BEGIN
 
 		/* Allocate memory for the entire output image and clear it */
 		const Camera *camera    = m_renderScene->getCamera();
+		m_block.lock();
 		m_block.init(camera->getOutputSize(), camera->getReconstructionFilter());
 		m_block.clear();
+		m_block.unlock();
 
 		cout << "Rendering .. " << std::flush;
 
