@@ -173,14 +173,11 @@ public:
 
     virtual bool getImGuiNodes() override
     {
-        ImGui::PushID(EMesh);
-        bool ret = Shape::getImGuiNodes();
-        // get ImGuiNodes for all children and own
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        ImGui::PushID(EShape);
+        touched |= Mesh::getImGuiNodes();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("name", flags, "Filename");
+        ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text(filename.filename().c_str());
@@ -188,7 +185,7 @@ public:
 
         ImGui::PopID();
 
-        return ret;
+        return touched;
     }
 
 protected:

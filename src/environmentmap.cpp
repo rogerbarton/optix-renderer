@@ -140,10 +140,7 @@ public:
 	virtual const char *getImGuiName() const override { return "PNG Environment Map"; }
 	virtual bool getImGuiNodes() override
 	{
-		bool ret = EnvironmentMap::getImGuiNodes();
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+		touched |= EnvironmentMap::getImGuiNodes();
 
 		if (m_map)
 		{
@@ -155,39 +152,39 @@ public:
 			ImGui::NextColumn();
 			if (node_open)
 			{
-				ret |= m_map->getImGuiNodes();
+				touched |= m_map->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
 
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("scale U", flags, "Scale U");
+        ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		touched |= ImGui::DragFloat("##value", &scaleU, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("SphereTexture", flags, "Sphere Texture");
+        ImGui::TreeNodeEx("SphereTexture", ImGuiLeafNodeFlags, "Sphere Texture");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::Checkbox("##value", &sphereTexture);
+		touched |= ImGui::Checkbox("##value", &sphereTexture);
         ImGui::NextColumn();
         ImGui::PopID();
 
-		return ret;
+		return touched;
 	}
 #endif
 private:

@@ -57,16 +57,15 @@ public:
     virtual bool getImGuiNodes() override
     {
         ImGui::PushID(EReconstructionFilter);
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("Shape", flags, "Shape");
+        ImGui::TreeNodeEx("Shape", ImGuiLeafNodeFlags, "Shape");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        bool ret = ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
-        return ret;
+        return touched;
     }
     #endif
 

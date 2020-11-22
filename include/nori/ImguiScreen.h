@@ -32,8 +32,8 @@ public:
 public:
 	MouseState() {}
 	~MouseState() {}
-	void onMouseClick(double xPos, double yPos, int button, int action,
-					  int mods)
+
+	void onMouseClick(double xPos, double yPos, int button, int action, int mods)
 	{
 		this->mods = mods;
 
@@ -49,6 +49,7 @@ public:
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 			rButtonPressed = (action != GLFW_RELEASE);
 	}
+
 	void onMouseMove(double xPos, double yPos)
 	{
 		mouseMoveX = lastMouseX - xPos;
@@ -142,10 +143,6 @@ private:
 	Vector2i imageOffset = Vector2i(0);
 	float imageZoom = 1.f;
 
-	/**
-	 * Draws the editable scene tree with imgui
-	 */
-	void drawSceneTree();
 };
 
 NORI_NAMESPACE_END

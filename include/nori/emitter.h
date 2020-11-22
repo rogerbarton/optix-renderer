@@ -141,19 +141,16 @@ NORI_NAMESPACE_BEGIN
 		virtual const char *getImGuiName() const override { return "Emitter Base"; }
 		virtual bool getImGuiNodes() override
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-			                           ImGuiTreeNodeFlags_Bullet;
-			bool               ret   = false;
 			ImGui::PushID(EEmitter);
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Position", flags, "Position");
+			ImGui::TreeNodeEx("Position", ImGuiLeafNodeFlags, "Position");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			ret |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
+			touched |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
 			ImGui::NextColumn();
 			ImGui::PopID();
-			return ret;
+			return touched;
 		}
 #endif
 

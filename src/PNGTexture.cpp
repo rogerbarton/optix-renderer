@@ -137,28 +137,26 @@ public:
 
 #ifndef NORI_USE_NANOGUI
 	virtual const char* getImGuiName() const override { return "PNG Texture"; }
-    virtual bool getImGuiNodes() override {
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-								   ImGuiTreeNodeFlags_Bullet;
-
-		bool ret = Texture::getImGuiNodes();
+    virtual bool getImGuiNodes() override
+    {
+		touched |= Texture::getImGuiNodes();
 
 		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("fileName", flags, "Filename");
+		ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
 		ImGui::Text(filename.filename().c_str());
 		ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("width", flags, "Width");
+        ImGui::TreeNodeEx("width", ImGuiLeafNodeFlags, "Width");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text("%d Pixels", width);
         ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("height", flags, "Height");
+        ImGui::TreeNodeEx("height", ImGuiLeafNodeFlags, "Height");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text("%d Pixels", height);
@@ -166,34 +164,34 @@ public:
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("scale U", flags, "Scale U");
+        ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
 		eulerAngles *= 180.f * INV_PI;
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
-        ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
+        ImGui::TreeNodeEx("Euler Angles", ImGuiLeafNodeFlags, "EulerAngles");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.5, -360, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragVector3f("##value", &eulerAngles, 0.5, -360, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 		eulerAngles *= M_PI / 180.f;
 
-		return ret;
+		return touched;
 	}
 #endif
 

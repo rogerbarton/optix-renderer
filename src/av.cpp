@@ -55,21 +55,19 @@ public:
 
     virtual bool getImGuiNodes() override
     {
-        bool ret = Integrator::getImGuiNodes();
-        
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        touched |= Integrator::getImGuiNodes();
+
         ImGui::AlignTextToFramePadding();
 
-        ImGui::TreeNodeEx("length", flags, "Length");
+        ImGui::TreeNodeEx("length", ImGuiLeafNodeFlags, "Length");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(1);
-        ret |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
         ImGui::NextColumn();
 
-        return ret;
+        return touched;
     }
 #endif
 protected:

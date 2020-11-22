@@ -49,9 +49,7 @@ NORI_NAMESPACE_BEGIN
 
 	NoriObject *Scene::cloneAndInit()
 	{
-		Scene *clone = new Scene(*this);
-
-		// -- Validate scene before cloning, TODO: move to finalizeDeserialize?
+		// -- Validate scene before cloning
 		if (!m_integrator)
 			throw NoriException("No integrator was specified!");
 		if (!m_camera)
@@ -64,7 +62,16 @@ NORI_NAMESPACE_BEGIN
 					NoriObjectFactory::createInstance("independent", PropertyList()));
 		}
 
-		// -- Deep copy children
+		if(!m_previewIntegrator)
+		{
+			m_previewIntegrator = dynamic_cast<Integrator *>(
+					NoriObjectFactory::createInstance("preview", PropertyList()));
+		}
+
+		Scene *clone = new Scene(*this);
+		clone->m_bvh = new BVH();
+
+		// -- Copy and initialize children
 		clone->m_integrator        = dynamic_cast<Integrator *>(m_integrator->cloneAndInit());
 		clone->m_previewIntegrator = dynamic_cast<Integrator *>(m_previewIntegrator->cloneAndInit());
 		// clone->m_preview_mode = m_preview_mode; // already copied?
@@ -88,11 +95,6 @@ NORI_NAMESPACE_BEGIN
 		for (int i = 0; i < m_volumes.size(); ++i)
 			clone->m_volumes[i] = dynamic_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
-
-		// -- Init clone
-		clone->m_bvh               = new BVH();
-		clone->m_previewIntegrator = dynamic_cast<Integrator *>(
-				NoriObjectFactory::createInstance("preview", PropertyList()));
 
 		cout << endl << "Configuration: " << clone->toString() << endl << endl;
 
@@ -127,20 +129,24 @@ NORI_NAMESPACE_BEGIN
 
 		// -- Update this
 		if (gui->rebuildBvh)
+		{
+			m_bvh->clear();
+			for(const auto shape : m_shapes)
+				m_bvh->addShape(shape);
 			m_bvh->build();
+		}
 	}
 
 	void Scene::addChild(NoriObject *obj)
 	{
 		switch (obj->getClassType())
 		{
-			case EMesh:
+			case EShape:
 			{
-				Shape *mesh = dynamic_cast<Shape *>(obj);
-				m_bvh->addShape(mesh);
-				m_shapes.push_back(mesh);
-				if (mesh->isEmitter())
-					m_emitters.push_back(mesh->getEmitter());
+				Shape *shape = dynamic_cast<Shape *>(obj);
+				m_shapes.push_back(shape);
+				if (shape->isEmitter())
+					m_emitters.push_back(shape->getEmitter());
 			}
 				break;
 
@@ -358,12 +364,12 @@ NORI_NAMESPACE_BEGIN
 			ImGui::TreePop();
 		}
 
-		bool node_open_emitter = ImGui::TreeNode("Emitter");
+		bool node_open_emitters = ImGui::TreeNode("Emitters");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
 		ImGui::Text("%d Emitters", (int) m_emitters.size());
 		ImGui::NextColumn();
-		if (node_open_emitter)
+		if (node_open_emitters)
 		{
 			for (int i = 0; i < m_emitters.size(); i++)
 			{

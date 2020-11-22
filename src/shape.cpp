@@ -91,8 +91,7 @@ std::string Intersection::toString() const
 #ifndef NORI_USE_NANOGUI
 bool Shape::getImGuiNodes()
 {
-    bool ret = false;
-    ImGui::PushID(EMesh);
+    ImGui::PushID(EShape);
     if (m_bsdf)
     {
         bool node_open_bsdf = ImGui::TreeNode("BSDF");
@@ -103,7 +102,7 @@ bool Shape::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_bsdf)
         {
-            ret |= m_bsdf->getImGuiNodes();
+            touched |= m_bsdf->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -118,12 +117,12 @@ bool Shape::getImGuiNodes()
         ImGui::NextColumn();
         if (node_open_emitter)
         {
-            ret |= m_emitter->getImGuiNodes();
+            touched |= m_emitter->getImGuiNodes();
             ImGui::TreePop();
         }
     }
     ImGui::PopID();
-    return ret;
+    return touched;
 }
 #endif
 

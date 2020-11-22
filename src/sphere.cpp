@@ -116,26 +116,23 @@ public:
     virtual const char *getImGuiName() const override { return "Sphere"; }
     virtual bool getImGuiNodes() override
     {
-        // get ImGuiNodes for all children and own
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-        bool ret = Shape::getImGuiNodes();
+    	touched |= Shape::getImGuiNodes();
         
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("center", flags, "Center");
+        ImGui::TreeNodeEx("center", ImGuiLeafNodeFlags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragPoint3f("##value", &m_position);
+	    touched |= ImGui::DragPoint3f("##value", &m_position);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("radius", flags, "Radius");
+        ImGui::TreeNodeEx("radius", ImGuiLeafNodeFlags, "Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_radius, 0.1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
-        return ret;
+        return touched;
     }
     #endif
 

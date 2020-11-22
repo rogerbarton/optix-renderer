@@ -135,17 +135,15 @@ public:
     virtual bool getImGuiNodes() override
     {
         ImGui::PushID(ESampler);
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
 
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
+        ImGui::TreeNodeEx("sampleCount", ImGuiLeafNodeFlags, "Sample Count");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        bool ret = ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
-        return ret;
+        return touched;
     }
     virtual const char *getImGuiName() const override { return "Sampler base"; }
 #endif

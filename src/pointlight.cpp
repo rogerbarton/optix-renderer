@@ -76,19 +76,17 @@ NORI_NAMESPACE_BEGIN
 		virtual const char *getImGuiName() const override { return "Pointlight"; }
 		virtual bool getImGuiNodes() override
 		{
-			bool               ret   = Emitter::getImGuiNodes();
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-			                           ImGuiTreeNodeFlags_Bullet;
+			touched |= Emitter::getImGuiNodes();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("power", flags, "Power");
+			ImGui::TreeNodeEx("power", ImGuiLeafNodeFlags, "Power");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			ret |= ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
+			touched |= ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
 			                          ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 
-			return ret;
+			return touched;
 		}
 #endif
 

@@ -161,49 +161,45 @@ public:
   }
   virtual bool getImGuiNodes() override
   {
+	  touched |= BSDF::getImGuiNodes();
 
-    bool ret = BSDF::getImGuiNodes();
+	  ImGui::AlignTextToFramePadding();
+	  ImGui::PushID(1);
+	  ImGui::TreeNodeEx("alpha", ImGuiLeafNodeFlags, "Alpha");
+	  ImGui::NextColumn();
+	  ImGui::SetNextItemWidth(-1);
+	  touched |= ImGui::DragFloat("##value", &m_alpha, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	  ImGui::NextColumn();
+	  ImGui::PopID();
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                               ImGuiTreeNodeFlags_Bullet;
+	  ImGui::AlignTextToFramePadding();
+	  ImGui::PushID(2);
+	  ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
+	  ImGui::NextColumn();
+	  ImGui::SetNextItemWidth(-1);
+	  touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	  ImGui::NextColumn();
+	  ImGui::PopID();
 
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushID(1);
-    ImGui::TreeNodeEx("alpha", flags, "Alpha");
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragFloat("##value", &m_alpha, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::NextColumn();
-    ImGui::PopID();
+	  ImGui::AlignTextToFramePadding();
+	  ImGui::PushID(3);
+	  ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
+	  ImGui::NextColumn();
+	  ImGui::SetNextItemWidth(-1);
+	  touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	  ImGui::NextColumn();
+	  ImGui::PopID();
 
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushID(2);
-    ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::NextColumn();
-    ImGui::PopID();
+	  ImGui::AlignTextToFramePadding();
+	  ImGui::PushID(3);
+	  ImGui::TreeNodeEx("Albedo of Diffuse Base", ImGuiLeafNodeFlags, "Albedo of Diffuse Base");
+	  ImGui::NextColumn();
+	  ImGui::SetNextItemWidth(-1);
+	  touched |= ImGui::ColorPicker("##value", &m_kd);
+	  ImGui::NextColumn();
+	  ImGui::PopID();
 
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushID(3);
-    ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::NextColumn();
-    ImGui::PopID();
-
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushID(3);
-    ImGui::TreeNodeEx("Albedo of Diffuse Base", flags, "Albedo of Diffuse Base");
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::ColorPicker("##value", &m_kd);
-    ImGui::NextColumn();
-    ImGui::PopID();
-    
-    return ret;
+	  return touched;
   }
 #endif
 

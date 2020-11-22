@@ -101,6 +101,8 @@ public:
 private:
     Eigen::Matrix4f m_transform;
     Eigen::Matrix4f m_inverse;
+
+    bool touched = true;
 };
 
 NORI_NAMESPACE_END

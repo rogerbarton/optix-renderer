@@ -130,17 +130,15 @@ public:
 
     bool getImGuiNodes() override
     {
-        bool ret = Sampler::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+	    touched |= Sampler::getImGuiNodes();
 
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("uniformEvery", flags, "Uniform Every");
+        ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
-        return ret;
+        return touched;
     }
     #endif
 

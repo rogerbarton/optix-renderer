@@ -30,17 +30,15 @@ NORI_NAMESPACE_BEGIN
 		}
 		virtual bool getImGuiNodes() override
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-			                           ImGuiTreeNodeFlags_Bullet;
 			ImGui::PushID(EVolume);
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("fileName", flags, "Filename");
+			ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::Text(filename.filename().c_str());
 			ImGui::NextColumn();
 			ImGui::PopID();
-			return false;
+			return touched;
 		}
 #endif
 

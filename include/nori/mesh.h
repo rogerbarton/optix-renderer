@@ -115,10 +115,10 @@ public:
     virtual const char *getImGuiName() const override { return "Mesh"; }
     virtual bool getImGuiNodes() override
     {
-        ImGui::PushID(EMesh);
-        bool ret = Shape::getImGuiNodes();
+        ImGui::PushID(EShape);
+        touched |= Shape::getImGuiNodes();
         ImGui::PopID();
-        return ret;
+        return touched;
     }
 #endif
 

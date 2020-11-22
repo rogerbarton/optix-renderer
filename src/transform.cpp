@@ -19,19 +19,14 @@ std::string Transform::toString() const
 #ifndef NORI_USE_NANOGUI
 bool Transform::getImGuiNodes()
 {
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                               ImGuiTreeNodeFlags_Bullet;
-
     nori::Vector3f origin = m_transform.col(3).head(3);
-
-    bool ret = false;
 
     ImGui::AlignTextToFramePadding();
     ImGui::PushID(1);
-    ImGui::TreeNodeEx("origin", flags, "Origin");
+    ImGui::TreeNodeEx("origin", ImGuiLeafNodeFlags, "Origin");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragVector3f("##value", &origin);
+    touched |= ImGui::DragVector3f("##value", &origin);
     ImGui::PopID();
     ImGui::NextColumn();
 
@@ -40,15 +35,15 @@ bool Transform::getImGuiNodes()
 
     ImGui::AlignTextToFramePadding();
     ImGui::PushID(2);
-    ImGui::TreeNodeEx("eulerAngles", flags, "Euler Angles");
+    ImGui::TreeNodeEx("eulerAngles", ImGuiLeafNodeFlags, "Euler Angles");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.5f, -360, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	touched |= ImGui::DragVector3f("##value", &eulerAngles, 0.5f, -360, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::PopID();
     ImGui::NextColumn();
 
-    if (!ret)
-        return ret;
+    if (!touched)
+        return touched;
 
     // convert euler angles + origin back to matrix
     m_transform.col(3).head(3) = origin;
@@ -67,7 +62,7 @@ bool Transform::getImGuiNodes()
     // Update inverse as well
     m_inverse = m_transform.inverse();
 
-    return ret;
+    return touched;
 }
 #endif
 
@@ -78,6 +73,8 @@ Transform Transform::operator*(const Transform &t) const
 }
 void Transform::update(const Transform &guiObject)
 {
+	if(!touched) return;
+	touched = false;
 	*this = guiObject;
 }
 

@@ -196,9 +196,7 @@ public:
 #ifndef NORI_USE_NANOGUI
     virtual const char* getImGuiName() const override { return "Perspective"; }
     virtual bool getImGuiNodes() override {
-        bool ret = Camera::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        touched |= Camera::getImGuiNodes();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(0);
@@ -208,57 +206,57 @@ public:
         ImGui::Text("To World");
         ImGui::NextColumn();
         if(node_open) {
-            ret |= m_cameraToWorld.getImGuiNodes();
+	        touched |= m_cameraToWorld.getImGuiNodes();
             ImGui::TreePop();
         }
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("fov", flags, "Field Of View");
+        ImGui::TreeNodeEx("fov", ImGuiLeafNodeFlags, "Field Of View");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("nearCLip", flags, "Near Clip");
+        ImGui::TreeNodeEx("nearCLip", ImGuiLeafNodeFlags, "Near Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("fov", flags, "Far Clip");
+        ImGui::TreeNodeEx("fov", ImGuiLeafNodeFlags, "Far Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
-        ImGui::TreeNodeEx("lensRadius", flags, "Lens Radius");
+        ImGui::TreeNodeEx("lensRadius", ImGuiLeafNodeFlags, "Lens Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(5);
-        ImGui::TreeNodeEx("focalDistance", flags, "Focal Distance");
+        ImGui::TreeNodeEx("focalDistance", ImGuiLeafNodeFlags, "Focal Distance");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
-        return ret;
+        return touched;
     }
 #endif
 private:

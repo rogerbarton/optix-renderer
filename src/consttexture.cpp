@@ -72,39 +72,33 @@ std::string ConstantTexture<Color3f>::toString() const
 template <>
 bool ConstantTexture<float>::getImGuiNodes()
 {
-    bool ret = Texture::getImGuiNodes();
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                               ImGuiTreeNodeFlags_Bullet;
-
-    int id = 1;
+    touched |= Texture::getImGuiNodes();
 
     ImGui::AlignTextToFramePadding();
 
-    ImGui::TreeNodeEx("Float", flags, "Float");
+    ImGui::TreeNodeEx("Float", ImGuiLeafNodeFlags, "Float");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ret |= ImGui::DragFloat("##value", &m_value, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	touched |= ImGui::DragFloat("##value", &m_value, 0.01f, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
-    return ret;
+    return touched;
 }
 
 template <>
 bool ConstantTexture<Color3f>::getImGuiNodes()
 {
-    bool ret = Texture::getImGuiNodes();
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                               ImGuiTreeNodeFlags_Bullet;
+	touched |= Texture::getImGuiNodes();
 
     ImGui::AlignTextToFramePadding();
 
-    ImGui::TreeNodeEx("Color", flags, "Color");
+    ImGui::TreeNodeEx("Color", ImGuiLeafNodeFlags, "Color");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
 
-    ret |= ImGui::ColorPicker("##value", &m_value);
+	touched |= ImGui::ColorPicker("##value", &m_value);
     ImGui::NextColumn();
-    return ret;
+    return touched;
 }
 #endif
 

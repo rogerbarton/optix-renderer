@@ -1,19 +1,18 @@
 #include <nori/bsdf.h>
 #include <nori/frame.h>
-#include <nori/common.h>
 #include <nori/warp.h>
 
 NORI_NAMESPACE_BEGIN
 
 // this helper macro adds the ImGui code for one of the 10 variables
-#define ImGuiValue(variable, varName)                                                               \
-    ImGui::AlignTextToFramePadding();                                                               \
-    ImGui::TreeNodeEx(varName, flags, varName);                                                     \
-    ImGui::NextColumn();                                                                            \
-    ImGui::SetNextItemWidth(-1);                                                                    \
-    ImGui::PushID(id++);                                                                            \
-    ret |= ImGui::DragFloat("##value", &variable, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
-    ImGui::PopID();                                                                                 \
+#define ImGuiValue(variable, varName)                                                                    \
+    ImGui::AlignTextToFramePadding();                                                                    \
+    ImGui::TreeNodeEx(varName, ImGuiLeafNodeFlags, varName);                                             \
+    ImGui::NextColumn();                                                                                 \
+    ImGui::SetNextItemWidth(-1);                                                                         \
+    ImGui::PushID(id++);                                                                                 \
+    touched |= ImGui::DragFloat("##value", &variable, 0.01f, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
+    ImGui::PopID();                                                                                      \
     ImGui::NextColumn();
 
 class Disney : public BSDF
@@ -152,20 +151,17 @@ public:
     }
     virtual bool getImGuiNodes() override
     {
-        bool ret = BSDF::getImGuiNodes();
-
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        touched |= BSDF::getImGuiNodes();
 
         int id = 1;
 
         ImGui::AlignTextToFramePadding();
 
-        ImGui::TreeNodeEx("baseColor", flags, "Base Color");
+        ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::PushID(id++);
-        ret |= ImGui::ColorPicker("##value", &baseColor);
+        touched |= ImGui::ColorPicker("##value", &baseColor);
         ImGui::PopID();
         ImGui::NextColumn();
 
@@ -180,7 +176,7 @@ public:
         ImGuiValue(clearcoat, "Clearcoat");
         ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
 
-        return ret;
+        return touched;
     }
 #endif
 private:
