@@ -16,6 +16,7 @@ public:
 	}
 
 	NoriObject *cloneAndInit() override {
+		// Use constant texture as a fallback
 		if(!m_map)
 		{
 			PropertyList l;

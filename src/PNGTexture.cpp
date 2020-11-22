@@ -7,7 +7,7 @@
 
 NORI_NAMESPACE_BEGIN
 
-class PNGTexture : public Texture<Vector3f>
+class PNGTexture : public Texture<Color3f>
 {
 public:
 	explicit PNGTexture(const PropertyList &props)
@@ -91,7 +91,7 @@ public:
 	}
 
 	//4 bytes per pixel, ordered RGBA
-	Vector3f eval(const Point2f &_uv) override
+	Color3f eval(const Point2f &_uv) override
 	{
 		Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);
 
@@ -106,7 +106,7 @@ public:
 		uv.x() = uv_coords.y() / (2.f * M_PI);
 		uv.y() = uv_coords.x() / M_PI;
 
-		Vector3f out;
+		Color3f out;
 		unsigned int w = static_cast<unsigned int>((uv[0]) * scaleU * (float)width);
 		unsigned int h = static_cast<unsigned int>((uv[1]) * scaleV * (float)height);
 
