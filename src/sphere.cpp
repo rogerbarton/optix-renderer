@@ -53,6 +53,15 @@ public:
 		m_radius   = gui->m_radius;
 
 		Shape::update(guiObject);
+
+		if(gui->geometryTouched || gui->transformTouched)
+		{
+			m_bbox.expandBy(m_position - Vector3f(m_radius));
+			m_bbox.expandBy(m_position + Vector3f(m_radius));
+		}
+
+		gui->geometryTouched = false;
+		gui->transformTouched = false;
 	}
 
 	virtual BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
@@ -139,16 +148,17 @@ public:
         ImGui::TreeNodeEx("center", ImGuiLeafNodeFlags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragPoint3f("##value", &m_position);
+	    transformTouched |= ImGui::DragPoint3f("##value", &m_position);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("radius", ImGuiLeafNodeFlags, "Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    geometryTouched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
+        touched |= geometryTouched | transformTouched;
         return touched;
     }
     #endif

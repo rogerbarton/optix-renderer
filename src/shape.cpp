@@ -39,10 +39,8 @@ void Shape::cloneAndInit(Shape *clone)
 void Shape::update(const NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const Shape *>(guiObject);
-
 	m_bsdf->update(gui->m_bsdf);
-
-    // Emitter updated by scene
+    // Note: Emitter updated by scene
 }
 
 Shape::~Shape()

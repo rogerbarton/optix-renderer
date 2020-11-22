@@ -190,8 +190,6 @@ NORI_NAMESPACE_BEGIN
 
 
 	private:
-		mutable bool rebuildBvh = true;
-
 		std::vector<Shape *> m_shapes;
 		Integrator           *m_integrator        = nullptr;
 		Integrator           *m_previewIntegrator = nullptr;
@@ -210,6 +208,16 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_VOLUMES
 		std::vector<Volume *> m_volumes;
 #endif
+
+		/**
+		 * Has the shape only been moved/transformed. Only IAS needs to be reconstructed
+		 */
+		mutable bool transformTouched = true;
+
+		/**
+		 * Has the shape geometry been modified that the BVH, specifically GAS, needs to be reconstructed?
+		 */
+		mutable bool geometryTouched = true;
 	};
 
 NORI_NAMESPACE_END

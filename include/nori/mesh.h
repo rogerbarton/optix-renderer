@@ -130,8 +130,6 @@ protected:
     MatrixXu m_F;       ///< Faces
 
     DiscretePDF m_pdf;
-
-    bool meshDirty = true;
 };
 
 NORI_NAMESPACE_END

@@ -166,6 +166,15 @@ public:
     virtual bool getImGuiNodes() override;
 #endif
 
+	/**
+	 * Has the shape only been moved/transformed. Only IAS needs to be reconstructed
+	 */
+	mutable bool transformTouched = true;
+
+	/**
+	 * Has the shape geometry been modified that the BVH, specifically GAS, needs to be reconstructed?
+	 */
+	mutable bool geometryTouched = true;
 protected:
     BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
     Emitter *m_emitter = nullptr; ///< Associated emitter, if any

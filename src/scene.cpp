@@ -37,6 +37,8 @@ NORI_NAMESPACE_BEGIN
 		delete m_sampler;
 		delete m_camera;
 		delete m_integrator;
+		for (auto s : m_shapes)
+			delete s;
 		for (auto e : m_emitters)
 			delete e;
 		m_emitters.clear();
@@ -135,14 +137,17 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 		// -- Update this
-		if (gui->rebuildBvh)
+		if (gui->geometryTouched || gui->transformTouched)
 		{
-			gui->rebuildBvh = false;
+			std::cout << "Rebuilding BVH" << std::endl;
 			m_bvh->clear();
 			for (const auto shape : m_shapes)
 				m_bvh->addShape(shape);
 			m_bvh->build();
 		}
+
+		gui->geometryTouched = false;
+		gui->transformTouched = false;
 	}
 
 	void Scene::addChild(NoriObject *obj)
@@ -359,6 +364,8 @@ NORI_NAMESPACE_BEGIN
 				if (node_open_shape)
 				{
 					touched |= m_shapes[i]->getImGuiNodes();
+					transformTouched |= m_shapes[i]->transformTouched;
+					geometryTouched  |= m_shapes[i]->geometryTouched;
 
 					ImGui::TreePop();
 				}

@@ -51,15 +51,19 @@ public:
 		gui->touched = false;
 
 		// reload file if the filename has changed. TODO: reload if file has been touched
-    	if(filename.str() != gui->filename.str())
+    	if(gui->geometryTouched)
 	    {
 		    filename = gui->filename;
 		    loadFromFile();
-		    meshDirty = true;
 	    }
-    	trafo.update(gui->trafo);
+
+    	// Update sub-object regardless of transformTouched
+	    trafo.update(gui->trafo);
 
 		Mesh::update(guiObject);
+
+		gui->geometryTouched = false;
+		gui->transformTouched = false;
 	}
 
 	void loadFromFile() {
@@ -187,8 +191,22 @@ public:
         ImGui::Text(filename.filename().c_str());
         ImGui::NextColumn();
 
+	    ImGui::AlignTextToFramePadding();
+	    ImGui::PushID(0);
+	    bool node_open = ImGui::TreeNode("Transform");
+	    ImGui::NextColumn();
+	    ImGui::SetNextItemWidth(-1);
+	    ImGui::Text("To World");
+	    ImGui::NextColumn();
+	    if(node_open) {
+		    transformTouched |= trafo.getImGuiNodes();
+		    ImGui::TreePop();
+	    }
+	    ImGui::PopID();
+
         ImGui::PopID();
 
+        touched |= transformTouched | geometryTouched;
         return touched;
     }
 
