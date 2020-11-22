@@ -151,7 +151,7 @@ public:
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
      * provided by this instance
      * */
-    virtual EClassType getClassType() const override { return EMesh; }
+    virtual EClassType getClassType() const override { return EShape; }
 
 #ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Shape Base"; }

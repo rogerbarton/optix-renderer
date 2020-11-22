@@ -379,7 +379,7 @@ void ImguiScreen::draw()
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::BeginChild(42);
-				drawSceneTree();
+				m_renderThread.drawGui();
 				ImGui::EndChild();
 			}
 		}
@@ -624,15 +624,6 @@ void ImguiScreen::initImGui()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
-}
-
-void ImguiScreen::drawSceneTree()
-{
-	// check if a scene exists
-	if (!m_renderThread.m_guiScene)
-		ImGui::Text("No scene loaded...");
-
-	m_renderThread.drawGui();
 }
 
 NORI_NAMESPACE_END

@@ -378,6 +378,11 @@ NORI_NAMESPACE_BEGIN
 
 	void RenderThread::drawGui()
 	{
+		if (!m_guiScene) {
+			ImGui::Text("No scene loaded...");
+			return;
+		}
+
 		// Start columns
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);

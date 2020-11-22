@@ -62,7 +62,7 @@ NoriObject *loadFromXML(const std::string &filename)
     {
         /* Object classes */
         EScene = NoriObject::EScene,
-        EMesh = NoriObject::EMesh,
+        EMesh = NoriObject::EShape,
         ETexture = NoriObject::ETexture,
         EBSDF = NoriObject::EBSDF,
         EPhaseFunction = NoriObject::EPhaseFunction,

@@ -36,18 +36,18 @@ class NoriObject
 public:
     enum EClassType
     {
-        EScene = 0,
-        EMesh,
-        ETexture,
-        EVolume,
-        EBSDF,
-        EPhaseFunction,
-        EEmitter,
-        EMedium,
-        ECamera,
-        EIntegrator,
-        ESampler,
-        EEnvironmentMap,
+	    EScene = 0,
+	    EShape,
+	    ETexture,
+	    EVolume,
+	    EBSDF,
+	    EPhaseFunction,
+	    EEmitter,
+	    EMedium,
+	    ECamera,
+	    EIntegrator,
+	    ESampler,
+	    EEnvironmentMap,
         EPixelSampler,
         EDenoiser,
         ETest,
@@ -62,7 +62,7 @@ public:
         {
         case EScene:
             return "scene";
-        case EMesh:
+        case EShape:
             return "shape";
         case ETexture:
             return "texture";
