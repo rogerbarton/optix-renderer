@@ -33,7 +33,10 @@ void Shape::cloneAndInit(Shape *clone)
 	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
 	if(m_emitter)
+	{
 		clone->m_emitter = static_cast<Emitter *>(m_emitter->cloneAndInit());
+		clone->m_emitter->setShape(clone);
+	}
 }
 
 void Shape::update(const NoriObject *guiObject)

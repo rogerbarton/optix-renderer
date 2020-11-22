@@ -121,7 +121,8 @@ NORI_NAMESPACE_BEGIN
 		 */
 		void cloneAndInit(Emitter *clone)
 		{
-			clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
+			// Shape already cloned
+			// clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
 		}
 
 		void update(const NoriObject *guiObject) override
