@@ -47,7 +47,10 @@ public:
 	void update(const NoriObject *guiObject) override
 	{
     	const auto* gui = dynamic_cast<const WavefrontOBJ*>(guiObject);
-    	// reload file if the filename has changed. TODO: reload if file has been touched
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// reload file if the filename has changed. TODO: reload if file has been touched
     	if(filename.str() != gui->filename.str())
 	    {
 		    filename = gui->filename;

@@ -67,10 +67,9 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		if (!touched) return;
-		touched = false;
-
 		const auto* gui = dynamic_cast<const PerspectiveCamera *>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
 
 		// -- Copy properties
 		m_outputSize = gui->m_outputSize;

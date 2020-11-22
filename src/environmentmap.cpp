@@ -31,6 +31,9 @@ public:
 	void update(const NoriObject* guiObject) override
 	{
 		const auto* gui = dynamic_cast<const PNGEnvMap*>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
 		scaleU = gui->scaleU;
 		scaleV = gui->scaleV;
 		sphereTexture = gui->sphereTexture;

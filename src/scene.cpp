@@ -106,7 +106,7 @@ NORI_NAMESPACE_BEGIN
 
 	void Scene::update(const NoriObject *guiObject)
 	{
-		const Scene *gui = dynamic_cast<const Scene *>(guiObject);
+		const auto *gui = dynamic_cast<const Scene *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 
@@ -137,6 +137,7 @@ NORI_NAMESPACE_BEGIN
 		// -- Update this
 		if (gui->rebuildBvh)
 		{
+			gui->rebuildBvh = false;
 			m_bvh->clear();
 			for (const auto shape : m_shapes)
 				m_bvh->addShape(shape);
@@ -265,7 +266,6 @@ NORI_NAMESPACE_BEGIN
 
 	bool Scene::getImGuiNodes()
 	{
-		bool ret = false;
 		ImGui::PushID(EScene);
 		if (m_camera)
 		{
@@ -276,7 +276,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			if (node_open_camera)
 			{
-				ret |= m_camera->getImGuiNodes();
+				touched |= m_camera->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
@@ -290,7 +290,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			if (node_open_integrator)
 			{
-				ret |= m_integrator->getImGuiNodes();
+				touched |= m_integrator->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
@@ -304,7 +304,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			if (node_open_sampler)
 			{
-				ret |= m_sampler->getImGuiNodes();
+				touched |= m_sampler->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
@@ -318,7 +318,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			if (node_open_envmap)
 			{
-				ret |= m_envmap->getImGuiNodes();
+				touched |= m_envmap->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
@@ -332,7 +332,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			if (node_open_denoiser)
 			{
-				ret |= m_denoiser->getImGuiNodes();
+				touched |= m_denoiser->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
@@ -358,7 +358,7 @@ NORI_NAMESPACE_BEGIN
 
 				if (node_open_shape)
 				{
-					ret |= m_shapes[i]->getImGuiNodes();
+					touched |= m_shapes[i]->getImGuiNodes();
 
 					ImGui::TreePop();
 				}
@@ -390,7 +390,7 @@ NORI_NAMESPACE_BEGIN
 
 				if (node_open_emitter)
 				{
-					ret |= m_emitters[i]->getImGuiNodes();
+					touched |= m_emitters[i]->getImGuiNodes();
 
 					ImGui::TreePop();
 				}
@@ -403,7 +403,7 @@ NORI_NAMESPACE_BEGIN
 
 		ImGui::PopID();
 
-		return ret;
+		return touched;
 	}
 #endif
 

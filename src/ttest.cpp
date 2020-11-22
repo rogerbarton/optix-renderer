@@ -96,16 +96,16 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const StudentsTTest *>(guiObject);
+		const auto *gui = dynamic_cast<const StudentsTTest *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 
 
 		// -- Copy properties
-		m_angles = gui->m_angles;
-		m_references = gui->m_references;
+		m_angles            = gui->m_angles;
+		m_references        = gui->m_references;
 		m_significanceLevel = gui->m_significanceLevel;
-		m_sampleCount = gui->m_sampleCount;
+		m_sampleCount       = gui->m_sampleCount;
 
 		// -- Update sub-objects
 		assert(m_bsdfs.size() == gui->m_bsdfs.size());

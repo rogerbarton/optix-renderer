@@ -128,7 +128,7 @@ private:
 	ImageBlock &m_block;
 	RenderThread m_renderThread;
 
-	float clearColor[3] = {0.8f, 0.8f, 0.8f};
+	float clearColor[3] = {0.2f, 0.2f, 0.2f};
 
 	KeyboardState keyboardState;
 	MouseState mouseState;

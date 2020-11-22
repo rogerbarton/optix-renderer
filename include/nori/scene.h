@@ -190,7 +190,7 @@ NORI_NAMESPACE_BEGIN
 
 
 	private:
-		bool rebuildBvh = true;
+		mutable bool rebuildBvh = true;
 
 		std::vector<Shape *> m_shapes;
 		Integrator           *m_integrator        = nullptr;
