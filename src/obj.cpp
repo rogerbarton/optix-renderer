@@ -43,7 +43,22 @@ public:
 		return clone;
 	}
 
-    void loadFromFile() {
+	void update(const NoriObject *guiObject) override
+	{
+    	const auto* gui = dynamic_cast<const WavefrontOBJ*>(guiObject);
+    	// reload file if the filename has changed. TODO: reload if file has been touched
+    	if(filename.str() != gui->filename.str())
+	    {
+		    filename = gui->filename;
+		    loadFromFile();
+		    meshDirty = true;
+	    }
+    	trafo.update(gui->trafo);
+
+		Mesh::update(guiObject);
+	}
+
+	void loadFromFile() {
 	    typedef std::unordered_map<OBJVertex, uint32_t, OBJVertexHash> VertexMap;
 
 	    std::ifstream is(filename.str());

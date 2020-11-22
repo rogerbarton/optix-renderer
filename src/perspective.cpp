@@ -31,7 +31,7 @@ NORI_NAMESPACE_BEGIN
  */
 class PerspectiveCamera : public Camera {
 public:
-    PerspectiveCamera(const PropertyList &propList) {
+    explicit PerspectiveCamera(const PropertyList &propList) {
         /* Width and height in pixels. Default: 720p */
         m_outputSize.x() = propList.getInteger("width", 1280);
         m_outputSize.y() = propList.getInteger("height", 720);
@@ -51,13 +51,44 @@ public:
         m_lensRadius    = propList.getFloat("lensRadius", 0.f);
 	    m_focalDistance = propList.getFloat("focalDistance", 1.f);
 
-        m_rfilter = NULL;
+        m_rfilter = nullptr;
     }
 
-    virtual void update(const NoriObject *guiObject) override {
+	NoriObject *cloneAndInit() override {
+    	// If no reconstruction filter was assigned, instantiate a Gaussian filter
+		if (!m_rfilter)
+			m_rfilter = dynamic_cast<ReconstructionFilter *>(
+					NoriObjectFactory::createInstance("gaussian", PropertyList()));
+
+		auto clone = new PerspectiveCamera(*this);
+		clone->m_rfilter = dynamic_cast<ReconstructionFilter *>(m_rfilter->cloneAndInit());
+    	return clone;
+    }
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched) return;
+		touched = false;
+
+		const auto* gui = dynamic_cast<const PerspectiveCamera *>(guiObject);
+
+		// -- Copy properties
+		m_outputSize = gui->m_outputSize;
+		m_fov = gui->m_fov;
+		m_nearClip = gui->m_nearClip;
+		m_farClip = gui->m_farClip;
+		m_lensRadius = gui->m_lensRadius;
+		m_focalDistance = gui->m_lensRadius;
+
+		// -- Update sub-objects
+		m_rfilter->update(gui->m_rfilter);
+		m_cameraToWorld.update(gui->m_cameraToWorld);
+
+		// -- Recalculate derived properties
+		m_invOutputSize = m_outputSize.cast<float>().cwiseInverse();
         float aspect = m_outputSize.x() / (float) m_outputSize.y();
 
-        /* Project vectors in camera space onto a plane at z=1:
+        /** Project vectors in camera space onto a plane at z=1:
          *
          *  xProj = cot * x / z
          *  yProj = cot * y / z
@@ -82,13 +113,6 @@ public:
         m_sampleToCamera = Transform( 
             Eigen::DiagonalMatrix<float, 3>(Vector3f(0.5f, -0.5f * aspect, 1.0f)) *
             Eigen::Translation<float, 3>(1.0f, -1.0f/aspect, 0.0f) * perspective).inverse();
-
-        /* If no reconstruction filter was assigned, instantiate a Gaussian filter */
-        if (!m_rfilter) {
-            m_rfilter = static_cast<ReconstructionFilter *>(
-                    NoriObjectFactory::createInstance("gaussian", PropertyList()));
-	        m_rfilter->update(guiObject);
-        }
     }
 
     Color3f sampleRay(Ray3f &ray,
@@ -238,9 +262,7 @@ public:
     }
 #endif
 private:
-    Vector2f m_invOutputSize;
-    Transform m_sampleToCamera;
-    Transform m_cameraToWorld;
+	// -- Properties
     float m_fov;
     float m_nearClip;
     float m_farClip;
@@ -248,6 +270,14 @@ private:
     // Depth of Field
     float m_lensRadius; // aka aperture
     float m_focalDistance; // aka focal length
+
+    // -- Sub-objects
+	Transform m_cameraToWorld;
+
+    // -- Derived properties
+	Transform m_sampleToCamera;
+    Vector2f m_invOutputSize;
+
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");

@@ -25,18 +25,19 @@
 
 NORI_NAMESPACE_BEGIN
 
-Mesh::Mesh() {}
-
 void Mesh::update(const NoriObject *guiObject)
 {
-	Shape::update(guiObject);
+	if(meshDirty)
+	{
+		m_pdf.reserve(getPrimitiveCount());
+		for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
+		{
+			m_pdf.append(surfaceArea(i));
+		}
+		m_pdf.normalize();
+	}
 
-    m_pdf.reserve(getPrimitiveCount());
-    for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
-    {
-        m_pdf.append(surfaceArea(i));
-    }
-    m_pdf.normalize();
+	Shape::update(guiObject);
 }
 
 void Mesh::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const

@@ -10,6 +10,7 @@ class NormalIntegrator : public Integrator
 public:
 	explicit NormalIntegrator(const PropertyList &props) {}
 	NORI_OBJECT_DEFAULT_CLONE(NormalIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(NormalIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {

@@ -76,5 +76,9 @@ Transform Transform::operator*(const Transform &t) const
     return Transform(m_transform * t.m_transform,
                      t.m_inverse * m_inverse);
 }
+void Transform::update(const Transform &guiObject)
+{
+	*this = guiObject;
+}
 
 NORI_NAMESPACE_END

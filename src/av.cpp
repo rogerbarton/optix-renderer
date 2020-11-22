@@ -13,6 +13,7 @@ public:
     }
 
 	NORI_OBJECT_DEFAULT_CLONE(AverageVisibilityIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(AverageVisibilityIntegrator)
 
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
@@ -67,6 +68,8 @@ public:
         ret |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
         ImGui::NextColumn();
+
+        return ret;
     }
 #endif
 protected:

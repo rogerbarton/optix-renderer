@@ -34,8 +34,9 @@ void Shape::update(const NoriObject *guiObject)
 {
     if (!m_bsdf)
     {
+    	// TODO: move to cloneAndInit
         /* If no material was assigned, instantiate a diffuse BRDF */
-        m_bsdf = static_cast<BSDF *>(
+        m_bsdf = dynamic_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
 	    m_bsdf->update(guiObject);
     }

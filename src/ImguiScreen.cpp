@@ -118,7 +118,6 @@ void ImguiScreen::openXML(const std::string &filename)
 
 	try
 	{
-		renderingFilename = filename;
 		m_renderThread.loadScene(filename);
 
 		imageZoom = 1.f;
@@ -141,9 +140,11 @@ void ImguiScreen::openEXR(const std::string &filename)
 	if (m_renderThread.isBusy())
 		m_renderThread.stopRendering();
 
-	if (m_renderThread.m_scene)
-		delete m_renderThread.m_scene;
-	m_renderThread.m_scene = nullptr; // nullify scene for Tree viewer
+	if (m_renderThread.m_guiScene)
+	{
+		delete m_renderThread.m_guiScene;
+		m_renderThread.m_guiScene = nullptr; // nullify scene for Tree viewer
+	}
 
 	Bitmap bitmap(filename);
 
@@ -326,10 +327,10 @@ void ImguiScreen::draw()
 				m_renderThread.stopRendering();
 
 			// show restart button if m_scene is valid
-			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
+			if (m_renderThread.m_guiScene && ImGui::Button("Restart Render"))
 				m_renderThread.restartRender();
 
-			if (m_renderThread.m_scene)
+			if (m_renderThread.m_guiScene)
 			{
 				if (ImGui::Button((currentLayer == RENDER) ? "Change to Preview" : "Change to Render View"))
 				{
@@ -338,16 +339,16 @@ void ImguiScreen::draw()
 					if (currentLayer == PREVIEW)
 					{
 						// save sample count
-						oldSampleCount = m_renderThread.m_scene->getSampler()->getSampleCount();
-						m_renderThread.m_scene->getSampler()->setSampleCount(1);
-						m_renderThread.m_scene->setPreviewMode(true);
+						oldSampleCount = m_renderThread.m_guiScene->getSampler()->getSampleCount();
+						m_renderThread.m_guiScene->getSampler()->setSampleCount(1);
+						m_renderThread.m_guiScene->setPreviewMode(true);
 						needsRerender = true;
 					}
 					else
 					{
 						// copy back old integrator
-						m_renderThread.m_scene->setPreviewMode(false);
-						m_renderThread.m_scene->getSampler()->setSampleCount(oldSampleCount);
+						m_renderThread.m_guiScene->setPreviewMode(false);
+						m_renderThread.m_guiScene->getSampler()->setSampleCount(oldSampleCount);
 					}
 				}
 			}

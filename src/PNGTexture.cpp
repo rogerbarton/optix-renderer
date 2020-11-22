@@ -10,9 +10,39 @@ NORI_NAMESPACE_BEGIN
 class PNGTexture : public Texture<Vector3f>
 {
 public:
-	PNGTexture(const PropertyList &props)
+	explicit PNGTexture(const PropertyList &props)
 	{
 		filename = getFileResolver()->resolve(props.getString("filename"));
+
+		scaleU = props.getFloat("scaleU", 1.f);
+		scaleV = props.getFloat("scaleV", 1.f);
+
+		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
+	}
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new PNGTexture(*this);
+		clone->loadFromFile();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = dynamic_cast<const PNGTexture*>(guiObject);
+		// reload file if the filename has changed. TODO: reload if file has been touched
+		if(filename.str() != gui->filename.str())
+		{
+			filename = gui->filename;
+			loadFromFile();
+		}
+
+		scaleU = gui->scaleU;
+		scaleV = gui->scaleV;
+		eulerAngles = gui->eulerAngles;
+	}
+
+	void loadFromFile() {
 		if (!filename.exists())
 			throw NoriException("PNGTexture: image file not found %s", filename);
 
@@ -55,11 +85,6 @@ public:
 		{
 			throw NoriException("PNGTexture: file extension .%s unknown.", extension);
 		}
-
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
-
-		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
 	}
 
 	//4 bytes per pixel, ordered RGBA
@@ -133,7 +158,7 @@ public:
         ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("height", flags, "height");
+        ImGui::TreeNodeEx("height", flags, "Height");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text("%d Pixels", height);
@@ -174,10 +199,11 @@ public:
 
 private:
 	filesystem::path filename;
-	unsigned int width, height;
-	std::vector<float> data;
 	float scaleU, scaleV;
 	Vector3f eulerAngles;
+
+	unsigned int width, height;
+	std::vector<float> data;
 
 	float InverseGammaCorrect(float value)
 	{
@@ -191,16 +217,42 @@ NORI_REGISTER_CLASS(PNGTexture, "png_texture");
 
 class NormalMap : public Texture<Vector3f>
 {
+	filesystem::path filename;
+	float scaleU, scaleV;
 
 	unsigned int width, height;
 	std::vector<float> data;
 
-	float scaleU, scaleV;
-
 public:
-	NormalMap(const PropertyList &props)
+	explicit NormalMap(const PropertyList &props)
 	{
-		filesystem::path filename = getFileResolver()->resolve(props.getString("filename"));
+		filename = getFileResolver()->resolve(props.getString("filename"));
+
+		scaleU = props.getFloat("scaleU", 1.f);
+		scaleV = props.getFloat("scaleV", 1.f);
+	}
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new NormalMap(*this);
+		clone->loadFromFile();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = dynamic_cast<const NormalMap*>(guiObject);
+		// reload file if the filename has changed. TODO: reload if file has been touched
+		if(filename.str() != gui->filename.str())
+		{
+			filename = gui->filename;
+			loadFromFile();
+		}
+		scaleU = gui->scaleU;
+		scaleV = gui->scaleV;
+	}
+
+	void loadFromFile() {
 		std::vector<unsigned char> d;
 		lodepng::decode(d, width, height, filename.str());
 
@@ -220,9 +272,6 @@ public:
 				data.emplace_back(b);
 			}
 		}
-
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
 	}
 
 	//4 bytes per pixel, ordered RGBA

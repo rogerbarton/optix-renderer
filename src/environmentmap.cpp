@@ -9,22 +9,29 @@ class PNGEnvMap : public EnvironmentMap
 public:
 	explicit PNGEnvMap(const PropertyList &props)
 	{
-		if (props.has("envmap"))
-		{
-			PropertyList l;
-			l.setColor("value", props.getColor("albedo"));
-			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-		}
+		PropertyList l;
+		l.setColor("value", props.has("envmap") ? props.getColor("albedo") : Color3f(0.5f));
+		m_map = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
 
 		sphereTexture = props.getBoolean("sphereTexture", false);
-	};
+	}
+
 	NoriObject *cloneAndInit() override {
 		auto clone = new PNGEnvMap(*this);
 		clone->m_map = dynamic_cast<Texture<Color3f>*>(m_map->cloneAndInit());
 		return clone;
+	}
+
+	void update(const NoriObject* guiObject) override
+	{
+		const auto* gui = dynamic_cast<const PNGEnvMap*>(guiObject);
+		scaleU = gui->scaleU;
+		scaleV = gui->scaleV;
+		sphereTexture = gui->sphereTexture;
+		m_map->update(gui->m_map);
 	}
 
 	~PNGEnvMap()
@@ -41,7 +48,7 @@ public:
 			{
 				if (m_map)
 					throw NoriException("There is already an envmap defined!");
-				m_map = static_cast<Texture<Color3f> *>(obj);
+				m_map = dynamic_cast<Texture<Color3f> *>(obj);
 			}
 			else
 			{
@@ -52,17 +59,6 @@ public:
 		default:
 			throw NoriException("EnvMap::addChild(<%s>) is not supported!",
 								classTypeName(obj->getClassType()));
-		}
-	}
-
-	void activate() override
-	{
-		if (!m_map)
-		{
-			PropertyList l;
-			l.setColor("value", Color3f(0.5f));
-			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-			m_map->update(nullptr);
 		}
 	}
 

@@ -142,11 +142,20 @@ public:
     bool touched = true; // if the gui has modified the object, optionally add for children
     /**
      * Initialize the object when the scene has changed before rendering.
+     * You can use the NORI_OBJECT_DEFAULT_UPDATE macro.
      */
-    virtual void update(const NoriObject *guiObject)
-    {
-	    touched = false;
-    }
+    virtual void update(const NoriObject *guiObject) = 0;
+
+    /**
+     * Implements the NoriObject::update() by copying ALL members if touched.
+     * Use this if all members are (xml) properties.
+     */
+#   define NORI_OBJECT_DEFAULT_UPDATE(cls)              \
+	void update(const NoriObject *guiObject) override { \
+		if(!touched) return;                            \
+        touched = false;                                \
+        *this = *dynamic_cast<const cls *>(guiObject);  \
+	}
 
     /// Return a brief string summary of the instance (for debugging purposes)
     virtual std::string toString() const = 0;

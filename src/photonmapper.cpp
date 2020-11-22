@@ -28,7 +28,9 @@ NORI_NAMESPACE_BEGIN
 class PhotonMapper : public Integrator
 {
 public:
-    /// Photon map data structure
+	PhotonMapper() = default;
+
+	/// Photon map data structure
     typedef PointKDTree<Photon> PhotonMap;
 
     explicit PhotonMapper(const PropertyList &props)
@@ -37,6 +39,25 @@ public:
         m_photonCount = props.getInteger("photonCount", 1000000);
         m_photonRadius = props.getFloat("photonRadius", 0.0f /* Default: automatic */);
     }
+
+	NoriObject *cloneAndInit() override {
+    	auto* clone = new PhotonMapper();
+    	clone->m_photonCount = m_photonCount;
+    	clone->m_photonRadius = m_photonRadius;
+    	return clone;
+    }
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched) return;
+		touched = false;
+
+		const auto* gui = dynamic_cast<const PhotonMapper *>(guiObject);
+
+		// -- Copy properties
+		m_photonCount = gui->m_photonCount;
+		m_photonRadius = gui->m_photonRadius;
+	}
 
 	virtual void preprocess(const Scene *scene) override
     {
@@ -279,6 +300,8 @@ public:
         ret |= ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+
+        return ret;
     }
 #endif
 private:
@@ -290,7 +313,7 @@ private:
     float m_photonRadius;
     std::unique_ptr<PhotonMap> m_photonMap;
 
-    int m_emittedPhotons = 0;
+    int m_emittedPhotons;
 };
 
 NORI_REGISTER_CLASS(PhotonMapper, "photonmapper");

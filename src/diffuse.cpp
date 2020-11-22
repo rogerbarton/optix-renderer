@@ -31,12 +31,9 @@ class Diffuse : public BSDF
 public:
     explicit Diffuse(const PropertyList &propList) : m_albedo(nullptr)
     {
-        if (propList.has("albedo"))
-        {
-            PropertyList l;
-            l.setColor("value", propList.getColor("albedo"));
-            m_albedo = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-        }
+        PropertyList l;
+        l.setColor("value", propList.has("albedo") ? propList.getColor("albedo") : Color3f(0.5f));
+        m_albedo = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
     }
 
 	NoriObject *cloneAndInit() override {
@@ -44,6 +41,15 @@ public:
     	clone->m_albedo = dynamic_cast<Texture<Color3f>*>(m_albedo->cloneAndInit());
     	return clone;
     }
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched)return;
+		touched = false;
+
+		const auto* gui = dynamic_cast<const Diffuse *>(guiObject);
+		m_albedo->update(gui->m_albedo);
+	}
 
     ~Diffuse() override
     {
@@ -71,17 +77,6 @@ public:
         default:
             throw NoriException("Diffuse::addChild(<%s>) is not supported!",
                                 classTypeName(obj->getClassType()));
-        }
-    }
-
-    virtual void update(const NoriObject *guiObject) override
-    {
-        if (!m_albedo)
-        {
-            PropertyList l;
-            l.setColor("value", Color3f(0.5f));
-            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-	        m_albedo->update(nullptr);
         }
     }
 

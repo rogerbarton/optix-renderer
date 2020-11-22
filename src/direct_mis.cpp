@@ -10,6 +10,7 @@ class DirectMISIntegrator : public Integrator
 public:
   explicit DirectMISIntegrator(const PropertyList &propList) {}
   NORI_OBJECT_DEFAULT_CLONE(DirectMISIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectMISIntegrator)
 
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {

@@ -50,6 +50,7 @@ public:
     m_ks = 1 - m_kd.maxCoeff();
   }
   NORI_OBJECT_DEFAULT_CLONE(Microfacet)
+  NORI_OBJECT_DEFAULT_UPDATE(Microfacet)
 
   /// Evaluate the microfacet normal distribution D
   float evalBeckmann(const Normal3f &m) const

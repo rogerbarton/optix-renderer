@@ -26,6 +26,7 @@ class Mirror : public BSDF {
 public:
     explicit Mirror(const PropertyList &) { }
 	NORI_OBJECT_DEFAULT_CLONE(Mirror)
+	NORI_OBJECT_DEFAULT_UPDATE(Mirror)
 
     virtual Color3f eval(const BSDFQueryRecord &) const override {
         /* Discrete BRDFs always evaluate to zero in Nori */

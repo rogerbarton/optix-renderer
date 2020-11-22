@@ -44,8 +44,6 @@ NORI_NAMESPACE_BEGIN
 		/// Release all memory
 		virtual ~Scene();
 
-		Scene(Scene& other);
-
 		/// Return a pointer to the scene's kd-tree
 		const BVH *getBVH() const { return m_bvh; }
 

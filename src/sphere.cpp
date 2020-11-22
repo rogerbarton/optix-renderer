@@ -36,6 +36,7 @@ public:
         m_bbox.expandBy(m_position + Vector3f(m_radius));
     }
 	NORI_OBJECT_DEFAULT_CLONE(Sphere)
+	NORI_OBJECT_DEFAULT_UPDATE(Sphere)
 
 	virtual BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
 

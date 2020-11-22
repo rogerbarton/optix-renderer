@@ -11,6 +11,7 @@ class DirectIntegrator : public Integrator
 public:
   explicit DirectIntegrator(const PropertyList &propList) {}
   NORI_OBJECT_DEFAULT_CLONE(DirectIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectIntegrator)
 
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {

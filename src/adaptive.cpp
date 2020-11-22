@@ -20,6 +20,7 @@ public:
         uniform_every = propList.getInteger("uniformEvery", 100);
     }
 	NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
+	NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
 
     std::unique_ptr<Sampler> clone() const override
     {

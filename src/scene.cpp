@@ -24,7 +24,6 @@
 #include <nori/emitter.h>
 #include <nori/volume.h>
 #include <nori/bsdf.h>
-#include <nori/PreviewIntegrator.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -50,7 +49,7 @@ NORI_NAMESPACE_BEGIN
 
 	NoriObject *Scene::cloneAndInit()
 	{
-		Scene* clone = new Scene(*this);
+		Scene *clone = new Scene(*this);
 
 		// -- Validate scene before cloning, TODO: move to finalizeDeserialize?
 		if (!m_integrator)
@@ -66,42 +65,43 @@ NORI_NAMESPACE_BEGIN
 		}
 
 		// -- Deep copy children
-		clone->m_integrator = dynamic_cast<Integrator*>(m_integrator->cloneAndInit());
-		clone->m_previewIntegrator = dynamic_cast<Integrator*>(m_previewIntegrator->cloneAndInit());
+		clone->m_integrator        = dynamic_cast<Integrator *>(m_integrator->cloneAndInit());
+		clone->m_previewIntegrator = dynamic_cast<Integrator *>(m_previewIntegrator->cloneAndInit());
 		// clone->m_preview_mode = m_preview_mode; // already copied?
 
-		clone->m_sampler = dynamic_cast<Sampler*>(m_sampler->cloneAndInit());
-		clone->m_camera  = dynamic_cast<Camera*>(m_camera->cloneAndInit());
+		clone->m_sampler = dynamic_cast<Sampler *>(m_sampler->cloneAndInit());
+		clone->m_camera  = dynamic_cast<Camera *>(m_camera->cloneAndInit());
 
-		clone->m_envmap   = dynamic_cast<EnvironmentMap*>(m_envmap->cloneAndInit());
-		clone->m_denoiser = dynamic_cast<Denoiser*>(m_denoiser->cloneAndInit());
+		clone->m_envmap   = dynamic_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
+		clone->m_denoiser = dynamic_cast<Denoiser *>(m_denoiser->cloneAndInit());
 
 		clone->m_shapes.reserve(m_shapes.size());
 		for (int i = 0; i < m_shapes.size(); ++i)
-			clone->m_shapes[i] = dynamic_cast<Shape*>(m_shapes[i]->cloneAndInit());
+			clone->m_shapes[i] = dynamic_cast<Shape *>(m_shapes[i]->cloneAndInit());
 
 		clone->m_emitters.reserve(m_emitters.size());
 		for (int i = 0; i < m_emitters.size(); ++i)
-			clone->m_emitters[i] = dynamic_cast<Emitter*>(m_emitters[i]->cloneAndInit());
+			clone->m_emitters[i] = dynamic_cast<Emitter *>(m_emitters[i]->cloneAndInit());
 
 #ifdef NORI_USE_VOLUMES
 		clone->m_volumes.reserve(m_volumes.size());
 		for (int i = 0; i < m_volumes.size(); ++i)
-			clone->m_volumes[i] = dynamic_cast<Volume*>(m_volumes[i]->cloneAndInit());
+			clone->m_volumes[i] = dynamic_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
 
 		// -- Init clone
 		clone->m_bvh               = new BVH();
-		clone->m_previewIntegrator = new PreviewIntegrator(PropertyList());
+		clone->m_previewIntegrator = dynamic_cast<Integrator *>(
+				NoriObjectFactory::createInstance("preview", PropertyList()));
 
-		cout << endl<< "Configuration: " << clone->toString() << endl << endl;
+		cout << endl << "Configuration: " << clone->toString() << endl << endl;
 
 		return clone;
 	}
 
 	void Scene::update(const NoriObject *guiObject)
 	{
-		const Scene* gui = dynamic_cast<const Scene*>(guiObject);
+		const Scene *gui = dynamic_cast<const Scene *>(guiObject);
 
 		// -- Update children
 		m_integrator->update(gui->m_integrator);
@@ -111,7 +111,7 @@ NORI_NAMESPACE_BEGIN
 		m_sampler->update(gui->m_sampler);
 		m_camera->update(gui->m_camera);
 
-		m_envmap ->update(gui->m_envmap);
+		m_envmap->update(gui->m_envmap);
 		m_denoiser->update(gui->m_denoiser);
 
 		for (int i = 0; i < gui->m_shapes.size(); ++i)
@@ -126,7 +126,7 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 		// -- Update this
-		if(gui->rebuildBvh)
+		if (gui->rebuildBvh)
 			m_bvh->build();
 	}
 

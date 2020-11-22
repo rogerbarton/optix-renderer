@@ -11,6 +11,7 @@ class PathMISIntegrator : public Integrator
 public:
     explicit PathMISIntegrator(const PropertyList &propList) {}
 	NORI_OBJECT_DEFAULT_CLONE(PathMISIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(PathMISIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {

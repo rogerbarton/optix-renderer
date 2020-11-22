@@ -27,6 +27,7 @@ class Checkerboard : public Texture<T>
 public:
   explicit Checkerboard(const PropertyList &props);
   NORI_OBJECT_DEFAULT_CLONE(Checkerboard<T>);
+  NORI_OBJECT_DEFAULT_UPDATE(Checkerboard<T>);
 
   virtual std::string toString() const override;
 

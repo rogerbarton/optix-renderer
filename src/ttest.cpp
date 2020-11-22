@@ -54,6 +54,8 @@ NORI_NAMESPACE_BEGIN
  *
  * 2. that the average radiance received by a camera within some scene
  *    matches a given value (modulo noise).
+ *
+ * TODO: No idea if scenes as children will work!!
  */
 class StudentsTTest : public NoriObject {
 public:
@@ -75,7 +77,48 @@ public:
         /* Number of BSDF samples that should be generated (default: 100K) */
         m_sampleCount = propList.getInteger("sampleCount", 100000);
     }
-	NORI_OBJECT_DEFAULT_CLONE(StudentsTTest)
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new StudentsTTest(*this);
+
+		assert(clone->m_bsdfs.size() == m_bsdfs.size());
+		for (int i = 0; i < m_bsdfs.size(); ++i)
+			clone->m_bsdfs[i] = dynamic_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
+
+		assert(clone->m_scenes.size() == m_scenes.size());
+		for (int i = 0; i < m_scenes.size(); ++i)
+			clone->m_scenes[i] = dynamic_cast<Scene *>(m_scenes[i]->cloneAndInit());
+
+		clone->execute();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched)return;
+		touched = false;
+
+		const auto* gui = dynamic_cast<const StudentsTTest *>(guiObject);
+
+		// -- Copy properties
+		m_angles = gui->m_angles;
+		m_references = gui->m_references;
+		m_significanceLevel = gui->m_significanceLevel;
+		m_sampleCount = gui->m_sampleCount;
+
+		// -- Update sub-objects
+		assert(m_bsdfs.size() == gui->m_bsdfs.size());
+		for (int i = 0; i < gui->m_bsdfs.size(); i++)
+			m_bsdfs[i]->update(gui->m_bsdfs[i]);
+
+		// TODO: No idea if this will work
+		assert(m_scenes.size() == gui->m_scenes.size());
+		for (int i = 0; i < gui->m_scenes.size(); i++)
+			m_scenes[i]->update(gui->m_scenes[i]);
+
+		execute();
+	}
 
 	virtual ~StudentsTTest() {
         for (auto bsdf : m_bsdfs)
@@ -101,7 +144,7 @@ public:
     }
 
     /// Invoke a series of t-tests on the provided input
-    virtual void update(const NoriObject *guiObject) override {
+    void execute() {
         int total = 0, passed = 0;
         pcg32 random;
 

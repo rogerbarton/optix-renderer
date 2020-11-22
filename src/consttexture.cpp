@@ -26,6 +26,7 @@ class ConstantTexture : public Texture<T>
 public:
     explicit ConstantTexture(const PropertyList &props);
     NORI_OBJECT_DEFAULT_CLONE(ConstantTexture<T>);
+    NORI_OBJECT_DEFAULT_UPDATE(ConstantTexture<T>);
 
     virtual std::string toString() const override;
 

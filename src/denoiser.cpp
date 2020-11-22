@@ -6,7 +6,7 @@ NORI_NAMESPACE_BEGIN
 class SimpleDenoiser : public Denoiser
 {
 public:
-    SimpleDenoiser(const PropertyList &props)
+    explicit SimpleDenoiser(const PropertyList &props)
     {
         // gauss param for color distance
         sigma_r = clamp(props.getFloat("sigma_r", 0.f), Epsilon, 10.f);
@@ -17,6 +17,9 @@ public:
         // patch size for inner loop
         inner_range = clamp(props.getInteger("range", 1), 1, 50);
     }
+
+    NORI_OBJECT_DEFAULT_CLONE(SimpleDenoiser)
+    NORI_OBJECT_DEFAULT_UPDATE(SimpleDenoiser)
 
     Bitmap *denoise(const Bitmap *bitmap) const override
     {

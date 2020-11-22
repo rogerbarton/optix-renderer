@@ -36,6 +36,7 @@ public:
         m_stddev = propList.getFloat("stddev", 0.5f);
     }
 	NORI_OBJECT_DEFAULT_CLONE(GaussianFilter)
+	NORI_OBJECT_DEFAULT_UPDATE(GaussianFilter)
 
 	float eval(float x) const
     {
@@ -54,14 +55,15 @@ public:
     virtual bool getImGuiNodes() override
     {
         bool ret = ReconstructionFilter::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("Stddev", flags, "Standard Deviation");
+        ImGui::TreeNodeEx("Stddev", ImGuiLeafNodeFlags, "Standard Deviation");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ret |= ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
+
+        return ret;
     }
 #endif
 
@@ -88,6 +90,7 @@ public:
         m_C = propList.getFloat("C", 1.0f / 3.0f);
     }
 	NORI_OBJECT_DEFAULT_CLONE(MitchellNetravaliFilter)
+	NORI_OBJECT_DEFAULT_UPDATE(MitchellNetravaliFilter)
 
 	float eval(float x) const
     {
@@ -116,26 +119,27 @@ public:
     virtual const char *getImGuiName() const override { return "Mitchell-Netravali Filter"; }
     virtual bool getImGuiNodes() override
     {
-        ReconstructionFilter::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        bool result = ReconstructionFilter::getImGuiNodes();
+
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("m_B", flags, "B");
+        ImGui::TreeNodeEx("m_B", ImGuiLeafNodeFlags, "B");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_B, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        result |= ImGui::DragFloat("##value", &m_B, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("m_C", flags, "C");
+        ImGui::TreeNodeEx("m_C", ImGuiLeafNodeFlags, "C");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ImGui::DragFloat("##value", &m_C, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    result |= ImGui::DragFloat("##value", &m_C, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+
+	    return result;
     }
 #endif
 protected:
@@ -151,6 +155,7 @@ public:
         m_radius = 1.0f;
     }
 	NORI_OBJECT_DEFAULT_CLONE(TentFilter)
+	NORI_OBJECT_DEFAULT_UPDATE(TentFilter)
 
 	float eval(float x) const
     {
@@ -165,7 +170,7 @@ public:
     virtual const char *getImGuiName() const override { return "Tent Filter"; }
     virtual bool getImGuiNodes() override
     {
-        ReconstructionFilter::getImGuiNodes();
+        return ReconstructionFilter::getImGuiNodes();
     }
 #endif
 };
@@ -179,6 +184,7 @@ public:
         m_radius = 0.5f;
     }
 	NORI_OBJECT_DEFAULT_CLONE(BoxFilter)
+	NORI_OBJECT_DEFAULT_UPDATE(BoxFilter)
 
 	float eval(float) const
     {
@@ -193,7 +199,7 @@ public:
     virtual const char *getImGuiName() const override { return "Box Filter"; }
     virtual bool getImGuiNodes() override
     {
-        ReconstructionFilter::getImGuiNodes();
+        return ReconstructionFilter::getImGuiNodes();
     }
 #endif
 };

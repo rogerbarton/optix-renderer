@@ -10,6 +10,7 @@ class DirectEMSIntegrator : public Integrator
 public:
   explicit DirectEMSIntegrator(const PropertyList &propList) {}
   NORI_OBJECT_DEFAULT_CLONE(DirectEMSIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectEMSIntegrator)
 
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {

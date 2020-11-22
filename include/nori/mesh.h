@@ -110,8 +110,8 @@ public:
 
     /// Return a human-readable summary of this instance
     virtual std::string toString() const override;
-#ifndef NORI_USE_NANOGUI
 
+#ifndef NORI_USE_NANOGUI
     virtual const char *getImGuiName() const override { return "Mesh"; }
     virtual bool getImGuiNodes() override
     {
@@ -121,9 +121,6 @@ public:
         return ret;
     }
 #endif
-protected:
-    /// Create an empty mesh
-    Mesh();
 
 protected:
     std::string m_name; ///< Identifying name
@@ -133,6 +130,8 @@ protected:
     MatrixXu m_F;       ///< Faces
 
     DiscretePDF m_pdf;
+
+    bool meshDirty = true;
 };
 
 NORI_NAMESPACE_END

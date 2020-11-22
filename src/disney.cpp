@@ -36,6 +36,7 @@ public:
         clearcoatGloss = clamp(props.getFloat("clearcoatGloss", 1.f), 0.f, 1.f);
     }
 	NORI_OBJECT_DEFAULT_CLONE(Disney)
+	NORI_OBJECT_DEFAULT_UPDATE(Disney)
 
     Color3f eval(const BSDFQueryRecord &bRec) const override
     {

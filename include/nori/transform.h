@@ -92,6 +92,8 @@ public:
     /// Return a string representation
     std::string toString() const;
 
+	void update(const Transform &guiObject);
+
 #ifndef NORI_USE_NANOGUI
     bool getImGuiNodes();
 #endif

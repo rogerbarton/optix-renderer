@@ -22,6 +22,7 @@
 #include <hypothesis.h>
 #include <fstream>
 #include <memory>
+#include <cassert>
 
 /*
  * =======================================================================
@@ -71,7 +72,44 @@ public:
         if (m_sampleCount < 0) // ~5K samples per bin
             m_sampleCount = m_cosThetaResolution * m_phiResolution * 5000;
     }
-	NORI_OBJECT_DEFAULT_CLONE(ChiSquareTest)
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new ChiSquareTest(*this);
+		assert(clone->m_bsdfs.size() == m_bsdfs.size());
+		for (int i = 0; i < m_bsdfs.size(); ++i)
+			clone->m_bsdfs[i] = dynamic_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
+
+		clone->execute();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched)return;
+		touched = false;
+
+		const auto* gui = dynamic_cast<const ChiSquareTest *>(guiObject);
+
+		// -- Copy properties
+		m_significanceLevel = gui->m_significanceLevel;
+		m_cosThetaResolution = gui->m_cosThetaResolution;
+		m_minExpFrequency = gui->m_minExpFrequency;
+		m_sampleCount = gui->m_sampleCount;
+		m_testCount = gui->m_testCount;
+
+		// -- Update sub-objects
+		assert(m_bsdfs.size() == gui->m_bsdfs.size());
+		for (int i = 0; i < gui->m_bsdfs.size(); i++)
+			m_bsdfs[i]->update(gui->m_bsdfs[i]);
+
+		// -- Update derived properties
+		m_phiResolution = 2 * m_cosThetaResolution;
+		if (m_sampleCount < 0) // ~5K samples per bin
+			m_sampleCount = m_cosThetaResolution * m_phiResolution * 5000;
+
+		execute();
+	}
 
     virtual ~ChiSquareTest() {
         for (auto bsdf : m_bsdfs)
@@ -91,108 +129,109 @@ public:
     }
 
     /// Execute the chi-square test
-    virtual void update(const NoriObject *guiObject) override {
-        int passed = 0, total = 0, res = m_cosThetaResolution*m_phiResolution;
-        pcg32 random; /* Pseudorandom number generator */
+    void execute() {
 
-        std::unique_ptr<double[]> obsFrequencies(new double[res]);
-        std::unique_ptr<double[]> expFrequencies(new double[res]);
+	    int passed = 0, total = 0, res = m_cosThetaResolution*m_phiResolution;
+	    pcg32 random; /* Pseudorandom number generator */
+
+	    std::unique_ptr<double[]> obsFrequencies(new double[res]);
+	    std::unique_ptr<double[]> expFrequencies(new double[res]);
 
 
-        /* Test each registered BSDF */
-        for (auto bsdf : m_bsdfs) {
-            /* Run several tests per BSDF to be on the safe side */
-            for (int l = 0; l<m_testCount; ++l) {
-                memset(obsFrequencies.get(), 0, res*sizeof(double));
-                memset(expFrequencies.get(), 0, res*sizeof(double));
+	    /* Test each registered BSDF */
+	    for (auto bsdf : m_bsdfs) {
+		    /* Run several tests per BSDF to be on the safe side */
+		    for (int l = 0; l<m_testCount; ++l) {
+			    memset(obsFrequencies.get(), 0, res*sizeof(double));
+			    memset(expFrequencies.get(), 0, res*sizeof(double));
 
-                cout << "------------------------------------------------------" << endl;
-                cout << "Testing: " << bsdf->toString() << endl;
-                ++total;
+			    cout << "------------------------------------------------------" << endl;
+			    cout << "Testing: " << bsdf->toString() << endl;
+			    ++total;
 
-                float cosTheta = random.nextFloat();
-                float sinTheta = std::sqrt(std::max((float) 0, 1-cosTheta*cosTheta));
-                float sinPhi, cosPhi;
-                sincosf(2.0f * M_PI * random.nextFloat(), &sinPhi, &cosPhi);
-                Vector3f wi(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
+			    float cosTheta = random.nextFloat();
+			    float sinTheta = std::sqrt(std::max((float) 0, 1-cosTheta*cosTheta));
+			    float sinPhi, cosPhi;
+			    sincosf(2.0f * M_PI * random.nextFloat(), &sinPhi, &cosPhi);
+			    Vector3f wi(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
 
-                cout << "Accumulating " << m_sampleCount << " samples into a " << m_cosThetaResolution
-                     << "x" << m_phiResolution << " contingency table .. ";
-                cout.flush();
+			    cout << "Accumulating " << m_sampleCount << " samples into a " << m_cosThetaResolution
+			         << "x" << m_phiResolution << " contingency table .. ";
+			    cout.flush();
 
-                /* Generate many samples from the BSDF and create
-                   a histogram / contingency table */
-                BSDFQueryRecord bRec(wi);
-                for (int i=0; i<m_sampleCount; ++i) {
-                    Point2f sample(random.nextFloat(), random.nextFloat());
-                    Color3f result = bsdf->sample(bRec, sample);
+			    /* Generate many samples from the BSDF and create
+				   a histogram / contingency table */
+			    BSDFQueryRecord bRec(wi);
+			    for (int i=0; i<m_sampleCount; ++i) {
+				    Point2f sample(random.nextFloat(), random.nextFloat());
+				    Color3f result = bsdf->sample(bRec, sample);
 
-                    if ((result.array() == 0).all())
-                        continue;
+				    if ((result.array() == 0).all())
+					    continue;
 
-                    int cosThetaBin = std::min(std::max(0, (int) std::floor((bRec.wo.z()*0.5f+0.5f)
-                            * m_cosThetaResolution)), m_cosThetaResolution-1);
+				    int cosThetaBin = std::min(std::max(0, (int) std::floor((bRec.wo.z()*0.5f+0.5f)
+				                                                            * m_cosThetaResolution)), m_cosThetaResolution-1);
 
-                    float scaledPhi = std::atan2(bRec.wo.y(), bRec.wo.x()) * INV_TWOPI;
-                    if (scaledPhi < 0)
-                        scaledPhi += 1;
+				    float scaledPhi = std::atan2(bRec.wo.y(), bRec.wo.x()) * INV_TWOPI;
+				    if (scaledPhi < 0)
+					    scaledPhi += 1;
 
-                    int phiBin = std::min(std::max(0,
-                        (int) std::floor(scaledPhi * m_phiResolution)), m_phiResolution-1);
-                    obsFrequencies[cosThetaBin * m_phiResolution + phiBin] += 1;
-                }
-                cout << "done." << endl;
+				    int phiBin = std::min(std::max(0,
+				                                   (int) std::floor(scaledPhi * m_phiResolution)), m_phiResolution-1);
+				    obsFrequencies[cosThetaBin * m_phiResolution + phiBin] += 1;
+			    }
+			    cout << "done." << endl;
 
-                /* Numerically integrate the probability density
-                   function over rectangles in spherical coordinates. */
-                double *ptr = expFrequencies.get();
-                cout << "Integrating expected frequencies .. ";
-                cout.flush();
-                for (int i=0; i<m_cosThetaResolution; ++i) {
-                    double cosThetaStart = -1.0 + i     * 2.0 / m_cosThetaResolution;
-                    double cosThetaEnd   = -1.0 + (i+1) * 2.0 / m_cosThetaResolution;
-                    for (int j=0; j<m_phiResolution; ++j) {
-                        double phiStart = j     * 2*M_PI / m_phiResolution;
-                        double phiEnd   = (j+1) * 2*M_PI / m_phiResolution;
+			    /* Numerically integrate the probability density
+				   function over rectangles in spherical coordinates. */
+			    double *ptr = expFrequencies.get();
+			    cout << "Integrating expected frequencies .. ";
+			    cout.flush();
+			    for (int i=0; i<m_cosThetaResolution; ++i) {
+				    double cosThetaStart = -1.0 + i     * 2.0 / m_cosThetaResolution;
+				    double cosThetaEnd   = -1.0 + (i+1) * 2.0 / m_cosThetaResolution;
+				    for (int j=0; j<m_phiResolution; ++j) {
+					    double phiStart = j     * 2*M_PI / m_phiResolution;
+					    double phiEnd   = (j+1) * 2*M_PI / m_phiResolution;
 
-                        auto integrand = [&](double cosTheta, double phi) -> double {
-                            double sinTheta = std::sqrt(1 - cosTheta * cosTheta);
-                            double sinPhi = std::sin(phi), cosPhi = std::cos(phi);
+					    auto integrand = [&](double cosTheta, double phi) -> double {
+						    double sinTheta = std::sqrt(1 - cosTheta * cosTheta);
+						    double sinPhi = std::sin(phi), cosPhi = std::cos(phi);
 
-                            Vector3f wo((float) (sinTheta * cosPhi),
-                                        (float) (sinTheta * sinPhi),
-                                        (float) cosTheta);
+						    Vector3f wo((float) (sinTheta * cosPhi),
+						                (float) (sinTheta * sinPhi),
+						                (float) cosTheta);
 
-                            BSDFQueryRecord bRec(wi, wo, ESolidAngle);
-                            return bsdf->pdf(bRec);
-                        };
+						    BSDFQueryRecord bRec(wi, wo, ESolidAngle);
+						    return bsdf->pdf(bRec);
+					    };
 
-                        double integral = hypothesis::adaptiveSimpson2D(
-                            integrand, cosThetaStart, phiStart, cosThetaEnd,
-                            phiEnd);
+					    double integral = hypothesis::adaptiveSimpson2D(
+							    integrand, cosThetaStart, phiStart, cosThetaEnd,
+							    phiEnd);
 
-                        *ptr++ = integral * m_sampleCount;
-                    }
-                }
-                cout << "done." << endl;
+					    *ptr++ = integral * m_sampleCount;
+				    }
+			    }
+			    cout << "done." << endl;
 
-                /* Write the test input data to disk for debugging */
-                hypothesis::chi2_dump(m_cosThetaResolution, m_phiResolution, obsFrequencies.get(), expFrequencies.get(),
-                    tfm::format("chi2test_%i.m", total));
+			    /* Write the test input data to disk for debugging */
+			    hypothesis::chi2_dump(m_cosThetaResolution, m_phiResolution, obsFrequencies.get(), expFrequencies.get(),
+			                          tfm::format("chi2test_%i.m", total));
 
-                /* Perform the Chi^2 test */
-                std::pair<bool, std::string> result =
-                    hypothesis::chi2_test(m_cosThetaResolution*m_phiResolution, obsFrequencies.get(), expFrequencies.get(),
-                        m_sampleCount, m_minExpFrequency, m_significanceLevel, m_testCount * (int) m_bsdfs.size());
+			    /* Perform the Chi^2 test */
+			    std::pair<bool, std::string> result =
+					                                 hypothesis::chi2_test(m_cosThetaResolution*m_phiResolution, obsFrequencies.get(), expFrequencies.get(),
+					                                                       m_sampleCount, m_minExpFrequency, m_significanceLevel, m_testCount * (int) m_bsdfs.size());
 
-                if (result.first)
-                    ++passed;
+			    if (result.first)
+				    ++passed;
 
-                cout << result.second << endl;
-            }
-        }
+			    cout << result.second << endl;
+		    }
+	    }
 
-        cout << "Passed " << passed << "/" << total << " tests." << endl;
+	    cout << "Passed " << passed << "/" << total << " tests." << endl;
     }
 
     virtual std::string toString() const override {
