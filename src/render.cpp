@@ -69,6 +69,10 @@ NORI_NAMESPACE_BEGIN
 
 	void RenderThread::loadScene(const std::string &filename)
 	{
+		// Trigger interrupt, but don't wait
+		if(isBusy())
+			m_render_status = ERenderStatus::Interrupt;
+
 		filesystem::path path(filename);
 
 		/* Add the parent directory of the scene file to the
@@ -84,7 +88,14 @@ NORI_NAMESPACE_BEGIN
 			return;
 		}
 
-		// New scene accepted
+		// Wait for current render to finish before continuing
+		if(isBusy())
+		{
+			m_render_thread.join();
+			m_render_status = ERenderStatus::Idle;
+		}
+
+		// -- Accept new scene and initialize it
 		sceneFilename = filename;
 
 		// Delete old scene if exists
@@ -305,7 +316,7 @@ NORI_NAMESPACE_BEGIN
 
 		cout << "done. (took " << timer.elapsedString() << ")" << endl;
 
-		if (m_renderScene->isPreviewMode())
+		if (m_renderScene->isPreviewMode() || m_render_status == ERenderStatus::Interrupt)
 		{
 			// stop the rendering here, don't save
 			m_render_status = ERenderStatus::Done;

@@ -113,9 +113,6 @@ void ImguiScreen::drop(const std::string &filename)
 
 void ImguiScreen::openXML(const std::string &filename)
 {
-	if (m_renderThread.isBusy())
-		m_renderThread.stopRendering();
-
 	try
 	{
 		m_renderThread.loadScene(filename);
