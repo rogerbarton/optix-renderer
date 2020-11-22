@@ -99,12 +99,20 @@ public:
     /// Release all memory
     virtual ~Shape();
 
-    virtual void addChild(NoriObject *child) override;
+	virtual NoriObject *cloneAndInit() override = 0;
+
+	/**
+	 * Finish initialization for other components
+	 * @param clone The already created clone
+	 */
+	void cloneAndInit(Shape *clone);
 
     /// Initialize internal data structures (called once by the XML parser)
     virtual void update(const NoriObject *guiObject) override;
 
-    //// Return an axis-aligned bounding box of the entire mesh
+	virtual void addChild(NoriObject *child) override;
+
+	//// Return an axis-aligned bounding box of the entire mesh
     const BoundingBox3f &getBoundingBox() const { return m_bbox; }
 
     /// Is this mesh an area emitter?

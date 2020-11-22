@@ -122,8 +122,6 @@ NORI_NAMESPACE_BEGIN
 
 		stopRendering();
 
-		m_renderScene->update(m_guiScene); // reinitialize it
-
 		m_render_status = ERenderStatus::Busy;
 		m_render_thread = std::thread([this] { renderThreadMain(); });
 	}
@@ -131,7 +129,7 @@ NORI_NAMESPACE_BEGIN
 	void RenderThread::renderThreadMain()
 	{
 		// call initialize here? call inverse recursively, initialize children first.
-		m_renderScene->update(nullptr);
+		m_renderScene->update(m_guiScene);
 
 		/* Allocate memory for the entire output image and clear it */
 		const Camera *camera    = m_renderScene->getCamera();
@@ -403,6 +401,7 @@ NORI_NAMESPACE_BEGIN
 
 		if(guiSceneDirty)
 		{
+			guiSceneDirty = false;
 			restartRender();
 		}
 	}

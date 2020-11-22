@@ -24,22 +24,31 @@
 
 NORI_NAMESPACE_BEGIN
 
-Shape::~Shape()
+void Shape::cloneAndInit(Shape *clone)
 {
-    delete m_bsdf;
-    //delete m_emitter; // scene is responsible for deleting the emitter
+	// If no material was assigned, instantiate a diffuse BRDF
+	if (!m_bsdf)
+		m_bsdf = dynamic_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
+
+	clone->m_bsdf = dynamic_cast<BSDF *>(m_bsdf->cloneAndInit());
+
+	if(m_emitter)
+		clone->m_emitter = dynamic_cast<Emitter *>(m_emitter->cloneAndInit());
 }
 
 void Shape::update(const NoriObject *guiObject)
 {
-    if (!m_bsdf)
-    {
-    	// TODO: move to cloneAndInit
-        /* If no material was assigned, instantiate a diffuse BRDF */
-        m_bsdf = dynamic_cast<BSDF *>(
-            NoriObjectFactory::createInstance("diffuse", PropertyList()));
-	    m_bsdf->update(guiObject);
-    }
+	const auto *gui = dynamic_cast<const Shape *>(guiObject);
+
+	m_bsdf->update(gui->m_bsdf);
+
+    // Emitter updated by scene
+}
+
+Shape::~Shape()
+{
+	delete m_bsdf;
+	//delete m_emitter; // scene is responsible for deleting the emitter
 }
 
 void Shape::addChild(NoriObject *obj)

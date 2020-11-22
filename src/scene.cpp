@@ -62,7 +62,7 @@ NORI_NAMESPACE_BEGIN
 					NoriObjectFactory::createInstance("independent", PropertyList()));
 		}
 
-		if(!m_previewIntegrator)
+		if (!m_previewIntegrator)
 		{
 			m_previewIntegrator = dynamic_cast<Integrator *>(
 					NoriObjectFactory::createInstance("preview", PropertyList()));
@@ -79,19 +79,22 @@ NORI_NAMESPACE_BEGIN
 		clone->m_sampler = dynamic_cast<Sampler *>(m_sampler->cloneAndInit());
 		clone->m_camera  = dynamic_cast<Camera *>(m_camera->cloneAndInit());
 
-		clone->m_envmap   = dynamic_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
-		clone->m_denoiser = dynamic_cast<Denoiser *>(m_denoiser->cloneAndInit());
+		if (m_envmap)
+			clone->m_envmap   = dynamic_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
+		if (m_denoiser)
+			clone->m_denoiser = dynamic_cast<Denoiser *>(m_denoiser->cloneAndInit());
 
-		clone->m_shapes.reserve(m_shapes.size());
 		for (int i = 0; i < m_shapes.size(); ++i)
+		{
 			clone->m_shapes[i] = dynamic_cast<Shape *>(m_shapes[i]->cloneAndInit());
-
-		clone->m_emitters.reserve(m_emitters.size());
-		for (int i = 0; i < m_emitters.size(); ++i)
-			clone->m_emitters[i] = dynamic_cast<Emitter *>(m_emitters[i]->cloneAndInit());
+			if (m_shapes[i]->isEmitter())
+			{
+				m_emitters.push_back(m_shapes[i]->getEmitter());
+				clone->m_emitters.push_back(clone->m_shapes[i]->getEmitter());
+			}
+		}
 
 #ifdef NORI_USE_VOLUMES
-		clone->m_volumes.reserve(m_volumes.size());
 		for (int i = 0; i < m_volumes.size(); ++i)
 			clone->m_volumes[i] = dynamic_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
@@ -113,8 +116,10 @@ NORI_NAMESPACE_BEGIN
 		m_sampler->update(gui->m_sampler);
 		m_camera->update(gui->m_camera);
 
-		m_envmap->update(gui->m_envmap);
-		m_denoiser->update(gui->m_denoiser);
+		if (m_envmap)
+			m_envmap->update(gui->m_envmap);
+		if (m_denoiser)
+			m_denoiser->update(gui->m_denoiser);
 
 		for (int i = 0; i < gui->m_shapes.size(); ++i)
 			m_shapes[i]->update(gui->m_shapes[i]);
@@ -131,7 +136,7 @@ NORI_NAMESPACE_BEGIN
 		if (gui->rebuildBvh)
 		{
 			m_bvh->clear();
-			for(const auto shape : m_shapes)
+			for (const auto shape : m_shapes)
 				m_bvh->addShape(shape);
 			m_bvh->build();
 		}
@@ -145,8 +150,6 @@ NORI_NAMESPACE_BEGIN
 			{
 				Shape *shape = dynamic_cast<Shape *>(obj);
 				m_shapes.push_back(shape);
-				if (shape->isEmitter())
-					m_emitters.push_back(shape->getEmitter());
 			}
 				break;
 

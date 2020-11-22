@@ -66,7 +66,7 @@ protected:
     };
 
     ERenderThreadUpdateFlags updateFlags;
-    bool guiSceneDirty;
+    bool guiSceneDirty = false;
 
 	std::string sceneFilename;
 	std::string outputName;

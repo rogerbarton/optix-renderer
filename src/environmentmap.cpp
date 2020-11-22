@@ -9,10 +9,6 @@ class PNGEnvMap : public EnvironmentMap
 public:
 	explicit PNGEnvMap(const PropertyList &props)
 	{
-		PropertyList l;
-		l.setColor("value", props.has("envmap") ? props.getColor("albedo") : Color3f(0.5f));
-		m_map = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
 
@@ -20,6 +16,13 @@ public:
 	}
 
 	NoriObject *cloneAndInit() override {
+		if(!m_map)
+		{
+			PropertyList l;
+			l.setColor("value", Color3f(0.5f));
+			m_map = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+		}
+
 		auto clone = new PNGEnvMap(*this);
 		clone->m_map = dynamic_cast<Texture<Color3f>*>(m_map->cloneAndInit());
 		return clone;

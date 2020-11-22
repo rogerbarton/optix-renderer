@@ -17,7 +17,7 @@ NORI_NAMESPACE_BEGIN
 		NoriObject *cloneAndInit() override
 		{
 			auto clone = new PointLight(*this);
-			clone->m_shape = dynamic_cast<Shape *>(m_shape->cloneAndInit());
+			Emitter::cloneAndInit(clone);
 			return clone;
 		}
 

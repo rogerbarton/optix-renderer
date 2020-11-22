@@ -113,6 +113,17 @@ NORI_NAMESPACE_BEGIN
 			throw NoriException("Emitter::samplePhoton(): not implemented!");
 		}
 
+		virtual NoriObject *cloneAndInit() override = 0;
+
+		/**
+		 * [Overload] Finish initialization for other components
+		 * @param clone The already created clone
+		 */
+		void cloneAndInit(Emitter *clone)
+		{
+			clone->m_shape = dynamic_cast<Shape *>(m_shape->cloneAndInit());
+		}
+
 		void update(const NoriObject *guiObject) override
 		{
 			const auto *gui = dynamic_cast<const Emitter *>(guiObject);

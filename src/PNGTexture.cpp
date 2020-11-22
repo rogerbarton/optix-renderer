@@ -167,7 +167,7 @@ public:
         ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -176,7 +176,7 @@ public:
         ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleU, 0.01f, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 

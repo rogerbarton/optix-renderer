@@ -35,8 +35,25 @@ public:
         m_bbox.expandBy(m_position - Vector3f(m_radius));
         m_bbox.expandBy(m_position + Vector3f(m_radius));
     }
-	NORI_OBJECT_DEFAULT_CLONE(Sphere)
-	NORI_OBJECT_DEFAULT_UPDATE(Sphere)
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new Sphere(*this);
+		Shape::cloneAndInit(clone);
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		if (!touched)return;
+		touched = false;
+
+		const auto *gui = dynamic_cast<const Sphere *>(guiObject);
+		m_position = gui->m_position;
+		m_radius   = gui->m_radius;
+
+		Shape::update(guiObject);
+	}
 
 	virtual BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
 
@@ -117,7 +134,7 @@ public:
     virtual bool getImGuiNodes() override
     {
     	touched |= Shape::getImGuiNodes();
-        
+
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("center", ImGuiLeafNodeFlags, "Center");
         ImGui::NextColumn();
