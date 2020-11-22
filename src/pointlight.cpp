@@ -23,10 +23,10 @@ NORI_NAMESPACE_BEGIN
 
 		void update(const NoriObject *guiObject) override
 		{
-			if (!touched)return;
-			touched = false;
-
 			const auto *gui = dynamic_cast<const PointLight *>(guiObject);
+			if (!gui->touched)return;
+			gui->touched = false;
+
 			m_power    = gui->m_power;
 			Emitter::update(guiObject);
 		}

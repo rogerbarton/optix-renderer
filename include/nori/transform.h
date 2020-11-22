@@ -102,7 +102,7 @@ private:
     Eigen::Matrix4f m_transform;
     Eigen::Matrix4f m_inverse;
 
-    bool touched = true;
+    mutable bool touched = true;
 };
 
 NORI_NAMESPACE_END

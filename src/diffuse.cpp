@@ -44,10 +44,10 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		if (!touched)return;
-		touched = false;
-
 		const auto* gui = dynamic_cast<const Diffuse *>(guiObject);
+		if (!gui->touched)return;
+		gui->touched = false;
+
 		m_albedo->update(gui->m_albedo);
 	}
 

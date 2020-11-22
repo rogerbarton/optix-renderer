@@ -392,16 +392,15 @@ NORI_NAMESPACE_BEGIN
 		ImGui::Text(filesystem::path(sceneFilename).filename().c_str());
 		ImGui::NextColumn();
 
-		guiSceneDirty |= m_guiScene->getImGuiNodes();
+		bool guiSceneTouched = m_guiScene->getImGuiNodes();
 
 		// end columns
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
 
-		if(guiSceneDirty)
+		if(guiSceneTouched)
 		{
-			guiSceneDirty = false;
 			restartRender();
 		}
 	}

@@ -107,6 +107,8 @@ NORI_NAMESPACE_BEGIN
 	void Scene::update(const NoriObject *guiObject)
 	{
 		const Scene *gui = dynamic_cast<const Scene *>(guiObject);
+		if (!gui->touched)return;
+		gui->touched = false;
 
 		// -- Update children
 		m_integrator->update(gui->m_integrator);

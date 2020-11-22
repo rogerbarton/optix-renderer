@@ -23,10 +23,10 @@ NORI_NAMESPACE_BEGIN
 
 	void Volume::update(const NoriObject *guiObject)
 	{
-		if(!touched) return;
-		touched = false;
-
 		const auto* gui = dynamic_cast<const Volume*>(guiObject);
+		if(!gui->touched) return;
+		gui->touched = false;
+
 		// reload file if the filename has changed. TODO: reload if file has been touched
 		if(filename.str() != gui->filename.str())
 		{

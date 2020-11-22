@@ -73,8 +73,8 @@ Transform Transform::operator*(const Transform &t) const
 }
 void Transform::update(const Transform &guiObject)
 {
-	if(!touched) return;
-	touched = false;
+	if(!guiObject.touched) return;
+	guiObject.touched = false;
 	*this = guiObject;
 }
 

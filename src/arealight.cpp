@@ -39,10 +39,10 @@ NORI_NAMESPACE_BEGIN
 
 		void update(const NoriObject *guiObject) override
 		{
-			if (!touched)return;
-			touched = false;
-
 			const auto* gui = dynamic_cast<const AreaEmitter *>(guiObject);
+			if (!gui->touched)return;
+			gui->touched = false;
+
 			m_radiance = gui->m_radiance;
 			Emitter::update(guiObject);
 		}

@@ -139,7 +139,12 @@ public:
 		return new cls(*this);            \
 	}                                     \
 
-    bool touched = true; // if the gui has modified the object, optionally add for children
+	/**
+	 * If the gui has modified the object, optionally add for children.
+	 * This can be modified for const objects.
+	 */
+    mutable bool touched = true;
+
     /**
      * Initialize the object when the scene has changed before rendering.
      * You can use the NORI_OBJECT_DEFAULT_UPDATE macro.
@@ -150,11 +155,12 @@ public:
      * Implements the NoriObject::update() by copying ALL members if touched.
      * Use this if all members are (xml) properties.
      */
-#   define NORI_OBJECT_DEFAULT_UPDATE(cls)              \
-	void update(const NoriObject *guiObject) override { \
-		if(!touched) return;                            \
-        touched = false;                                \
-        *this = *dynamic_cast<const cls *>(guiObject);  \
+#   define NORI_OBJECT_DEFAULT_UPDATE(cls)                   \
+	void update(const NoriObject *guiObject) override {      \
+        const auto *gui = dynamic_cast<const cls *>(guiObject);   \
+		if(!gui->touched) return;                            \
+        gui->touched = false;                                \
+        *this = *gui;                                        \
 	}
 
     /// Return a brief string summary of the instance (for debugging purposes)
