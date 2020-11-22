@@ -45,7 +45,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto *gui = dynamic_cast<const Sphere *>(guiObject);
+		const auto *gui = static_cast<const Sphere *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 

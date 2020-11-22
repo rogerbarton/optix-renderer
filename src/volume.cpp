@@ -23,7 +23,7 @@ NORI_NAMESPACE_BEGIN
 
 	void Volume::update(const NoriObject *guiObject)
 	{
-		const auto *gui = dynamic_cast<const Volume *>(guiObject);
+		const auto *gui = static_cast<const Volume *>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 

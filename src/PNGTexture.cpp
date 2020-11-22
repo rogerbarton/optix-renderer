@@ -29,7 +29,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const PNGTexture*>(guiObject);
+		const auto* gui = static_cast<const PNGTexture*>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 
@@ -242,7 +242,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const NormalMap*>(guiObject);
+		const auto* gui = static_cast<const NormalMap*>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 

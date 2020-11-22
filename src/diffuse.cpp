@@ -33,18 +33,18 @@ public:
     {
         PropertyList l;
         l.setColor("value", propList.has("albedo") ? propList.getColor("albedo") : Color3f(0.5f));
-        m_albedo = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
     }
 
 	NoriObject *cloneAndInit() override {
     	auto clone = new Diffuse(*this);
-    	clone->m_albedo = dynamic_cast<Texture<Color3f>*>(m_albedo->cloneAndInit());
+    	clone->m_albedo = static_cast<Texture<Color3f>*>(m_albedo->cloneAndInit());
     	return clone;
     }
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const Diffuse *>(guiObject);
+		const auto* gui = static_cast<const Diffuse *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 

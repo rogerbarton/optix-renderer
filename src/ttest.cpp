@@ -84,11 +84,11 @@ public:
 
 		assert(clone->m_bsdfs.size() == m_bsdfs.size());
 		for (int i = 0; i < m_bsdfs.size(); ++i)
-			clone->m_bsdfs[i] = dynamic_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
+			clone->m_bsdfs[i] = static_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
 
 		assert(clone->m_scenes.size() == m_scenes.size());
 		for (int i = 0; i < m_scenes.size(); ++i)
-			clone->m_scenes[i] = dynamic_cast<Scene *>(m_scenes[i]->cloneAndInit());
+			clone->m_scenes[i] = static_cast<Scene *>(m_scenes[i]->cloneAndInit());
 
 		clone->execute();
 		return clone;
@@ -96,7 +96,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto *gui = dynamic_cast<const StudentsTTest *>(guiObject);
+		const auto *gui = static_cast<const StudentsTTest *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 

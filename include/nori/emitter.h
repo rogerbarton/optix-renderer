@@ -121,12 +121,12 @@ NORI_NAMESPACE_BEGIN
 		 */
 		void cloneAndInit(Emitter *clone)
 		{
-			clone->m_shape = dynamic_cast<Shape *>(m_shape->cloneAndInit());
+			clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
 		}
 
 		void update(const NoriObject *guiObject) override
 		{
-			const auto *gui = dynamic_cast<const Emitter *>(guiObject);
+			const auto *gui = static_cast<const Emitter *>(guiObject);
 			m_position = gui->m_position;
 			m_shape->update(gui->m_shape);
 		}

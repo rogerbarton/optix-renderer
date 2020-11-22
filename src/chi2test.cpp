@@ -78,7 +78,7 @@ public:
 		auto clone = new ChiSquareTest(*this);
 		assert(clone->m_bsdfs.size() == m_bsdfs.size());
 		for (int i = 0; i < m_bsdfs.size(); ++i)
-			clone->m_bsdfs[i] = dynamic_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
+			clone->m_bsdfs[i] = static_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
 
 		clone->execute();
 		return clone;
@@ -86,7 +86,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const ChiSquareTest *>(guiObject);
+		const auto* gui = static_cast<const ChiSquareTest *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 

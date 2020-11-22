@@ -157,7 +157,7 @@ public:
      */
 #   define NORI_OBJECT_DEFAULT_UPDATE(cls)                   \
 	void update(const NoriObject *guiObject) override {      \
-        const auto *gui = dynamic_cast<const cls *>(guiObject);   \
+        const auto *gui = static_cast<const cls *>(guiObject);   \
 		if(!gui->touched) return;                            \
         gui->touched = false;                                \
         *this = *gui;                                        \

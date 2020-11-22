@@ -49,7 +49,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const PhotonMapper *>(guiObject);
+		const auto* gui = static_cast<const PhotonMapper *>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 

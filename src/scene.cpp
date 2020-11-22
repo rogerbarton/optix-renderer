@@ -58,13 +58,13 @@ NORI_NAMESPACE_BEGIN
 		if (!m_sampler)
 		{
 			// Create a default (independent) sampler
-			m_sampler = dynamic_cast<Sampler *>(
+			m_sampler = static_cast<Sampler *>(
 					NoriObjectFactory::createInstance("independent", PropertyList()));
 		}
 
 		if (!m_previewIntegrator)
 		{
-			m_previewIntegrator = dynamic_cast<Integrator *>(
+			m_previewIntegrator = static_cast<Integrator *>(
 					NoriObjectFactory::createInstance("preview", PropertyList()));
 		}
 
@@ -72,21 +72,21 @@ NORI_NAMESPACE_BEGIN
 		clone->m_bvh = new BVH();
 
 		// -- Copy and initialize children
-		clone->m_integrator        = dynamic_cast<Integrator *>(m_integrator->cloneAndInit());
-		clone->m_previewIntegrator = dynamic_cast<Integrator *>(m_previewIntegrator->cloneAndInit());
+		clone->m_integrator        = static_cast<Integrator *>(m_integrator->cloneAndInit());
+		clone->m_previewIntegrator = static_cast<Integrator *>(m_previewIntegrator->cloneAndInit());
 		// clone->m_preview_mode = m_preview_mode; // already copied?
 
-		clone->m_sampler = dynamic_cast<Sampler *>(m_sampler->cloneAndInit());
-		clone->m_camera  = dynamic_cast<Camera *>(m_camera->cloneAndInit());
+		clone->m_sampler = static_cast<Sampler *>(m_sampler->cloneAndInit());
+		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
 
 		if (m_envmap)
-			clone->m_envmap   = dynamic_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
+			clone->m_envmap   = static_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
 		if (m_denoiser)
-			clone->m_denoiser = dynamic_cast<Denoiser *>(m_denoiser->cloneAndInit());
+			clone->m_denoiser = static_cast<Denoiser *>(m_denoiser->cloneAndInit());
 
 		for (int i = 0; i < m_shapes.size(); ++i)
 		{
-			clone->m_shapes[i] = dynamic_cast<Shape *>(m_shapes[i]->cloneAndInit());
+			clone->m_shapes[i] = static_cast<Shape *>(m_shapes[i]->cloneAndInit());
 			if (m_shapes[i]->isEmitter())
 			{
 				m_emitters.push_back(m_shapes[i]->getEmitter());
@@ -96,7 +96,7 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_VOLUMES
 		for (int i = 0; i < m_volumes.size(); ++i)
-			clone->m_volumes[i] = dynamic_cast<Volume *>(m_volumes[i]->cloneAndInit());
+			clone->m_volumes[i] = static_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
 
 		cout << endl << "Configuration: " << clone->toString() << endl << endl;
@@ -106,7 +106,7 @@ NORI_NAMESPACE_BEGIN
 
 	void Scene::update(const NoriObject *guiObject)
 	{
-		const auto *gui = dynamic_cast<const Scene *>(guiObject);
+		const auto *gui = static_cast<const Scene *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
 
@@ -151,48 +151,48 @@ NORI_NAMESPACE_BEGIN
 		{
 			case EShape:
 			{
-				Shape *shape = dynamic_cast<Shape *>(obj);
+				Shape *shape = static_cast<Shape *>(obj);
 				m_shapes.push_back(shape);
 			}
 				break;
 
 			case EEmitter:
-				m_emitters.push_back(dynamic_cast<Emitter *>(obj));
+				m_emitters.push_back(static_cast<Emitter *>(obj));
 				break;
 
 			case ESampler:
 				if (m_sampler)
 					throw NoriException("There can only be one sampler per scene!");
-				m_sampler = dynamic_cast<Sampler *>(obj);
+				m_sampler = static_cast<Sampler *>(obj);
 				break;
 
 			case ECamera:
 				if (m_camera)
 					throw NoriException("There can only be one camera per scene!");
-				m_camera = dynamic_cast<Camera *>(obj);
+				m_camera = static_cast<Camera *>(obj);
 				break;
 
 			case EIntegrator:
 				if (m_integrator)
 					throw NoriException("There can only be one integrator per scene!");
-				m_integrator = dynamic_cast<Integrator *>(obj);
+				m_integrator = static_cast<Integrator *>(obj);
 				break;
 
 			case EEnvironmentMap:
 				if (m_envmap)
 					throw NoriException("There can only be one environment map per scene!");
-				m_envmap = dynamic_cast<EnvironmentMap *>(obj);
+				m_envmap = static_cast<EnvironmentMap *>(obj);
 				break;
 			case EDenoiser:
 				if (m_denoiser)
 					throw NoriException("There can only be one denoiser per scene!");
-				m_denoiser = dynamic_cast<Denoiser *>(obj);
+				m_denoiser = static_cast<Denoiser *>(obj);
 				break;
 
 			case EVolume:
 				// Skip if volumes are disabled
 #ifdef NORI_USE_VOLUMES
-				m_volumes.push_back(dynamic_cast<Volume *>(obj));
+				m_volumes.push_back(static_cast<Volume *>(obj));
 #endif
 				break;
 

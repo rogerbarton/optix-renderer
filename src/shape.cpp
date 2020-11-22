@@ -28,17 +28,17 @@ void Shape::cloneAndInit(Shape *clone)
 {
 	// If no material was assigned, instantiate a diffuse BRDF
 	if (!m_bsdf)
-		m_bsdf = dynamic_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
+		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
 
-	clone->m_bsdf = dynamic_cast<BSDF *>(m_bsdf->cloneAndInit());
+	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
 	if(m_emitter)
-		clone->m_emitter = dynamic_cast<Emitter *>(m_emitter->cloneAndInit());
+		clone->m_emitter = static_cast<Emitter *>(m_emitter->cloneAndInit());
 }
 
 void Shape::update(const NoriObject *guiObject)
 {
-	const auto *gui = dynamic_cast<const Shape *>(guiObject);
+	const auto *gui = static_cast<const Shape *>(guiObject);
 
 	m_bsdf->update(gui->m_bsdf);
 

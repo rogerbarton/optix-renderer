@@ -97,8 +97,8 @@ NORI_NAMESPACE_BEGIN
 		}
 
 		// Create gui/properties scene first, then deep copy to render scene
-		m_guiScene    = dynamic_cast<Scene *>(root);
-		m_renderScene = dynamic_cast<Scene *>(m_guiScene->cloneAndInit());
+		m_guiScene    = static_cast<Scene *>(root);
+		m_renderScene = static_cast<Scene *>(m_guiScene->cloneAndInit());
 
 		// Determine the filename of the output bitmap
 		outputName = sceneFilename;

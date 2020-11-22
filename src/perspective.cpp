@@ -57,17 +57,17 @@ public:
 	NoriObject *cloneAndInit() override {
     	// If no reconstruction filter was assigned, instantiate a Gaussian filter
 		if (!m_rfilter)
-			m_rfilter = dynamic_cast<ReconstructionFilter *>(
+			m_rfilter = static_cast<ReconstructionFilter *>(
 					NoriObjectFactory::createInstance("gaussian", PropertyList()));
 
 		auto clone = new PerspectiveCamera(*this);
-		clone->m_rfilter = dynamic_cast<ReconstructionFilter *>(m_rfilter->cloneAndInit());
+		clone->m_rfilter = static_cast<ReconstructionFilter *>(m_rfilter->cloneAndInit());
     	return clone;
     }
 
 	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = dynamic_cast<const PerspectiveCamera *>(guiObject);
+		const auto* gui = static_cast<const PerspectiveCamera *>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 
@@ -136,7 +136,7 @@ public:
         {
 	        ray.update();
 
-	        static Sampler *const sampler = dynamic_cast<Sampler *>(
+	        static Sampler *const sampler = static_cast<Sampler *>(
 			        NoriObjectFactory::createInstance("independent", PropertyList()));
 
 	        const Point2f pLens = m_lensRadius * Warp::squareToUniformDisk(sampler->next2D());

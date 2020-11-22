@@ -46,7 +46,7 @@ public:
 
 	void update(const NoriObject *guiObject) override
 	{
-    	const auto* gui = dynamic_cast<const WavefrontOBJ*>(guiObject);
+    	const auto* gui = static_cast<const WavefrontOBJ*>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 

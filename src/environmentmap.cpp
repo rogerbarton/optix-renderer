@@ -21,17 +21,17 @@ public:
 		{
 			PropertyList l;
 			l.setColor("value", Color3f(0.5f));
-			m_map = dynamic_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 		}
 
 		auto clone = new PNGEnvMap(*this);
-		clone->m_map = dynamic_cast<Texture<Color3f>*>(m_map->cloneAndInit());
+		clone->m_map = static_cast<Texture<Color3f>*>(m_map->cloneAndInit());
 		return clone;
 	}
 
 	void update(const NoriObject* guiObject) override
 	{
-		const auto* gui = dynamic_cast<const PNGEnvMap*>(guiObject);
+		const auto* gui = static_cast<const PNGEnvMap*>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 
@@ -55,7 +55,7 @@ public:
 			{
 				if (m_map)
 					throw NoriException("There is already an envmap defined!");
-				m_map = dynamic_cast<Texture<Color3f> *>(obj);
+				m_map = static_cast<Texture<Color3f> *>(obj);
 			}
 			else
 			{
