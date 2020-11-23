@@ -39,10 +39,14 @@
   </mesh>
 
   <!-- use default color for env map -->
-  <emitter type="envmap"/> 
-
+  <emitter type="envmap">
+    <texture type="constant_color" name="albedo">
+      <color name="value" value="0.1,0.1,0.1"/>
+    </texture>
+  </emitter>
+  
   <emitter type="point">
-    <point name="position" value="0, 30, 0"/>
-    <color name="power" value="10000,10000,10000"/>
+    <point name="position" value="0, 20, 0"/>
+    <color name="power" value="10000, 10000, 10000"/>
   </emitter>
 </scene>

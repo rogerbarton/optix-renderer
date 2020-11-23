@@ -63,13 +63,15 @@ public:
         Vector3f Cspec0 = mix<Vector3f>(specular * 0.08f * mix(Vector3f(1.f), Ctint, specularTint), Cdlin, metallic);
         Vector3f Csheen = mix<Vector3f>(Vector3f(1.f), Ctint, sheenTint);
 
+        // diffuse fresnel
         float FL = SchlickFresnel(NdotL);
         float FV = SchlickFresnel(NdotV);
         float Fd90 = 0.5f + 2.f * LdotH * LdotH * roughness;
         float Fd = mix<float>(1.0, Fd90, FL) * mix<float>(1.0, Fd90, FV);
 
+        // hanrahan-krueger brdf approximation of isotropic bsdf
         float Fss90 = LdotH * LdotH * roughness;
-        float Fss = mix<float>(1.0, Fss90, FL) * mix<float>(1.0, Fss90, FV);
+        float Fss = mix<float>(1.0, Fss90, FL) * mix<float>(1.0f, Fss90, FV);
         float ss = 1.25f * (Fss * (1.f / (NdotL + NdotV) - 0.5f) + 0.5f);
 
         // specular
@@ -91,7 +93,7 @@ public:
         float Gr = smithG_GGX(NdotL, 0.25f) * smithG_GGX(NdotV, 0.25f);
 
         Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1.f - metallic) + Vector3f(Gs * Fs * Ds) + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
-
+        //finalCol *= L.dot(N);
         return Color3f(finalCol.x(), finalCol.y(), finalCol.z());
     }
 

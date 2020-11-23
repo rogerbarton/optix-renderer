@@ -160,7 +160,7 @@ public:
 	    {
 		    fileBrowser.Open();
 		    fileBrowser.SetTitle("Open Image File");
-		    fileBrowser.SetTypeFilters({".png"});
+		    fileBrowser.SetTypeFilters({".png", ".hdr"});
 		    if(filename.has_parent_path())
 			    fileBrowser.SetPwd(filename.parent_path());
 	    }

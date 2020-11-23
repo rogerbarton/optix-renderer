@@ -19,8 +19,8 @@ public:
         m_sampleCount = propList.getInteger("sampleCount", 1);
         uniform_every = propList.getInteger("uniformEvery", 100);
     }
-	NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
-	NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
+    NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
+    NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
 
     std::unique_ptr<Sampler> clone() const override
     {
@@ -106,15 +106,15 @@ public:
             for (int i = 0; i < size.x() * size.y(); i++)
             {
                 // https://stackoverflow.com/questions/33426921/pick-a-matrix-cell-according-to-its-probability
-                while (true)
+
+                // TODO only select 95% (not those with hightes probability)
+                Histogram::elem_type it = histogram.getElement(next1D());
+                if (it != histogram.map.end())
                 {
-                    // TODO only select 95% (not those with hightes probability)
-                    Histogram::elem_type it = histogram.getElement(next1D());
-                    if (it != histogram.map.end())
-                    {
-                        result.push_back(it->second);
-                        break;
-                    }
+                    result.push_back(it->second);
+                    break;
+                } else {
+                    throw NoriException("Adaptive: histogram could not find data point...");
                 }
             }
         }
@@ -122,19 +122,19 @@ public:
         return result;
     }
 #ifndef NORI_USE_NANOGUI
-	NORI_OBJECT_IMGUI_NAME("Adaptive");
-	bool getImGuiNodes() override
-	{
-		touched |= Sampler::getImGuiNodes();
+    NORI_OBJECT_IMGUI_NAME("Adaptive");
+    bool getImGuiNodes() override
+    {
+        touched |= Sampler::getImGuiNodes();
 
-		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		return touched;
-	}
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        return touched;
+    }
 #endif
 
 protected:

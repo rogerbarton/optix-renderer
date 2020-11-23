@@ -78,24 +78,19 @@ public:
 				   const Point2f &sample) const
 	{
 		// sample any point based on the probabilities
-
 		Histogram::upair result;
-		while (true)
+
+		Histogram::elem_type it = histogram.getElement(sample.x());
+		if (it != histogram.map.end())
 		{
-			Histogram::elem_type it = histogram.getElement(sample.x());
-			if (it != histogram.map.end())
-			{
-				result = it->second;
-				break;
-			}
-			else
-			{
-				throw NoriException("Histogram could not find a data point...");
-			}
+			result = it->second;
+		}
+		else
+		{
+			throw NoriException("Histogram could not find a data point...");
 		}
 
 		// convert result (kind of uv coords) into direction
-
 		float i = result.first / (float)m_map->getHeight();
 		float j = result.second / (float)m_map->getWidth();
 
@@ -109,19 +104,15 @@ public:
 		{
 			v = sphericalDirection(j * M_PI, i * 2.0f * M_PI);
 		}
-		Vector3f v_inf = v * 1.f / Epsilon;			 // divide by epsilon = * inf
-		lRec.n = -(v_inf - m_position).normalized(); // the normal points inwards to m_position
+		Vector3f v_inf = v * 1.f / Epsilon; // divide by epsilon = * inf
+		lRec.n = -v;						// the normal points inwards
 		lRec.p = v_inf;
 		lRec.wi = (lRec.p - lRec.ref).normalized();
 		lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 
 		lRec.pdf = pdf(lRec);
 
-		if (lRec.pdf < Epsilon)
-			return Color3f(0.f);
-
-		Color3f col = eval(lRec) / lRec.pdf;
-		return col;
+		return eval(lRec) / lRec.pdf;
 	}
 
 	float pdf(const EmitterQueryRecord &lRec) const
@@ -143,7 +134,8 @@ public:
 		i = i + m_map->getHeight() % m_map->getHeight();
 		j = j + m_map->getWidth() % m_map->getWidth();
 
-		return probabilities(i, j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f));
+		// second and third part is the probability of sampling one pixel (in solid angles)
+		return probabilities(i, j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
 	}
 
 	Color3f eval(const EmitterQueryRecord &lRec) const override
@@ -160,6 +152,20 @@ public:
 		uv.y() = uv_coords.x() / M_PI;
 
 		return m_map->eval(uv);
+	}
+
+	Color3f samplePhoton(Ray3f &ray, const Point2f &sample1, const Point2f &sample2) const override
+	{
+		EmitterQueryRecord EQR;
+		auto Li = this->sample(EQR, sample1);
+
+		//set shadowray
+		ray = EQR.shadowRay;
+
+		//compute pdf of sampling random point
+		auto pdf = this->pdf(EQR);
+
+		return Li / pdf;
 	}
 
 #ifndef NORI_USE_NANOGUI
