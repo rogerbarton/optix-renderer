@@ -10,9 +10,10 @@ class EnvMap : public Emitter
 public:
 	explicit EnvMap(const PropertyList &props) {}
 
-	NoriObject *cloneAndInit() override {
+	NoriObject *cloneAndInit() override
+	{
 		// Use constant texture as a fallback
-		if(!m_map)
+		if (!m_map)
 		{
 			PropertyList l;
 			l.setColor("value", Color3f(0.5f));
@@ -20,14 +21,17 @@ public:
 		}
 
 		auto clone = new EnvMap(*this);
-		clone->m_map = static_cast<Texture<Color3f>*>(m_map->cloneAndInit());
+		clone->m_map = static_cast<Texture<Color3f> *>(m_map->cloneAndInit());
+		calculateProbs();
+
 		return clone;
 	}
 
 	void update(const NoriObject *guiObject) override
 	{
 		const auto *gui = static_cast<const EnvMap *>(guiObject);
-		if (!gui->touched) return;
+		if (!gui->touched)
+			return;
 		gui->touched = false;
 
 		m_map->update(gui->m_map);
