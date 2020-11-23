@@ -31,7 +31,7 @@ NORI_NAMESPACE_BEGIN
  */
 class PerspectiveCamera : public Camera {
 public:
-    PerspectiveCamera(const PropertyList &propList) {
+    explicit PerspectiveCamera(const PropertyList &propList) {
         /* Width and height in pixels. Default: 720p */
         m_outputSize.x() = propList.getInteger("width", 1280);
         m_outputSize.y() = propList.getInteger("height", 720);
@@ -51,13 +51,43 @@ public:
         m_lensRadius    = propList.getFloat("lensRadius", 0.f);
 	    m_focalDistance = propList.getFloat("focalDistance", 1.f);
 
-        m_rfilter = NULL;
+        m_rfilter = nullptr;
     }
 
-    virtual void activate() override {
+	NoriObject *cloneAndInit() override {
+    	// If no reconstruction filter was assigned, instantiate a Gaussian filter
+		if (!m_rfilter)
+			m_rfilter = static_cast<ReconstructionFilter *>(
+					NoriObjectFactory::createInstance("gaussian", PropertyList()));
+
+		auto clone = new PerspectiveCamera(*this);
+		clone->m_rfilter = static_cast<ReconstructionFilter *>(m_rfilter->cloneAndInit());
+    	return clone;
+    }
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = static_cast<const PerspectiveCamera *>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// -- Copy properties
+		m_outputSize = gui->m_outputSize;
+		m_fov = gui->m_fov;
+		m_nearClip = gui->m_nearClip;
+		m_farClip = gui->m_farClip;
+		m_lensRadius = gui->m_lensRadius;
+		m_focalDistance = gui->m_lensRadius;
+
+		// -- Update sub-objects
+		m_rfilter->update(gui->m_rfilter);
+		m_cameraToWorld.update(gui->m_cameraToWorld);
+
+		// -- Recalculate derived properties
+		m_invOutputSize = m_outputSize.cast<float>().cwiseInverse();
         float aspect = m_outputSize.x() / (float) m_outputSize.y();
 
-        /* Project vectors in camera space onto a plane at z=1:
+        /** Project vectors in camera space onto a plane at z=1:
          *
          *  xProj = cot * x / z
          *  yProj = cot * y / z
@@ -82,13 +112,6 @@ public:
         m_sampleToCamera = Transform( 
             Eigen::DiagonalMatrix<float, 3>(Vector3f(0.5f, -0.5f * aspect, 1.0f)) *
             Eigen::Translation<float, 3>(1.0f, -1.0f/aspect, 0.0f) * perspective).inverse();
-
-        /* If no reconstruction filter was assigned, instantiate a Gaussian filter */
-        if (!m_rfilter) {
-            m_rfilter = static_cast<ReconstructionFilter *>(
-                    NoriObjectFactory::createInstance("gaussian", PropertyList()));
-            m_rfilter->activate();
-        }
     }
 
     Color3f sampleRay(Ray3f &ray,
@@ -113,7 +136,7 @@ public:
         {
 	        ray.update();
 
-	        static Sampler *const sampler = dynamic_cast<Sampler *>(
+	        static Sampler *const sampler = static_cast<Sampler *>(
 			        NoriObjectFactory::createInstance("independent", PropertyList()));
 
 	        const Point2f pLens = m_lensRadius * Warp::squareToUniformDisk(sampler->next2D());
@@ -170,11 +193,9 @@ public:
         );
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Perspective"; }
+	NORI_OBJECT_IMGUI_NAME("Perspective");
     virtual bool getImGuiNodes() override {
-        bool ret = Camera::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+        touched |= Camera::getImGuiNodes();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(0);
@@ -184,63 +205,61 @@ public:
         ImGui::Text("To World");
         ImGui::NextColumn();
         if(node_open) {
-            ret |= m_cameraToWorld.getImGuiNodes();
+	        touched |= m_cameraToWorld.getImGuiNodes();
             ImGui::TreePop();
         }
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("fov", flags, "Field Of View");
+        ImGui::TreeNodeEx("fov", ImGuiLeafNodeFlags, "Field Of View");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_fov, 1, 0, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("nearCLip", flags, "Near Clip");
+        ImGui::TreeNodeEx("nearCLip", ImGuiLeafNodeFlags, "Near Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_nearClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("fov", flags, "Far Clip");
+        ImGui::TreeNodeEx("fov", ImGuiLeafNodeFlags, "Far Clip");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_farClip, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
-        ImGui::TreeNodeEx("lensRadius", flags, "Lens Radius");
+        ImGui::TreeNodeEx("lensRadius", ImGuiLeafNodeFlags, "Lens Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_lensRadius, 0.001f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(5);
-        ImGui::TreeNodeEx("focalDistance", flags, "Focal Distance");
+        ImGui::TreeNodeEx("focalDistance", ImGuiLeafNodeFlags, "Focal Distance");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_focalDistance, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
-        return ret;
+        return touched;
     }
 #endif
 private:
-    Vector2f m_invOutputSize;
-    Transform m_sampleToCamera;
-    Transform m_cameraToWorld;
+	// -- Properties
     float m_fov;
     float m_nearClip;
     float m_farClip;
@@ -248,6 +267,14 @@ private:
     // Depth of Field
     float m_lensRadius; // aka aperture
     float m_focalDistance; // aka focal length
+
+    // -- Sub-objects
+	Transform m_cameraToWorld;
+
+    // -- Derived properties
+	Transform m_sampleToCamera;
+    Vector2f m_invOutputSize;
+
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");

@@ -9,7 +9,10 @@ NORI_NAMESPACE_BEGIN
 class PathMISIntegrator : public Integrator
 {
 public:
-    PathMISIntegrator(const PropertyList &propList) {}
+    explicit PathMISIntegrator(const PropertyList &propList) {}
+	NORI_OBJECT_DEFAULT_CLONE(PathMISIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(PathMISIntegrator)
+
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
         Color3f Li = Color3f(0.f); // initial radiance
@@ -150,10 +153,7 @@ public:
         return "PathMISIntegrator[]";
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override
-    {
-        return "Path MIS";
-    }
+	NORI_OBJECT_IMGUI_NAME("Path MIS");
     virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 protected:

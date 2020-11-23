@@ -312,8 +312,6 @@ void BVH::addShape(Shape *shape) {
 }
 
 void BVH::clear() {
-    for (auto shape : m_shapes)
-        delete shape;
     m_shapes.clear();
     m_shapeOffset.clear();
     m_shapeOffset.push_back(0u);

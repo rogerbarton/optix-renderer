@@ -27,7 +27,7 @@ float get_pixel_ratio()
 	return xscale;
 }
 
-ImguiScreen::ImguiScreen(ImageBlock &block) : m_block(block), m_renderThread(m_block)
+ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_block}
 {
 	windowWidth = 1000;
 	windowHeight = 800;
@@ -113,13 +113,9 @@ void ImguiScreen::drop(const std::string &filename)
 
 void ImguiScreen::openXML(const std::string &filename)
 {
-	if (m_renderThread.isBusy())
-		m_renderThread.stopRendering();
-
 	try
 	{
-		renderingFilename = filename;
-		m_renderThread.renderScene(filename);
+		m_renderThread.loadScene(filename);
 
 		imageZoom = 1.f;
 		centerImage(true);
@@ -141,9 +137,11 @@ void ImguiScreen::openEXR(const std::string &filename)
 	if (m_renderThread.isBusy())
 		m_renderThread.stopRendering();
 
-	if (m_renderThread.m_scene)
-		delete m_renderThread.m_scene;
-	m_renderThread.m_scene = nullptr; // nullify scene for Tree viewer
+	if (m_renderThread.m_guiScene)
+	{
+		delete m_renderThread.m_guiScene;
+		m_renderThread.m_guiScene = nullptr; // nullify scene for Tree viewer
+	}
 
 	Bitmap bitmap(filename);
 
@@ -283,13 +281,9 @@ void ImguiScreen::draw()
 	{
 		std::string extension = filebrowser.GetSelected().extension().string();
 		if (extension == ".xml")
-		{
 			openXML(filebrowser.GetSelected().string());
-		}
 		else if (extension == ".exr")
-		{
 			openEXR(filebrowser.GetSelected().string());
-		}
 		filebrowser.ClearSelected();
 	}
 
@@ -326,31 +320,14 @@ void ImguiScreen::draw()
 				m_renderThread.stopRendering();
 
 			// show restart button if m_scene is valid
-			if (m_renderThread.m_scene && ImGui::Button("Restart Render"))
-				m_renderThread.rerenderScene(renderingFilename);
-
-			if (m_renderThread.m_scene)
+			if (m_renderThread.m_guiScene)
 			{
-				if (ImGui::Button((currentLayer == RENDER) ? "Change to Preview" : "Change to Render View"))
-				{
-					currentLayer = (currentLayer == RENDER) ? PREVIEW : RENDER;
-
-					if (currentLayer == PREVIEW)
-					{
-						// save sample count
-						oldSampleCount = m_renderThread.m_scene->getSampler()->getSampleCount();
-						m_renderThread.m_scene->getSampler()->setSampleCount(1);
-						m_renderThread.m_scene->setPreviewMode(true);
-						needsRerender = true;
-					}
-					else
-					{
-						// copy back old integrator
-						m_renderThread.m_scene->setPreviewMode(false);
-						m_renderThread.m_scene->getSampler()->setSampleCount(oldSampleCount);
-					}
-				}
+				ImGui::SameLine();
+				if (ImGui::Button("Restart Render"))
+					m_renderThread.restartRender();
 			}
+
+			m_renderThread.drawRenderGui();
 
 			ImGui::NewLine();
 
@@ -378,7 +355,7 @@ void ImguiScreen::draw()
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::BeginChild(42);
-				needsRerender |= drawSceneTree();
+				m_renderThread.drawSceneGui();
 				ImGui::EndChild();
 			}
 		}
@@ -527,7 +504,7 @@ void ImguiScreen::keyPressed(int key, int mods)
 	else if (key == GLFW_KEY_ESCAPE)
 		m_renderThread.stopRendering();
 	else if (key == GLFW_KEY_F5)
-		m_renderThread.rerenderScene(renderingFilename);
+		m_renderThread.restartRender();
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
 	{
 		filebrowserSave.Open();
@@ -623,66 +600,6 @@ void ImguiScreen::initImGui()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
-}
-
-bool ImguiScreen::drawSceneTree()
-{
-	// check if a scene exists
-	if (!m_renderThread.m_scene)
-	{
-		ImGui::Text("No scene loaded...");
-		return false;
-	}
-
-	bool renderThreadBusy = m_renderThread.isBusy();
-
-	bool ret = false;
-
-	if (renderThreadBusy)
-	{
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha,
-							ImGui::GetStyle().Alpha * 0.5f);
-	}
-
-	// Start columns
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-	ImGui::Columns(2);
-
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-							   ImGuiTreeNodeFlags_Bullet;
-
-	ImGui::AlignTextToFramePadding();
-	ImGui::TreeNodeEx("fileName", flags, "Filename");
-	ImGui::NextColumn();
-	ImGui::SetNextItemWidth(-1);
-	ImGui::Text(filesystem::path(renderingFilename).filename().c_str());
-	ImGui::NextColumn();
-
-	// Start recursion
-	ret |= m_renderThread.m_scene->getImGuiNodes();
-
-	// end columns
-	ImGui::Columns(1);
-	ImGui::Separator();
-	ImGui::PopStyleVar();
-
-	// pop disable flags
-	if (renderThreadBusy)
-	{
-		ImGui::PopItemFlag();
-		ImGui::PopStyleVar();
-	}
-	else
-	{
-		if (currentLayer == PREVIEW && needsRerender)
-		{
-			m_renderThread.rerenderScene(renderingFilename);
-			needsRerender = false;
-		}
-	}
-
-	return ret;
 }
 
 NORI_NAMESPACE_END

@@ -9,7 +9,9 @@ NORI_NAMESPACE_BEGIN
 class PathMATSIntegrator : public Integrator
 {
 public:
-    PathMATSIntegrator(const PropertyList &propList) {}
+    explicit PathMATSIntegrator(const PropertyList &propList) {}
+	NORI_OBJECT_DEFAULT_CLONE(PathMATSIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(PathMATSIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
@@ -80,10 +82,7 @@ public:
         return std::string("PathMATSIntegrator[]");
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override
-    {
-        return "Path MATS";
-    }
+	NORI_OBJECT_IMGUI_NAME("Path MATS");
     virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 protected:

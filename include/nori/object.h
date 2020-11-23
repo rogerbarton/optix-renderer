@@ -59,17 +59,17 @@ class NoriObject
 public:
     enum EClassType
     {
-        EScene = 0,
-        EMesh,
-        ETexture,
-        EVolume,
-        EBSDF,
-        EPhaseFunction,
-        EEmitter,
-        EMedium,
-        ECamera,
-        EIntegrator,
-        ESampler,
+	    EScene = 0,
+	    EShape,
+	    ETexture,
+	    EVolume,
+	    EBSDF,
+	    EPhaseFunction,
+	    EEmitter,
+	    EMedium,
+	    ECamera,
+	    EIntegrator,
+	    ESampler,
         EPixelSampler,
         EDenoiser,
         ETest,
@@ -84,7 +84,7 @@ public:
         {
         case EScene:
             return "scene";
-        case EMesh:
+        case EShape:
             return "shape";
         case ETexture:
             return "texture";
@@ -145,19 +145,43 @@ public:
     }
 
     /**
-     * \brief Perform some action associated with the object
-     *
-     * The default implementation throws an exception. Certain objects
-     * may choose to override it, e.g. to implement initialization, 
-     * testing, or rendering functionality.
-     *
-     * This function is called by the XML parser once it has
-     * constructed an object and added all of its children
-     * using \ref addChild().
+     * Clones the object, initializes the copy and returns the new copy. Does a deep copy.
      */
-    virtual void activate()
-    { /* Do nothing */
-    }
+	virtual NoriObject *cloneAndInit() = 0;
+
+	/**
+	 * Creates a copy constructor for the derived class.
+	 * Can be used in most cases where there are no pointer members, as this function should perform a deep copy.
+	 * See also: https://stackoverflow.com/questions/12255546/c-deep-copying-a-base-class-pointer
+	 */
+#   define NORI_OBJECT_DEFAULT_CLONE(cls) \
+	NoriObject *cloneAndInit() override { \
+		return new cls(*this);            \
+	}                                     \
+
+	/**
+	 * If the gui has modified the object, optionally add for children.
+	 * This can be modified for const objects.
+	 */
+    mutable bool touched = true;
+
+    /**
+     * Initialize the object when the scene has changed before rendering.
+     * You can use the NORI_OBJECT_DEFAULT_UPDATE macro.
+     */
+    virtual void update(const NoriObject *guiObject) = 0;
+
+    /**
+     * Implements the NoriObject::update() by copying ALL members if touched.
+     * Use this if all members are (xml) properties.
+     */
+#   define NORI_OBJECT_DEFAULT_UPDATE(cls)                   \
+	void update(const NoriObject *guiObject) override {      \
+        const auto *gui = static_cast<const cls *>(guiObject);   \
+		if(!gui->touched) return;                            \
+        gui->touched = false;                                \
+        *this = *gui;                                        \
+	}
 
     /// Return a brief string summary of the instance (for debugging purposes)
     virtual std::string toString() const = 0;
@@ -166,8 +190,19 @@ public:
     void setIdName(const std::string &name) { m_idname = name; }
     const std::string &getIdName() const { return m_idname; }
 #ifndef NORI_USE_NANOGUI
+	virtual std::string getImGuiName() const  {
+		return tfm::format("%s%s", "Object", (touched ? "*" : ""));
+	}
+
+	/**
+	 * Sets the display name in the scene tree. Indicates if the object was touched
+	 */
+#   define NORI_OBJECT_IMGUI_NAME(cls)                         \
+	std::string getImGuiName() const override {                \
+		return tfm::format("%s%s", cls, (touched ? "*" : "")); \
+	}
+
     virtual bool getImGuiNodes() = 0;
-    virtual const char* getImGuiName() const = 0;
 #endif
 
 protected:

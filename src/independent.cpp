@@ -37,6 +37,8 @@ public:
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
     }
+	NORI_OBJECT_DEFAULT_CLONE(Independent)
+	NORI_OBJECT_DEFAULT_UPDATE(Independent)
 
     virtual ~Independent() {}
 
@@ -97,15 +99,11 @@ public:
         return result;
     }
 #ifndef NORI_USE_NANOGUI
-    const char* getImGuiName() const override
-    {
-        return "Independent";
-    }
-
-    bool getImGuiNodes() override
-    {
-        return Sampler::getImGuiNodes();
-    }
+	NORI_OBJECT_IMGUI_NAME("Independent");
+	bool getImGuiNodes() override
+	{
+		return Sampler::getImGuiNodes();
+	}
 #endif
 protected:
     Independent() {}

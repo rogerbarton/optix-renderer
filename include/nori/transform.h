@@ -92,6 +92,8 @@ public:
     /// Return a string representation
     std::string toString() const;
 
+	void update(const Transform &guiObject);
+
 #ifndef NORI_USE_NANOGUI
     bool getImGuiNodes();
 #endif
@@ -99,6 +101,8 @@ public:
 private:
     Eigen::Matrix4f m_transform;
     Eigen::Matrix4f m_inverse;
+
+    mutable bool touched = true;
 };
 
 NORI_NAMESPACE_END

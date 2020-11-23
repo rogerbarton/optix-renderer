@@ -14,11 +14,13 @@ NORI_NAMESPACE_BEGIN
 class AdaptiveSampler : public Sampler
 {
 public:
-    AdaptiveSampler(const PropertyList &propList)
+    explicit AdaptiveSampler(const PropertyList &propList)
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
         uniform_every = propList.getInteger("uniformEvery", 100);
     }
+	NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
+	NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
 
     std::unique_ptr<Sampler> clone() const override
     {
@@ -120,26 +122,20 @@ public:
         return result;
     }
 #ifndef NORI_USE_NANOGUI
-    const char *getImGuiName() const override
-    {
-        return "Adaptive";
-    }
+	NORI_OBJECT_IMGUI_NAME("Adaptive");
+	bool getImGuiNodes() override
+	{
+		touched |= Sampler::getImGuiNodes();
 
-    bool getImGuiNodes() override
-    {
-        bool ret = Sampler::getImGuiNodes();
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("uniformEvery", flags, "Uniform Every");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        return ret;
-    }
-    #endif
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		return touched;
+	}
+#endif
 
 protected:
     AdaptiveSampler() {}

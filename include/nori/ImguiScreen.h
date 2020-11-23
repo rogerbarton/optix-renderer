@@ -32,8 +32,8 @@ public:
 public:
 	MouseState() {}
 	~MouseState() {}
-	void onMouseClick(double xPos, double yPos, int button, int action,
-					  int mods)
+
+	void onMouseClick(double xPos, double yPos, int button, int action, int mods)
 	{
 		this->mods = mods;
 
@@ -49,6 +49,7 @@ public:
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 			rButtonPressed = (action != GLFW_RELEASE);
 	}
+
 	void onMouseMove(double xPos, double yPos)
 	{
 		mouseMoveX = lastMouseX - xPos;
@@ -109,13 +110,6 @@ public:
 	void drop(const std::string& filename);
 
 private:
-	enum LAYER { RENDER = 0, PREVIEW};
-
-	LAYER currentLayer = RENDER;
-	int oldSampleCount = 0;
-
-	bool needsRerender = false;
-
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
 	bool uiShowSceneWindow = true;
@@ -127,15 +121,13 @@ private:
 	ImageBlock &m_block;
 	RenderThread m_renderThread;
 
-	float clearColor[3] = {0.8f, 0.8f, 0.8f};
+	float clearColor[3] = {0.2f, 0.2f, 0.2f};
 
 	KeyboardState keyboardState;
 	MouseState mouseState;
 
 	ImGui::FileBrowser filebrowser;
 	ImGui::FileBrowser filebrowserSave = ImGui::FileBrowser(ImGuiFileBrowserFlags_::ImGuiFileBrowserFlags_EnterNewFilename);
-
-	std::string renderingFilename;
 
 	uint32_t m_texture = 0;
 	float m_scale = 1.f;
@@ -144,10 +136,6 @@ private:
 	Vector2i imageOffset = Vector2i(0);
 	float imageZoom = 1.f;
 
-	/**
-	 * Draws the editable scene tree with imgui
-	 */
-	bool drawSceneTree();
 };
 
 NORI_NAMESPACE_END

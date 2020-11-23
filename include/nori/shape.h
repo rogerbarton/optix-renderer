@@ -99,12 +99,20 @@ public:
     /// Release all memory
     virtual ~Shape();
 
-    virtual void addChild(NoriObject *child) override;
+	virtual NoriObject *cloneAndInit() override = 0;
+
+	/**
+	 * Finish initialization for other components
+	 * @param clone The already created clone
+	 */
+	void cloneAndInit(Shape *clone);
 
     /// Initialize internal data structures (called once by the XML parser)
-    virtual void activate() override;
+    virtual void update(const NoriObject *guiObject) override;
 
-    //// Return an axis-aligned bounding box of the entire mesh
+	virtual void addChild(NoriObject *child) override;
+
+	//// Return an axis-aligned bounding box of the entire mesh
     const BoundingBox3f &getBoundingBox() const { return m_bbox; }
 
     /// Is this mesh an area emitter?
@@ -151,16 +159,25 @@ public:
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
      * provided by this instance
      * */
-    virtual EClassType getClassType() const override { return EMesh; }
+    virtual EClassType getClassType() const override { return EShape; }
 
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Shape Base"; }
-    virtual bool getImGuiNodes() override;
+	NORI_OBJECT_IMGUI_NAME("Shape");
+	virtual bool getImGuiNodes() override;
 #endif
 
+	/**
+	 * Has the shape only been moved/transformed. Only IAS needs to be reconstructed
+	 */
+	mutable bool transformTouched = true;
+
+	/**
+	 * Has the shape geometry been modified that the BVH, specifically GAS, needs to be reconstructed?
+	 */
+	mutable bool geometryTouched = true;
+    Emitter *m_emitter = nullptr; ///< Associated emitter, if any
 protected:
     BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
-    Emitter *m_emitter = nullptr; ///< Associated emitter, if any
     BoundingBox3f m_bbox;         ///< Bounding box of the mesh
 };
 

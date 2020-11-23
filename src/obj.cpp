@@ -30,143 +30,188 @@ NORI_NAMESPACE_BEGIN
 class WavefrontOBJ : public Mesh
 {
 public:
-    WavefrontOBJ(const PropertyList &propList)
+    explicit WavefrontOBJ(const PropertyList &propList)
     {
-        typedef std::unordered_map<OBJVertex, uint32_t, OBJVertexHash> VertexMap;
-
-        filename =
-            getFileResolver()->resolve(propList.getString("filename"));
-
-        std::ifstream is(filename.str());
-        if (is.fail())
-            throw NoriException("Unable to open OBJ file \"%s\"!", filename);
-        Transform trafo = propList.getTransform("toWorld", Transform());
-
-        cout << "Loading \"" << filename << "\" .. ";
-        cout.flush();
-        Timer timer;
-
-        std::vector<Vector3f> positions;
-        std::vector<Vector2f> texcoords;
-        std::vector<Vector3f> normals;
-        std::vector<uint32_t> indices;
-        std::vector<OBJVertex> vertices;
-        VertexMap vertexMap;
-
-        std::string line_str;
-        while (std::getline(is, line_str))
-        {
-            std::istringstream line(line_str);
-
-            std::string prefix;
-            line >> prefix;
-
-            if (prefix == "v")
-            {
-                Point3f p;
-                line >> p.x() >> p.y() >> p.z();
-                p = trafo * p;
-                m_bbox.expandBy(p);
-                positions.push_back(p);
-            }
-            else if (prefix == "vt")
-            {
-                Point2f tc;
-                line >> tc.x() >> tc.y();
-                texcoords.push_back(tc);
-            }
-            else if (prefix == "vn")
-            {
-                Normal3f n;
-                line >> n.x() >> n.y() >> n.z();
-                normals.push_back((trafo * n).normalized());
-            }
-            else if (prefix == "f")
-            {
-                std::string v1, v2, v3, v4;
-                line >> v1 >> v2 >> v3 >> v4;
-                OBJVertex verts[6];
-                int nVertices = 3;
-
-                verts[0] = OBJVertex(v1);
-                verts[1] = OBJVertex(v2);
-                verts[2] = OBJVertex(v3);
-
-                if (!v4.empty())
-                {
-                    /* This is a quad, split into two triangles */
-                    verts[3] = OBJVertex(v4);
-                    verts[4] = verts[0];
-                    verts[5] = verts[2];
-                    nVertices = 6;
-                }
-                /* Convert to an indexed vertex list */
-                for (int i = 0; i < nVertices; ++i)
-                {
-                    const OBJVertex &v = verts[i];
-                    VertexMap::const_iterator it = vertexMap.find(v);
-                    if (it == vertexMap.end())
-                    {
-                        vertexMap[v] = (uint32_t)vertices.size();
-                        indices.push_back((uint32_t)vertices.size());
-                        vertices.push_back(v);
-                    }
-                    else
-                    {
-                        indices.push_back(it->second);
-                    }
-                }
-            }
-        }
-
-        m_F.resize(3, indices.size() / 3);
-        memcpy(m_F.data(), indices.data(), sizeof(uint32_t) * indices.size());
-
-        m_V.resize(3, vertices.size());
-        for (uint32_t i = 0; i < vertices.size(); ++i)
-            m_V.col(i) = positions.at(vertices[i].p - 1);
-
-        if (!normals.empty())
-        {
-            m_N.resize(3, vertices.size());
-            for (uint32_t i = 0; i < vertices.size(); ++i)
-                m_N.col(i) = normals.at(vertices[i].n - 1);
-        }
-
-        if (!texcoords.empty())
-        {
-            m_UV.resize(2, vertices.size());
-            for (uint32_t i = 0; i < vertices.size(); ++i)
-                m_UV.col(i) = texcoords.at(vertices[i].uv - 1);
-        }
-
-        m_name = filename.str();
-        cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
-             << timer.elapsedString() << " and "
-             << memString(m_F.size() * sizeof(uint32_t) +
-                          sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
-             << ")" << endl;
+	    filename = getFileResolver()->resolve(propList.getString("filename"));
+	    trafo = propList.getTransform("toWorld", Transform());
     }
 
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(EMesh);
-        bool ret = Shape::getImGuiNodes();
-        // get ImGuiNodes for all children and own
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new WavefrontOBJ(*this);
+		clone->loadFromFile();
+		Shape::cloneAndInit(clone);
+		return clone;
+	}
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("name", flags, "Filename");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::Text(filename.filename().c_str());
-        ImGui::NextColumn();
+	void update(const NoriObject *guiObject) override
+	{
+    	const auto* gui = static_cast<const WavefrontOBJ*>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
 
-        ImGui::PopID();
+		// reload file if the filename has changed. TODO: reload if file has been touched
+    	if(gui->geometryTouched)
+	    {
+		    filename = gui->filename;
+		    loadFromFile();
+	    }
 
-        return ret;
+    	// Update sub-object regardless of transformTouched
+	    trafo.update(gui->trafo);
+
+		Mesh::update(guiObject);
+
+		gui->geometryTouched = false;
+		gui->transformTouched = false;
+	}
+
+	void loadFromFile() {
+	    typedef std::unordered_map<OBJVertex, uint32_t, OBJVertexHash> VertexMap;
+
+	    std::ifstream is(filename.str());
+	    if (is.fail())
+		    throw NoriException("Unable to open OBJ file \"%s\"!", filename);
+
+	    cout << "Loading \"" << filename << "\" .. ";
+	    cout.flush();
+	    Timer timer;
+
+	    std::vector<Vector3f> positions;
+	    std::vector<Vector2f> texcoords;
+	    std::vector<Vector3f> normals;
+	    std::vector<uint32_t> indices;
+	    std::vector<OBJVertex> vertices;
+	    VertexMap vertexMap;
+
+	    std::string line_str;
+	    while (std::getline(is, line_str))
+	    {
+		    std::istringstream line(line_str);
+
+		    std::string prefix;
+		    line >> prefix;
+
+		    if (prefix == "v")
+		    {
+			    Point3f p;
+			    line >> p.x() >> p.y() >> p.z();
+			    p = trafo * p;
+			    m_bbox.expandBy(p);
+			    positions.push_back(p);
+		    }
+		    else if (prefix == "vt")
+		    {
+			    Point2f tc;
+			    line >> tc.x() >> tc.y();
+			    texcoords.push_back(tc);
+		    }
+		    else if (prefix == "vn")
+		    {
+			    Normal3f n;
+			    line >> n.x() >> n.y() >> n.z();
+			    normals.push_back((trafo * n).normalized());
+		    }
+		    else if (prefix == "f")
+		    {
+			    std::string v1, v2, v3, v4;
+			    line >> v1 >> v2 >> v3 >> v4;
+			    OBJVertex verts[6];
+			    int nVertices = 3;
+
+			    verts[0] = OBJVertex(v1);
+			    verts[1] = OBJVertex(v2);
+			    verts[2] = OBJVertex(v3);
+
+			    if (!v4.empty())
+			    {
+				    /* This is a quad, split into two triangles */
+				    verts[3] = OBJVertex(v4);
+				    verts[4] = verts[0];
+				    verts[5] = verts[2];
+				    nVertices = 6;
+			    }
+			    /* Convert to an indexed vertex list */
+			    for (int i = 0; i < nVertices; ++i)
+			    {
+				    const OBJVertex &v = verts[i];
+				    VertexMap::const_iterator it = vertexMap.find(v);
+				    if (it == vertexMap.end())
+				    {
+					    vertexMap[v] = (uint32_t)vertices.size();
+					    indices.push_back((uint32_t)vertices.size());
+					    vertices.push_back(v);
+				    }
+				    else
+				    {
+					    indices.push_back(it->second);
+				    }
+			    }
+		    }
+	    }
+
+	    m_F.resize(3, indices.size() / 3);
+	    memcpy(m_F.data(), indices.data(), sizeof(uint32_t) * indices.size());
+
+	    m_V.resize(3, vertices.size());
+	    for (uint32_t i = 0; i < vertices.size(); ++i)
+		    m_V.col(i) = positions.at(vertices[i].p - 1);
+
+	    if (!normals.empty())
+	    {
+		    m_N.resize(3, vertices.size());
+		    for (uint32_t i = 0; i < vertices.size(); ++i)
+			    m_N.col(i) = normals.at(vertices[i].n - 1);
+	    }
+
+	    if (!texcoords.empty())
+	    {
+		    m_UV.resize(2, vertices.size());
+		    for (uint32_t i = 0; i < vertices.size(); ++i)
+			    m_UV.col(i) = texcoords.at(vertices[i].uv - 1);
+	    }
+
+	    m_name = filename.str();
+	    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
+	         << timer.elapsedString() << " and "
+	         << memString(m_F.size() * sizeof(uint32_t) +
+	                      sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
+	         << ")" << endl;
     }
+
+#ifndef NORI_USE_NANOGUI
+	NORI_OBJECT_IMGUI_NAME("Mesh");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(EShape);
+		touched |= Mesh::getImGuiNodes();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text(filename.filename().c_str());
+		ImGui::NextColumn();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(0);
+		bool node_open = ImGui::TreeNode("Transform");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text("To World");
+		ImGui::NextColumn();
+		if(node_open) {
+			transformTouched |= trafo.getImGuiNodes();
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		ImGui::PopID();
+
+		touched |= transformTouched | geometryTouched;
+		return touched;
+	}
+#endif
 
 protected:
     /// Vertex indices used by the OBJ format
@@ -213,6 +258,7 @@ protected:
     };
 private:
     filesystem::path filename;
+	Transform trafo;
 };
 
 NORI_REGISTER_CLASS(WavefrontOBJ, "obj");

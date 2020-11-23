@@ -53,22 +53,21 @@ public:
      * */
     virtual EClassType getClassType() const override { return EReconstructionFilter; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Reconstruction Filter"; }
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(EReconstructionFilter);
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("Shape", flags, "Shape");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        bool ret = ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-        return ret;
-    }
-    #endif
+	NORI_OBJECT_IMGUI_NAME("Reconstruction Filter Base");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(EReconstructionFilter);
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("Shape", ImGuiLeafNodeFlags, "Shape");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
+		return touched;
+	}
+#endif
 
 protected:
     float m_radius;

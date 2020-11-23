@@ -12,7 +12,30 @@ NORI_NAMESPACE_BEGIN
 		filename = getFileResolver()->resolve(props.getString("filename"));
 		if (!filename.exists())
 			throw NoriException(tfm::format("Volume: file not found %s", filename).c_str());
+	}
 
+	NoriObject *Volume::cloneAndInit()
+	{
+		auto clone = new Volume{};
+		clone->loadFromFile();
+		return clone;
+	}
+
+	void Volume::update(const NoriObject *guiObject)
+	{
+		const auto *gui = static_cast<const Volume *>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// reload file if the filename has changed. TODO: reload if file has been touched
+		if (filename.str() != gui->filename.str())
+		{
+			filename = gui->filename;
+			loadFromFile();
+		}
+	}
+
+	void Volume::loadFromFile() {
 		const auto originalExtension = filename.extension();
 
 		// NanoVDB has its own file format
@@ -51,7 +74,6 @@ NORI_NAMESPACE_BEGIN
 		                   "]",
 		                   filename);
 	}
-
 
 	void Volume::readGrid(filesystem::path& file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer>& gridHandle,
 	                      nanovdb::NanoGrid<float>*& grid)

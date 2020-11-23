@@ -57,8 +57,8 @@ public:
 		return 1;
 	}
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Texture Base"; }
-    virtual bool getImGuiNodes() override { return false; }
+	NORI_OBJECT_IMGUI_NAME("Texture Base");
+	virtual bool getImGuiNodes() override { return false; }
 #endif
 };
 

@@ -8,7 +8,10 @@ NORI_NAMESPACE_BEGIN
 class DirectEMSIntegrator : public Integrator
 {
 public:
-  DirectEMSIntegrator(const PropertyList &propList) {}
+  explicit DirectEMSIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectEMSIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectEMSIntegrator)
+
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
     Intersection its;
@@ -74,11 +77,8 @@ public:
     return std::string("DirectEMSIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override
-  {
-    return "Direct EMS";
-  }
-  virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Direct EMS");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

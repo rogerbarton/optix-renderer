@@ -24,21 +24,35 @@
 
 NORI_NAMESPACE_BEGIN
 
-Shape::~Shape()
+void Shape::cloneAndInit(Shape *clone)
 {
-    delete m_bsdf;
-    //delete m_emitter; // scene is responsible for deleting the emitter
+	// If no material was assigned, instantiate a diffuse BRDF
+	if (!m_bsdf)
+		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
+
+	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
+
+	if(m_emitter)
+	{
+		clone->m_emitter = static_cast<Emitter *>(m_emitter->cloneAndInit());
+		clone->m_emitter->setShape(clone);
+	}
 }
 
-void Shape::activate()
+void Shape::update(const NoriObject *guiObject)
 {
-    if (!m_bsdf)
-    {
-        /* If no material was assigned, instantiate a diffuse BRDF */
-        m_bsdf = static_cast<BSDF *>(
-            NoriObjectFactory::createInstance("diffuse", PropertyList()));
-        m_bsdf->activate();
-    }
+	const auto *gui = static_cast<const Shape *>(guiObject);
+	m_bsdf->update(gui->m_bsdf);
+
+	// Note: Emitter updated by scene
+	// if(m_emitter)
+	// 	m_emitter->update(gui->m_emitter);
+}
+
+Shape::~Shape()
+{
+	delete m_bsdf;
+	//delete m_emitter; // Emitter is parent of Shape
 }
 
 void Shape::addChild(NoriObject *obj)
@@ -90,19 +104,18 @@ std::string Intersection::toString() const
 #ifndef NORI_USE_NANOGUI
 bool Shape::getImGuiNodes()
 {
-    bool ret = false;
-    ImGui::PushID(EMesh);
+    ImGui::PushID(EShape);
     if (m_bsdf)
     {
         bool node_open_bsdf = ImGui::TreeNode("BSDF");
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
-        ImGui::Text(m_bsdf->getImGuiName());
+        ImGui::Text(m_bsdf->getImGuiName().c_str());
         ImGui::NextColumn();
         if (node_open_bsdf)
         {
-            ret |= m_bsdf->getImGuiNodes();
+            touched |= m_bsdf->getImGuiNodes();
             ImGui::TreePop();
         }
     }
@@ -113,16 +126,16 @@ bool Shape::getImGuiNodes()
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
-        ImGui::Text(m_emitter->getImGuiName());
+        ImGui::Text(m_emitter->getImGuiName().c_str());
         ImGui::NextColumn();
         if (node_open_emitter)
         {
-            ret |= m_emitter->getImGuiNodes();
+            touched |= m_emitter->getImGuiNodes();
             ImGui::TreePop();
         }
     }
     ImGui::PopID();
-    return ret;
+    return touched;
 }
 #endif
 

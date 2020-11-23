@@ -6,7 +6,7 @@ NORI_NAMESPACE_BEGIN
 class SimpleDenoiser : public Denoiser
 {
 public:
-    SimpleDenoiser(const PropertyList &props)
+    explicit SimpleDenoiser(const PropertyList &props)
     {
         // gauss param for color distance
         sigma_r = clamp(props.getFloat("sigma_r", 0.f), Epsilon, 10.f);
@@ -17,6 +17,9 @@ public:
         // patch size for inner loop
         inner_range = clamp(props.getInteger("range", 1), 1, 50);
     }
+
+    NORI_OBJECT_DEFAULT_CLONE(SimpleDenoiser)
+    NORI_OBJECT_DEFAULT_UPDATE(SimpleDenoiser)
 
     Bitmap *denoise(const Bitmap *bitmap) const override
     {
@@ -75,42 +78,39 @@ public:
                            sigma_r, sigma_d, inner_range);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "SimpleDenoiser"; }
-    virtual bool getImGuiNodes() override
-    {
-        bool ret = Denoiser::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Simple Denoier");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= Denoiser::getImGuiNodes();
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("Sigma R", ImGuiLeafNodeFlags, "Sigma R");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &sigma_r, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("Sigma R", flags, "Sigma R");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &sigma_r, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("Sigma D", ImGuiLeafNodeFlags, "Sigma D");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &sigma_d, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("Sigma D", flags, "Sigma D");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &sigma_d, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(3);
-        ImGui::TreeNodeEx("Inner Range", flags, "Inner Range");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-        return ret;
-    }
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(3);
+		ImGui::TreeNodeEx("Inner Range", ImGuiLeafNodeFlags, "Inner Range");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
+		return touched;
+	}
 #endif
 
 private:

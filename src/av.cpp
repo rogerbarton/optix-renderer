@@ -7,12 +7,15 @@ NORI_NAMESPACE_BEGIN
 class AverageVisibilityIntegrator : public Integrator
 {
 public:
-    AverageVisibilityIntegrator(const PropertyList &props)
+    explicit AverageVisibilityIntegrator(const PropertyList &props)
     {
         m_length = props.getFloat("length");
     }
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+	NORI_OBJECT_DEFAULT_CLONE(AverageVisibilityIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(AverageVisibilityIntegrator)
+
+	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
         Intersection its;
         if (!scene->rayIntersect(ray, its))
@@ -39,7 +42,7 @@ public:
         }
     }
 
-    std::string toString() const
+    std::string toString() const override
     {
         return tfm::format(
             "AverageVisibilityIntegrator[\n"
@@ -48,24 +51,23 @@ public:
             m_length);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "AV"; }
+	NORI_OBJECT_IMGUI_NAME("Average Visibility");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= Integrator::getImGuiNodes();
 
-    virtual bool getImGuiNodes() override
-    {
-        bool ret = Integrator::getImGuiNodes();
-        
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
-        ImGui::AlignTextToFramePadding();
+		ImGui::AlignTextToFramePadding();
 
-        ImGui::TreeNodeEx("length", flags, "Length");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(1);
-        ret |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-    }
+		ImGui::TreeNodeEx("length", ImGuiLeafNodeFlags, "Length");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushID(1);
+		touched |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::PopID();
+		ImGui::NextColumn();
+
+		return touched;
+	}
 #endif
 protected:
     float m_length = 0.0;

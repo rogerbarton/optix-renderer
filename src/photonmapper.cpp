@@ -28,17 +28,37 @@ NORI_NAMESPACE_BEGIN
 class PhotonMapper : public Integrator
 {
 public:
-    /// Photon map data structure
+	PhotonMapper() = default;
+
+	/// Photon map data structure
     typedef PointKDTree<Photon> PhotonMap;
 
-    PhotonMapper(const PropertyList &props)
+    explicit PhotonMapper(const PropertyList &props)
     {
         /* Lookup parameters */
         m_photonCount = props.getInteger("photonCount", 1000000);
         m_photonRadius = props.getFloat("photonRadius", 0.0f /* Default: automatic */);
     }
 
-    virtual void preprocess(const Scene *scene) override
+	NoriObject *cloneAndInit() override {
+    	auto* clone = new PhotonMapper();
+    	clone->m_photonCount = m_photonCount;
+    	clone->m_photonRadius = m_photonRadius;
+    	return clone;
+    }
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = static_cast<const PhotonMapper *>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// -- Copy properties
+		m_photonCount = gui->m_photonCount;
+		m_photonRadius = gui->m_photonRadius;
+	}
+
+	virtual void preprocess(const Scene *scene) override
     {
         cout << "Gathering " << m_photonCount << " photons .. ";
         cout.flush();
@@ -260,34 +280,29 @@ public:
             m_photonRadius);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override
-    {
-        return "Photonmapper";
-    }
-    virtual bool getImGuiNodes() override
-    {
-        bool ret = Integrator::getImGuiNodes();
-
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+	NORI_OBJECT_IMGUI_NAME("Photonmapper");
+    virtual bool getImGuiNodes() override {
+        touched = Integrator::getImGuiNodes();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(1);
-        ImGui::TreeNodeEx("photonCount", flags, "Photon Count");
+        ImGui::TreeNodeEx("photonCount", ImGuiLeafNodeFlags, "Photon Count");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT * 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	     touched |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT * 100, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("photonRadius", flags, "Photon Radius");
+        ImGui::TreeNodeEx("photonRadius", ImGuiLeafNodeFlags, "Photon Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_photonRadius, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
+
+        return touched;
     }
 #endif
 private:
@@ -299,7 +314,7 @@ private:
     float m_photonRadius;
     std::unique_ptr<PhotonMap> m_photonMap;
 
-    int m_emittedPhotons = 0;
+    int m_emittedPhotons;
 };
 
 NORI_REGISTER_CLASS(PhotonMapper, "photonmapper");

@@ -8,7 +8,10 @@ NORI_NAMESPACE_BEGIN
 class DirectMISIntegrator : public Integrator
 {
 public:
-  DirectMISIntegrator(const PropertyList &propList) {}
+  explicit DirectMISIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectMISIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectMISIntegrator)
+
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
     Intersection its;
@@ -139,11 +142,8 @@ public:
     return std::string("DirectMISIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override
-  {
-    return "Direct MIS";
-  }
-  virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Direct MIS");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

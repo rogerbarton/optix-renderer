@@ -29,16 +29,33 @@ NORI_NAMESPACE_BEGIN
 class Diffuse : public BSDF
 {
 public:
-    Diffuse(const PropertyList &propList) : m_albedo(nullptr)
+    explicit Diffuse(const PropertyList &propList) : m_albedo(nullptr)
     {
-        if (propList.has("albedo"))
-        {
-            PropertyList l;
-            l.setColor("value", propList.getColor("albedo"));
-            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-        }
     }
-    virtual ~Diffuse()
+
+	NoriObject *cloneAndInit() override {
+    	// Use constant texture as fallback
+    	if(!m_albedo){
+		    PropertyList l;
+		    l.setColor("value", Color3f(0.5f));
+		    m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+    	}
+
+    	auto clone = new Diffuse(*this);
+    	clone->m_albedo = static_cast<Texture<Color3f>*>(m_albedo->cloneAndInit());
+    	return clone;
+    }
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = static_cast<const Diffuse *>(guiObject);
+		if (!gui->touched)return;
+		gui->touched = false;
+
+		m_albedo->update(gui->m_albedo);
+	}
+
+    ~Diffuse() override
     {
         delete m_albedo;
     }
@@ -64,17 +81,6 @@ public:
         default:
             throw NoriException("Diffuse::addChild(<%s>) is not supported!",
                                 classTypeName(obj->getClassType()));
-        }
-    }
-
-    virtual void activate() override
-    {
-        if (!m_albedo)
-        {
-            PropertyList l;
-            l.setColor("value", Color3f(0.5f));
-            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-            m_albedo->activate();
         }
     }
 
@@ -144,23 +150,22 @@ public:
 
     virtual EClassType getClassType() const override { return EBSDF; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Diffuse"; }
-    virtual bool getImGuiNodes() override
-    {
-        bool node_open = ImGui::TreeNode("Texture");
-        ImGui::NextColumn();
-        ImGui::AlignTextToFramePadding();
+	NORI_OBJECT_IMGUI_NAME("Diffuse");
+	virtual bool getImGuiNodes() override
+	{
+		bool node_open = ImGui::TreeNode("Texture");
+		ImGui::NextColumn();
+		ImGui::AlignTextToFramePadding();
 
-        ImGui::Text(m_albedo->getImGuiName());
-        ImGui::NextColumn();
-        bool ret = false;
-        if (node_open)
-        {
-            ret |= m_albedo->getImGuiNodes();
-            ImGui::TreePop();
-        }
-        return ret;
-    }
+		ImGui::Text(m_albedo->getImGuiName().c_str());
+		ImGui::NextColumn();
+		if (node_open)
+		{
+			touched |= m_albedo->getImGuiNodes();
+			ImGui::TreePop();
+		}
+		return touched;
+	}
 #endif
 
 private:

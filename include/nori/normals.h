@@ -8,10 +8,9 @@ NORI_NAMESPACE_BEGIN
 class NormalIntegrator : public Integrator
 {
 public:
-    NormalIntegrator(const PropertyList &props)
-    {
-        /* No parameters this time */
-    }
+	explicit NormalIntegrator(const PropertyList &props) {}
+	NORI_OBJECT_DEFAULT_CLONE(NormalIntegrator)
+	NORI_OBJECT_DEFAULT_UPDATE(NormalIntegrator)
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
     {
@@ -39,8 +38,8 @@ public:
         return "NormalIntegrator[]";
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Normals"; }
-    virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Normal");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

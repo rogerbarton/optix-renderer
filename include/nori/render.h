@@ -29,28 +29,51 @@ NORI_NAMESPACE_BEGIN
 class RenderThread {
 
 public:
-    RenderThread(ImageBlock & block);
+	RenderThread(ImageBlock &block) : m_block(block) {}
     ~RenderThread();
 
-    void renderScene(const std::string & filename);
-    void rerenderScene(const std::string& filename);
+    void loadScene(const std::string & filename);
+    void restartRender();
 
-	inline void renderThreadMain(const std::string &outputName, const std::string &outputNameDenoised,
-	                      const std::string &outputNameVariance);
+	inline void renderThreadMain();
 
     bool isBusy();
     void stopRendering();
+	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 
-    float getProgress();
+	/**
+	 * Draws gui specific to rendering. Does not draw the scene gui.
+	 */
+	void drawRenderGui();
+	void drawSceneGui();
 
-    Scene* m_scene = nullptr;
+	Scene *m_guiScene       = nullptr;
+	Scene *m_renderScene    = nullptr;
+	/**
+	 * Restart render when a change is detected. Otherwise the apply button can be used.
+	 * m_preview_mode overrides this.
+	 */
+	bool  m_autoUpdate      = true;
+	bool  m_guiSceneTouched = false;
+	bool  m_previewMode     = false;
 protected:
-    
-    ImageBlock & m_block;
-    std::thread m_render_thread;
-    std::atomic<int> m_render_status; // 0: free, 1: busy, 2: interruption, 3: done
-    std::atomic<float> m_progress;
 
+	enum class ERenderStatus : int {
+		Idle      = 0,
+		Busy      = 1,
+		Interrupt = 2,
+		Done      = 3
+	};
+
+    ImageBlock & m_block;
+    std::thread                m_renderThread;
+    std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
+    std::atomic<float>         m_progress     = 1.f;
+
+	std::string sceneFilename;
+	std::string outputName;
+	std::string outputNameDenoised;
+	std::string outputNameVariance;
 };
 
 NORI_NAMESPACE_END

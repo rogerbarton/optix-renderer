@@ -114,22 +114,20 @@ public:
      * */
     virtual EClassType getClassType() const override { return ESampler; }
 #ifndef NORI_USE_NANOGUI
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(ESampler);
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+	NORI_OBJECT_IMGUI_NAME("Sampler Base");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(ESampler);
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("sampleCount", flags, "Sample Count");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        bool ret = ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-        return ret;
-    }
-    virtual const char *getImGuiName() const override { return "Sampler base"; }
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("sampleCount", ImGuiLeafNodeFlags, "Sample Count");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
+		return touched;
+	}
 #endif
 protected:
     int m_sampleCount;

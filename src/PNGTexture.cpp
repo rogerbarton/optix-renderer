@@ -7,12 +7,45 @@
 
 NORI_NAMESPACE_BEGIN
 
-class PNGTexture : public Texture<Vector3f>
+class PNGTexture : public Texture<Color3f>
 {
 public:
-	PNGTexture(const PropertyList &props)
+	explicit PNGTexture(const PropertyList &props)
 	{
 		filename = getFileResolver()->resolve(props.getString("filename"));
+
+		scaleU = props.getFloat("scaleU", 1.f);
+		scaleV = props.getFloat("scaleV", 1.f);
+
+		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
+	}
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new PNGTexture(*this);
+		clone->loadFromFile();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = static_cast<const PNGTexture*>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// reload file if the filename has changed. TODO: reload if file has been touched
+		if(filename.str() != gui->filename.str())
+		{
+			filename = gui->filename;
+			loadFromFile();
+		}
+
+		scaleU = gui->scaleU;
+		scaleV = gui->scaleV;
+		eulerAngles = gui->eulerAngles;
+	}
+
+	void loadFromFile() {
 		if (!filename.exists())
 			throw NoriException("PNGTexture: image file not found %s", filename);
 
@@ -55,15 +88,10 @@ public:
 		{
 			throw NoriException("PNGTexture: file extension .%s unknown.", extension);
 		}
-
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
-
-		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
 	}
 
 	//4 bytes per pixel, ordered RGBA
-	Vector3f eval(const Point2f &_uv) override
+	Color3f eval(const Point2f &_uv) override
 	{
 		Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);
 
@@ -78,7 +106,7 @@ public:
 		uv.x() = uv_coords.y() / (2.f * M_PI);
 		uv.y() = uv_coords.x() / M_PI;
 
-		Vector3f out;
+		Color3f out;
 		unsigned int w = static_cast<unsigned int>((uv[0]) * scaleU * (float)width);
 		unsigned int h = static_cast<unsigned int>((uv[1]) * scaleV * (float)height);
 
@@ -111,29 +139,26 @@ public:
 	}
 
 #ifndef NORI_USE_NANOGUI
-	virtual const char* getImGuiName() const override { return "PNG Texture"; }
-    virtual bool getImGuiNodes() override {
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-								   ImGuiTreeNodeFlags_Bullet;
-
-		bool ret = Texture::getImGuiNodes();
+    virtual bool getImGuiNodes() override
+    {
+		touched |= Texture::getImGuiNodes();
 
 		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("fileName", flags, "Filename");
+		ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
 		ImGui::Text(filename.filename().c_str());
 		ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("width", flags, "Width");
+        ImGui::TreeNodeEx("width", ImGuiLeafNodeFlags, "Width");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text("%d Pixels", width);
         ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("height", flags, "height");
+        ImGui::TreeNodeEx("height", ImGuiLeafNodeFlags, "Height");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         ImGui::Text("%d Pixels", height);
@@ -141,43 +166,44 @@ public:
 
         ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
-        ImGui::TreeNodeEx("scale V", flags, "Scale V");
+        ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(3);
-        ImGui::TreeNodeEx("scale U", flags, "Scale U");
+        ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &scaleU, 0.01f, 0, 10.f, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
 		eulerAngles *= 180.f * INV_PI;
 		ImGui::AlignTextToFramePadding();
         ImGui::PushID(4);
-        ImGui::TreeNodeEx("Euler Angles", flags, "EulerAngles");
+        ImGui::TreeNodeEx("Euler Angles", ImGuiLeafNodeFlags, "EulerAngles");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragVector3f("##value", &eulerAngles, 0.5, -360, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragVector3f("##value", &eulerAngles, 0.5, -360, 360, "%f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 		eulerAngles *= M_PI / 180.f;
 
-		return ret;
+		return touched;
 	}
 #endif
 
 private:
 	filesystem::path filename;
-	unsigned int width, height;
-	std::vector<float> data;
 	float scaleU, scaleV;
 	Vector3f eulerAngles;
+
+	unsigned int width, height;
+	std::vector<float> data;
 
 	float InverseGammaCorrect(float value)
 	{
@@ -191,16 +217,45 @@ NORI_REGISTER_CLASS(PNGTexture, "png_texture");
 
 class NormalMap : public Texture<Vector3f>
 {
+	filesystem::path filename;
+	float scaleU, scaleV;
 
 	unsigned int width, height;
 	std::vector<float> data;
 
-	float scaleU, scaleV;
-
 public:
-	NormalMap(const PropertyList &props)
+	explicit NormalMap(const PropertyList &props)
 	{
-		filesystem::path filename = getFileResolver()->resolve(props.getString("filename"));
+		filename = getFileResolver()->resolve(props.getString("filename"));
+
+		scaleU = props.getFloat("scaleU", 1.f);
+		scaleV = props.getFloat("scaleV", 1.f);
+	}
+
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new NormalMap(*this);
+		clone->loadFromFile();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto* gui = static_cast<const NormalMap*>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		// reload file if the filename has changed. TODO: reload if file has been touched
+		if(filename.str() != gui->filename.str())
+		{
+			filename = gui->filename;
+			loadFromFile();
+		}
+		scaleU = gui->scaleU;
+		scaleV = gui->scaleV;
+	}
+
+	void loadFromFile() {
 		std::vector<unsigned char> d;
 		lodepng::decode(d, width, height, filename.str());
 
@@ -220,9 +275,6 @@ public:
 				data.emplace_back(b);
 			}
 		}
-
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
 	}
 
 	//4 bytes per pixel, ordered RGBA

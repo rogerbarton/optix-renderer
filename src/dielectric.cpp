@@ -25,7 +25,7 @@ NORI_NAMESPACE_BEGIN
 class Dielectric : public BSDF
 {
 public:
-    Dielectric(const PropertyList &propList)
+    explicit Dielectric(const PropertyList &propList)
     {
         /* Interior IOR (default: BK7 borosilicate optical glass) */
         m_intIOR = propList.getFloat("intIOR", 1.5046f);
@@ -33,6 +33,8 @@ public:
         /* Exterior IOR (default: air) */
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
     }
+    NORI_OBJECT_DEFAULT_CLONE(Dielectric)
+    NORI_OBJECT_DEFAULT_UPDATE(Dielectric)
 
     virtual Color3f eval(const BSDFQueryRecord &) const override
     {
@@ -109,33 +111,30 @@ public:
             m_intIOR, m_extIOR);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Dielectric"; }
-    virtual bool getImGuiNodes() override {
-        bool ret = BSDF::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Dielectric");
+	virtual bool getImGuiNodes() override {
+		touched |= BSDF::getImGuiNodes();
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                   ImGuiTreeNodeFlags_Bullet;
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("intIOR", flags, "Interior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_intIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("Exterior IOR", flags, "Exterior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_extIOR, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        return ret;
-    }
+		return touched;
+	}
 #endif
 private:
     float m_intIOR, m_extIOR;

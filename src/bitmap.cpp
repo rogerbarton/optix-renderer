@@ -91,7 +91,7 @@ void Bitmap::save(const std::string &filename) {
     channels.insert("G", Imf::Channel(Imf::FLOAT));
     channels.insert("B", Imf::Channel(Imf::FLOAT));
 
-    Imf::FrameBuffer frameBuffer;
+    Imf::FrameBuffer frameBuffer; // TODO: Segfault here when deleting the FrameBuffer, in ~FrameBuffer()
     size_t compStride = sizeof(float),
            pixelStride = 3 * compStride,
            rowStride = pixelStride * cols();

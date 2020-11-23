@@ -54,10 +54,12 @@ NORI_NAMESPACE_BEGIN
  *
  * 2. that the average radiance received by a camera within some scene
  *    matches a given value (modulo noise).
+ *
+ * TODO: No idea if scenes as children will work!!
  */
 class StudentsTTest : public NoriObject {
 public:
-    StudentsTTest(const PropertyList &propList) {
+    explicit StudentsTTest(const PropertyList &propList) {
         /* The null hypothesis will be rejected when the associated
            p-value is below the significance level specified here. */
         m_significanceLevel = propList.getFloat("significanceLevel", 0.01f);
@@ -76,7 +78,49 @@ public:
         m_sampleCount = propList.getInteger("sampleCount", 100000);
     }
 
-    virtual ~StudentsTTest() {
+	NoriObject *cloneAndInit() override
+	{
+		auto clone = new StudentsTTest(*this);
+
+		assert(clone->m_bsdfs.size() == m_bsdfs.size());
+		for (int i = 0; i < m_bsdfs.size(); ++i)
+			clone->m_bsdfs[i] = static_cast<BSDF *>(m_bsdfs[i]->cloneAndInit());
+
+		assert(clone->m_scenes.size() == m_scenes.size());
+		for (int i = 0; i < m_scenes.size(); ++i)
+			clone->m_scenes[i] = static_cast<Scene *>(m_scenes[i]->cloneAndInit());
+
+		clone->execute();
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto *gui = static_cast<const StudentsTTest *>(guiObject);
+		if (!gui->touched)return;
+		gui->touched = false;
+
+
+		// -- Copy properties
+		m_angles            = gui->m_angles;
+		m_references        = gui->m_references;
+		m_significanceLevel = gui->m_significanceLevel;
+		m_sampleCount       = gui->m_sampleCount;
+
+		// -- Update sub-objects
+		assert(m_bsdfs.size() == gui->m_bsdfs.size());
+		for (int i = 0; i < gui->m_bsdfs.size(); i++)
+			m_bsdfs[i]->update(gui->m_bsdfs[i]);
+
+		// TODO: No idea if this will work
+		assert(m_scenes.size() == gui->m_scenes.size());
+		for (int i = 0; i < gui->m_scenes.size(); i++)
+			m_scenes[i]->update(gui->m_scenes[i]);
+
+		execute();
+	}
+
+	virtual ~StudentsTTest() {
         for (auto bsdf : m_bsdfs)
             delete bsdf;
         for (auto scene : m_scenes)
@@ -100,7 +144,7 @@ public:
     }
 
     /// Invoke a series of t-tests on the provided input
-    virtual void activate() override {
+    void execute() {
         int total = 0, passed = 0;
         pcg32 random;
 
@@ -153,7 +197,7 @@ public:
 
             int ctr = 0;
             for (auto scene : m_scenes) {
-                const Integrator *integrator = scene->getIntegrator();
+                const Integrator *integrator = scene->getIntegrator(false);
                 const Camera *camera = scene->getCamera();
                 float reference = m_references[ctr++];
 
@@ -208,7 +252,7 @@ public:
 
     virtual EClassType getClassType() const override { return ETest; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "TTest"; }
+	NORI_OBJECT_IMGUI_NAME("T-Test");
     virtual bool getImGuiNodes() override { return false; }
 #endif
 private:

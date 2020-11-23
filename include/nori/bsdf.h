@@ -119,7 +119,7 @@ public:
      */
     virtual bool isDiffuse() const { return false; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "BSDF Base"; }
+	NORI_OBJECT_IMGUI_NAME("BSDF Base");
     virtual bool getImGuiNodes() override { return false; }
 #endif
 };

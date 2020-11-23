@@ -9,7 +9,9 @@ NORI_NAMESPACE_BEGIN
 class DirectIntegrator : public Integrator
 {
 public:
-  DirectIntegrator(const PropertyList &propList) {}
+  explicit DirectIntegrator(const PropertyList &propList) {}
+  NORI_OBJECT_DEFAULT_CLONE(DirectIntegrator)
+  NORI_OBJECT_DEFAULT_UPDATE(DirectIntegrator)
 
   Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
   {
@@ -67,11 +69,8 @@ public:
 
   std::string toString() const { return tfm::format("DirectIntegrator[]"); }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override
-  {
-    return "Direct";
-  }
-  virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Direct Simple");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

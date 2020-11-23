@@ -35,8 +35,9 @@ NORI_NAMESPACE_BEGIN
 class Mesh : public Shape
 {
 public:
+	Mesh() : m_pdf() {}
     /// Initialize internal data structures (called once by the XML parser)
-    virtual void activate() override;
+    virtual void update(const NoriObject *guiObject) override;
 
     /// Return the total number of triangles in this shape
     virtual uint32_t getPrimitiveCount() const override { return (uint32_t)m_F.cols(); }
@@ -110,20 +111,17 @@ public:
 
     /// Return a human-readable summary of this instance
     virtual std::string toString() const override;
-#ifndef NORI_USE_NANOGUI
 
-    virtual const char *getImGuiName() const override { return "Mesh"; }
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(EMesh);
-        bool ret = Shape::getImGuiNodes();
-        ImGui::PopID();
-        return ret;
-    }
+#ifndef NORI_USE_NANOGUI
+	NORI_OBJECT_IMGUI_NAME("Mesh Base");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(EShape);
+		touched |= Shape::getImGuiNodes();
+		ImGui::PopID();
+		return touched;
+	}
 #endif
-protected:
-    /// Create an empty mesh
-    Mesh();
 
 protected:
     std::string m_name; ///< Identifying name

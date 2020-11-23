@@ -8,14 +8,31 @@ NORI_NAMESPACE_BEGIN
 class EnvMap : public Emitter
 {
 public:
-	EnvMap(const PropertyList &props)
-	{
-		if (props.has("albedo"))
+	explicit EnvMap(const PropertyList &props) {}
+
+	NoriObject *cloneAndInit() override {
+		// Use constant texture as a fallback
+		if(!m_map)
 		{
 			PropertyList l;
-			l.setColor("value", props.getColor("albedo"));
+			l.setColor("value", Color3f(0.5f));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 		}
+
+		auto clone = new EnvMap(*this);
+		clone->m_map = static_cast<Texture<Color3f>*>(m_map->cloneAndInit());
+		return clone;
+	}
+
+	void update(const NoriObject *guiObject) override
+	{
+		const auto *gui = static_cast<const EnvMap *>(guiObject);
+		if (!gui->touched) return;
+		gui->touched = false;
+
+		m_map->update(gui->m_map);
+
+		calculateProbs();
 	}
 
 	~EnvMap()
@@ -44,19 +61,6 @@ public:
 			throw NoriException("EnvMap::addChild(<%s>) is not supported!",
 								classTypeName(obj->getClassType()));
 		}
-	}
-
-	void activate() override
-	{
-		if (!m_map)
-		{
-			PropertyList l;
-			l.setColor("value", Color3f(0.5f));
-			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-			m_map->activate();
-		}
-
-		calculateProbs();
 	}
 
 	std::string toString() const override
@@ -154,17 +158,12 @@ public:
 
 		return m_map->eval(uv);
 	}
+
 #ifndef NORI_USE_NANOGUI
-	virtual const char *getImGuiName() const override
-	{
-		return "Environment Map";
-	}
+	NORI_OBJECT_IMGUI_NAME("Environment Map");
 	virtual bool getImGuiNodes() override
 	{
-		bool ret = Emitter::getImGuiNodes();
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-								   ImGuiTreeNodeFlags_Bullet;
+		touched |= Emitter::getImGuiNodes();
 
 		if (m_map)
 		{
@@ -172,16 +171,16 @@ public:
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
 
-			ImGui::Text(m_map->getImGuiName());
+			ImGui::Text(m_map->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open)
 			{
-				ret |= m_map->getImGuiNodes();
+				touched |= m_map->getImGuiNodes();
 				ImGui::TreePop();
 			}
 		}
 
-		return ret;
+		return touched;
 	}
 #endif
 

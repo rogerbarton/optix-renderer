@@ -9,7 +9,3 @@ Makefile
 .idea/
 .vscode/
 cmake-build*/
-
-*.exr
-
-*.nvdb

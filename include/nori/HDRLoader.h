@@ -53,10 +53,10 @@ namespace nori
 
 			while (len > 0)
 			{
-				scanline[0][0] = fgetc(file);
-				scanline[0][1] = fgetc(file);
-				scanline[0][2] = fgetc(file);
-				scanline[0][3] = fgetc(file);
+				scanline[0][0] = static_cast<unsigned char>(fgetc(file));
+				scanline[0][1] = static_cast<unsigned char>(fgetc(file));
+				scanline[0][2] = static_cast<unsigned char>(fgetc(file));
+				scanline[0][3] = static_cast<unsigned char>(fgetc(file));
 				if (feof(file))
 					return false;
 
@@ -96,14 +96,14 @@ namespace nori
 				return oldDecrunch(scanline, len, file);
 			}
 
-			scanline[0][1] = fgetc(file);
-			scanline[0][2] = fgetc(file);
+			scanline[0][1] = static_cast<unsigned char>(fgetc(file));
+			scanline[0][2] = static_cast<unsigned char>(fgetc(file));
 			i = fgetc(file);
 
 			if (scanline[0][1] != 2 || scanline[0][2] & 128)
 			{
 				scanline[0][0] = 2;
-				scanline[0][3] = i;
+				scanline[0][3] = static_cast<unsigned char>(i);
 				return oldDecrunch(scanline + 1, len - 1, file);
 			}
 
@@ -112,18 +112,18 @@ namespace nori
 			{
 				for (j = 0; j < len;)
 				{
-					unsigned char code = fgetc(file);
+					unsigned char code = static_cast<unsigned char>(fgetc(file));
 					if (code > 128)
 					{ // run
 						code &= 127;
-						unsigned char val = fgetc(file);
+						unsigned char val = static_cast<unsigned char>(fgetc(file));
 						while (code--)
 							scanline[j++][i] = val;
 					}
 					else
 					{ // non-run
 						while (code--)
-							scanline[j++][i] = fgetc(file);
+							scanline[j++][i] = static_cast<unsigned char>(fgetc(file));
 					}
 				}
 			}
@@ -157,7 +157,7 @@ namespace nori
 			while (true)
 			{
 				oldc = c;
-				c    = fgetc(file);
+				c    = static_cast<unsigned char>(fgetc(file));
 				if (c == 0xa && oldc == 0xa)
 					break;
 				cmd[i++] = c;
@@ -167,7 +167,7 @@ namespace nori
 			i = 0;
 			while (true)
 			{
-				c = fgetc(file);
+				c = static_cast<unsigned char>(fgetc(file));
 				reso[i++] = c;
 				if (c == 0xa)
 					break;
