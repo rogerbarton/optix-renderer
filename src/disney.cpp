@@ -5,14 +5,14 @@
 NORI_NAMESPACE_BEGIN
 
 // this helper macro adds the ImGui code for one of the 10 variables
-#define ImGuiValue(variable, varName)                                                                    \
-    ImGui::AlignTextToFramePadding();                                                                    \
-    ImGui::TreeNodeEx(varName, ImGuiLeafNodeFlags, varName);                                             \
-    ImGui::NextColumn();                                                                                 \
-    ImGui::SetNextItemWidth(-1);                                                                         \
-    ImGui::PushID(id++);                                                                                 \
+#define ImGuiValue(variable, varName)                                                               \
+    ImGui::AlignTextToFramePadding();                                                               \
+    ImGui::TreeNodeEx(varName, ImGuiLeafNodeFlags, varName);                                        \
+    ImGui::NextColumn();                                                                            \
+    ImGui::SetNextItemWidth(-1);                                                                    \
+    ImGui::PushID(id++);                                                                            \
     touched |= ImGui::SliderFloat("##value", &variable, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
-    ImGui::PopID();                                                                                      \
+    ImGui::PopID();                                                                                 \
     ImGui::NextColumn();
 
 class Disney : public BSDF
@@ -34,8 +34,8 @@ public:
         clearcoat = clamp(props.getFloat("clearcoat", 0.f), 0.f, 1.f);
         clearcoatGloss = clamp(props.getFloat("clearcoatGloss", 1.f), 0.f, 1.f);
     }
-	NORI_OBJECT_DEFAULT_CLONE(Disney)
-	NORI_OBJECT_DEFAULT_UPDATE(Disney)
+    NORI_OBJECT_DEFAULT_CLONE(Disney)
+    NORI_OBJECT_DEFAULT_UPDATE(Disney)
 
     Color3f eval(const BSDFQueryRecord &bRec) const override
     {
@@ -43,9 +43,9 @@ public:
 
         Vector3f L = bRec.wi;                 // light incident Vector
         Vector3f V = bRec.wo;                 // view vector
-        Vector3f N = Vector3f(0.f, 0.f, 1.f); // normal
         Vector3f X = Vector3f(1.f, 0.f, 0.f); // tangent
         Vector3f Y = Vector3f(0.f, 1.f, 0.f); // bitangent
+        Vector3f N = Vector3f(0.f, 0.f, 1.f); // normal
 
         float NdotL = Frame::cosTheta(L);
         float NdotV = Frame::cosTheta(V);
@@ -93,8 +93,11 @@ public:
         float Gr = smithG_GGX(NdotL, 0.25f) * smithG_GGX(NdotV, 0.25f);
 
         Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1.f - metallic) + Vector3f(Gs * Fs * Ds) + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
-        //finalCol *= L.dot(N);
-        return Color3f(finalCol.x(), finalCol.y(), finalCol.z());
+        Color3f ret = Color3f(finalCol.x(), finalCol.y(), finalCol.z());
+        if(ret.getLuminance() > 1.f) {
+            return Color3f(0.f);
+        }
+        return ret;
     }
 
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override
@@ -150,36 +153,36 @@ public:
         return true;
     }
 #ifndef NORI_USE_NANOGUI
-	NORI_OBJECT_IMGUI_NAME("Disney");
-	virtual bool getImGuiNodes() override
-	{
-		touched |= BSDF::getImGuiNodes();
+    NORI_OBJECT_IMGUI_NAME("Disney");
+    virtual bool getImGuiNodes() override
+    {
+        touched |= BSDF::getImGuiNodes();
 
-		int id = 1;
+        int id = 1;
 
-		ImGui::AlignTextToFramePadding();
+        ImGui::AlignTextToFramePadding();
 
-		ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		ImGui::PushID(id++);
-		touched |= ImGui::ColorPicker("##value", &baseColor);
-		ImGui::PopID();
-		ImGui::NextColumn();
+        ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::PushID(id++);
+        touched |= ImGui::ColorPicker("##value", &baseColor);
+        ImGui::PopID();
+        ImGui::NextColumn();
 
-		ImGuiValue(metallic, "Metallic");
-		ImGuiValue(subsurface, "Subsurface");
-		ImGuiValue(specular, "Specular");
-		ImGuiValue(roughness, "Roughness");
-		ImGuiValue(specularTint, "Specular Tint");
-		ImGuiValue(anisotropic, "Anisotropic");
-		ImGuiValue(sheen, "Sheen");
-		ImGuiValue(sheenTint, "Sheen Tint");
-		ImGuiValue(clearcoat, "Clearcoat");
-		ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
+        ImGuiValue(metallic, "Metallic");
+        ImGuiValue(subsurface, "Subsurface");
+        ImGuiValue(specular, "Specular");
+        ImGuiValue(roughness, "Roughness");
+        ImGuiValue(specularTint, "Specular Tint");
+        ImGuiValue(anisotropic, "Anisotropic");
+        ImGuiValue(sheen, "Sheen");
+        ImGuiValue(sheenTint, "Sheen Tint");
+        ImGuiValue(clearcoat, "Clearcoat");
+        ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
 
-		return touched;
-	}
+        return touched;
+    }
 #endif
 private:
     static Vector3f mon2lin(Color3f vec)
