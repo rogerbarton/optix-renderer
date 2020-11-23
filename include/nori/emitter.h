@@ -119,20 +119,9 @@ NORI_NAMESPACE_BEGIN
 		 * [Overload] Finish initialization for other components
 		 * @param clone The already created clone
 		 */
-		void cloneAndInit(Emitter *clone)
-		{
-			// Shape already cloned
-			// if(m_shape)
-			// 	clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
-		}
+		void cloneAndInit(Emitter *clone);
 
-		void update(const NoriObject *guiObject) override
-		{
-			const auto *gui = static_cast<const Emitter *>(guiObject);
-			m_position = gui->m_position;
-			// if(m_shape)
-			// 	m_shape->update(gui->m_shape);
-		}
+		void update(const NoriObject *guiObject) override;
 
 		/**
 		 * \brief Virtual destructor
@@ -153,22 +142,10 @@ NORI_NAMESPACE_BEGIN
 		bool hasShape() { return m_shape != nullptr; }
 
 		Point3f getPosition() const { return m_position; }
+
 #ifndef NORI_USE_NANOGUI
 		virtual const char *getImGuiName() const override { return "Emitter Base"; }
-		virtual bool getImGuiNodes() override
-		{
-			ImGui::PushID(EEmitter);
-
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Position", ImGuiLeafNodeFlags, "Position");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-			touched |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
-			ImGui::NextColumn();
-			ImGui::PopID();
-
-			return touched;
-		}
+		bool getImGuiNodes() override;
 #endif
 
 	protected:
