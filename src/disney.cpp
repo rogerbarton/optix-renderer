@@ -12,7 +12,7 @@ NORI_NAMESPACE_BEGIN
     ImGui::NextColumn();                                                                            \
     ImGui::SetNextItemWidth(-1);                                                                    \
     ImGui::PushID(id++);                                                                            \
-    ret |= ImGui::DragFloat("##value", &variable, 0.01, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
+    ret |= ImGui::SliderFloat("##value", &variable, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
     ImGui::PopID();                                                                                 \
     ImGui::NextColumn();
 

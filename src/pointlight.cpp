@@ -51,7 +51,7 @@ public:
   {
     return tfm::format("PointLight[\n"
                        "  power = %s,\n"
-                       "  position = %s,\n"
+                       "  position = %s\n"
                        "]",
                        m_power.toString(), m_position.toString());
   }
@@ -69,6 +69,7 @@ public:
     ImGui::SetNextItemWidth(-1);
     ret |= ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
+    return ret;
   }
 #endif
 
