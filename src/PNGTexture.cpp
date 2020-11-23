@@ -23,7 +23,6 @@ public:
 	NoriObject *cloneAndInit() override
 	{
 		auto clone = new PNGTexture(*this);
-		clone->loadFromFile();
 		return clone;
 	}
 
@@ -139,6 +138,7 @@ public:
 	}
 
 #ifndef NORI_USE_NANOGUI
+	NORI_OBJECT_IMGUI_NAME("Image (png)")
     virtual bool getImGuiNodes() override
     {
 		touched |= Texture::getImGuiNodes();
@@ -235,7 +235,6 @@ public:
 	NoriObject *cloneAndInit() override
 	{
 		auto clone = new NormalMap(*this);
-		clone->loadFromFile();
 		return clone;
 	}
 

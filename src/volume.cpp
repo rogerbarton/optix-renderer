@@ -17,7 +17,6 @@ NORI_NAMESPACE_BEGIN
 	NoriObject *Volume::cloneAndInit()
 	{
 		auto clone = new Volume{};
-		clone->loadFromFile();
 		return clone;
 	}
 

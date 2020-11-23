@@ -39,7 +39,6 @@ public:
 	NoriObject *cloneAndInit() override
 	{
 		auto clone = new WavefrontOBJ(*this);
-		clone->loadFromFile();
 		Shape::cloneAndInit(clone);
 		return clone;
 	}
