@@ -59,18 +59,11 @@
     </bsdf>
   </mesh>
 
-  <envmap type="png_env">
-    <texture type="png_texture" name="envmap">
+  <emitter type="envmap">
+    <texture type="png_texture" name="albedo">
       <string name="filename" value="../res/rooitou_park.png"/>
-      <!-- left / right -->
-      <float name="offsetU" value="0.0"/>
-
-      <!-- top / down -->
-      <float name="offsetV" value="0.0"/>
     </texture>
-    <boolean name="sphereTexture" value="true"/>
-
-  </envmap>
+  </emitter>
 
   <!-- add an area light above... -->
 

@@ -64,7 +64,7 @@ public:
 
         float FL = SchlickFresnel(NdotL);
         float FV = SchlickFresnel(NdotV);
-        float Fd90 = 0.5f + 2 * LdotH * LdotH * roughness;
+        float Fd90 = 0.5f + 2.f * LdotH * LdotH * roughness;
         float Fd = mix<float>(1.0, Fd90, FL) * mix<float>(1.0, Fd90, FV);
 
         float Fss90 = LdotH * LdotH * roughness;
@@ -83,11 +83,13 @@ public:
 
         // sheen
         Vector3f Fsheen = FH * sheen * Csheen;
+
+        // clearcoat
         float Dr = GTR1(NdotH, mix<float>(0.1f, 0.001f, clearcoatGloss));
         float Fr = mix<float>(0.04f, 1.f, FH);
         float Gr = smithG_GGX(NdotL, 0.25f) * smithG_GGX(NdotV, 0.25f);
 
-        Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metallic) + Vector3f(Gs * Fs * Ds) + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
+        Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1.f - metallic) + Vector3f(Gs * Fs * Ds) + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
 
         return Color3f(finalCol.x(), finalCol.y(), finalCol.z());
     }
@@ -103,7 +105,8 @@ public:
         bRec.wo = Warp::squareToCosineHemisphere(sample);
         bRec.eta = 1.f;
 
-        Color3f finalCol = eval(bRec) / pdf(bRec);
+        // we don't need the pdf here, because col / pdf * solid_angle = col (for cosine weighted)
+        Color3f finalCol = eval(bRec);
 
         return finalCol;
     }
@@ -197,13 +200,13 @@ private:
 
     static float SchlickFresnel(float a)
     {
-        float m = clamp(1 - a, 0.f, 1.f);
+        float m = clamp(1.f - a, 0.f, 1.f);
         float m2 = m * m;
         return m2 * m2 * m; // pow(m, 5)
     }
     static float smithG_GGX_aniso(float NdotV, float VdotX, float VdotY, float ax, float ay)
     {
-        return 1 / (NdotV + sqrt(VdotX * ax * VdotX * ax + VdotY * ay * VdotY * ay + NdotV * NdotV));
+        return 1.f / (NdotV + sqrt(VdotX * ax * VdotX * ax + VdotY * ay * VdotY * ay + NdotV * NdotV));
     }
 
     static float smithG_GGX(float NdotV, float alphaG)
@@ -215,15 +218,15 @@ private:
 
     static float GTR1(float NdotH, float a)
     {
-        if (a >= 1)
-            return 1 / M_PI;
+        if (a >= 1.f)
+            return INV_PI;
         float a2 = a * a;
-        float t = 1 + (a2 - 1) * NdotH * NdotH;
-        return (a2 - 1) / (M_PI * log(a2) * t);
+        float t = 1.f + (a2 - 1.f) * NdotH * NdotH;
+        return (a2 - 1.f) / (M_PI * log(a2) * t);
     }
     static float GTR2_aniso(float NdotH, float HdotX, float HdotY, float ax, float ay)
     {
-        return 1 / (M_PI * ax * ay * pow(pow(HdotX / ax, 2) + pow(HdotY / ay, 2) + NdotH * NdotH, 2));
+        return 1.f / (M_PI * ax * ay * pow(pow(HdotX / ax, 2.f) + pow(HdotY / ay, 2.f) + NdotH * NdotH, 2.f));
     }
 
     Color3f baseColor;

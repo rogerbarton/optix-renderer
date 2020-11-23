@@ -1,0 +1,31 @@
+<scene>
+
+  <sampler type="independent">
+    <integer name="sampleCount" value="1000"/>
+    <integer name="uniformEvery" value="25"/>
+  </sampler>
+
+  <integrator type="path_mis"/>
+
+  <camera type="perspective">
+    <transform name="toWorld">
+      <lookat target="0,0,0" origin="0,25,10" up="0,-1,0"/>
+    </transform>
+
+    <float name="fov" value="85"/>
+
+    <integer name="width" value="800"/>
+    <integer name="height" value="800"/>
+  </camera>
+
+  <mesh type="sphere">
+    <point name="center" value="0,0,0"/>
+    <float name="radius" value="10"/>
+
+    <bsdf type="disney">
+      <color name="baseColor" value="0.2, 0.2, 1"/>
+    </bsdf>
+  </mesh>
+
+  <emitter type="envmap"/>
+</scene>
