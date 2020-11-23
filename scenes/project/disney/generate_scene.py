@@ -5,7 +5,7 @@ out_file = "disney.xml"
 params = ["metallic", "subsurface", "specular", "roughness", "specularTint", "anisotropic", "sheen", "sheenTint", "clearcoat", "clearcoatGloss"]
 
 colors = ["fff100", "ff8c00", "e81123", "ec008c", "68217a", "00188f", "00bcf2", "00b294", "009e49", "bad80a"]
-colors = ["00f000" for x in range(10)]
+#colors = ["00f000" for x in range(10)]
 
 def hex_val(c):
     if c == "0": return 0
@@ -46,7 +46,6 @@ def gen_sphere(x,y, color, param, value):
         <float name="radius" value="0.45"/>
 		<bsdf type="disney">
             <color name="baseColor" value="{convert_color_string(color)}"/>
-            <float name="specular" value="1"/>
             <float name="{param}" value="{value}"/>
         </bsdf>
     </mesh>
@@ -79,9 +78,9 @@ with open(out_file, "w") as wr:
 	</camera>
 
     <emitter type="envmap">
-		<texture type="png_texture" name="albedo">
+		<!--<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/canyon1.png"/>
-		</texture>
+		</texture>-->
 	</emitter>
     """)
 
