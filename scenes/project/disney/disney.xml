@@ -21,14 +21,13 @@
         <integer name="height" value="512"/>
     </camera>
 
-    <envmap type="png_env">
-        <texture type="png_texture" name="envmap">
+    <emitter type="envmap">
+        <texture type="png_texture" name="albedo">
             <string name="filename" value="../res/rooitou_park.png"/>
         </texture>
         <float name="offsetU" value="0.0"/>
         <float name="offsetV" value="0.0"/>
-        <boolean name="sphereTexture" value="true"/>
-    </envmap>
+    </emitter>
 
     <mesh type="sphere">
         <point name="center" value="-4.5,0,-4.5"/>
