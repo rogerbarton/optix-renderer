@@ -108,7 +108,6 @@ public:
 			v = sphericalDirection(j * M_PI, i * 2.0f * M_PI);
 		}
 		Vector3f v_inf = v * 1.f / Epsilon; // divide by epsilon = * inf
-		//Vector3f v_inf = v;
 		lRec.n = -(v_inf - m_position).normalized(); // the normal points inwards to m_position
 		lRec.p = v_inf;
 		lRec.wi = (lRec.p - lRec.ref).normalized();
