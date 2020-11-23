@@ -122,6 +122,8 @@ NORI_NAMESPACE_BEGIN
 		outputNameVariance = outputName + "_variance.dat";
 		outputName += ".exr";
 
+		m_renderScene->update(m_guiScene);
+
 		// Start the actual thread
 		m_renderStatus = ERenderStatus::Busy;
 		m_renderThread = std::thread([this] { renderThreadMain(); });
@@ -135,15 +137,14 @@ NORI_NAMESPACE_BEGIN
 
 		stopRendering();
 
+		m_renderScene->update(m_guiScene);
+
 		m_renderStatus = ERenderStatus::Busy;
 		m_renderThread = std::thread([this] { renderThreadMain(); });
 	}
 
 	void RenderThread::renderThreadMain()
 	{
-		// call initialize here? call inverse recursively, initialize children first.
-		m_renderScene->update(m_guiScene);
-
 		/* Allocate memory for the entire output image and clear it */
 		const Camera *camera    = m_renderScene->getCamera();
 		m_block.lock();
