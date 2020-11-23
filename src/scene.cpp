@@ -42,9 +42,8 @@ NORI_NAMESPACE_BEGIN
 		for (auto e : m_emitters)
 			if (!e->hasShape())
 				delete e;
-		m_emitters.clear();
 
-		delete m_envmap;
+		// delete m_envmap; // Already deleted as an emitter
 		delete m_denoiser;
 
 		delete m_previewIntegrator;
@@ -81,8 +80,9 @@ NORI_NAMESPACE_BEGIN
 		clone->m_sampler = static_cast<Sampler *>(m_sampler->cloneAndInit());
 		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
 
-		if (m_envmap)
-			clone->m_envmap   = static_cast<Emitter *>(m_envmap->cloneAndInit());
+		// envmap handled in emitters
+		// if (m_envmap)
+		// 	clone->m_envmap   = static_cast<Emitter *>(m_envmap->cloneAndInit());
 		if (m_denoiser)
 			clone->m_denoiser = static_cast<Denoiser *>(m_denoiser->cloneAndInit());
 
@@ -91,7 +91,13 @@ NORI_NAMESPACE_BEGIN
 		std::map<int, int> shapeToEmitter{};
 		for (int           i = 0; i < m_emitters.size(); ++i)
 			if (!m_emitters[i]->hasShape())
+			{
 				clone->m_emitters[i] = static_cast<Emitter *>(m_emitters[i]->cloneAndInit());
+
+				// Update envmap pointer, don't clone it twice
+				if(m_emitters[i]->isEnvMap())
+					clone->m_envmap = clone->m_emitters[i];
+			}
 			else
 			{
 				int m = 0;
