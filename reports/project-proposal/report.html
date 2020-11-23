@@ -57,53 +57,84 @@
             <h2>Our features</h2>
             <h3>Roger Barton (17-948-324)</h3>
             <h4>Blender (5)</h4>
-            <p>TODO</p>
+                <p>We'd like to use Blender to model the fluid splashing out of the bottle with a blender fluid simulation. 
+                    This will be exported as a normal triangle mesh.
+                    The smoke will be done using the OpenVDB format, which blender can produce for us.
+                </p>
             <h4>Depth of Field (5)</h4>
-            <p>TODO</p>
-            <h4>Anisotropic Phase Function (e.g. Henyey-Greenstein) (5)</h4>
-            <p>TODO</p>
+                <p>This can be verified by comparing to an identical render with blender cycles. The camera properties can be set to be the 
+                    same except that a conversion to f-stops will be done, see <a href="https://en.wikipedia.org/wiki/F-number#Notation">wikipedia</a>.
+                </p>
             <h4>Bump Mapping or Normal Mapping (5)</h4>
-            <p>TODO</p>
+                <p>
+                    We can validate this with an adapted normal integrator from the first assignment.
+                    To ensure that the directions are correct a comparison render can be made with blender cycles.
+                </p>
+            <h4>Anisotropic Phase Function (e.g. Henyey-Greenstein) (5)</h4>
+                <p>This will be validated by comparing to another renderer, for example the cycles renderer.
+                    The phase function can also be visualized in the warptest to see that it visually corresponds to the images in the lecture slides and pbr book.
+                    The blender principled volume shader has an anisotropy value in the range [-1,1], which appears to correspond to the asymmetry parameter g in henyey-greenstein (this will need to be checked).
+                </p>
             <h4>Emissive Participating Media (10)</h4>
-            <p>TODO</p>
+                <p>
+                    The blender principled volume shader also has an emission value. Potentially this can also be used to compare renders for a homogeneous volume. 
+                    Although there will likely need to be some unit conversion.
+                </p>
             <h4>Heterogenous Participating Media (30)</h4>
-            <p>TODO</p>
+                <p>
+                    To validate, we can render a homogeneous volume with the heterogeneous integrator and check that they are the same.
+                    We can also compare a render to blender cycles. 
+                    There will be some differences probably due to blender having a more advanced material or different interpolation (although this can be specified). 
+                    But it can still serve as a reference.
+                </p>
 
             <h3>Matthias Busenhart (17-918-160)</h3>
             <h4>Images as Textures (5)</h4>
-            <p>This can be easy verified. Images should be mappable to objects using the uv coordinates.</p>
-            <p>For example on spheres, images should be "turnable", meaning an arbitrary rotation should be possible.
-            </p>
+                <p>This can be visually verified with an albedo texture. Images should be mappable to objects using the uv coordinates.</p>
             <h4>Simple Extra Emitters (5)</h4>
-            <p>I plan to add the following emitter: spotlight</p>
-            <p>Validation is done by rendering images as already seen in project 3.</p>
+                <p>I plan to add the following emitter: spotlight</p>
+                <p>Validation is done by rendering images as already seen in project 3.</p>
             <h4>Simple Denoising (10)</h4>
-            <p>Denoising Variation is done by a comparison (side by side) of a denoised image an the original image.</p>
+                <p>Denoising Variation is done by a comparison (side by side) of a denoised image an the original image.
+                    The denoiser can also be compared to another denoiser.
+                </p>
             <h4>Adaptive Sampling (10)</h4>
-            <p>Validation is done by visual inspection. The rendered image should look correct and in addition a
-                variance plot can be shown.</p>
+                <p>Validation is done by visual inspection. The rendered image should look correct and in addition a
+                    variance plot can be shown. We will produce an image which shows the normalized number of samples per pixel. 
+                    We can then verify that regions with high variance have more samples, 
+                    e.g. regions with caustics.
+                </p>
             <h4>Disney BSDF (15)</h4>
-            <p>Validation is done by comparing our implementation with the image found on <a
-                    href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">this</a>
-                presentation (slide 3).</p>
+                <p>Validation is done by comparing our implementation with the image found on <a
+                        href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">this</a>
+                    presentation (slide 3).</p>
             <h4>Environment Map Emitter (15)</h4>
-            <p>This feature is easy to verify, since it is clear by a glance if the environment map works. Possibly the
-                same scene from different angles will be done in order to show that for example an image as an envmap
-                will turn with the scene.</p>
+                <p>This feature is easy to verify, since it is clear by a glance if the environment map works. Possibly the
+                    same scene from different angles will be done in order to show that for example an image as an environment
+                    will turn with the scene.
+                    TODO: how to verify emitter sampling?
+                </p>
 
             <h3>Comments on some Features</h3>
-            <p>We like to use Blender to model the fluid splashing out of the bottle. This will be exported as a normal
-                triangle mesh.</p>
-            <p>We like to add a smoke, which comes out from the bottle (which appears if you open a bottle under
-                pressure). This will be done using the OpenVDB format, which blender can produce for us.</p>
-            <p>The candle wax will be melted and modeled as coloured glass (dielectric) to avoid a BSSDF.</p>
+                <p>We like to add a smoke, which comes out from the bottle (which appears if you open a bottle under
+                    pressure).</p>
+                <p>The candle wax will be melted and modeled as coloured glass (dielectric) to avoid a BSSDF.</p>
+
+                <p>For validation, if it turns out that blender does not allow for a good enough comparison we will fallback to the pbrt or mitsuba renderers.</p>
+
+            <h3>Misc Features</h3>
+                <p>We have already added more gui features with the Dear GUI library. 
+                    So we can interactively tune the scene parameters and see how the 
+                    render changes. This will allow for faster validation of certain features, as we can easily try out 
+                    multiple parameters in a short amount of time.
+                </p>
 
             <h3>Sources</h3>
-            <p>The images are from <a
-                    href="https://www.alamy.de/stockfoto-nahaufnahme-der-explosion-der-flasche-champagner-korken-31634118.html">Alamy</a>
-                and <a
-                    href="https://www.shutterstock.com/video/clip-7870795-many-small-flaming-candles-on-black-table">Shutterstock</a>.
-            </p>
+                <p>The images are from <a
+                        href="https://www.alamy.de/stockfoto-nahaufnahme-der-explosion-der-flasche-champagner-korken-31634118.html">Alamy</a>
+                    and <a
+                        href="https://www.shutterstock.com/video/clip-7870795-many-small-flaming-candles-on-black-table">Shutterstock</a>.
+                </p>
         </div>
     </div>
 
