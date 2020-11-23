@@ -367,7 +367,7 @@ NORI_NAMESPACE_BEGIN
 		bool node_open_shapes = ImGui::TreeNode("Shapes");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text("%d Shapes", (int) m_shapes.size());
+		ImGui::Text(m_shapes.size() == 1 ? "%d Shape": "%d Shapes", (int) m_shapes.size());
 		ImGui::NextColumn();
 		if (node_open_shapes)
 		{
@@ -401,7 +401,7 @@ NORI_NAMESPACE_BEGIN
 		bool node_open_emitters = ImGui::TreeNode("Emitters");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text("%d Emitters", (int) m_emitters.size());
+		ImGui::Text(m_emitters.size() == 1 ? "%d Emitter": "%d Emitters", (int) m_emitters.size());
 		ImGui::NextColumn();
 		if (node_open_emitters)
 		{
