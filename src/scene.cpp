@@ -82,7 +82,7 @@ NORI_NAMESPACE_BEGIN
 		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
 
 		if (m_envmap)
-			clone->m_envmap   = static_cast<EnvironmentMap *>(m_envmap->cloneAndInit());
+			clone->m_envmap   = static_cast<Emitter *>(m_envmap->cloneAndInit());
 		if (m_denoiser)
 			clone->m_denoiser = static_cast<Denoiser *>(m_denoiser->cloneAndInit());
 

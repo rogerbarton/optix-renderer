@@ -8,13 +8,7 @@ NORI_NAMESPACE_BEGIN
 class EnvMap : public Emitter
 {
 public:
-	explicit EnvMap(const PropertyList &props)
-	{
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
-
-		sphereTexture = props.getBoolean("sphereTexture", false);
-	}
+	explicit EnvMap(const PropertyList &props) {}
 
 	NoriObject *cloneAndInit() override {
 		// Use constant texture as a fallback
@@ -24,25 +18,21 @@ public:
 			l.setColor("value", Color3f(0.5f));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 		}
-	}
 
-		auto clone = new PNGEnvMap(*this);
+		auto clone = new EnvMap(*this);
 		clone->m_map = static_cast<Texture<Color3f>*>(m_map->cloneAndInit());
 		return clone;
 	}
 
-	void update(const NoriObject* guiObject) override
+	void update(const NoriObject *guiObject) override
 	{
-		const auto* gui = static_cast<const PNGEnvMap*>(guiObject);
+		const auto *gui = static_cast<const EnvMap *>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 
-		scaleU = gui->scaleU;
-		scaleV = gui->scaleV;
-		sphereTexture = gui->sphereTexture;
 		m_map->update(gui->m_map);
-      
-      calculateProbs();
+
+		calculateProbs();
 	}
 
 	~EnvMap()
@@ -168,11 +158,12 @@ public:
 
 		return m_map->eval(uv);
 	}
+
 #ifndef NORI_USE_NANOGUI
 	NORI_OBJECT_IMGUI_NAME("Environment Map");
 	virtual bool getImGuiNodes() override
 	{
-		touched |= EnvironmentMap::getImGuiNodes();
+		touched |= Emitter::getImGuiNodes();
 
 		if (m_map)
 		{

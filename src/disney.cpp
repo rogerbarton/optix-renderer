@@ -11,7 +11,7 @@ NORI_NAMESPACE_BEGIN
     ImGui::NextColumn();                                                                                 \
     ImGui::SetNextItemWidth(-1);                                                                         \
     ImGui::PushID(id++);                                                                                 \
-    touched |= ImGui::SliderFloat("##value", &variable, 0.01f, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
+    touched |= ImGui::SliderFloat("##value", &variable, 0, 1, "%f%", ImGuiSliderFlags_AlwaysClamp); \
     ImGui::PopID();                                                                                      \
     ImGui::NextColumn();
 

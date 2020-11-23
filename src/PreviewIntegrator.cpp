@@ -21,7 +21,11 @@ NORI_NAMESPACE_BEGIN
 			if (!scene->rayIntersect(ray, its))
 			{
 				if (scene->getEnvMap())
-					return scene->getEnvMap()->eval(ray.d);
+				{
+					EmitterQueryRecord eqr;
+					eqr.wi = ray.d;
+					return scene->getEnvMap()->eval(eqr);
+				}
 				return Color3f(0.f);
 			}
 
@@ -33,22 +37,25 @@ NORI_NAMESPACE_BEGIN
 			// primary ray, pointing to camera
 			Vector3f wo    = its.toLocal((ray.o - its.p).normalized());
 
-			const Emitter *light  = scene->getRandomEmitter(sampler->next1D());
-			if(light)
+			const Emitter *light = scene->getRandomEmitter(sampler->next1D());
+			if (light)
 			{
 				EmitterQueryRecord rec(its.p);
-				Color3f li = light->sample(rec, sampler->next2D()) * scene->getLights().size();
+				
+				Color3f  li = light->sample(rec, sampler->next2D()) * scene->getLights().size();
 				Vector3f wi = its.toLocal(rec.wi);
 
 				Intersection light_intersection;
-				scene->rayIntersect(rec.shadowRay, light_intersection);
+				if (!scene->rayIntersect(rec.shadowRay, light_intersection))
+				{
+					BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
+					bsdfRec.uv = its.uv;
+					bsdfRec.p  = its.p;
+					Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
+					float   cos        = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
 
-				BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
-				bsdfRec.uv = its.uv;                      // set the uv coordinates
-				Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
-				float   cos        = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
-
-				result = li * cos * bsdf_color;
+					result = li * cos * bsdf_color;
+				}
 			}
 			else
 			{
