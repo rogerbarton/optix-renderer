@@ -16,9 +16,6 @@ public:
 			l.setColor("value", props.getColor("albedo"));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 		}
-
-		scaleU = props.getFloat("scaleU", 1.f);
-		scaleV = props.getFloat("scaleV", 1.f);
 	}
 
 	~EnvMap()
@@ -65,11 +62,9 @@ public:
 	std::string toString() const override
 	{
 		return tfm::format("PngEnvMap[\n"
-						   "  texture = %s,\n"
-						   "  scaleU = %f,\n"
-						   "  scaleV = %f,\n"
+						   "  texture = %s\n"
 						   "]",
-						   m_map->toString(), scaleU, scaleV);
+						   m_map->toString());
 	};
 
 	Color3f sample(EmitterQueryRecord &lRec,
@@ -107,7 +102,7 @@ public:
 		{
 			v = sphericalDirection(j * M_PI, i * 2.0f * M_PI);
 		}
-		Vector3f v_inf = v * 1.f / Epsilon; // divide by epsilon = * inf
+		Vector3f v_inf = v * 1.f / Epsilon;			 // divide by epsilon = * inf
 		lRec.n = -(v_inf - m_position).normalized(); // the normal points inwards to m_position
 		lRec.p = v_inf;
 		lRec.wi = (lRec.p - lRec.ref).normalized();
@@ -186,24 +181,6 @@ public:
 			}
 		}
 
-		ImGui::AlignTextToFramePadding();
-		ImGui::PushID(1);
-		ImGui::TreeNodeEx("scale U", flags, "Scale U");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		ret |= ImGui::DragFloat("##value", &scaleU, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
-		ImGui::AlignTextToFramePadding();
-		ImGui::PushID(2);
-		ImGui::TreeNodeEx("scale V", flags, "Scale V");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		ret |= ImGui::DragFloat("##value", &scaleV, 0.01, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
 		return ret;
 	}
 #endif
@@ -237,7 +214,6 @@ private:
 	}
 
 	Texture<Color3f> *m_map = nullptr;
-	float scaleU, scaleV;
 	Histogram histogram;
 	MatrixXf probabilities;
 };

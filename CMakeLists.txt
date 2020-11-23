@@ -74,7 +74,6 @@ add_executable(nori
   include/nori/transform.h
   include/nori/vector.h
   include/nori/warp.h
-  include/nori/environmentmap.h
   include/nori/HDRLoader.h
   include/nori/denoiser.h
 
