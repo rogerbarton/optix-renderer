@@ -179,8 +179,13 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
+
                 if (scene->getEnvMap())
-		            Li += t * scene->getEnvMap()->eval(traceRay.d);
+                {
+                    EmitterQueryRecord eqr;
+                    eqr.wi = traceRay.d;
+                    Li += t * scene->getEnvMap()->eval(eqr);
+                }
                 break;
             }
 
@@ -220,7 +225,7 @@ public:
                         BSDFQueryRecord bqr_p(its.toLocal(-traceRay.d), its.toLocal(photon.getDirection()), EMeasure::ESolidAngle);
                         bqr_p.uv = its.uv;
                         bqr_p.p = its.p;
-                        
+
                         photonColor += photon.getPower() * bsdf->eval(bqr_p) / (M_PI * m_photonRadius * m_photonRadius);
                     }
 
@@ -284,7 +289,7 @@ public:
         ImGui::TreeNodeEx("photonCount", ImGuiLeafNodeFlags, "Photon Count");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT*100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	     touched |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT * 100, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 

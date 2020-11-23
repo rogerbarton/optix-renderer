@@ -122,6 +122,13 @@ NORI_NAMESPACE_BEGIN
 		void cloneAndInit(Emitter *clone);
 
 		void update(const NoriObject *guiObject) override;
+      
+      virtual bool isEnvMap() const { return false; }
+
+      /**
+       * \brief Set the shape if the emitter is attached to a shape
+       * */
+      void setShape(Shape *shape) { m_shape = shape; }
 
 		/**
 		 * \brief Virtual destructor

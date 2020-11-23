@@ -78,11 +78,11 @@ with open(out_file, "w") as wr:
 		<integer name="height" value="512"/>
 	</camera>
 
-    <envmap type="png_env">
-		<texture type="png_texture" name="envmap">
+    <emitter type="envmap">
+		<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/canyon1.png"/>
 		</texture>
-	</envmap>
+	</emitter>
     """)
 
     # write all spheres

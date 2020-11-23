@@ -25,8 +25,12 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
-	            if (scene->getEnvMap())
-		            Li += t * scene->getEnvMap()->eval(traceRay.d);
+                if (scene->getEnvMap())
+                {
+                    EmitterQueryRecord eqr;
+                    eqr.wi = traceRay.d;
+                    Li += t * scene->getEnvMap()->eval(eqr);
+                }
                 break;
             }
 

@@ -19,7 +19,9 @@ public:
     {
       if (scene->getEnvMap())
       {
-        return scene->getEnvMap()->eval(ray.d);
+        EmitterQueryRecord eqr;
+        eqr.wi = ray.d;
+        return scene->getEnvMap()->eval(eqr);
       }
       else
       {
@@ -80,7 +82,9 @@ public:
         // add env map
         if (scene->getEnvMap())
         {
-          result_ems = li * scene->getEnvMap()->eval(eqr.shadowRay.d);
+          EmitterQueryRecord eqr2;
+          eqr2.wi = eqr.shadowRay.d;
+          result_ems = li * scene->getEnvMap()->eval(eqr2);
         }
       }
     }
@@ -120,9 +124,12 @@ public:
       else
       {
         // add env map
+        
         if (scene->getEnvMap())
         {
-          result_mats = bsdf_color * scene->getEnvMap()->eval(shadowRay.d);
+          EmitterQueryRecord eqr;
+          eqr.wi = shadowRay.d;
+          result_mats = bsdf_color * scene->getEnvMap()->eval(eqr);
         }
       }
     }

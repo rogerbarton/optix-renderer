@@ -1,13 +1,14 @@
-#include <nori/environmentmap.h>
+#include <nori/emitter.h>
 #include <nori/texture.h>
 #include <Eigen/Geometry>
+#include <nori/warp.h>
 
 NORI_NAMESPACE_BEGIN
 
-class PNGEnvMap : public EnvironmentMap
+class EnvMap : public Emitter
 {
 public:
-	explicit PNGEnvMap(const PropertyList &props)
+	explicit EnvMap(const PropertyList &props)
 	{
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
@@ -23,6 +24,7 @@ public:
 			l.setColor("value", Color3f(0.5f));
 			m_map = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
 		}
+	}
 
 		auto clone = new PNGEnvMap(*this);
 		clone->m_map = static_cast<Texture<Color3f>*>(m_map->cloneAndInit());
@@ -39,9 +41,11 @@ public:
 		scaleV = gui->scaleV;
 		sphereTexture = gui->sphereTexture;
 		m_map->update(gui->m_map);
+      
+      calculateProbs();
 	}
 
-	~PNGEnvMap()
+	~EnvMap()
 	{
 		delete m_map;
 	}
@@ -51,10 +55,10 @@ public:
 		switch (obj->getClassType())
 		{
 		case ETexture:
-			if (obj->getIdName() == "envmap")
+			if (obj->getIdName() == "albedo")
 			{
 				if (m_map)
-					throw NoriException("There is already an envmap defined!");
+					throw NoriException("There is already an albedo defined!");
 				m_map = static_cast<Texture<Color3f> *>(obj);
 			}
 			else
@@ -72,76 +76,97 @@ public:
 	std::string toString() const override
 	{
 		return tfm::format("PngEnvMap[\n"
-						   "  envmap = %s,\n"
-						   "  scaleU = %f,\n"
-						   "  scaleV = %f,\n"
-						   "  sphereTexture = %d\n"
+						   "  texture = %s\n"
 						   "]",
-						   m_map->toString(), scaleU, scaleV, sphereTexture);
+						   m_map->toString());
 	};
 
-	//use wi as the escaping ray
-	Color3f eval(const Vector3f &_wi) override
+	Color3f sample(EmitterQueryRecord &lRec,
+				   const Point2f &sample) const
 	{
-		if (!sphereTexture)
+		// sample any point based on the probabilities
+
+		Histogram::upair result;
+		while (true)
 		{
-			const float uw = 0.25f;
-			const float uh = 1.f / 3.f;
-
-			const Vector3f &r = _wi;
-			Point2f uv;
-
-			float u, v;
-			int index;
-			convert_xyz_to_cube_uv(r[0], r[1], r[2], &index, &u, &v);
-
-			v = 1.f - v;
-
-			u *= scaleU;
-			v *= scaleV;
-
-			u *= uw;
-			v *= uh;
-
-			switch (index)
+			Histogram::elem_type it = histogram.getElement(sample.x());
+			if (it != histogram.map.end())
 			{
-			case 0: //X+
-				u += 2 * uw;
-				v += uh;
-				break;
-			case 1: //X-
-				v += uh;
-				break;
-			case 3: //Y+
-				u += uw;
-				v += 2 * uh;
-				break;
-			case 2: //Y-
-				u += uw;
-				break;
-			case 4: //Z+
-				u += uw;
-				v += uh;
-				break;
-			case 5: //Z-
-				u += 3 * uw;
-				v += uh;
+				result = it->second;
 				break;
 			}
-			return m_map->eval(Point2f(u, v));
+			else
+			{
+				throw NoriException("Histogram could not find a data point...");
+			}
+		}
+
+		// convert result (kind of uv coords) into direction
+
+		float i = result.first / (float)m_map->getHeight();
+		float j = result.second / (float)m_map->getWidth();
+
+		Vector3f v;
+		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
+		{
+			// sample a uniform direction from the scene (this only happens if the texture is constant)
+			v = Warp::squareToUniformSphere(sample);
 		}
 		else
 		{
-			// eval texture based on _wi
-			Point2f uv_coords = sphericalCoordinates(_wi);
-			Point2f uv;
-
-			// switch coordinates and map to [0,1]
-			uv.x() = uv_coords.y() / (2.f * M_PI);
-			uv.y() = uv_coords.x() / M_PI;
-
-			return m_map->eval(uv);
+			v = sphericalDirection(j * M_PI, i * 2.0f * M_PI);
 		}
+		Vector3f v_inf = v * 1.f / Epsilon;			 // divide by epsilon = * inf
+		lRec.n = -(v_inf - m_position).normalized(); // the normal points inwards to m_position
+		lRec.p = v_inf;
+		lRec.wi = (lRec.p - lRec.ref).normalized();
+		lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
+
+		lRec.pdf = pdf(lRec);
+
+		if (lRec.pdf < Epsilon)
+			return Color3f(0.f);
+
+		Color3f col = eval(lRec) / lRec.pdf;
+		return col;
+	}
+
+	float pdf(const EmitterQueryRecord &lRec) const
+	{
+		// adaptive sampling based on the brightness of each pixel
+
+		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
+		{
+			return Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f));
+		}
+
+		Vector3f target = lRec.p;
+		Point2f uv = sphericalCoordinates(target);
+
+		// convert these uv coords into x and y for the probability
+		unsigned int i = uv.y() / (2.f * M_PI) * m_map->getWidth();
+		unsigned int j = uv.x() * INV_PI * m_map->getHeight();
+
+		i = i + m_map->getHeight() % m_map->getHeight();
+		j = j + m_map->getWidth() % m_map->getWidth();
+
+		return probabilities(i, j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f));
+	}
+
+	Color3f eval(const EmitterQueryRecord &lRec) const override
+	{
+		// ref does not have to be set, because the env map has inf size
+		// --> the distance of ref/center of envmap is neglectable
+
+		// eval texture based on lRec.wi
+		Point2f uv_coords = sphericalCoordinates(lRec.wi);
+		Point2f uv;
+
+		// switch coordinates and map to [0,1]
+		uv.x() = uv_coords.y() / (2.f * M_PI);
+		uv.y() = uv_coords.x() / M_PI;
+
+		return m_map->eval(uv);
 	}
 #ifndef NORI_USE_NANOGUI
 	NORI_OBJECT_IMGUI_NAME("Environment Map");
@@ -164,119 +189,42 @@ public:
 			}
 		}
 
-		ImGui::AlignTextToFramePadding();
-		ImGui::PushID(1);
-		ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragFloat("##value", &scaleU, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
-		ImGui::AlignTextToFramePadding();
-		ImGui::PushID(2);
-		ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
-		ImGui::AlignTextToFramePadding();
-		ImGui::PushID(3);
-		ImGui::TreeNodeEx("SphereTexture", ImGuiLeafNodeFlags, "Sphere Texture");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::Checkbox("##value", &sphereTexture);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
 		return touched;
 	}
 #endif
-private:
-	Texture<Color3f> *m_map = nullptr;
-	bool sphereTexture = false;
-	float scaleU, scaleV;
 
-	void convert_xyz_to_cube_uv(float x, float y, float z, int *index, float *u, float *v)
+	bool isEnvMap() const override
 	{
-		float absX = fabs(x);
-		float absY = fabs(y);
-		float absZ = fabs(z);
-
-		int isXPositive = x > 0 ? 1 : 0;
-		int isYPositive = y > 0 ? 1 : 0;
-		int isZPositive = z > 0 ? 1 : 0;
-
-		float maxAxis = 0, uc = 0, vc = 0;
-
-		// POSITIVE X
-		if (isXPositive && absX >= absY && absX >= absZ)
-		{
-			// u (0 to 1) goes from +z to -z
-			// v (0 to 1) goes from -y to +y
-			maxAxis = absX;
-			uc = -z;
-			vc = y;
-			*index = 0;
-		}
-		// NEGATIVE X
-		if (!isXPositive && absX >= absY && absX >= absZ)
-		{
-			// u (0 to 1) goes from -z to +z
-			// v (0 to 1) goes from -y to +y
-			maxAxis = absX;
-			uc = z;
-			vc = y;
-			*index = 1;
-		}
-		// POSITIVE Y
-		if (isYPositive && absY >= absX && absY >= absZ)
-		{
-			// u (0 to 1) goes from -x to +x
-			// v (0 to 1) goes from +z to -z
-			maxAxis = absY;
-			uc = x;
-			vc = -z;
-			*index = 2;
-		}
-		// NEGATIVE Y
-		if (!isYPositive && absY >= absX && absY >= absZ)
-		{
-			// u (0 to 1) goes from -x to +x
-			// v (0 to 1) goes from -z to +z
-			maxAxis = absY;
-			uc = x;
-			vc = z;
-			*index = 3;
-		}
-		// POSITIVE Z
-		if (isZPositive && absZ >= absX && absZ >= absY)
-		{
-			// u (0 to 1) goes from -x to +x
-			// v (0 to 1) goes from -y to +y
-			maxAxis = absZ;
-			uc = x;
-			vc = y;
-			*index = 4;
-		}
-		// NEGATIVE Z
-		if (!isZPositive && absZ >= absX && absZ >= absY)
-		{
-			// u (0 to 1) goes from +x to -x
-			// v (0 to 1) goes from -y to +y
-			maxAxis = absZ;
-			uc = -x;
-			vc = y;
-			*index = 5;
-		}
-
-		// Convert range from -1 to 1 to 0 to 1
-		*u = 0.5f * (uc / maxAxis + 1.0f);
-		*v = 0.5f * (vc / maxAxis + 1.0f);
+		return true;
 	}
+
+private:
+	/// calculate the histogram based on the probabilities
+	void calculateProbs()
+	{
+		probabilities = MatrixXf(m_map->getHeight(), m_map->getWidth());
+		for (int i = 0; i < m_map->getHeight(); i++)
+		{
+			for (int j = 0; j < m_map->getWidth(); j++)
+			{
+				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
+				probabilities(i, j) = col.getLuminance(); // bias to possibly select every one once
+			}
+		}
+		probabilities.normalize();
+		for (int i = 0; i < m_map->getHeight(); i++)
+		{
+			for (int j = 0; j < m_map->getWidth(); j++)
+			{
+				histogram.add_element(i, j, probabilities(i, j));
+			}
+		}
+	}
+
+	Texture<Color3f> *m_map = nullptr;
+	Histogram histogram;
+	MatrixXf probabilities;
 };
 
-NORI_REGISTER_CLASS(PNGEnvMap, "png_env");
+NORI_REGISTER_CLASS(EnvMap, "envmap");
 NORI_NAMESPACE_END

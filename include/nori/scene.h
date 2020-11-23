@@ -21,7 +21,6 @@
 
 #include <nori/bvh.h>
 #include <nori/emitter.h>
-#include <nori/environmentmap.h>
 #include <nori/denoiser.h>
 #include <nori/volume.h>
 
@@ -99,10 +98,10 @@ NORI_NAMESPACE_BEGIN
 		}
 #endif
 
-		EnvironmentMap *getEnvMap() const
-		{
-			return m_envmap;
-		}
+    Emitter *getEnvMap() const
+    {
+        return m_envmap;
+    }
 
 		Denoiser *getDenoiser() const
 		{
@@ -184,13 +183,12 @@ NORI_NAMESPACE_BEGIN
 		Integrator           *m_integrator        = nullptr;
 		Integrator           *m_previewIntegrator = nullptr;
 
-
 		Sampler *m_sampler = nullptr;
 		Camera  *m_camera  = nullptr;
 		BVH     *m_bvh     = nullptr;
-
-		EnvironmentMap *m_envmap   = nullptr;
-		Denoiser       *m_denoiser = nullptr;
+      
+      Emitter *m_envmap    = nullptr;
+      Denoiser *m_denoiser = nullptr;
 
 		std::vector<Emitter *> m_emitters;
 

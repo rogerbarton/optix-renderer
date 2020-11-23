@@ -168,6 +168,9 @@ NORI_NAMESPACE_BEGIN
 		tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
 		samplers.resize(numBlocks);
 
+	   // calculate variance here
+   	Eigen::MatrixXf variance(m_block.rows(), m_block.cols());
+
 		for (uint32_t k = 0; k < numSamples; ++k)
 		{
 			m_progress = k / float(numSamples);
@@ -176,8 +179,6 @@ NORI_NAMESPACE_BEGIN
 
 			tbb::blocked_range<int> range(0, numBlocks);
 
-			// calculate variance here
-			Eigen::MatrixXf variance(m_block.rows(), m_block.cols());
 			m_renderScene->getSampler()->setSampleRound(k);
 
 			Histogram histogram;
@@ -290,18 +291,6 @@ NORI_NAMESPACE_BEGIN
 					}
 				}
 
-				if (k == numSamples - 1 && m_renderScene->getSampler()->computeVariance())
-				{
-					// write variance to disk
-					std::ofstream var_out(outputNameVariance);
-
-					std::cout << std::endl
-					          << "Writing variance to " << outputNameVariance << std::endl;
-
-					var_out << variance << std::endl;
-					var_out.close();
-				}
-
 				ImageBlock block(m_block.getSize(),
 				                 camera->getReconstructionFilter());
 				m_renderScene->getSampler()->setSampleRound(k);
@@ -341,6 +330,16 @@ NORI_NAMESPACE_BEGIN
 
 		/* Save using the OpenEXR format */
 		bitmap->save(outputName);
+
+	   // write variance to disk
+	   // for now, disable variance writer
+	   /*
+	   std::ofstream var_out(outputNameVariance);
+	   std::cout << std::endl
+			   << "Writing variance to " << outputNameVariance << std::endl;
+	   var_out << variance << std::endl;
+   	var_out.close();
+	   */
 
 		//delete m_scene;
 		//m_scene = nullptr;

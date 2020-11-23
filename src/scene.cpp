@@ -177,7 +177,9 @@ NORI_NAMESPACE_BEGIN
 
 			case EEmitter:
 				m_emitters.push_back(static_cast<Emitter *>(obj));
-				break;
+	      	if(m_emitters.back()->isEnvMap())
+	      		m_envmap = static_cast<Emitter *>(obj);
+	      	break;
 
 			case ESampler:
 				if (m_sampler)
@@ -196,12 +198,12 @@ NORI_NAMESPACE_BEGIN
 					throw NoriException("There can only be one integrator per scene!");
 				m_integrator = static_cast<Integrator *>(obj);
 				break;
-
+         /*
 			case EEnvironmentMap:
 				if (m_envmap)
 					throw NoriException("There can only be one environment map per scene!");
 				m_envmap = static_cast<EnvironmentMap *>(obj);
-				break;
+				break;*/
 			case EDenoiser:
 				if (m_denoiser)
 					throw NoriException("There can only be one denoiser per scene!");

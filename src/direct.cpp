@@ -21,7 +21,9 @@ public:
     {
       if (scene->getEnvMap())
       {
-        return scene->getEnvMap()->eval(ray.d);
+        EmitterQueryRecord eqr;
+        eqr.wi = ray.d;
+        return scene->getEnvMap()->eval(eqr);
       }
       return Color3f(0.f);
     }
@@ -46,25 +48,21 @@ public:
 
       // the intersection for the shadow (secondary) ray
       Intersection light_intersection;
-      scene->rayIntersect(rec.shadowRay, light_intersection);
-      // check if the primary intersection and the secondary intersection are
-      // not too close if they were, the secondary ray would point into the
-      // object
-      if ((its.p - light_intersection.p).norm() > Epsilon)
+      if (!scene->rayIntersect(rec.shadowRay))
       {
-        continue;
+
+        // create BSDF query record based on wi, wo and the measure
+        BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
+        bsdfRec.uv = its.uv; // set the uv coordinates
+        bsdfRec.p = its.p;
+        Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
+
+        // calculate the angle
+        float cos = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
+
+        // add up the bsdf term together with the cos and the sampled light
+        result += li * cos * bsdf_color;
       }
-
-      // create BSDF query record based on wi, wo and the measure
-      BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
-      bsdfRec.uv = its.uv;                      // set the uv coordinates
-      Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
-
-      // calculate the angle
-      float cos = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
-
-      // add up the bsdf term together with the cos and the sampled light
-      result += li * cos * bsdf_color;
     }
     return result;
   }

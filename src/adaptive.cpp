@@ -109,8 +109,7 @@ public:
                 while (true)
                 {
                     // TODO only select 95% (not those with hightes probability)
-                    float p = histogram.cumulative * next1D();
-                    Histogram::map_type::const_iterator it = histogram.map.lower_bound(p);
+                    Histogram::elem_type it = histogram.getElement(next1D());
                     if (it != histogram.map.end())
                     {
                         result.push_back(it->second);
