@@ -21,9 +21,7 @@ NORI_NAMESPACE_BEGIN
 			if (!scene->rayIntersect(ray, its))
 			{
 				if (scene->getEnvMap())
-				{
 					return scene->getEnvMap()->eval(ray.d);
-				}
 				return Color3f(0.f);
 			}
 
@@ -35,33 +33,40 @@ NORI_NAMESPACE_BEGIN
 			// primary ray, pointing to camera
 			Vector3f wo    = its.toLocal((ray.o - its.p).normalized());
 
-			const Emitter *l      = scene->getRandomEmitter(sampler->next1D());
+			const Emitter *light  = scene->getRandomEmitter(sampler->next1D());
+			if(light)
+			{
+				EmitterQueryRecord rec(its.p);
+				Color3f li = light->sample(rec, sampler->next2D()) * scene->getLights().size();
+				Vector3f wi = its.toLocal(rec.wi);
 
-			EmitterQueryRecord rec(its.p);
-			Color3f            li = l->sample(rec, sampler->next2D()) * scene->getLights().size();
+				Intersection light_intersection;
+				scene->rayIntersect(rec.shadowRay, light_intersection);
 
-			Vector3f wi = its.toLocal(rec.wi);
+				BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
+				bsdfRec.uv = its.uv;                      // set the uv coordinates
+				Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
+				float   cos        = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
 
-			Intersection light_intersection;
-			scene->rayIntersect(rec.shadowRay, light_intersection);
+				result = li * cos * bsdf_color;
+			}
+			else
+			{
+				Normal3f n = its.shFrame.n.cwiseAbs();
+				result = Color3f(n.x(), n.y(), n.z());
+			}
 
-			BSDFQueryRecord bsdfRec(wi, wo, EMeasure::ESolidAngle);
-			bsdfRec.uv = its.uv;                      // set the uv coordinates
-			Color3f bsdf_color = bsdf->eval(bsdfRec); // eval the bsdf on the shape
-			float   cos        = std::abs(rec.wi.dot(its.shFrame.n)) / rec.wi.norm();
-
-			result += li * cos * bsdf_color;
 			return result;
 		}
 
 		std::string toString() const override
 		{
-			return "NormalIntegrator[]";
+			return "PreviewIntegrator[]";
 		}
 #ifndef NORI_USE_NANOGUI
 		virtual const char *getImGuiName() const override
 		{
-			return "Normals";
+			return "Preview";
 		}
 		virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
