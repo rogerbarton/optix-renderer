@@ -191,6 +191,9 @@ NORI_NAMESPACE_BEGIN
 
 				for (int i = range.begin(); i < range.end(); ++i)
 				{
+					if (m_renderStatus == ERenderStatus::Interrupt)
+						break;
+
 					// Request an image block from the block generator
 					blockGenerator.next(block);
 
