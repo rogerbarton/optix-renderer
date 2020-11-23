@@ -48,12 +48,12 @@ NORI_NAMESPACE_BEGIN
 
 	bool RenderThread::isBusy()
 	{
-		if (m_render_status == ERenderStatus::Done)
+		if (m_renderStatus == ERenderStatus::Done)
 		{
-			m_render_thread.join();
-			m_render_status = ERenderStatus::Idle;
+			m_renderThread.join();
+			m_renderStatus = ERenderStatus::Idle;
 		}
-		return m_render_status != ERenderStatus::Idle;
+		return m_renderStatus != ERenderStatus::Idle;
 	}
 
 	void RenderThread::stopRendering()
@@ -61,9 +61,9 @@ NORI_NAMESPACE_BEGIN
 		if (isBusy())
 		{
 			cout << "Requesting interruption of the current rendering" << endl;
-			m_render_status = ERenderStatus::Interrupt;
-			m_render_thread.join();
-			m_render_status = ERenderStatus::Idle;
+			m_renderStatus = ERenderStatus::Interrupt;
+			m_renderThread.join();
+			m_renderStatus = ERenderStatus::Idle;
 			cout << "Rendering successfully aborted" << endl;
 		}
 	}
@@ -72,7 +72,7 @@ NORI_NAMESPACE_BEGIN
 	{
 		// Trigger interrupt, but don't wait
 		if(isBusy())
-			m_render_status = ERenderStatus::Interrupt;
+			m_renderStatus = ERenderStatus::Interrupt;
 
 		filesystem::path path(filename);
 
@@ -92,8 +92,8 @@ NORI_NAMESPACE_BEGIN
 		// Wait for current render to finish before continuing
 		if(isBusy())
 		{
-			m_render_thread.join();
-			m_render_status = ERenderStatus::Idle;
+			m_renderThread.join();
+			m_renderStatus = ERenderStatus::Idle;
 		}
 
 		// -- Accept new scene and initialize it
@@ -123,8 +123,8 @@ NORI_NAMESPACE_BEGIN
 		outputName += ".exr";
 
 		// Start the actual thread
-		m_render_status = ERenderStatus::Busy;
-		m_render_thread = std::thread([this] { renderThreadMain(); });
+		m_renderStatus = ERenderStatus::Busy;
+		m_renderThread = std::thread([this] { renderThreadMain(); });
 	}
 
 	void RenderThread::restartRender()
@@ -134,8 +134,8 @@ NORI_NAMESPACE_BEGIN
 
 		stopRendering();
 
-		m_render_status = ERenderStatus::Busy;
-		m_render_thread = std::thread([this] { renderThreadMain(); });
+		m_renderStatus = ERenderStatus::Busy;
+		m_renderThread = std::thread([this] { renderThreadMain(); });
 	}
 
 	void RenderThread::renderThreadMain()
@@ -158,10 +158,10 @@ NORI_NAMESPACE_BEGIN
 
 		Timer timer;
 
-		Integrator* const integrator = m_renderScene->getIntegrator(m_preview_mode);
+		Integrator* const integrator = m_renderScene->getIntegrator(m_previewMode);
 		integrator->preprocess(m_renderScene);
 
-		const auto numSamples = m_preview_mode ? 1 : m_renderScene->getSampler()->getSampleCount();
+		const auto numSamples = m_previewMode ? 1 : m_renderScene->getSampler()->getSampleCount();
 		const auto numBlocks  = blockGenerator.getBlockCount();
 
 		tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
@@ -170,7 +170,7 @@ NORI_NAMESPACE_BEGIN
 		for (uint32_t k = 0; k < numSamples; ++k)
 		{
 			m_progress = k / float(numSamples);
-			if (m_render_status == ERenderStatus::Interrupt)
+			if (m_renderStatus == ERenderStatus::Interrupt)
 				break;
 
 			tbb::blocked_range<int> range(0, numBlocks);
@@ -318,10 +318,10 @@ NORI_NAMESPACE_BEGIN
 
 		cout << "done. (took " << timer.elapsedString() << ")" << endl;
 
-		if (m_preview_mode || m_render_status == ERenderStatus::Interrupt)
+		if (m_previewMode || m_renderStatus == ERenderStatus::Interrupt)
 		{
 			// stop the rendering here, don't save
-			m_render_status = ERenderStatus::Done;
+			m_renderStatus = ERenderStatus::Done;
 			return;
 		}
 
@@ -344,7 +344,7 @@ NORI_NAMESPACE_BEGIN
 		//delete m_scene;
 		//m_scene = nullptr;
 
-		m_render_status = ERenderStatus::Done;
+		m_renderStatus = ERenderStatus::Done;
 	}
 
 	static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,
@@ -390,9 +390,17 @@ NORI_NAMESPACE_BEGIN
 	}
 
 	void RenderThread::drawRenderGui() {
-		if (m_guiScene)
+		m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
+
+		ImGui::Checkbox("Auto-update", &m_autoUpdate);
+		if(m_guiSceneTouched)
 		{
-			m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_preview_mode);
+			ImGui::SameLine();
+			if (ImGui::Button("Apply Changes"))
+			{
+				m_guiSceneTouched = false;
+				restartRender();
+			}
 		}
 	}
 
@@ -421,7 +429,7 @@ NORI_NAMESPACE_BEGIN
 		ImGui::Separator();
 		ImGui::PopStyleVar();
 
-		if(m_guiSceneTouched)
+		if((m_autoUpdate || m_previewMode) && m_guiSceneTouched)
 		{
 			m_guiSceneTouched = false;
 			restartRender();

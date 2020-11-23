@@ -47,10 +47,15 @@ public:
 	void drawRenderGui();
 	void drawSceneGui();
 
-	Scene *m_guiScene = nullptr;
+	Scene *m_guiScene       = nullptr;
 	Scene *m_renderScene    = nullptr;
+	/**
+	 * Restart render when a change is detected. Otherwise the apply button can be used.
+	 * m_preview_mode overrides this.
+	 */
+	bool  m_autoUpdate      = true;
 	bool  m_guiSceneTouched = false;
-	bool  m_preview_mode    = false;
+	bool  m_previewMode     = false;
 protected:
 
 	enum class ERenderStatus : int {
@@ -61,24 +66,14 @@ protected:
 	};
 
     ImageBlock & m_block;
-    std::thread m_render_thread;
-    std::atomic<ERenderStatus> m_render_status = ERenderStatus::Idle;
-    std::atomic<float> m_progress = 1.f;
-
-    // Update flags
-    enum class ERenderThreadUpdateFlags : int{
-    	RestartRender = 0,
-    	ReloadScene = 1
-    };
-
-    ERenderThreadUpdateFlags updateFlags;
+    std::thread                m_renderThread;
+    std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
+    std::atomic<float>         m_progress     = 1.f;
 
 	std::string sceneFilename;
 	std::string outputName;
 	std::string outputNameDenoised;
 	std::string outputNameVariance;
-
-	void initializeFromScene();
 };
 
 NORI_NAMESPACE_END

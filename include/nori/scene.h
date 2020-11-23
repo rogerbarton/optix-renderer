@@ -77,9 +77,7 @@ NORI_NAMESPACE_BEGIN
 		const Emitter *getRandomEmitter(float rnd) const
 		{
 			auto const &n    = m_emitters.size();
-			size_t     index = std::min(
-					static_cast<size_t>(std::floor(n * rnd)),
-					n - 1);
+			size_t     index = std::min(static_cast<size_t>(std::floor(n * rnd)), n - 1);
 			if (index >= m_emitters.size())
 				return nullptr;
 			return m_emitters[index];
