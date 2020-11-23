@@ -70,7 +70,6 @@ public:
         ECamera,
         EIntegrator,
         ESampler,
-        EEnvironmentMap,
         EPixelSampler,
         EDenoiser,
         ETest,
@@ -103,8 +102,6 @@ public:
             return "sampler";
         case ETest:
             return "test";
-        case EEnvironmentMap:
-            return "environmentmap";
         case EDenoiser:
             return "denoiser";
         case EPixelSampler:

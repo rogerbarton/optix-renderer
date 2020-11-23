@@ -21,7 +21,6 @@
 
 #include <nori/bvh.h>
 #include <nori/emitter.h>
-#include <nori/environmentmap.h>
 #include <nori/denoiser.h>
 #include <nori/volume.h>
 
