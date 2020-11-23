@@ -24,7 +24,9 @@ public:
         {
             if (scene->getEnvMap())
             {
-                return scene->getEnvMap()->eval(ray.d);
+                EmitterQueryRecord eqr;
+                eqr.wi = ray.d;
+                return scene->getEnvMap()->eval(eqr);
             }
             return Color3f(0.f);
         }
@@ -37,7 +39,7 @@ public:
         // primary ray, pointing to camera
         Vector3f wo = its.toLocal((ray.o - its.p).normalized());
 
-        const Emitter* l = scene->getRandomEmitter(sampler->next1D());
+        const Emitter *l = scene->getRandomEmitter(sampler->next1D());
 
         EmitterQueryRecord rec(its.p);
         Color3f li = l->sample(rec, sampler->next2D()) * scene->getLights().size();

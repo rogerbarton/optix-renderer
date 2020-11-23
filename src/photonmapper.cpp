@@ -159,8 +159,13 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
+
                 if (scene->getEnvMap())
-		            Li += t * scene->getEnvMap()->eval(traceRay.d);
+                {
+                    EmitterQueryRecord eqr;
+                    eqr.wi = traceRay.d;
+                    Li += t * scene->getEnvMap()->eval(eqr);
+                }
                 break;
             }
 
@@ -200,7 +205,7 @@ public:
                         BSDFQueryRecord bqr_p(its.toLocal(-traceRay.d), its.toLocal(photon.getDirection()), EMeasure::ESolidAngle);
                         bqr_p.uv = its.uv;
                         bqr_p.p = its.p;
-                        
+
                         photonColor += photon.getPower() * bsdf->eval(bqr_p) / (M_PI * m_photonRadius * m_photonRadius);
                     }
 
@@ -255,8 +260,12 @@ public:
             m_photonRadius);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Photonmapper"; }
-    virtual bool getImGuiNodes() override {
+    virtual const char *getImGuiName() const override
+    {
+        return "Photonmapper";
+    }
+    virtual bool getImGuiNodes() override
+    {
         bool ret = Integrator::getImGuiNodes();
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
@@ -267,7 +276,7 @@ public:
         ImGui::TreeNodeEx("photonCount", flags, "Photon Count");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT*100, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragInt("##value", &m_photonCount, 1, 0, SLIDER_MAX_INT * 100, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 

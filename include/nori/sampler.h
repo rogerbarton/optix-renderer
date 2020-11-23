@@ -24,24 +24,6 @@
 
 NORI_NAMESPACE_BEGIN
 
-/*
- * This struct is used to store a cumulative function distribution (CFD) of samples
- */
-struct Histogram
-{
-    using upair = std::pair<int, int>;
-    using map_type = std::map<float, upair>;
-
-    float cumulative;
-    map_type map;
-
-    void add_element(int i, int j, float value)
-    {
-        cumulative += value;
-        map[cumulative] = upair(i, j);
-    }
-};
-
 class ImageBlock;
 
 /**

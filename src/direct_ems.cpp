@@ -16,7 +16,9 @@ public:
     {
       if (scene->getEnvMap())
       {
-        return scene->getEnvMap()->eval(ray.d);
+        EmitterQueryRecord eqr;
+        eqr.wi = ray.d;
+        return scene->getEnvMap()->eval(eqr);
       }
       return Color3f(0.f);
     }
@@ -72,7 +74,10 @@ public:
     return std::string("DirectEMSIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override { return "Direct EMS"; }
+  virtual const char *getImGuiName() const override
+  {
+    return "Direct EMS";
+  }
   virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };

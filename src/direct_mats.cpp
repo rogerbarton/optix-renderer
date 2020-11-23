@@ -19,7 +19,9 @@ public:
     {
       if (scene->getEnvMap())
       {
-        result += scene->getEnvMap()->eval(ray.d);
+        EmitterQueryRecord eqr;
+        eqr.wi = ray.d;
+        return scene->getEnvMap()->eval(eqr);
       }
 
       return result;
@@ -58,7 +60,9 @@ public:
       // if the ray does not intersect again, it will intersect the Env map
       if (scene->getEnvMap())
       {
-        result += scene->getEnvMap()->eval(secondaryRay.d) * bsdf_col;
+        EmitterQueryRecord eqr;
+        eqr.wi = secondaryRay.d;
+        result += scene->getEnvMap()->eval(eqr) * bsdf_col;
       }
 
       return result;
@@ -79,7 +83,10 @@ public:
     return std::string("DirectMATSIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override { return "Direct MATS"; }
+  virtual const char *getImGuiName() const override
+  {
+    return "Direct MATS";
+  }
   virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };

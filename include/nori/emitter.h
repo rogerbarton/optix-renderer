@@ -123,6 +123,8 @@ public:
    * */
   virtual EClassType getClassType() const override { return EEmitter; }
 
+  virtual bool isEnvMap() const { return false; }
+
   /**
    * \brief Set the shape if the emitter is attached to a shape
    * */

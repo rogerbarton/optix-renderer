@@ -21,7 +21,9 @@ public:
         {
             if (scene->getEnvMap())
             {
-                return scene->getEnvMap()->eval(ray.d);
+                EmitterQueryRecord eqr;
+                eqr.wi = ray.d;
+                return scene->getEnvMap()->eval(eqr);
             }
             return Color3f(0.0f);
         }

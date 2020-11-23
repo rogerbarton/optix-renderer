@@ -17,10 +17,10 @@ public:
     // if no collision at all, return black
     if (!scene->rayIntersect(ray, its))
     {
-      if (scene->getEnvMap())
+      /*if (scene->getEnvMap())
       {
         return scene->getEnvMap()->eval(ray.d);
-      }
+      }*/
       return Color3f(0.f);
     }
 

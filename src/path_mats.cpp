@@ -23,8 +23,12 @@ public:
             Intersection its;
             if (!scene->rayIntersect(traceRay, its))
             {
-	            if (scene->getEnvMap())
-		            Li += t * scene->getEnvMap()->eval(traceRay.d);
+                if (scene->getEnvMap())
+                {
+                    EmitterQueryRecord eqr;
+                    eqr.wi = traceRay.d;
+                    Li += t * scene->getEnvMap()->eval(eqr);
+                }
                 break;
             }
 
@@ -76,7 +80,10 @@ public:
         return std::string("PathMATSIntegrator[]");
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Path MATS"; }
+    virtual const char *getImGuiName() const override
+    {
+        return "Path MATS";
+    }
     virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 protected:

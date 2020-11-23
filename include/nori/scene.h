@@ -104,7 +104,7 @@ public:
     }
 #endif
 
-    EnvironmentMap *getEnvMap() const
+    Emitter *getEnvMap() const
     {
         return m_envmap;
     }
@@ -195,7 +195,7 @@ private:
     Camera *m_camera = nullptr;
     BVH *m_bvh = nullptr;
 
-    EnvironmentMap *m_envmap = nullptr;
+    Emitter *m_envmap = nullptr;
     Denoiser *m_denoiser = nullptr;
 
     std::vector<Emitter *> m_emitters;
