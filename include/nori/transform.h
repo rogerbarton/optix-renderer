@@ -46,6 +46,11 @@ public:
     Transform(const Eigen::Matrix4f &trafo, const Eigen::Matrix4f &inv) 
         : m_transform(trafo), m_inverse(inv) { }
 
+    void clear() {
+	    m_transform = Eigen::Matrix4f::Identity();
+	    m_inverse = Eigen::Matrix4f::Identity();
+    }
+
     /// Return the underlying matrix
     const Eigen::Matrix4f &getMatrix() const {
         return m_transform;

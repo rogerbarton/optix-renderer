@@ -22,7 +22,6 @@ public:
 
 		auto clone = new EnvMap(*this);
 		clone->m_map = static_cast<Texture<Color3f> *>(m_map->cloneAndInit());
-		calculateProbs();
 
 		return clone;
 	}

@@ -356,11 +356,17 @@ void ImguiScreen::draw()
 			{
 				ImGui::BeginChild(42);
 				m_renderThread.drawSceneGui();
+				if(!m_renderThread.m_guiScene && ImGui::Button("Open Scene"))
+					filebrowser.Open();
+
 				ImGui::EndChild();
 			}
 		}
 		ImGui::End();
 	}
+
+	if(uiShowDemoWindow)
+		ImGui::ShowDemoWindow(&uiShowDemoWindow);
 }
 
 void ImguiScreen::setCallbacks()
@@ -502,7 +508,14 @@ void ImguiScreen::keyPressed(int key, int mods)
 	else if (key == GLFW_KEY_D)
 		uiShowSceneWindow = !uiShowSceneWindow;
 	else if (key == GLFW_KEY_ESCAPE)
-		m_renderThread.stopRendering();
+	{
+		if(filebrowser.IsOpened())
+			filebrowser.Close();
+		else if (filebrowserSave.IsOpened())
+			filebrowserSave.Close();
+		else
+			m_renderThread.stopRendering();
+	}
 	else if (key == GLFW_KEY_F5)
 		m_renderThread.restartRender();
 	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
@@ -515,13 +528,18 @@ void ImguiScreen::keyPressed(int key, int mods)
 		setZoom(1.f);
 	else if (key == GLFW_KEY_2)
 		setZoom(2.f);
+	else if (key == GLFW_KEY_F1)
+		uiShowDemoWindow = !uiShowDemoWindow;
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
 {
 }
 
-void ImguiScreen::mouseButtonPressed(int button, int mods) {}
+void ImguiScreen::mouseButtonPressed(int button, int mods) {
+	if(!m_renderThread.isBusy() && !m_renderThread.m_guiScene)
+		filebrowser.Open();
+}
 void ImguiScreen::mouseButtonReleased(int button, int mods) {}
 void ImguiScreen::mouseMove(double xpos, double ypos)
 {

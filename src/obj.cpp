@@ -21,6 +21,8 @@
 #include <filesystem/resolver.h>
 #include <unordered_map>
 #include <fstream>
+#include <filesystem>
+#include <imgui/filebrowser.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -32,7 +34,7 @@ class WavefrontOBJ : public Mesh
 public:
     explicit WavefrontOBJ(const PropertyList &propList)
     {
-	    filename = getFileResolver()->resolve(propList.getString("filename"));
+	    filename = getFileResolver()->resolve(propList.getString("filename")).str();
 	    trafo = propList.getTransform("toWorld", Transform());
     }
 
@@ -49,9 +51,9 @@ public:
 		if (!gui->touched) return;
 		gui->touched = false;
 
-		// reload file if the filename has changed. TODO: reload if file has been touched
-    	if(gui->geometryTouched)
+    	if(gui->fileTouched || gui->geometryTouched || gui->transformTouched)
 	    {
+		    fileLastReadTime = std::filesystem::last_write_time(filename);
 		    filename = gui->filename;
 		    loadFromFile();
 	    }
@@ -61,14 +63,15 @@ public:
 
 		Mesh::update(guiObject);
 
-		gui->geometryTouched = false;
+		gui->geometryTouched  = false;
 		gui->transformTouched = false;
+		gui->fileTouched      = false;
 	}
 
 	void loadFromFile() {
 	    typedef std::unordered_map<OBJVertex, uint32_t, OBJVertexHash> VertexMap;
 
-	    std::ifstream is(filename.str());
+	    std::ifstream is(filename);
 	    if (is.fail())
 		    throw NoriException("Unable to open OBJ file \"%s\"!", filename);
 
@@ -162,6 +165,8 @@ public:
 		    for (uint32_t i = 0; i < vertices.size(); ++i)
 			    m_N.col(i) = normals.at(vertices[i].n - 1);
 	    }
+	    else
+	    	normals.clear();
 
 	    if (!texcoords.empty())
 	    {
@@ -169,8 +174,10 @@ public:
 		    for (uint32_t i = 0; i < vertices.size(); ++i)
 			    m_UV.col(i) = texcoords.at(vertices[i].uv - 1);
 	    }
+	    else
+	    	texcoords.clear();
 
-	    m_name = filename.str();
+	    m_name = filename.string();
 	    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
 	         << timer.elapsedString() << " and "
 	         << memString(m_F.size() * sizeof(uint32_t) +
@@ -189,9 +196,35 @@ public:
 		ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		ImGui::Text(filename.filename().c_str());
+		ImGui::Text(tfm::format("%s%s", filename.filename().string().c_str(), (fileTouched ? "*" : "")).c_str());
 		ImGui::NextColumn();
 
+		// -- Change filename
+		ImGui::NextColumn(); // skip column
+		static ImGui::FileBrowser fileBrowser;
+		if (ImGui::Button("Open"))
+		{
+			fileBrowser.Open();
+			fileBrowser.SetTitle("Open Mesh File");
+			fileBrowser.SetTypeFilters({".obj"});
+			if(filename.has_parent_path())
+				fileBrowser.SetPwd(filename.parent_path());
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Refresh"))
+			geometryTouched |= std::filesystem::last_write_time(filename) > fileLastReadTime;
+		ImGui::NextColumn();
+
+		fileBrowser.Display();
+		if (fileBrowser.HasSelected())
+		{
+			filename = fileBrowser.GetSelected();
+			fileTouched = true;
+			fileBrowser.ClearSelected();
+		}
+
+		// -- Remaining Properties
 		ImGui::AlignTextToFramePadding();
 		ImGui::PushID(0);
 		bool node_open = ImGui::TreeNode("Transform");
@@ -207,6 +240,8 @@ public:
 
 		ImGui::PopID();
 
+		geometryTouched |= fileTouched;
+		geometryTouched |= transformTouched; // Because obj bakes the transform into the mesh, we must reload the mesh
 		touched |= transformTouched | geometryTouched;
 		return touched;
 	}
@@ -256,8 +291,11 @@ protected:
         }
     };
 private:
-    filesystem::path filename;
+	std::filesystem::path filename;
 	Transform trafo;
+
+	std::filesystem::file_time_type fileLastReadTime;
+	mutable bool fileTouched = true;
 };
 
 NORI_REGISTER_CLASS(WavefrontOBJ, "obj");

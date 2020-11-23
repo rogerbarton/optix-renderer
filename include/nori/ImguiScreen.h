@@ -113,6 +113,7 @@ private:
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
 	bool uiShowSceneWindow = true;
+	bool uiShowDemoWindow  = false;
 
 	int windowWidth;
 	int windowHeight;

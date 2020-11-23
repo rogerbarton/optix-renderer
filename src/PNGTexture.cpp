@@ -1,9 +1,11 @@
 #include <nori/texture.h>
-#include <filesystem/resolver.h>
 #include <lodepng/lodepng.h>
 #include <nori/bsdf.h>
 #include <nori/HDRLoader.h>
 #include <Eigen/Geometry>
+#include <filesystem/resolver.h>
+#include <filesystem>
+#include <imgui/filebrowser.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -12,7 +14,7 @@ class PNGTexture : public Texture<Color3f>
 public:
 	explicit PNGTexture(const PropertyList &props)
 	{
-		filename = getFileResolver()->resolve(props.getString("filename"));
+		filename = getFileResolver()->resolve(props.getString("filename")).str();
 
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
@@ -32,9 +34,10 @@ public:
 		if (!gui->touched) return;
 		gui->touched = false;
 
-		// reload file if the filename has changed. TODO: reload if file has been touched
-		if(filename.str() != gui->filename.str())
+		if(gui->fileTouched)
 		{
+			gui->fileTouched = false;
+			fileLastReadTime = std::filesystem::last_write_time(filename);
 			filename = gui->filename;
 			loadFromFile();
 		}
@@ -45,15 +48,15 @@ public:
 	}
 
 	void loadFromFile() {
-		if (!filename.exists())
+		if (!std::filesystem::exists(filename))
 			throw NoriException("PNGTexture: image file not found %s", filename);
 
-		std::string extension = filename.extension();
+		std::string extension = filename.extension().string();
 
-		if (extension == "png")
+		if (extension == ".png")
 		{
 			std::vector<unsigned char> tmp;
-			lodepng::decode(tmp, width, height, filename.str());
+			lodepng::decode(tmp, width, height, filename.string());
 			data.resize(tmp.size());
 
 			for (unsigned int i = 0; i < data.size(); ++i)
@@ -61,10 +64,10 @@ public:
 				data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255.f);
 			}
 		}
-		else if (extension == "hdr")
+		else if (extension == ".hdr")
 		{
 			nori::HDRLoader::HDRLoaderResult result{};
-			bool ret = nori::HDRLoader::load(filename.str().c_str(), result);
+			bool ret = nori::HDRLoader::load(filename.string().c_str(), result);
 			if (!ret)
 			{
 				throw NoriException("Could not load HDR file...");
@@ -147,9 +150,35 @@ public:
 		ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		ImGui::Text(filename.filename().c_str());
+		ImGui::Text(tfm::format("%s%s", filename.filename().string().c_str(), (fileTouched ? "*" : "")).c_str());
 		ImGui::NextColumn();
 
+	    // -- Change filename
+	    ImGui::NextColumn(); // skip column
+	    static ImGui::FileBrowser fileBrowser;
+	    if (ImGui::Button("Open"))
+	    {
+		    fileBrowser.Open();
+		    fileBrowser.SetTitle("Open Image File");
+		    fileBrowser.SetTypeFilters({".png"});
+		    if(filename.has_parent_path())
+			    fileBrowser.SetPwd(filename.parent_path());
+	    }
+
+	    ImGui::SameLine();
+	    if (ImGui::Button("Refresh"))
+		    fileTouched |= std::filesystem::last_write_time(filename) > fileLastReadTime;
+	    ImGui::NextColumn();
+
+	    fileBrowser.Display();
+	    if (fileBrowser.HasSelected())
+	    {
+		    filename = fileBrowser.GetSelected();
+		    fileTouched = true;
+		    fileBrowser.ClearSelected();
+	    }
+
+	    // -- Image Info
 		ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("width", ImGuiLeafNodeFlags, "Width");
         ImGui::NextColumn();
@@ -164,7 +193,8 @@ public:
         ImGui::Text("%d Pixels", height);
         ImGui::NextColumn();
 
-        ImGui::AlignTextToFramePadding();
+	    // -- Remaining Properties
+	    ImGui::AlignTextToFramePadding();
         ImGui::PushID(2);
         ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
         ImGui::NextColumn();
@@ -193,17 +223,21 @@ public:
         ImGui::PopID();
 		eulerAngles *= M_PI / 180.f;
 
+		touched |= fileTouched;
 		return touched;
 	}
 #endif
 
 private:
-	filesystem::path filename;
+	std::filesystem::path filename;
 	float scaleU, scaleV;
 	Vector3f eulerAngles;
 
 	unsigned int width, height;
 	std::vector<float> data;
+
+	std::filesystem::file_time_type fileLastReadTime;
+	mutable bool                    fileTouched = true;
 
 	float InverseGammaCorrect(float value)
 	{
