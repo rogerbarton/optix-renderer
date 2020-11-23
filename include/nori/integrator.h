@@ -60,8 +60,8 @@ public:
      * */
     virtual EClassType getClassType() const override { return EIntegrator; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Integrator Base"; }
-    virtual bool getImGuiNodes() override { return false; }
+	NORI_OBJECT_IMGUI_NAME("Integrator Base");
+	virtual bool getImGuiNodes() override { return false; }
 #endif
 };
 

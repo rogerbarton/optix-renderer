@@ -179,36 +179,39 @@ public:
 	         << ")" << endl;
     }
 
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(EShape);
-        touched |= Mesh::getImGuiNodes();
+#ifndef NORI_USE_NANOGUI
+	NORI_OBJECT_IMGUI_NAME("Mesh");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(EShape);
+		touched |= Mesh::getImGuiNodes();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::Text(filename.filename().c_str());
-        ImGui::NextColumn();
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text(filename.filename().c_str());
+		ImGui::NextColumn();
 
-	    ImGui::AlignTextToFramePadding();
-	    ImGui::PushID(0);
-	    bool node_open = ImGui::TreeNode("Transform");
-	    ImGui::NextColumn();
-	    ImGui::SetNextItemWidth(-1);
-	    ImGui::Text("To World");
-	    ImGui::NextColumn();
-	    if(node_open) {
-		    transformTouched |= trafo.getImGuiNodes();
-		    ImGui::TreePop();
-	    }
-	    ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(0);
+		bool node_open = ImGui::TreeNode("Transform");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text("To World");
+		ImGui::NextColumn();
+		if(node_open) {
+			transformTouched |= trafo.getImGuiNodes();
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
 
-        ImGui::PopID();
+		ImGui::PopID();
 
-        touched |= transformTouched | geometryTouched;
-        return touched;
-    }
+		touched |= transformTouched | geometryTouched;
+		return touched;
+	}
+#endif
 
 protected:
     /// Vertex indices used by the OBJ format

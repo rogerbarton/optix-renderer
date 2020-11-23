@@ -144,7 +144,7 @@ public:
 		}
 	}
 #ifndef NORI_USE_NANOGUI
-	virtual const char *getImGuiName() const override { return "PNG Environment Map"; }
+	NORI_OBJECT_IMGUI_NAME("Environment Map");
 	virtual bool getImGuiNodes() override
 	{
 		touched |= EnvironmentMap::getImGuiNodes();
@@ -155,7 +155,7 @@ public:
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
 
-			ImGui::Text(m_map->getImGuiName());
+			ImGui::Text(m_map->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open)
 			{
@@ -165,31 +165,31 @@ public:
 		}
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("scale U", ImGuiLeafNodeFlags, "Scale U");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
 		touched |= ImGui::DragFloat("##value", &scaleU, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::NextColumn();
+		ImGui::PopID();
 
 		ImGui::AlignTextToFramePadding();
-        ImGui::PushID(3);
-        ImGui::TreeNodeEx("SphereTexture", ImGuiLeafNodeFlags, "Sphere Texture");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("scale V", ImGuiLeafNodeFlags, "Scale V");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &scaleV, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(3);
+		ImGui::TreeNodeEx("SphereTexture", ImGuiLeafNodeFlags, "Sphere Texture");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
 		touched |= ImGui::Checkbox("##value", &sphereTexture);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::NextColumn();
+		ImGui::PopID();
 
 		return touched;
 	}

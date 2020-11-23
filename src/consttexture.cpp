@@ -35,7 +35,7 @@ public:
         return m_value;
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Constant"; }
+	NORI_OBJECT_IMGUI_NAME("Constant");
     virtual bool getImGuiNodes() override { return false; }
 #endif
 protected:

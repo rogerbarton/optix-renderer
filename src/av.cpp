@@ -51,24 +51,23 @@ public:
             m_length);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "AV"; }
+	NORI_OBJECT_IMGUI_NAME("Average Visibility");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= Integrator::getImGuiNodes();
 
-    virtual bool getImGuiNodes() override
-    {
-        touched |= Integrator::getImGuiNodes();
+		ImGui::AlignTextToFramePadding();
 
-        ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("length", ImGuiLeafNodeFlags, "Length");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushID(1);
+		touched |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::PopID();
+		ImGui::NextColumn();
 
-        ImGui::TreeNodeEx("length", ImGuiLeafNodeFlags, "Length");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(1);
-	    touched |= ImGui::DragFloat("##value", &m_length, 1, 0.f, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::PopID();
-        ImGui::NextColumn();
-
-        return touched;
-    }
+		return touched;
+	}
 #endif
 protected:
     float m_length = 0.0;

@@ -252,7 +252,7 @@ public:
 
     virtual EClassType getClassType() const override { return ETest; }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "TTest"; }
+	NORI_OBJECT_IMGUI_NAME("T-Test");
     virtual bool getImGuiNodes() override { return false; }
 #endif
 private:

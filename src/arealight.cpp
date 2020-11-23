@@ -143,7 +143,7 @@ NORI_NAMESPACE_BEGIN
 			return M_PI / sqr.pdf * m_radiance; // divide by pdf == multiply by area
 		}
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override { return "Arealight"; }
+		NORI_OBJECT_IMGUI_NAME("Arealight");
 		virtual bool getImGuiNodes() override
 		{
 			touched |= Emitter::getImGuiNodes();
@@ -154,7 +154,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::SetNextItemWidth(-1);
 
 			touched |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
-			                          ImGuiSliderFlags_AlwaysClamp);
+			                              ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 			return touched;
 		}

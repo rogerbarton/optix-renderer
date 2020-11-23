@@ -170,16 +170,19 @@ public:
     void setIdName(const std::string &name) { m_idname = name; }
     const std::string &getIdName() const { return m_idname; }
 #ifndef NORI_USE_NANOGUI
-    virtual bool getImGuiNodes() = 0;
-    virtual const char* getImGuiName() const = 0;
-
-    /**
-     * Sets the display name in the scene tree. Indicates if the object was touched
-     */
-#   define NORI_OBJECT_IMGUI_NAME(cls)                  \
-	const char* getImGuiName() const override { \
-	return touched ? #cls "*" : #cls;            \
+	virtual std::string getImGuiName() const  {
+		return tfm::format("%s%s", "Object", (touched ? "*" : ""));
 	}
+
+	/**
+	 * Sets the display name in the scene tree. Indicates if the object was touched
+	 */
+#   define NORI_OBJECT_IMGUI_NAME(cls)                         \
+	std::string getImGuiName() const override {                \
+		return tfm::format("%s%s", cls, (touched ? "*" : "")); \
+	}
+
+    virtual bool getImGuiNodes() = 0;
 #endif
 
 protected:

@@ -111,30 +111,30 @@ public:
             m_intIOR, m_extIOR);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Dielectric"; }
-    virtual bool getImGuiNodes() override {
-        touched |= BSDF::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Dielectric");
+	virtual bool getImGuiNodes() override {
+		touched |= BSDF::getImGuiNodes();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        return touched;
-    }
+		return touched;
+	}
 #endif
 private:
     float m_intIOR, m_extIOR;

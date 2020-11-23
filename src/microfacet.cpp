@@ -155,52 +155,49 @@ public:
                        m_alpha, m_intIOR, m_extIOR, m_kd.toString(), m_ks);
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override
-  {
-    return "Microfacet";
-  }
-  virtual bool getImGuiNodes() override
-  {
-	  touched |= BSDF::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Microfacet");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= BSDF::getImGuiNodes();
 
-	  ImGui::AlignTextToFramePadding();
-	  ImGui::PushID(1);
-	  ImGui::TreeNodeEx("alpha", ImGuiLeafNodeFlags, "Alpha");
-	  ImGui::NextColumn();
-	  ImGui::SetNextItemWidth(-1);
-	  touched |= ImGui::DragFloat("##value", &m_alpha, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-	  ImGui::NextColumn();
-	  ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("alpha", ImGuiLeafNodeFlags, "Alpha");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_alpha, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-	  ImGui::AlignTextToFramePadding();
-	  ImGui::PushID(2);
-	  ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
-	  ImGui::NextColumn();
-	  ImGui::SetNextItemWidth(-1);
-	  touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-	  ImGui::NextColumn();
-	  ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("intIOR", ImGuiLeafNodeFlags, "Interior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_intIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-	  ImGui::AlignTextToFramePadding();
-	  ImGui::PushID(3);
-	  ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
-	  ImGui::NextColumn();
-	  ImGui::SetNextItemWidth(-1);
-	  touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
-	  ImGui::NextColumn();
-	  ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(3);
+		ImGui::TreeNodeEx("Exterior IOR", ImGuiLeafNodeFlags, "Exterior IOR");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &m_extIOR, 0.01f, 0, 10.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-	  ImGui::AlignTextToFramePadding();
-	  ImGui::PushID(3);
-	  ImGui::TreeNodeEx("Albedo of Diffuse Base", ImGuiLeafNodeFlags, "Albedo of Diffuse Base");
-	  ImGui::NextColumn();
-	  ImGui::SetNextItemWidth(-1);
-	  touched |= ImGui::ColorPicker("##value", &m_kd);
-	  ImGui::NextColumn();
-	  ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(3);
+		ImGui::TreeNodeEx("Albedo of Diffuse Base", ImGuiLeafNodeFlags, "Albedo of Diffuse Base");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::ColorPicker("##value", &m_kd);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-	  return touched;
-  }
+		return touched;
+	}
 #endif
 
 private:

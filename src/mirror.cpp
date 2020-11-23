@@ -60,10 +60,10 @@ public:
         return "Mirror[]";
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Mirror"; }
-    virtual bool getImGuiNodes() override {
-        return BSDF::getImGuiNodes();
-    }
+	NORI_OBJECT_IMGUI_NAME("Mirror");
+	virtual bool getImGuiNodes() override {
+		return BSDF::getImGuiNodes();
+	}
 #endif
 };
 

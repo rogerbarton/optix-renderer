@@ -129,6 +129,7 @@ NORI_NAMESPACE_BEGIN
 
 	void RenderThread::restartRender()
 	{
+		m_guiSceneTouched = false;
 		if (!m_guiScene)
 			return;
 
@@ -397,10 +398,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			ImGui::SameLine();
 			if (ImGui::Button("Apply Changes"))
-			{
-				m_guiSceneTouched = false;
 				restartRender();
-			}
 		}
 	}
 
@@ -430,10 +428,7 @@ NORI_NAMESPACE_BEGIN
 		ImGui::PopStyleVar();
 
 		if((m_autoUpdate || m_previewMode) && m_guiSceneTouched)
-		{
-			m_guiSceneTouched = false;
 			restartRender();
-		}
 	}
 
 

@@ -275,7 +275,7 @@ public:
             m_photonRadius);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Photonmapper"; }
+	NORI_OBJECT_IMGUI_NAME("Photonmapper");
     virtual bool getImGuiNodes() override {
         touched = Integrator::getImGuiNodes();
 

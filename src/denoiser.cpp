@@ -78,39 +78,39 @@ public:
                            sigma_r, sigma_d, inner_range);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "SimpleDenoiser"; }
-    virtual bool getImGuiNodes() override
-    {
-        touched |= Denoiser::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Simple Denoier");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= Denoiser::getImGuiNodes();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(1);
-        ImGui::TreeNodeEx("Sigma R", ImGuiLeafNodeFlags, "Sigma R");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &sigma_r, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(1);
+		ImGui::TreeNodeEx("Sigma R", ImGuiLeafNodeFlags, "Sigma R");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &sigma_r, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(2);
-        ImGui::TreeNodeEx("Sigma D", ImGuiLeafNodeFlags, "Sigma D");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &sigma_d, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(2);
+		ImGui::TreeNodeEx("Sigma D", ImGuiLeafNodeFlags, "Sigma D");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragFloat("##value", &sigma_d, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::PushID(3);
-        ImGui::TreeNodeEx("Inner Range", ImGuiLeafNodeFlags, "Inner Range");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-        return touched;
-    }
+		ImGui::AlignTextToFramePadding();
+		ImGui::PushID(3);
+		ImGui::TreeNodeEx("Inner Range", ImGuiLeafNodeFlags, "Inner Range");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragInt("##value", &inner_range, 1, 1, SLIDER_MAX_INT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		ImGui::PopID();
+		return touched;
+	}
 #endif
 
 private:

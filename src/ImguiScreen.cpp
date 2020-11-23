@@ -320,8 +320,12 @@ void ImguiScreen::draw()
 				m_renderThread.stopRendering();
 
 			// show restart button if m_scene is valid
-			if (m_renderThread.m_guiScene && ImGui::Button("Restart Render"))
-				m_renderThread.restartRender();
+			if (m_renderThread.m_guiScene)
+			{
+				ImGui::SameLine();
+				if (ImGui::Button("Restart Render"))
+					m_renderThread.restartRender();
+			}
 
 			m_renderThread.drawRenderGui();
 

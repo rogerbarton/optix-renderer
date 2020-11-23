@@ -64,10 +64,7 @@ NORI_NAMESPACE_BEGIN
 			return "PreviewIntegrator[]";
 		}
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override
-		{
-			return "Preview";
-		}
+		NORI_OBJECT_IMGUI_NAME("Preview");
 		virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 	};

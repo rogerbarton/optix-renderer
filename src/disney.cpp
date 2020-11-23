@@ -145,39 +145,36 @@ public:
         return true;
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override
-    {
-        return "Disney BSDF";
-    }
-    virtual bool getImGuiNodes() override
-    {
-        touched |= BSDF::getImGuiNodes();
+	NORI_OBJECT_IMGUI_NAME("Disney");
+	virtual bool getImGuiNodes() override
+	{
+		touched |= BSDF::getImGuiNodes();
 
-        int id = 1;
+		int id = 1;
 
-        ImGui::AlignTextToFramePadding();
+		ImGui::AlignTextToFramePadding();
 
-        ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        touched |= ImGui::ColorPicker("##value", &baseColor);
-        ImGui::PopID();
-        ImGui::NextColumn();
+		ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushID(id++);
+		touched |= ImGui::ColorPicker("##value", &baseColor);
+		ImGui::PopID();
+		ImGui::NextColumn();
 
-        ImGuiValue(metallic, "Metallic");
-        ImGuiValue(subsurface, "Subsurface");
-        ImGuiValue(specular, "Specular");
-        ImGuiValue(roughness, "Roughness");
-        ImGuiValue(specularTint, "Specular Tint");
-        ImGuiValue(anisotropic, "Anisotropic");
-        ImGuiValue(sheen, "Sheen");
-        ImGuiValue(sheenTint, "Sheen Tint");
-        ImGuiValue(clearcoat, "Clearcoat");
-        ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
+		ImGuiValue(metallic, "Metallic");
+		ImGuiValue(subsurface, "Subsurface");
+		ImGuiValue(specular, "Specular");
+		ImGuiValue(roughness, "Roughness");
+		ImGuiValue(specularTint, "Specular Tint");
+		ImGuiValue(anisotropic, "Anisotropic");
+		ImGuiValue(sheen, "Sheen");
+		ImGuiValue(sheenTint, "Sheen Tint");
+		ImGuiValue(clearcoat, "Clearcoat");
+		ImGuiValue(clearcoatGloss, "Clearcoat Gloss");
 
-        return touched;
-    }
+		return touched;
+	}
 #endif
 private:
     static Vector3f mon2lin(Color3f vec)

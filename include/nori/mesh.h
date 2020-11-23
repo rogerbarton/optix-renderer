@@ -113,14 +113,14 @@ public:
     virtual std::string toString() const override;
 
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Mesh"; }
-    virtual bool getImGuiNodes() override
-    {
-        ImGui::PushID(EShape);
-        touched |= Shape::getImGuiNodes();
-        ImGui::PopID();
-        return touched;
-    }
+	NORI_OBJECT_IMGUI_NAME("Mesh Base");
+	virtual bool getImGuiNodes() override
+	{
+		ImGui::PushID(EShape);
+		touched |= Shape::getImGuiNodes();
+		ImGui::PopID();
+		return touched;
+	}
 #endif
 
 protected:

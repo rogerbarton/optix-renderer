@@ -73,7 +73,7 @@ NORI_NAMESPACE_BEGIN
 			                   m_power.toString(), m_position.toString());
 		}
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override { return "Pointlight"; }
+		NORI_OBJECT_IMGUI_NAME("Pointlight");
 		virtual bool getImGuiNodes() override
 		{
 			touched |= Emitter::getImGuiNodes();

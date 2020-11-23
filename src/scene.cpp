@@ -291,7 +291,7 @@ NORI_NAMESPACE_BEGIN
 			bool node_open_camera = ImGui::TreeNode("Camera");
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_camera->getImGuiName());
+			ImGui::Text(m_camera->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open_camera)
 			{
@@ -305,7 +305,7 @@ NORI_NAMESPACE_BEGIN
 			bool node_open_integrator = ImGui::TreeNode("Integrator");
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_integrator->getImGuiName());
+			ImGui::Text(m_integrator->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open_integrator)
 			{
@@ -319,7 +319,7 @@ NORI_NAMESPACE_BEGIN
 			bool node_open_sampler = ImGui::TreeNode("Sampler");
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_sampler->getImGuiName());
+			ImGui::Text(m_sampler->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open_sampler)
 			{
@@ -333,7 +333,7 @@ NORI_NAMESPACE_BEGIN
 			bool node_open_envmap = ImGui::TreeNode("Environment Map");
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_envmap->getImGuiName());
+			ImGui::Text(m_envmap->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open_envmap)
 			{
@@ -347,7 +347,7 @@ NORI_NAMESPACE_BEGIN
 			bool node_open_denoiser = ImGui::TreeNode("Denoiser");
 			ImGui::NextColumn();
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_denoiser->getImGuiName());
+			ImGui::Text(m_denoiser->getImGuiName().c_str());
 			ImGui::NextColumn();
 			if (node_open_denoiser)
 			{
@@ -372,7 +372,7 @@ NORI_NAMESPACE_BEGIN
 				ImGui::NextColumn();
 				ImGui::AlignTextToFramePadding();
 
-				ImGui::Text(m_shapes[i]->getImGuiName());
+				ImGui::Text(m_shapes[i]->getImGuiName().c_str());
 				ImGui::NextColumn();
 
 				if (node_open_shape)
@@ -406,7 +406,7 @@ NORI_NAMESPACE_BEGIN
 				ImGui::NextColumn();
 				ImGui::AlignTextToFramePadding();
 
-				ImGui::Text(m_emitters[i]->getImGuiName());
+				ImGui::Text(m_emitters[i]->getImGuiName().c_str());
 				ImGui::NextColumn();
 
 				if (node_open_emitter)

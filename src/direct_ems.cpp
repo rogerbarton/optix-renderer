@@ -75,8 +75,8 @@ public:
     return std::string("DirectEMSIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override { return "Direct EMS"; }
-  virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Direct EMS");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

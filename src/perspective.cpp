@@ -193,7 +193,7 @@ public:
         );
     }
 #ifndef NORI_USE_NANOGUI
-	NORI_OBJECT_IMGUI_NAME(Perspective)
+	NORI_OBJECT_IMGUI_NAME("Perspective");
     virtual bool getImGuiNodes() override {
         touched |= Camera::getImGuiNodes();
 
@@ -242,7 +242,7 @@ public:
         ImGui::TreeNodeEx("lensRadius", ImGuiLeafNodeFlags, "Lens Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &m_lensRadius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_lensRadius, 0.001f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -251,7 +251,7 @@ public:
         ImGui::TreeNodeEx("focalDistance", ImGuiLeafNodeFlags, "Focal Distance");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragFloat("##value", &m_focalDistance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    touched |= ImGui::DragFloat("##value", &m_focalDistance, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 

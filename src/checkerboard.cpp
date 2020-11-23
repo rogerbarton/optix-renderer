@@ -51,8 +51,8 @@ public:
     }
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override { return "Checkerboard"; }
-  virtual bool getImGuiNodes() override { return false; }
+	NORI_OBJECT_IMGUI_NAME("Checkerboard");
+    virtual bool getImGuiNodes() override { return false; }
 #endif
 protected:
   T m_value1;

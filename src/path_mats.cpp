@@ -78,7 +78,7 @@ public:
         return std::string("PathMATSIntegrator[]");
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Path MATS"; }
+	NORI_OBJECT_IMGUI_NAME("Path MATS");
     virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 protected:

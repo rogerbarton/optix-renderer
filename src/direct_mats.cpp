@@ -82,8 +82,8 @@ public:
     return std::string("DirectMATSIntegrator[]");
   }
 #ifndef NORI_USE_NANOGUI
-  virtual const char *getImGuiName() const override { return "Direct MATS"; }
-  virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+	NORI_OBJECT_IMGUI_NAME("Direct MATS");
+	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
 };
 

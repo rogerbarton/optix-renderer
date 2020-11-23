@@ -139,7 +139,7 @@ public:
             m_emitter ? indent(m_emitter->toString()) : std::string("null"));
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Sphere"; }
+	NORI_OBJECT_IMGUI_NAME("Sphere");
     virtual bool getImGuiNodes() override
     {
     	touched |= Shape::getImGuiNodes();

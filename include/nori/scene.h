@@ -175,10 +175,7 @@ NORI_NAMESPACE_BEGIN
 
 		virtual EClassType getClassType() const override { return EScene; }
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override
-		{
-			return "Scene";
-		}
+		NORI_OBJECT_IMGUI_NAME("Scene");
 		virtual bool getImGuiNodes() override;
 #endif
 

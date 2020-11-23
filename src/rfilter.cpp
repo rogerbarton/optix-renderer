@@ -51,7 +51,7 @@ public:
         return tfm::format("GaussianFilter[radius=%f, stddev=%f]", m_radius, m_stddev);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Gaussian Filter"; }
+	NORI_OBJECT_IMGUI_NAME("Gaussian");
     virtual bool getImGuiNodes() override
     {
         bool ret = ReconstructionFilter::getImGuiNodes();
@@ -60,7 +60,7 @@ public:
         ImGui::TreeNodeEx("Stddev", ImGuiLeafNodeFlags, "Standard Deviation");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        ret |= ImGui::DragFloat("##value", &m_stddev, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat("##value", &m_stddev, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
         return ret;
@@ -116,7 +116,7 @@ public:
         return tfm::format("MitchellNetravaliFilter[radius=%f, B=%f, C=%f]", m_radius, m_B, m_C);
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Mitchell-Netravali Filter"; }
+	NORI_OBJECT_IMGUI_NAME("Mitchell-Netravali");
     virtual bool getImGuiNodes() override
     {
         bool result = ReconstructionFilter::getImGuiNodes();
@@ -126,7 +126,7 @@ public:
         ImGui::TreeNodeEx("m_B", ImGuiLeafNodeFlags, "B");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        result |= ImGui::DragFloat("##value", &m_B, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+        result |= ImGui::DragFloat("##value", &m_B, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -135,7 +135,7 @@ public:
         ImGui::TreeNodeEx("m_C", ImGuiLeafNodeFlags, "C");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    result |= ImGui::DragFloat("##value", &m_C, 0.01, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
+	    result |= ImGui::DragFloat("##value", &m_C, 0.01f, 0, SLIDER_MAX_FLOAT, "%f%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -167,7 +167,7 @@ public:
         return "TentFilter[]";
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Tent Filter"; }
+	NORI_OBJECT_IMGUI_NAME("Tent");
     virtual bool getImGuiNodes() override
     {
         return ReconstructionFilter::getImGuiNodes();
@@ -196,7 +196,7 @@ public:
         return "BoxFilter[]";
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Box Filter"; }
+	NORI_OBJECT_IMGUI_NAME("Box");
     virtual bool getImGuiNodes() override
     {
         return ReconstructionFilter::getImGuiNodes();

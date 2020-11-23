@@ -144,7 +144,7 @@ NORI_NAMESPACE_BEGIN
 		Point3f getPosition() const { return m_position; }
 
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override { return "Emitter Base"; }
+		NORI_OBJECT_IMGUI_NAME("Emitter Base");
 		bool getImGuiNodes() override;
 #endif
 

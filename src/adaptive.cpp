@@ -123,24 +123,20 @@ public:
         return result;
     }
 #ifndef NORI_USE_NANOGUI
-    const char *getImGuiName() const override
-    {
-        return "Adaptive";
-    }
+	NORI_OBJECT_IMGUI_NAME("Adaptive");
+	bool getImGuiNodes() override
+	{
+		touched |= Sampler::getImGuiNodes();
 
-    bool getImGuiNodes() override
-    {
-	    touched |= Sampler::getImGuiNodes();
-
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-	    touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        return touched;
-    }
-    #endif
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("uniformEvery", ImGuiLeafNodeFlags, "Uniform Every");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		touched |= ImGui::DragInt("##value", &uniform_every, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::NextColumn();
+		return touched;
+	}
+#endif
 
 protected:
     AdaptiveSampler() {}

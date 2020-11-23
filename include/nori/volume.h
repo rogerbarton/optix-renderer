@@ -24,10 +24,7 @@ NORI_NAMESPACE_BEGIN
 		nanovdb::NanoGrid<float>                 *heatGrid    = nullptr;
 
 #ifndef NORI_USE_NANOGUI
-		virtual const char *getImGuiName() const override
-		{
-			return "Volume";
-		}
+		NORI_OBJECT_IMGUI_NAME("Volume");
 		virtual bool getImGuiNodes() override
 		{
 			ImGui::PushID(EVolume);

@@ -111,7 +111,7 @@ bool Shape::getImGuiNodes()
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
-        ImGui::Text(m_bsdf->getImGuiName());
+        ImGui::Text(m_bsdf->getImGuiName().c_str());
         ImGui::NextColumn();
         if (node_open_bsdf)
         {
@@ -126,7 +126,7 @@ bool Shape::getImGuiNodes()
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
-        ImGui::Text(m_emitter->getImGuiName());
+        ImGui::Text(m_emitter->getImGuiName().c_str());
         ImGui::NextColumn();
         if (node_open_emitter)
         {

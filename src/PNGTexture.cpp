@@ -139,7 +139,6 @@ public:
 	}
 
 #ifndef NORI_USE_NANOGUI
-	virtual const char* getImGuiName() const override { return "PNG Texture"; }
     virtual bool getImGuiNodes() override
     {
 		touched |= Texture::getImGuiNodes();

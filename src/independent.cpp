@@ -99,15 +99,11 @@ public:
         return result;
     }
 #ifndef NORI_USE_NANOGUI
-    const char* getImGuiName() const override
-    {
-        return "Independent";
-    }
-
-    bool getImGuiNodes() override
-    {
-        return Sampler::getImGuiNodes();
-    }
+	NORI_OBJECT_IMGUI_NAME("Independent");
+	bool getImGuiNodes() override
+	{
+		return Sampler::getImGuiNodes();
+	}
 #endif
 protected:
     Independent() {}

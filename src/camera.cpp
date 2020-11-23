@@ -16,7 +16,7 @@ bool Camera::getImGuiNodes()
     ImGui::AlignTextToFramePadding();
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    ImGui::Text(m_rfilter->getImGuiName());
+    ImGui::Text(m_rfilter->getImGuiName().c_str());
     ImGui::NextColumn();
 
     if (node_open)

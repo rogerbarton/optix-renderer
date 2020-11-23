@@ -162,8 +162,8 @@ public:
     virtual EClassType getClassType() const override { return EShape; }
 
 #ifndef NORI_USE_NANOGUI
-    virtual const char *getImGuiName() const override { return "Shape Base"; }
-    virtual bool getImGuiNodes() override;
+	NORI_OBJECT_IMGUI_NAME("Shape");
+	virtual bool getImGuiNodes() override;
 #endif
 
 	/**
