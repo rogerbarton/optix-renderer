@@ -41,10 +41,16 @@ public:
     void stopRendering();
 	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 
-    void drawGui();
+	/**
+	 * Draws gui specific to rendering. Does not draw the scene gui.
+	 */
+	void drawRenderGui();
+	void drawSceneGui();
 
-	Scene* m_guiScene = nullptr;
-    Scene* m_renderScene = nullptr;
+	Scene *m_guiScene = nullptr;
+	Scene *m_renderScene    = nullptr;
+	bool  m_guiSceneTouched = false;
+	bool  m_preview_mode    = false;
 protected:
 
 	enum class ERenderStatus : int {

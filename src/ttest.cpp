@@ -197,7 +197,7 @@ public:
 
             int ctr = 0;
             for (auto scene : m_scenes) {
-                const Integrator *integrator = scene->getIntegrator();
+                const Integrator *integrator = scene->getIntegrator(false);
                 const Camera *camera = scene->getCamera();
                 float reference = m_references[ctr++];
 

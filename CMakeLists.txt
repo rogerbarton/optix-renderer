@@ -79,6 +79,7 @@ add_executable(nori
   include/nori/denoiser.h
 
   # Source code files
+  src/emitter.cpp
   src/bitmap.cpp
   src/block.cpp
   src/bvh.cpp

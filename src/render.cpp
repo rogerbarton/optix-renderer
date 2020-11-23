@@ -36,7 +36,8 @@
 
 NORI_NAMESPACE_BEGIN
 
-	static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, const Histogram &histogram);
+	static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,
+	                        ImageBlock &block, const Histogram &histogram);
 
 	RenderThread::~RenderThread()
 	{
@@ -157,9 +158,10 @@ NORI_NAMESPACE_BEGIN
 
 		Timer timer;
 
-		m_renderScene->getIntegrator()->preprocess(m_renderScene);
+		Integrator* const integrator = m_renderScene->getIntegrator(m_preview_mode);
+		integrator->preprocess(m_renderScene);
 
-		const auto numSamples = m_renderScene->getSampler()->getSampleCount();
+		const auto numSamples = m_preview_mode ? 1 : m_renderScene->getSampler()->getSampleCount();
 		const auto numBlocks  = blockGenerator.getBlockCount();
 
 		tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
@@ -201,7 +203,7 @@ NORI_NAMESPACE_BEGIN
 					samplers.at(blockId)->setSampleRound(k);
 
 					// Render all contained pixels
-					renderBlock(m_renderScene, samplers.at(blockId).get(), block, histogram);
+					renderBlock(m_renderScene, integrator, samplers.at(blockId).get(), block, histogram);
 
 					// The image block has been processed. Now add it to the "big" block that represents the entire image
 					m_block.put(block); // save to master block
@@ -303,7 +305,7 @@ NORI_NAMESPACE_BEGIN
 				                 camera->getReconstructionFilter());
 				m_renderScene->getSampler()->setSampleRound(k);
 				// Render all contained pixels
-				renderBlock(m_renderScene, m_renderScene->getSampler(), block, histogram);
+				renderBlock(m_renderScene, integrator, m_renderScene->getSampler(), block, histogram);
 				m_block.put(block);
 			}
 			else
@@ -316,7 +318,7 @@ NORI_NAMESPACE_BEGIN
 
 		cout << "done. (took " << timer.elapsedString() << ")" << endl;
 
-		if (m_renderScene->isPreviewMode() || m_render_status == ERenderStatus::Interrupt)
+		if (m_preview_mode || m_render_status == ERenderStatus::Interrupt)
 		{
 			// stop the rendering here, don't save
 			m_render_status = ERenderStatus::Done;
@@ -345,10 +347,10 @@ NORI_NAMESPACE_BEGIN
 		m_render_status = ERenderStatus::Done;
 	}
 
-	static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, const Histogram &histogram)
+	static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,
+	                        ImageBlock &block, const Histogram &histogram)
 	{
 		const Camera     *camera     = scene->getCamera();
-		const Integrator *integrator = scene->getIntegrator();
 
 		Point2i offset = block.getOffset();
 
@@ -387,7 +389,14 @@ NORI_NAMESPACE_BEGIN
 		                  map); // execute this in parallel (applicable if we render the whole block at once (adaptive sampling))
 	}
 
-	void RenderThread::drawGui()
+	void RenderThread::drawRenderGui() {
+		if (m_guiScene)
+		{
+			m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_preview_mode);
+		}
+	}
+
+	void RenderThread::drawSceneGui()
 	{
 		if (!m_guiScene) {
 			ImGui::Text("No scene loaded...");
@@ -405,15 +414,16 @@ NORI_NAMESPACE_BEGIN
 		ImGui::Text(filesystem::path(sceneFilename).filename().c_str());
 		ImGui::NextColumn();
 
-		bool guiSceneTouched = m_guiScene->getImGuiNodes();
+		m_guiSceneTouched |= m_guiScene->getImGuiNodes();
 
 		// end columns
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
 
-		if(guiSceneTouched)
+		if(m_guiSceneTouched)
 		{
+			m_guiSceneTouched = false;
 			restartRender();
 		}
 	}

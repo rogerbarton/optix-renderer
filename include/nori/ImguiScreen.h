@@ -110,13 +110,6 @@ public:
 	void drop(const std::string& filename);
 
 private:
-	enum LAYER { RENDER = 0, PREVIEW};
-
-	LAYER currentLayer = RENDER;
-	int oldSampleCount = 0;
-
-	bool needsRerender = false;
-
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
 	bool uiShowSceneWindow = true;

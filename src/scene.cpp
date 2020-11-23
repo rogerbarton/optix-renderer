@@ -77,7 +77,6 @@ NORI_NAMESPACE_BEGIN
 		// -- Copy and initialize children
 		clone->m_integrator        = static_cast<Integrator *>(m_integrator->cloneAndInit());
 		clone->m_previewIntegrator = static_cast<Integrator *>(m_previewIntegrator->cloneAndInit());
-		// clone->m_preview_mode = m_preview_mode; // already copied?
 
 		clone->m_sampler = static_cast<Sampler *>(m_sampler->cloneAndInit());
 		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
@@ -129,7 +128,6 @@ NORI_NAMESPACE_BEGIN
 		// -- Update children
 		m_integrator->update(gui->m_integrator);
 		m_previewIntegrator->update(gui->m_previewIntegrator);
-		m_preview_mode = gui->m_preview_mode;
 
 		m_sampler->update(gui->m_sampler);
 		m_camera->update(gui->m_camera);

@@ -281,13 +281,9 @@ void ImguiScreen::draw()
 	{
 		std::string extension = filebrowser.GetSelected().extension().string();
 		if (extension == ".xml")
-		{
 			openXML(filebrowser.GetSelected().string());
-		}
 		else if (extension == ".exr")
-		{
 			openEXR(filebrowser.GetSelected().string());
-		}
 		filebrowser.ClearSelected();
 	}
 
@@ -327,28 +323,7 @@ void ImguiScreen::draw()
 			if (m_renderThread.m_guiScene && ImGui::Button("Restart Render"))
 				m_renderThread.restartRender();
 
-			if (m_renderThread.m_guiScene)
-			{
-				if (ImGui::Button((currentLayer == RENDER) ? "Change to Preview" : "Change to Render View"))
-				{
-					currentLayer = (currentLayer == RENDER) ? PREVIEW : RENDER;
-
-					if (currentLayer == PREVIEW)
-					{
-						// save sample count
-						oldSampleCount = m_renderThread.m_guiScene->getSampler()->getSampleCount();
-						m_renderThread.m_guiScene->getSampler()->setSampleCount(1);
-						m_renderThread.m_guiScene->setPreviewMode(true);
-						needsRerender = true;
-					}
-					else
-					{
-						// copy back old integrator
-						m_renderThread.m_guiScene->setPreviewMode(false);
-						m_renderThread.m_guiScene->getSampler()->setSampleCount(oldSampleCount);
-					}
-				}
-			}
+			m_renderThread.drawRenderGui();
 
 			ImGui::NewLine();
 
@@ -376,7 +351,7 @@ void ImguiScreen::draw()
 			if (ImGui::CollapsingHeader("Scene Tree", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::BeginChild(42);
-				m_renderThread.drawGui();
+				m_renderThread.drawSceneGui();
 				ImGui::EndChild();
 			}
 		}
