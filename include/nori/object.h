@@ -172,6 +172,14 @@ public:
 #ifndef NORI_USE_NANOGUI
     virtual bool getImGuiNodes() = 0;
     virtual const char* getImGuiName() const = 0;
+
+    /**
+     * Sets the display name in the scene tree. Indicates if the object was touched
+     */
+#   define NORI_OBJECT_IMGUI_NAME(cls)                  \
+	const char* getImGuiName() const override { \
+	return touched ? #cls "*" : #cls;            \
+	}
 #endif
 
 protected:

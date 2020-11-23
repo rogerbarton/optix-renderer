@@ -193,7 +193,7 @@ public:
         );
     }
 #ifndef NORI_USE_NANOGUI
-    virtual const char* getImGuiName() const override { return "Perspective"; }
+	NORI_OBJECT_IMGUI_NAME(Perspective)
     virtual bool getImGuiNodes() override {
         touched |= Camera::getImGuiNodes();
 
