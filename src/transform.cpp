@@ -26,38 +26,49 @@ bool Transform::getImGuiNodes()
     ImGui::TreeNodeEx("origin", ImGuiLeafNodeFlags, "Origin");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-    touched |= ImGui::DragVector3f("##value", &origin);
+    touched |= ImGui::DragVector3f("##value", &origin, 0.01f);
     ImGui::PopID();
     ImGui::NextColumn();
 
-    Eigen::Matrix3f rotMat = m_transform.block(0, 0, 3, 3);
+    Eigen::Matrix3f rotScale = m_transform.block(0, 0, 3, 3);
+    Vector3f scale = rotScale.colwise().norm();
+    Eigen::Matrix3f rotMat = rotScale.colwise().normalized();
     Vector3f eulerAngles = rotMat.eulerAngles(2, 0, 2) * 180.f * INV_PI;
 
     ImGui::AlignTextToFramePadding();
     ImGui::PushID(2);
     ImGui::TreeNodeEx("eulerAngles", ImGuiLeafNodeFlags, "Euler Angles");
+    ImGui::SameLine();
+	ImGui::HelpMarker("Rotation is read-only");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-	touched |= ImGui::DragVector3f("##value", &eulerAngles, 0.5f, -360, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Text("%f, %f, %f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     ImGui::PopID();
     ImGui::NextColumn();
 
-    if (!touched)
+	ImGui::AlignTextToFramePadding();
+	ImGui::PushID(3);
+	ImGui::TreeNodeEx("scale", ImGuiLeafNodeFlags, "Scale");
+	ImGui::NextColumn();
+	ImGui::SetNextItemWidth(-1);
+	touched |= ImGui::DragVector3f("##value", &scale, 0.01f, 0.01f);
+	ImGui::PopID();
+	ImGui::NextColumn();
+
+	ImGui::NextColumn();
+	ImGui::NextColumn();
+	if (ImGui::Button("Reset"))
+	{
+		touched = true;
+		clear();
+	}
+
+	if (!touched)
         return touched;
 
-    // convert euler angles + origin back to matrix
+	// Apply translation and scaling, leave rotation
     m_transform.col(3).head(3) = origin;
-
-    eulerAngles *= M_PI / 180.f;
-
-    rotMat = Eigen::Quaternionf(
-                 Eigen::Quaternionf::Identity() *
-                 Eigen::AngleAxisf(eulerAngles.x(), Eigen::Vector3f::UnitZ()) *
-                 Eigen::AngleAxisf(eulerAngles.y(), Eigen::Vector3f::UnitX())) *
-             Eigen::AngleAxisf(eulerAngles.z(), Eigen::Vector3f::UnitZ())
-                 .toRotationMatrix();
-
-    m_transform.block(0, 0, 3, 3) = rotMat;
+    m_transform.block(0, 0, 3, 3) = Eigen::Scaling(scale) * rotMat;
 
     // Update inverse as well
     m_inverse = m_transform.inverse();
