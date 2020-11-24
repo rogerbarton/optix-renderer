@@ -305,7 +305,7 @@ public:
         /* Set up a perspective camera matrix */
         Matrix4f view, proj, model;
         view = lookAt(Vector3f(0, 0, 2), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-        const float viewAngle = 30, near = 0.01, far = 100;
+        const float viewAngle = 30, near = 0.01f, far = 100;
         float fH = std::tan(viewAngle / 360.0f * M_PI) * near;
         float fW = fH * (float) mSize.x() / (float) mSize.y();
         proj = frustum(-fW, fW, -fH, fH, near, far);

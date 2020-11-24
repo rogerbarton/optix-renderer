@@ -168,7 +168,7 @@ public:
 		return Li / pdf;
 	}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Environment Map");
 	virtual bool getImGuiNodes() override
 	{

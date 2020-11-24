@@ -25,7 +25,7 @@ NORI_NAMESPACE_BEGIN
 		float pdfSurface(const ShapeQueryRecord &sRec) const override;
 		std::string toString() const override;
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Volume");
 		bool getImGuiNodes() override;
 #endif

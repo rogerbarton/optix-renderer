@@ -118,7 +118,7 @@ public:
      * or not to store photons on a surface
      */
     virtual bool isDiffuse() const { return false; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("BSDF Base");
     virtual bool getImGuiNodes() override { return false; }
 #endif

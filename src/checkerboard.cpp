@@ -50,7 +50,7 @@ public:
       return m_value2;
     }
   }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Checkerboard");
     virtual bool getImGuiNodes() override { return false; }
 #endif
@@ -105,7 +105,7 @@ std::string Checkerboard<Color3f>::toString() const
                      m_delta.toString(), m_scale.toString(),
                      m_value1.toString(), m_value2.toString());
 }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 template <>
 bool Checkerboard<float>::getImGuiNodes()
 {

@@ -64,7 +64,7 @@ NORI_NAMESPACE_BEGIN
 		                   filename);
 	}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	bool Volume::getImGuiNodes()
 	{
 		ImGui::PushID(EVolume);

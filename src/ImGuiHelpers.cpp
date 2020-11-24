@@ -1,5 +1,6 @@
 #include <nori/ImguiHelpers.h>
 
+#ifdef NORI_USE_IMGUI
 namespace ImGui
 {
     IMGUI_IMPL_API bool DragColor3f(const char *label, nori::Color3f *color,
@@ -96,3 +97,5 @@ namespace ImGui
 	}
 
 } // namespace ImGui
+
+#endif

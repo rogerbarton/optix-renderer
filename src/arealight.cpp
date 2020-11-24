@@ -142,7 +142,7 @@ NORI_NAMESPACE_BEGIN
 
 			return M_PI / sqr.pdf * m_radiance; // divide by pdf == multiply by area
 		}
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Arealight");
 		virtual bool getImGuiNodes() override
 		{

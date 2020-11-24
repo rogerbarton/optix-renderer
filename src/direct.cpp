@@ -68,7 +68,7 @@ public:
   }
 
   std::string toString() const { return tfm::format("DirectIntegrator[]"); }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Direct Simple");
 	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif

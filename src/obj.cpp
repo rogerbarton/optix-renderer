@@ -186,7 +186,7 @@ public:
 	         << ")" << endl;
     }
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Mesh");
 	virtual bool getImGuiNodes() override
 	{

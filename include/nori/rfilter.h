@@ -52,7 +52,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EReconstructionFilter; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Reconstruction Filter Base");
 	virtual bool getImGuiNodes() override
 	{

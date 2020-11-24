@@ -154,7 +154,7 @@ public:
                        "]",
                        m_alpha, m_intIOR, m_extIOR, m_kd.toString(), m_ks);
   }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Microfacet");
 	virtual bool getImGuiNodes() override
 	{

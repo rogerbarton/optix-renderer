@@ -99,7 +99,7 @@ public:
 
 	void update(const Transform &guiObject);
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
     bool getImGuiNodes();
 #endif
 

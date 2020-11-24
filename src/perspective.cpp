@@ -192,7 +192,7 @@ public:
             indent(m_rfilter->toString())
         );
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Perspective");
     virtual bool getImGuiNodes() override {
         touched |= Camera::getImGuiNodes();

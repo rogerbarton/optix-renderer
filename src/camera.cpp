@@ -2,7 +2,7 @@
 #include <nori/rfilter.h>
 
 NORI_NAMESPACE_BEGIN
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 bool Camera::getImGuiNodes()
 {
     ImGui::AlignTextToFramePadding();

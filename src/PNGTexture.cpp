@@ -147,7 +147,7 @@ NORI_NAMESPACE_BEGIN
 			return height;
 		}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Image (png)")
 		virtual bool getImGuiNodes() override
 		{

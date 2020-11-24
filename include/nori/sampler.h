@@ -113,7 +113,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return ESampler; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Sampler Base");
 	virtual bool getImGuiNodes() override
 	{

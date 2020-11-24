@@ -50,7 +50,7 @@ public:
             "]",
             m_length);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Average Visibility");
 	virtual bool getImGuiNodes() override
 	{

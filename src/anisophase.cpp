@@ -44,7 +44,7 @@ NORI_NAMESPACE_BEGIN
 			                   "]",
 			                   m_g);
 		}
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Anisotropic Phase");
 		virtual bool getImGuiNodes() override
 		{

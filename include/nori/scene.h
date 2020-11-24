@@ -173,7 +173,7 @@ NORI_NAMESPACE_BEGIN
 		virtual std::string toString() const override;
 
 		virtual EClassType getClassType() const override { return EScene; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Scene");
 		virtual bool getImGuiNodes() override;
 #endif

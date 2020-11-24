@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 #include <imgui/imgui.h>
 #include <nori/vector.h>
 #include <nori/color.h>

@@ -1,5 +1,5 @@
 #include <nori/transform.h>
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 #include <nori/ImguiHelpers.h>
 #include <Eigen/Geometry>
 #endif
@@ -16,7 +16,7 @@ std::string Transform::toString() const
     return oss.str();
 }
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 bool Transform::getImGuiNodes()
 {
     nori::Vector3f origin = m_transform.col(3).head(3);

@@ -121,7 +121,7 @@ public:
 
         return result;
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
     NORI_OBJECT_IMGUI_NAME("Adaptive");
     bool getImGuiNodes() override
     {

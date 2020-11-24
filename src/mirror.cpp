@@ -59,7 +59,7 @@ public:
     virtual std::string toString() const override {
         return "Mirror[]";
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Mirror");
 	virtual bool getImGuiNodes() override {
 		return BSDF::getImGuiNodes();

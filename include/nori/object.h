@@ -189,7 +189,7 @@ public:
     /// Allow to assign a name to the object
     void setIdName(const std::string &name) { m_idname = name; }
     const std::string &getIdName() const { return m_idname; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	virtual std::string getImGuiName() const  {
 		return tfm::format("%s%s", "Object", (touched ? "*" : ""));
 	}

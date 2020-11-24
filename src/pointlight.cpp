@@ -72,7 +72,7 @@ NORI_NAMESPACE_BEGIN
 			                   "]",
 			                   m_power.toString(), m_position.toString());
 		}
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Pointlight");
 		virtual bool getImGuiNodes() override
 		{

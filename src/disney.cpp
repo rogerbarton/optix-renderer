@@ -152,7 +152,7 @@ public:
     {
         return true;
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
     NORI_OBJECT_IMGUI_NAME("Disney");
     virtual bool getImGuiNodes() override
     {
