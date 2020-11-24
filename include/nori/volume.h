@@ -18,25 +18,18 @@ NORI_NAMESPACE_BEGIN
 
 		std::string toString() const override;
 
-		filesystem::path                         filename;
+		std::filesystem::path                    filename;
 		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
 		nanovdb::NanoGrid<float>                 *densityGrid = nullptr;
 		nanovdb::NanoGrid<float>                 *heatGrid    = nullptr;
 
+
+		mutable std::filesystem::file_time_type fileLastReadTime;
+		mutable bool                            fileTouched   = true;
+
 #ifndef NORI_USE_NANOGUI
 		NORI_OBJECT_IMGUI_NAME("Volume");
-		virtual bool getImGuiNodes() override
-		{
-			ImGui::PushID(EVolume);
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-			ImGui::Text(filename.filename().c_str());
-			ImGui::NextColumn();
-			ImGui::PopID();
-			return touched;
-		}
+		bool getImGuiNodes() override;
 #endif
 
 		NoriObject *cloneAndInit() override;
@@ -68,7 +61,7 @@ NORI_NAMESPACE_BEGIN
 		 * @param gridHandle OUT
 		 * @param grid OUT
 		 */
-		void readGrid(filesystem::path &file, uint64_t gridId,
+		void readGrid(std::filesystem::path &file, uint64_t gridId,
 		              nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle, nanovdb::NanoGrid<float> *&grid);
 
 		/**
