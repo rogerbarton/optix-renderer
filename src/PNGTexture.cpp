@@ -204,6 +204,8 @@ NORI_NAMESPACE_BEGIN
 			ImGui::AlignTextToFramePadding();
 			ImGui::PushID(2);
 			ImGui::TreeNodeEx("sRGB", ImGuiLeafNodeFlags, "sRGB");
+			ImGui::SameLine();
+			ImGui::HelpMarker("Enable this for most textures. Disable for normal maps.");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			fileTouched |= ImGui::Checkbox("##value", &sRgb);

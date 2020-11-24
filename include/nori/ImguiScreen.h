@@ -33,9 +33,9 @@ public:
 	MouseState() {}
 	~MouseState() {}
 
-	void onMouseClick(double xPos, double yPos, int button, int action, int mods)
+	void onMouseClick(double xPos, double yPos, int button, int action, int _mods)
 	{
-		this->mods = mods;
+		mods = _mods;
 
 		lastMouseX = xPos;
 		lastMouseY = yPos;
