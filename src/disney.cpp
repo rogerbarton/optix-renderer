@@ -71,7 +71,7 @@ public:
 
         // hanrahan-krueger brdf approximation of isotropic bsdf
         float Fss90 = LdotH * LdotH * roughness;
-        float Fss = mix<float>(1.0, Fss90, FL) * mix<float>(1.0f, Fss90, FV);
+        float Fss = mix<float>(1.0f, Fss90, FL) * mix<float>(1.0f, Fss90, FV);
         float ss = 1.25f * (Fss * (1.f / (NdotL + NdotV) - 0.5f) + 0.5f);
 
         // specular
@@ -92,11 +92,11 @@ public:
         float Fr = mix<float>(0.04f, 1.f, FH);
         float Gr = smithG_GGX(NdotL, 0.25f) * smithG_GGX(NdotV, 0.25f);
 
-        Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1.f - metallic) + Vector3f(Gs * Fs * Ds) + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
+        Vector3f finalCol = (INV_PI * mix<float>(Fd, ss, subsurface) * Cdlin + Fsheen) * (1.f - metallic) + Gs * Fs * Ds + Vector3f(0.25f * clearcoat * Gr * Fr * Dr);
         Color3f ret = Color3f(finalCol.x(), finalCol.y(), finalCol.z());
-        if(ret.getLuminance() > 1.f) {
-            return Color3f(0.f);
-        }
+
+        if (ret.getLuminance() > 1.f)
+            ret /= ret.getLuminance();
         return ret;
     }
 
