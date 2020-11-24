@@ -19,25 +19,30 @@ NORI_NAMESPACE_BEGIN
 
 
 		/// Evaluate the BRDF for the given pair of directions
-		virtual Color3f eval(const BSDFQueryRecord &bRec) const override
+		Color3f eval(const BSDFQueryRecord &bRec) const override
 		{
-			throw NoriException("Not implemented.");
+			return Color3f(1.f);
 		}
 
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
-		virtual float pdf(const BSDFQueryRecord &bRec) const override
+		float pdf(const BSDFQueryRecord &bRec) const override
 		{
-			throw NoriException("Not implemented.");
+			const auto cosTheta = Frame::cosTheta(Frame(bRec.wi).toLocal(bRec.wo));
+			const auto g2 = m_g * m_g;
+			return 0.25f / M_PI * (1 - g2) / std::pow(1 + g2 - 2 * m_g * cosTheta, 1.5f);
 		}
 
 		/// Sample the BRDF
-		virtual Color3f sample(BSDFQueryRecord &bRec,
-		                       const Point2f &_sample) const override
+		Color3f sample(BSDFQueryRecord &bRec,
+		                       const Point2f &sample) const override
 		{
-			throw NoriException("Not implemented.");
+			// TODO: sample from pdf
+			bRec.wo = Warp::squareToUniformSphere(sample);
+
+			return eval(bRec) / pdf(bRec) * Frame::cosTheta(bRec.wo);
 		}
 
-		virtual std::string toString() const override
+		std::string toString() const override
 		{
 			return tfm::format("AnisoPhase[\n"
 			                   "  g = %f,\n"
@@ -46,7 +51,7 @@ NORI_NAMESPACE_BEGIN
 		}
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Anisotropic Phase");
-		virtual bool getImGuiNodes() override
+		bool getImGuiNodes() override
 		{
 			touched |= BSDF::getImGuiNodes();
 

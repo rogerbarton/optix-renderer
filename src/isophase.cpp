@@ -14,24 +14,24 @@ NORI_NAMESPACE_BEGIN
 		NORI_OBJECT_DEFAULT_CLONE(IsoPhase)
 		NORI_OBJECT_DEFAULT_UPDATE(IsoPhase)
 
-		virtual Color3f eval(const BSDFQueryRecord &bRec) const override
+		Color3f eval(const BSDFQueryRecord &bRec) const override
 		{
 			return Color3f(1.f);
 		}
 
-		virtual float pdf(const BSDFQueryRecord &bRec) const override
+		float pdf(const BSDFQueryRecord &bRec) const override
 		{
 			return 0.25f / M_PI;
 		}
 
-		virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override
+		Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override
 		{
 			bRec.wo = Warp::squareToUniformSphere(sample);
 
 			return eval(bRec) / pdf(bRec) * Frame::cosTheta(bRec.wo);
 		}
 
-		virtual std::string toString() const override
+		std::string toString() const override
 		{
 			return tfm::format("IsoPhase[]");
 		}

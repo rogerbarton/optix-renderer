@@ -83,6 +83,8 @@ public:
         if (warpType == Beckmann || warpType == MicrofacetBRDF)
             parameterValue = std::exp(std::log(0.05f) * (1 - parameterValue) +
                                       std::log(1.f)   *  parameterValue);
+        else if (warpType == AnisoPhase)
+        	parameterValue = 2 * parameterValue -1;
         return parameterValue;
     }
 
