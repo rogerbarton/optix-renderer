@@ -94,7 +94,7 @@ NORI_NAMESPACE_BEGIN
 			}
 			else
 			{
-				throw NoriException("PNGTexture: file extension .%s unknown.", extension);
+				throw NoriException("PNGTexture: file extension %s unknown.", extension);
 			}
 		}
 
@@ -203,7 +203,7 @@ NORI_NAMESPACE_BEGIN
 			// -- Remaining Properties
 			ImGui::AlignTextToFramePadding();
 			ImGui::PushID(2);
-			ImGui::TreeNodeEx("sRGB", ImGuiLeafNodeFlags, "Is Normal Map");
+			ImGui::TreeNodeEx("sRGB", ImGuiLeafNodeFlags, "sRGB");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			fileTouched |= ImGui::Checkbox("##value", &sRgb);
