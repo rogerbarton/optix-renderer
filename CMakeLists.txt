@@ -102,6 +102,7 @@ add_executable(nori
   src/camera.cpp
   src/transform.cpp
   src/PreviewIntegrator.cpp
+  src/isophase.cpp
   src/anisophase.cpp
 )
 
@@ -146,6 +147,8 @@ if(NORI_USE_GUI)
       src/warp.cpp
       src/warptest.cpp
       src/microfacet.cpp
+      src/isophase.cpp
+      src/anisophase.cpp
       src/object.cpp
       src/proplist.cpp
       src/common.cpp
