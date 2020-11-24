@@ -114,13 +114,7 @@ public:
 
 #ifndef NORI_USE_NANOGUI
 	NORI_OBJECT_IMGUI_NAME("Mesh Base");
-	virtual bool getImGuiNodes() override
-	{
-		ImGui::PushID(EShape);
-		touched |= Shape::getImGuiNodes();
-		ImGui::PopID();
-		return touched;
-	}
+	bool getImGuiNodes() override;
 #endif
 
 protected:

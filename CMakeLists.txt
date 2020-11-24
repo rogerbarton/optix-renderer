@@ -130,7 +130,9 @@ add_executable(nori
 
 if(NORI_USE_VOLUMES)
   target_sources(nori PRIVATE
-     src/volume.cpp
+    include/nori/volume.h
+    src/volume.cpp
+    src/volume.shape.cpp
   )
 endif()
 

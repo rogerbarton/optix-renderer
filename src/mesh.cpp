@@ -208,4 +208,11 @@ std::string Mesh::toString() const
         m_emitter ? indent(m_emitter->toString()) : std::string("null"));
 }
 
+bool Mesh::getImGuiNodes() {
+	ImGui::PushID(EShape);
+	touched |= Shape::getImGuiNodes();
+	ImGui::PopID();
+	return touched;
+}
+
 NORI_NAMESPACE_END

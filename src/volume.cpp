@@ -3,36 +3,7 @@
 #include <openvdb/tools/LevelSetSphere.h>
 #include <nanovdb/util/OpenToNanoVDB.h>
 
-#include <imgui/filebrowser.h>
-#include <iostream>
-
 NORI_NAMESPACE_BEGIN
-
-	Volume::Volume(const PropertyList &props)
-	{
-		filename = getFileResolver()->resolve(props.getString("filename")).str();
-	}
-
-	NoriObject *Volume::cloneAndInit()
-	{
-		auto clone = new Volume{};
-		return clone;
-	}
-
-	void Volume::update(const NoriObject *guiObject)
-	{
-		const auto *gui = static_cast<const Volume *>(guiObject);
-		if (!gui->touched) return;
-		gui->touched = false;
-
-		if (gui->fileTouched)
-		{
-			gui->fileTouched      = false;
-			gui->fileLastReadTime = std::filesystem::last_write_time(gui->filename);
-			filename = gui->filename;
-			loadFromFile();
-		}
-	}
 
 	void Volume::loadFromFile()
 	{
@@ -66,16 +37,9 @@ NORI_NAMESPACE_BEGIN
 			throw NoriException("Volume: file extension %s unknown.", originalExtension);
 	}
 
-	std::string Volume::toString() const
-	{
-		return tfm::format("Volume[\n"
-		                   "  filename = %s,\n"
-		                   "]",
-		                   filename);
-	}
-
-	void Volume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
-	                      nanovdb::NanoGrid<float> *&grid)
+	void
+	Volume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
+	                 nanovdb::NanoGrid<float> *&grid)
 	{
 		gridHandle = nanovdb::io::readGrid(filename.string(), gridId);
 
@@ -186,47 +150,5 @@ NORI_NAMESPACE_BEGIN
 		std::cout << "\t voxel size   : " << grid->voxelSize()[0] << ", " << grid->voxelSize()[1] << ", "
 		          << grid->voxelSize()[2] << std::endl;
 	}
-
-	bool Volume::getImGuiNodes()
-	{
-		ImGui::PushID(EVolume);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("name", ImGuiLeafNodeFlags, "Filename");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		ImGui::Text(tfm::format("%s%s", filename.filename().string().c_str(), (fileTouched ? "*" : "")).c_str());
-		ImGui::NextColumn();
-
-		// -- Change filename
-		ImGui::NextColumn(); // skip column
-		static ImGui::FileBrowser fileBrowser;
-		if (ImGui::Button("Open"))
-		{
-			fileBrowser.Open();
-			fileBrowser.SetTitle("Open Volume File");
-			fileBrowser.SetTypeFilters({".vdb", ".nvdb"});
-			if (filename.has_parent_path())
-				fileBrowser.SetPwd(filename.parent_path());
-		}
-
-		ImGui::SameLine();
-		if (ImGui::Button("Refresh"))
-			fileTouched |= std::filesystem::last_write_time(filename) > fileLastReadTime;
-		ImGui::NextColumn();
-
-		fileBrowser.Display();
-		if (fileBrowser.HasSelected())
-		{
-			filename    = fileBrowser.GetSelected();
-			fileTouched = true;
-			fileBrowser.ClearSelected();
-		}
-
-		ImGui::PopID();
-
-		return touched;
-	}
-
-	NORI_REGISTER_CLASS(Volume, "volume");
 
 NORI_NAMESPACE_END

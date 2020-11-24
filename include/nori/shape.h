@@ -99,7 +99,7 @@ public:
     /// Release all memory
     virtual ~Shape();
 
-	virtual NoriObject *cloneAndInit() override = 0;
+	NoriObject *cloneAndInit() override = 0;
 
 	/**
 	 * Finish initialization for other components
