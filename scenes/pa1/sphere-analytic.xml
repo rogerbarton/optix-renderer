@@ -22,16 +22,16 @@
 	</camera>
 
 	<!-- Create an analytic sphere -->
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="0,0,1"/>
 		<float name="radius" value="1.5"/>
 		<bsdf type="diffuse">
 			<color name="albedo" value="1,1,1"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plane.obj"/>
 
 		<bsdf type="diffuse">
@@ -44,7 +44,7 @@
 			<translate value="0,0,-1"/>
 		</transform>
 
-	</mesh>
+	</shape>
 
 
 </scene>

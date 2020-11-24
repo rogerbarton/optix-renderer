@@ -60,21 +60,20 @@ NoriObject *loadFromXML(const std::string &filename)
     /* Set of supported XML tags */
     enum ETag
     {
-        /* Object classes */
-        EScene = NoriObject::EScene,
-        EMesh = NoriObject::EShape,
-        ETexture = NoriObject::ETexture,
-        EBSDF = NoriObject::EBSDF,
-        EPhaseFunction = NoriObject::EPhaseFunction,
-        EEmitter = NoriObject::EEmitter,
-        EMedium = NoriObject::EMedium,
-        EVolume = NoriObject::EVolume,
-        ECamera = NoriObject::ECamera,
-        EIntegrator = NoriObject::EIntegrator,
-        ESampler = NoriObject::ESampler,
-        ETest = NoriObject::ETest,
-        EReconstructionFilter = NoriObject::EReconstructionFilter,
-        EDenoiser = NoriObject::EDenoiser,
+	    /* Object classes */
+	    EScene                = NoriObject::EScene,
+	    EShape                = NoriObject::EShape,
+	    ETexture              = NoriObject::ETexture,
+	    EBSDF                 = NoriObject::EBSDF,
+	    EPhaseFunction        = NoriObject::EPhaseFunction,
+	    EEmitter              = NoriObject::EEmitter,
+	    EMedium               = NoriObject::EMedium,
+	    ECamera               = NoriObject::ECamera,
+	    EIntegrator           = NoriObject::EIntegrator,
+	    ESampler              = NoriObject::ESampler,
+	    ETest                 = NoriObject::ETest,
+	    EReconstructionFilter = NoriObject::EReconstructionFilter,
+	    EDenoiser             = NoriObject::EDenoiser,
 
         /* Properties */
         EBoolean = NoriObject::EClassTypeCount,
@@ -97,14 +96,13 @@ NoriObject *loadFromXML(const std::string &filename)
     /* Create a mapping from tag names to tag IDs */
     std::map<std::string, ETag> tags;
     tags["scene"] = EScene;
-    tags["mesh"] = EMesh;
+    tags["shape"] = EShape;
     tags["texture"] = ETexture;
     tags["volume"] = EMedium;
     tags["bsdf"] = EBSDF;
     tags["emitter"] = EEmitter;
     tags["camera"] = ECamera;
     tags["medium"] = EMedium;
-    tags["volume"] = EVolume;
     tags["phase"] = EPhaseFunction;
     tags["integrator"] = EIntegrator;
     tags["denoiser"] = EDenoiser;

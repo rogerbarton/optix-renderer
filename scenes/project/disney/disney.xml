@@ -29,7 +29,7 @@
         <float name="offsetV" value="0.0"/>
     </emitter>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -37,9 +37,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -47,9 +47,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -57,9 +57,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -67,9 +67,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -77,9 +77,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -87,9 +87,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -97,9 +97,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -107,9 +107,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -117,9 +117,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,-4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -127,9 +127,9 @@
             <float name="specular" value="1"/>
             <float name="metallic" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -137,9 +137,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -147,9 +147,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -157,9 +157,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -167,9 +167,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -177,9 +177,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -187,9 +187,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -197,9 +197,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -207,9 +207,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -217,9 +217,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,-3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -227,9 +227,9 @@
             <float name="specular" value="1"/>
             <float name="subsurface" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -237,9 +237,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -247,9 +247,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -257,9 +257,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -267,9 +267,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -277,9 +277,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -287,9 +287,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -297,9 +297,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -307,9 +307,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -317,9 +317,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,-2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -327,9 +327,9 @@
             <float name="specular" value="1"/>
             <float name="specular" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -337,9 +337,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -347,9 +347,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -357,9 +357,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -367,9 +367,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -377,9 +377,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -387,9 +387,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -397,9 +397,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -407,9 +407,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -417,9 +417,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,-1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -427,9 +427,9 @@
             <float name="specular" value="1"/>
             <float name="roughness" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -437,9 +437,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -447,9 +447,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -457,9 +457,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -467,9 +467,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -477,9 +477,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -487,9 +487,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -497,9 +497,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -507,9 +507,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -517,9 +517,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,-0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -527,9 +527,9 @@
             <float name="specular" value="1"/>
             <float name="specularTint" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -537,9 +537,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -547,9 +547,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -557,9 +557,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -567,9 +567,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -577,9 +577,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -587,9 +587,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -597,9 +597,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -607,9 +607,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -617,9 +617,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,0.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -627,9 +627,9 @@
             <float name="specular" value="1"/>
             <float name="anisotropic" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -637,9 +637,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -647,9 +647,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -657,9 +657,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -667,9 +667,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -677,9 +677,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -687,9 +687,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -697,9 +697,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -707,9 +707,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -717,9 +717,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,1.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -727,9 +727,9 @@
             <float name="specular" value="1"/>
             <float name="sheen" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -737,9 +737,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -747,9 +747,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -757,9 +757,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -767,9 +767,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -777,9 +777,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -787,9 +787,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -797,9 +797,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -807,9 +807,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -817,9 +817,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,2.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -827,9 +827,9 @@
             <float name="specular" value="1"/>
             <float name="sheenTint" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -837,9 +837,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -847,9 +847,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -857,9 +857,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -867,9 +867,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -877,9 +877,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -887,9 +887,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -897,9 +897,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -907,9 +907,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -917,9 +917,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,3.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -927,9 +927,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoat" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-4.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -937,9 +937,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.0"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-3.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -947,9 +947,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.1"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-2.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -957,9 +957,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.2"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-1.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -967,9 +967,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.3"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="-0.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -977,9 +977,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.4"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -987,9 +987,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.5"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="1.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -997,9 +997,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.6"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="2.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -1007,9 +1007,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.7"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="3.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -1017,9 +1017,9 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.8"/>
         </bsdf>
-    </mesh>
+    </shape>
 
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="4.5,0,4.5"/>
         <float name="radius" value="0.45"/>
         <bsdf type="disney">
@@ -1027,6 +1027,6 @@
             <float name="specular" value="1"/>
             <float name="clearcoatGloss" value="0.9"/>
         </bsdf>
-    </mesh>
+    </shape>
 
 </scene>

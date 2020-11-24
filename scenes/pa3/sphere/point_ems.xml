@@ -30,7 +30,7 @@
 	</emitter>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="../../pa1/plane.obj"/>
 
 		<bsdf type="diffuse">
@@ -42,7 +42,7 @@
 			<rotate axis="1,0,0" angle="90"/>
 		</transform>
 
-	</mesh>
+	</shape>
 
 
 </scene>

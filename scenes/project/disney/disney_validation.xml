@@ -18,14 +18,14 @@
     <integer name="height" value="800"/>
   </camera>
 
-  <mesh type="sphere">
+  <shape type="sphere">
     <point name="center" value="0,0,0"/>
     <float name="radius" value="10"/>
 
     <bsdf type="disney">
       <color name="baseColor" value="0.2, 0.2, 1"/>
     </bsdf>
-  </mesh>
+  </shape>
 
   <emitter type="envmap"/>
 </scene>

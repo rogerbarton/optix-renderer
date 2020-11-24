@@ -27,7 +27,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.5, 0.5, 0.5"/>
@@ -35,7 +35,7 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 
 	<scene>
@@ -47,7 +47,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.8, 0.8, 0.8"/>
@@ -55,7 +55,7 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 
 
@@ -68,7 +68,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.5, 0.5, 0.5"/>
@@ -76,7 +76,7 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 
 	<scene>
@@ -88,7 +88,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.8, 0.8, 0.8"/>
@@ -96,7 +96,7 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 
 	<scene>
@@ -108,7 +108,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.5, 0.5, 0.5"/>
@@ -116,7 +116,7 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 
 	<scene>
@@ -128,7 +128,7 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="furnace.obj"/>
 			<bsdf type="diffuse">
 				<color name="albedo" value="0.8, 0.8, 0.8"/>
@@ -136,6 +136,6 @@
 			<emitter type="area">
 				<color name="radiance" value="1, 1, 1"/>
 			</emitter>
-		</mesh>
+		</shape>
 	</scene>
 </test>

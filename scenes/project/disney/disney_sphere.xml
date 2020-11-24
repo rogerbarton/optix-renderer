@@ -32,14 +32,14 @@
     <integer name="range" value="5"/>
 	</denoiser>
 
-  <mesh type="sphere">
+  <shape type="sphere">
     <point name="center" value="10,-30,0"/>
     <float name="radius" value="10"/>
 
     <bsdf type="mirror"/>
-  </mesh>
+  </shape>
 
-  <mesh type="sphere">
+  <shape type="sphere">
     <point name="center" value="0,0,0"/>
     <float name="radius" value="10"/>
 
@@ -57,7 +57,7 @@
 
       <color name="baseColor" value="0.2, 0.2, 1"/>
     </bsdf>
-  </mesh>
+  </shape>
 
   <emitter type="envmap">
     <texture type="png_texture" name="albedo">
@@ -67,7 +67,7 @@
 
   <!-- add an area light above... -->
 
-  <mesh type="sphere">
+  <shape type="sphere">
     <point name="center" value="0,0,150"/>
     <float name="radius" value="100"/>
 
@@ -79,6 +79,6 @@
     <emitter type="area">
       <color name="radiance" value="1,0,0"/>
     </emitter>
-  </mesh>
+  </shape>
 
 </scene>

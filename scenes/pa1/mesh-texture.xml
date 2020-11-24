@@ -22,7 +22,7 @@
 	</camera>
 
 	<!-- Load the camel head (freely available in ligigl) -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="camelhead.obj"/>
 
 		<bsdf type="diffuse">
@@ -38,10 +38,10 @@
 					<scale value="40,40,40"/>
 					<translate value="0,10,0"/>
 				</transform>
-	</mesh>
+	</shape>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plane.obj"/>
 
 		<bsdf type="diffuse"/>
@@ -49,7 +49,7 @@
 		<transform name="toWorld">
 			<scale value="100,1,100"/>
 		</transform>
-	</mesh>
+	</shape>
 
 
 		<!-- Illuminate using a point light -->

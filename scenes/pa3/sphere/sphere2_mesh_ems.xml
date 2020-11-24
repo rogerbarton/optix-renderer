@@ -24,7 +24,7 @@
 	</camera>
 
 	<!-- Load a triangulated sphere -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="sphere.obj"/>
 		<bsdf type="diffuse">
 			<color name="albedo" value="1,1,1"/>
@@ -36,10 +36,10 @@
 					<scale value="0.5,0.5,0.5"/>
 					<translate value="0,0,2" />
 				</transform>
-	</mesh>
+	</shape>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="../../pa1/plane.obj"/>
 
 		<bsdf type="diffuse">
@@ -51,7 +51,7 @@
 			<rotate axis="1,0,0" angle="90"/>
 		</transform>
 
-	</mesh>
+	</shape>
 
 
 </scene>
