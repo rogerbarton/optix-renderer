@@ -1,0 +1,129 @@
+<!DOCTYPE html
+    PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../favicon.ico" />
+
+    <title>Computer Graphics - Final Project</title>
+
+    <link href="resources/bootstrap.min.css" rel="stylesheet">
+    <link href="resources/offcanvas.css" rel="stylesheet">
+    <link href="resources/custom2014.css" rel="stylesheet">
+    <link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <div class="container headerBar">
+        <h1>Disney BSDF (Matthias, 15pt)</h1>
+    </div>
+
+    <div class="container contentWrapper">
+        <div class="pageContent">
+            <p>This implementation is based on <a
+                    href="https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf">this github link</a>.</p>
+            <p>To verify the disney BSDF, I render each parameter with different values. The resulting images are
+                compared against the image on <a
+                    href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">these
+                    slides (slide 3)</a>. All images are rendered with the Path MIS integartor and 512 samples per
+                pixel.</p>
+
+            <div class="twentytwenty-container">
+                <img src="images/disney/baseline.png" alt="All 0" class="img-responsive">
+                <img src="images/disney/default.png" alt="Default parameters" class="img-responsive">
+            </div>
+
+            <h4>Impact of Metallic</h4>
+            <div class="twentytwenty-container">
+                <img src="images/disney/metallic/metallic0.5.png" alt="Metallic 0.5" class="img-responsive">
+                <img src="images/disney/metallic/metallic1.png" alt="Metallic 1.0" class="img-responsive">
+            </div>
+
+            <h4>Impact of Roughness</h4>
+            <div class="twentytwenty-container">
+                <img src="images/disney/roughness/roughness0.png" alt="Roughness 0" class="img-responsive">
+                <img src="images/disney/roughness/roughness1.png" alt="Rougness 1" class="img-responsive">
+            </div>
+
+            <h4>Impact of Specular</h4>
+            <div class="twentytwenty-container">
+                <img src="images/disney/specular/specular0.png" alt="Specular 0" class="img-responsive">
+                <img src="images/disney/specular/specular1.png" alt="Specular 1.0" class="img-responsive">
+                <img src="images/disney/specular/specular0.33.png" alt="Specular 0.33" class="img-responsive">
+                <img src="images/disney/specular/specular0.66.png" alt="Specular 0.66" class="img-responsive">
+            </div>
+
+            <h4>Impact of Clearcoat</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default" class="img-responsive">
+                <img src="images/disney/clearcoat/clearcoat1.png" alt="Clearcoat 1" class="img-responsive">
+            </div>
+
+            <h4>Impact of Clearcoat Gloss</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default (clearcoat gloss 1)" class="img-responsive">
+                <img src="images/disney/clearcoatGloss/clearcoatGloss0.png" alt="Clearcoat Gloss 0"
+                    class="img-responsive">
+            </div>
+
+            <h4>Impact of Subsurface</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default" class="img-responsive">
+                <img src="images/disney/subsurface/subsurface1.png" alt="Subsurface 1" class="img-responsive">
+            </div>
+
+            <h4>Impact of Specular Tint</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default (Specular 0.5)" class="img-responsive">
+                <img src="images/disney/specularTint/specularTint1.png" alt="Specular Tint 1" class="img-responsive">
+            </div>
+
+            <h4>Impact of Sheen</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default" class="img-responsive">
+                <img src="images/disney/sheen/sheen1.png" alt="Sheen 1" class="img-responsive">
+            </div>
+
+            <h4>Impact of Sheen Tint</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/sheenTint/sheenTint0.png" alt="Sheen Tint 0" class="img-responsive">
+                <img src="images/disney/sheenTint/sheenTint1.png" alt="Sheen Tint 1" class="img-responsive">
+            </div>
+
+            <!-- ================================================================= -->
+
+
+        </div>
+    </div>
+
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="resources/bootstrap.min.js"></script>
+    <script src="/js/offcanvas.js"></script>
+    <script src="resources/jquery.event.move.js"></script>
+    <script src="resources/jquery.twentytwenty.js"></script>
+
+
+    <script>
+        $(window).load(function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5 }); });
+    </script>
+
+</body>
+
+</html>

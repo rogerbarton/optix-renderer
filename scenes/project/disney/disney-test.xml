@@ -24,7 +24,7 @@
 
     <!-- set all values to 0 for starter -->
     <bsdf type="disney">
-      <float name="metallic" value="0"/>
+      <!--<float name="metallic" value="0"/>
       <float name="subsurface" value="0"/>
       <float name="specular" value="0"/>
       <float name="roughness" value="0"/>
@@ -33,16 +33,19 @@
       <float name="sheen" value="0"/>
       <float name="sheenTint" value="0"/>
       <float name="clearcoat" value="0"/>
-      <float name="clearcoatGloss" value="0"/>
+      <float name="clearcoatGloss" value="0"/>-->
       <color name="baseColor" value=".819,.67,.157"/>
     </bsdf>
   </mesh>
 
-  <!-- use default color for env map -->
   <emitter type="envmap">
     <texture type="constant_color" name="albedo">
       <color name="value" value="0.1,0.1,0.1"/>
     </texture>
+    <!--<texture type="png_texture" name="albedo">
+      <string name="filename" value="../res/small_cave_2k.hdr"/>
+      <vector name="eulerAngles" value="90,90,180"/>
+    </texture>-->
   </emitter>
   
   <emitter type="point">
