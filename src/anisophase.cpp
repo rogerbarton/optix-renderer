@@ -27,17 +27,14 @@ NORI_NAMESPACE_BEGIN
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
 		float pdf(const BSDFQueryRecord &bRec) const override
 		{
-			const auto cosTheta = Frame::cosTheta(Frame(bRec.wi).toLocal(bRec.wo));
-			const auto g2 = m_g * m_g;
-			return 0.25f / M_PI * (1 - g2) / std::pow(1 + g2 - 2 * m_g * cosTheta, 1.5f);
+			return Warp::squareToHenyeyGreensteinPdf(Frame(bRec.wi).toLocal(bRec.wo), m_g);
 		}
 
 		/// Sample the BRDF
 		Color3f sample(BSDFQueryRecord &bRec,
 		                       const Point2f &sample) const override
 		{
-			// TODO: sample from pdf
-			bRec.wo = Warp::squareToUniformSphere(sample);
+			bRec.wo = Warp::squareToHenyeyGreenstein(sample, m_g);
 
 			return eval(bRec) / pdf(bRec) * Frame::cosTheta(bRec.wo);
 		}

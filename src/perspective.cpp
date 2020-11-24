@@ -139,6 +139,7 @@ public:
 	        static Sampler *const sampler = static_cast<Sampler *>(
 			        NoriObjectFactory::createInstance("independent", PropertyList()));
 
+	        // TODO: Also use squareToUniformTriangle for other bokeh effects
 	        const Point2f pLens = m_lensRadius * Warp::squareToUniformDisk(sampler->next2D());
 	        const float ft = m_focalDistance / ray.d.z();
 	        // position of ray at time of intersection with the focal plane

@@ -81,6 +81,17 @@ public:
 
     static Vector3f squareToUniformTriangle(const Point2f &sample);
 
+	/// Warp a uniformly distributed square sample to a Henyey-Greenstein distribution
+	static Vector3f squareToHenyeyGreenstein(const Point2f &sample, float g);
+
+	/// Probability density of \ref squareToHenyeyGreenstein()
+	static float squareToHenyeyGreensteinPdf(const Vector3f &m, float g);
+
+	/// Warp a uniformly distributed square sample to a Henyey-Greenstein distribution
+	static Vector3f squareToSchlick(const Point2f &sample, float g);
+
+	/// Probability density of \ref squareToHenyeyGreenstein()
+	static float squareToSchlickPdf(const Vector3f &m, float g);
 };
 
 NORI_NAMESPACE_END
