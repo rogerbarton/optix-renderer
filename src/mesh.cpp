@@ -30,6 +30,7 @@ void Mesh::update(const NoriObject *guiObject)
 	const auto *gui = static_cast<const Mesh *>(guiObject);
 	if(gui->geometryTouched)
 	{
+		m_pdf = DiscretePDF();
 		m_pdf.reserve(getPrimitiveCount());
 		for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
 			m_pdf.append(surfaceArea(i));

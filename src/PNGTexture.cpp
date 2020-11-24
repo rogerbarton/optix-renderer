@@ -22,11 +22,7 @@ public:
 		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
 	}
 
-	NoriObject *cloneAndInit() override
-	{
-		auto clone = new PNGTexture(*this);
-		return clone;
-	}
+	NORI_OBJECT_DEFAULT_CLONE(PNGTexture)
 
 	void update(const NoriObject *guiObject) override
 	{
@@ -37,7 +33,7 @@ public:
 		if(gui->fileTouched)
 		{
 			gui->fileTouched = false;
-			fileLastReadTime = std::filesystem::last_write_time(filename);
+			gui->fileLastReadTime = std::filesystem::last_write_time(gui->filename);
 			filename = gui->filename;
 			loadFromFile();
 		}
@@ -236,7 +232,7 @@ private:
 	unsigned int width, height;
 	std::vector<float> data;
 
-	std::filesystem::file_time_type fileLastReadTime;
+	mutable std::filesystem::file_time_type fileLastReadTime;
 	mutable bool                    fileTouched = true;
 
 	float InverseGammaCorrect(float value)
@@ -266,11 +262,7 @@ public:
 		scaleV = props.getFloat("scaleV", 1.f);
 	}
 
-	NoriObject *cloneAndInit() override
-	{
-		auto clone = new NormalMap(*this);
-		return clone;
-	}
+	NORI_OBJECT_DEFAULT_CLONE(NormalMap)
 
 	void update(const NoriObject *guiObject) override
 	{
