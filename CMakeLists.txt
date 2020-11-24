@@ -125,6 +125,7 @@ add_executable(nori
   src/camera.cpp
   src/transform.cpp
   src/PreviewIntegrator.cpp
+  src/anisophase.cpp
 )
 
 if(NORI_USE_VOLUMES)
