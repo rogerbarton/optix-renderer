@@ -1,46 +1,43 @@
 #pragma once
 #ifdef NORI_USE_VOLUMES
 
-#include <nori/object.h>
+#include <nori/shape.h>
 #include <nanovdb/util/IO.h>
 #include <filesystem/resolver.h>
 #include <filesystem>
 
 NORI_NAMESPACE_BEGIN
 
-	class Volume : public NoriObject
+	class Volume : public Shape
 	{
 	public:
-		Volume() {}
-		Volume(const PropertyList &props);
+		Volume() = default;
+		explicit Volume(const PropertyList &props);
+		NoriObject *cloneAndInit() override;
+		void update(const NoriObject *guiObject) override;
 
-		EClassType getClassType() const override { return EVolume; }
-
+		// -- Shape overrides
+		BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
+		Point3f getCentroid(uint32_t index) const override { return m_bbox.getCenter(); }
+		bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override;
+		void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
+		void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override;
+		float pdfSurface(const ShapeQueryRecord &sRec) const override;
 		std::string toString() const override;
 
-		filesystem::path                         filename;
+#ifdef NORI_USE_IMGUI
+		NORI_OBJECT_IMGUI_NAME("Volume");
+		bool getImGuiNodes() override;
+#endif
+
+		std::filesystem::path                    filename;
 		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
 		nanovdb::NanoGrid<float>                 *densityGrid = nullptr;
 		nanovdb::NanoGrid<float>                 *heatGrid    = nullptr;
 
-#ifndef NORI_USE_NANOGUI
-		NORI_OBJECT_IMGUI_NAME("Volume");
-		virtual bool getImGuiNodes() override
-		{
-			ImGui::PushID(EVolume);
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("fileName", ImGuiLeafNodeFlags, "Filename");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-			ImGui::Text(filename.filename().c_str());
-			ImGui::NextColumn();
-			ImGui::PopID();
-			return touched;
-		}
-#endif
+		mutable std::filesystem::file_time_type fileLastReadTime;
+		mutable bool                            fileTouched   = true;
 
-		NoriObject *cloneAndInit() override;
-		void update(const NoriObject *guiObject) override;
 	private:
 		void loadFromFile();
 
@@ -68,7 +65,7 @@ NORI_NAMESPACE_BEGIN
 		 * @param gridHandle OUT
 		 * @param grid OUT
 		 */
-		void readGrid(filesystem::path &file, uint64_t gridId,
+		void readGrid(std::filesystem::path &file, uint64_t gridId,
 		              nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle, nanovdb::NanoGrid<float> *&grid);
 
 		/**

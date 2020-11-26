@@ -69,7 +69,11 @@ public:
         UniformHemisphere,
         CosineHemisphere,
         Beckmann,
-        MicrofacetBRDF
+        HenyeyGreenstein,
+		Schlick,
+        MicrofacetBRDF,
+        IsoPhase,
+        AnisoPhase
     };
 
     WarpTest(): Screen(Vector2i(800, 600), "Assignment 2: Sampling and Warping"), m_bRec(Vector3f()) {
@@ -81,6 +85,8 @@ public:
         if (warpType == Beckmann || warpType == MicrofacetBRDF)
             parameterValue = std::exp(std::log(0.05f) * (1 - parameterValue) +
                                       std::log(1.f)   *  parameterValue);
+        else if (warpType == HenyeyGreenstein || warpType == Schlick || warpType == AnisoPhase)
+        	parameterValue = 2 * parameterValue -1;
         return parameterValue;
     }
 
@@ -95,7 +101,11 @@ public:
             case UniformHemisphere: result << Warp::squareToUniformHemisphere(sample); break;
             case CosineHemisphere: result << Warp::squareToCosineHemisphere(sample); break;
             case Beckmann: result << Warp::squareToBeckmann(sample, parameterValue); break;
-            case MicrofacetBRDF: {
+            case HenyeyGreenstein: result << Warp::squareToHenyeyGreenstein(sample, parameterValue); break;
+            case Schlick: result << Warp::squareToSchlick(sample, parameterValue); break;
+            case MicrofacetBRDF:
+            case IsoPhase:
+            case AnisoPhase: {
                 BSDFQueryRecord bRec(m_bRec);
                 float value = m_brdf->sample(bRec, sample).getLuminance();
                 return std::make_pair(bRec.wo, value == 0 ? 0.f : m_brdf->eval(bRec)[0]);
@@ -156,9 +166,21 @@ public:
             m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("microfacet", list));
 
             float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
-            m_bRec.wi =
-                Vector3f(std::sin(bsdfAngle), 0,
-                         std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+        }
+        else if (warpType == IsoPhase) {
+	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("isophase", PropertyList()));
+
+	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
+	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+        }
+        else if (warpType == AnisoPhase) {
+	        PropertyList list;
+	        list.setFloat("g", parameterValue);
+	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("anisophase", list));
+
+	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
+	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
 
         /* Generate the point positions */
@@ -177,7 +199,7 @@ public:
             value_scale = std::max(value_scale, values(0, i));
         value_scale = 1.f/value_scale;
 
-        if (!m_brdfValueCheckBox->checked() || warpType != MicrofacetBRDF)
+        if (!m_brdfValueCheckBox->checked() || (warpType != MicrofacetBRDF && warpType != IsoPhase && warpType != AnisoPhase))
             value_scale = 0.f;
 
         if (warpType != None) {
@@ -260,12 +282,15 @@ public:
         m_pointCountBox->setValue(str);
         m_parameterBox->setValue(tfm::format("%.1g", parameterValue));
         m_angleBox->setValue(tfm::format("%.1f", m_angleSlider->value() * 180-90));
-        m_parameterSlider->setEnabled(warpType == Beckmann || warpType == MicrofacetBRDF || warpType == UniformSphereCap);
-        m_parameterBox->setEnabled(warpType == Beckmann || warpType == MicrofacetBRDF || warpType == UniformSphereCap);
-        m_angleBox->setEnabled(warpType == MicrofacetBRDF);
-        m_angleSlider->setEnabled(warpType == MicrofacetBRDF);
-        m_parameterBox->setEnabled(warpType == MicrofacetBRDF);
-        m_brdfValueCheckBox->setEnabled(warpType == MicrofacetBRDF);
+	    m_parameterSlider->setEnabled(
+			    warpType == Beckmann || warpType == MicrofacetBRDF || warpType == HenyeyGreenstein ||
+			    warpType == Schlick || warpType == AnisoPhase || warpType == UniformSphereCap);
+	    m_parameterBox->setEnabled(
+			    warpType == Beckmann || warpType == MicrofacetBRDF || warpType == HenyeyGreenstein ||
+			    warpType == Schlick || warpType == AnisoPhase || warpType == UniformSphereCap);
+        m_angleBox->setEnabled(warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase);
+        m_angleSlider->setEnabled(warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase);
+        m_brdfValueCheckBox->setEnabled(warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase);
         m_pointCountSlider->setValue((std::log((float) m_pointCount) / std::log(2.f) - 5) / 15);
     }
 
@@ -305,7 +330,7 @@ public:
         /* Set up a perspective camera matrix */
         Matrix4f view, proj, model;
         view = lookAt(Vector3f(0, 0, 2), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-        const float viewAngle = 30, near = 0.01, far = 100;
+        const float viewAngle = 30, near = 0.01f, far = 100;
         float fH = std::tan(viewAngle / 360.0f * M_PI) * near;
         float fW = fH * (float) mSize.x() / (float) mSize.y();
         proj = frustum(-fW, fW, -fH, fH, near, far);
@@ -374,7 +399,7 @@ public:
                 m_gridShader->drawArray(GL_LINES, 0, m_lineCount);
                 glDisable(GL_BLEND);
             }
-            if (m_warpTypeBox->selectedIndex() == MicrofacetBRDF) {
+            if (m_warpTypeBox->selectedIndex() == MicrofacetBRDF || m_warpTypeBox->selectedIndex() == IsoPhase || m_warpTypeBox->selectedIndex() == AnisoPhase) {
                 m_arrowShader->bind();
                 m_arrowShader->setUniform("mvp", mvp);
                 m_arrowShader->drawArray(GL_LINES, 0, 106);
@@ -465,8 +490,12 @@ public:
                 else if (warpType == CosineHemisphere)
                     return Warp::squareToCosineHemispherePdf(v);
                 else if (warpType == Beckmann)
-                    return Warp::squareToBeckmannPdf(v, parameterValue);
-                else if (warpType == MicrofacetBRDF) {
+	                return Warp::squareToBeckmannPdf(v, parameterValue);
+                else if (warpType == HenyeyGreenstein)
+	                return Warp::squareToHenyeyGreensteinPdf(v, parameterValue);
+                else if (warpType == Schlick)
+	                return Warp::squareToSchlickPdf(v, parameterValue);
+                else if (warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase) {
                     BSDFQueryRecord bRec(m_bRec);
                     bRec.wo = v;
                     bRec.measure = nori::ESolidAngle;
@@ -560,7 +589,7 @@ public:
 
         new Label(m_window, "Warping method", "sans-bold");
         m_warpTypeBox = new ComboBox(m_window, { "None", "Disk", "Sphere", "Spherical cap", "Hemisphere (unif.)",
-                "Hemisphere (cos)", "Beckmann distr.", "Microfacet BRDF" });
+                "Hemisphere (cos)", "Beckmann distr.", "Henyey Greenstein", "Schlick", "Microfacet BRDF", "Isotropic Phase", "Anisotropic Phase (Henyey-Greenstein)" });
         m_warpTypeBox->setCallback([&](int) { refresh(); });
 
         panel = new Widget(m_window);

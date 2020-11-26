@@ -22,7 +22,7 @@
 	</camera>
 
 	<!-- Load a sphere shape -->
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="0,0,3"/>
         <float name="radius" value="3"/>
         <bsdf type="diffuse">
@@ -32,10 +32,10 @@
                 <color name="value2" value="0.2,0.2,0.2"/>
             </texture>
         </bsdf>
-    </mesh>
+    </shape>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plane.obj"/>
 
 		<bsdf type="diffuse">
@@ -48,7 +48,7 @@
 			<translate value="0,0,-1"/>
 		</transform>
 
-	</mesh>
+	</shape>
 
 	<!-- Illuminate using a point light -->
 	<emitter type="point">

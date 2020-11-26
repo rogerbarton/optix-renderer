@@ -145,7 +145,7 @@ NORI_NAMESPACE_BEGIN
 
 		Point3f getPosition() const { return m_position; }
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Emitter Base");
 		bool getImGuiNodes() override;
 #endif

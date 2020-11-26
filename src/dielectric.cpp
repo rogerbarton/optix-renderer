@@ -110,7 +110,7 @@ public:
             "]",
             m_intIOR, m_extIOR);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Dielectric");
 	virtual bool getImGuiNodes() override {
 		touched |= BSDF::getImGuiNodes();

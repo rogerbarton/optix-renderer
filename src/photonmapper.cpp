@@ -279,7 +279,7 @@ public:
             m_photonCount,
             m_photonRadius);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Photonmapper");
     virtual bool getImGuiNodes() override {
         touched = Integrator::getImGuiNodes();

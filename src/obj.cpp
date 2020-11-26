@@ -53,7 +53,7 @@ public:
 
     	if(gui->fileTouched || gui->geometryTouched || gui->transformTouched)
 	    {
-		    fileLastReadTime = std::filesystem::last_write_time(filename);
+		    gui->fileLastReadTime = std::filesystem::last_write_time(gui->filename);
 		    filename = gui->filename;
 		    loadFromFile();
 	    }
@@ -68,6 +68,11 @@ public:
 		gui->fileTouched      = false;
 	}
 
+	/**
+	 * Load the .obj file
+	 * Sets and also resets: m_V, m_F, m_N, m_UV
+	 * This will also handle if a file has already been loaded.
+	 */
 	void loadFromFile() {
 	    typedef std::unordered_map<OBJVertex, uint32_t, OBJVertexHash> VertexMap;
 
@@ -159,33 +164,29 @@ public:
 	    for (uint32_t i = 0; i < vertices.size(); ++i)
 		    m_V.col(i) = positions.at(vertices[i].p - 1);
 
+	    m_N.resize(3, vertices.empty() ? 0 : vertices.size());
 	    if (!normals.empty())
 	    {
-		    m_N.resize(3, vertices.size());
 		    for (uint32_t i = 0; i < vertices.size(); ++i)
 			    m_N.col(i) = normals.at(vertices[i].n - 1);
 	    }
-	    else
-	    	normals.clear();
 
+	    m_UV.resize(2, texcoords.empty() ? 0 : vertices.size());
 	    if (!texcoords.empty())
 	    {
-		    m_UV.resize(2, vertices.size());
 		    for (uint32_t i = 0; i < vertices.size(); ++i)
 			    m_UV.col(i) = texcoords.at(vertices[i].uv - 1);
 	    }
-	    else
-	    	texcoords.clear();
 
 	    m_name = filename.string();
-	    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
+	    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", N=" << m_N.cols() << ", UV=" << m_UV.cols() << ", took "
 	         << timer.elapsedString() << " and "
 	         << memString(m_F.size() * sizeof(uint32_t) +
 	                      sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
 	         << ")" << endl;
     }
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Mesh");
 	virtual bool getImGuiNodes() override
 	{
@@ -294,7 +295,7 @@ private:
 	std::filesystem::path filename;
 	Transform trafo;
 
-	std::filesystem::file_time_type fileLastReadTime;
+	mutable std::filesystem::file_time_type fileLastReadTime;
 	mutable bool fileTouched = true;
 };
 

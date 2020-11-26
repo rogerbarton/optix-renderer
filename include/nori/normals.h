@@ -37,7 +37,7 @@ public:
     {
         return "NormalIntegrator[]";
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Normal");
 	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif

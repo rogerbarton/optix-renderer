@@ -252,7 +252,7 @@ public:
     }
 
     virtual EClassType getClassType() const override { return ETest; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Chi^2 Test");
 	virtual bool getImGuiNodes() override { return false; }
 #endif

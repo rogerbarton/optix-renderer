@@ -168,7 +168,7 @@ public:
 		return Li / pdf;
 	}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Environment Map");
 	virtual bool getImGuiNodes() override
 	{
@@ -203,18 +203,18 @@ private:
 	void calculateProbs()
 	{
 		probabilities = MatrixXf(m_map->getHeight(), m_map->getWidth());
-		for (int i = 0; i < m_map->getHeight(); i++)
+		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
-			for (int j = 0; j < m_map->getWidth(); j++)
+			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
 				probabilities(i, j) = col.getLuminance(); // bias to possibly select every one once
 			}
 		}
 		probabilities.normalize();
-		for (int i = 0; i < m_map->getHeight(); i++)
+		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
-			for (int j = 0; j < m_map->getWidth(); j++)
+			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				histogram.add_element(i, j, probabilities(i, j));
 			}

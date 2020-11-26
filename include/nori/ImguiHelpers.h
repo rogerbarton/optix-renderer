@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 #include <imgui/imgui.h>
 #include <nori/vector.h>
 #include <nori/color.h>
@@ -42,6 +42,10 @@ namespace ImGui
     IMGUI_API bool DragVector3f(const char *label, nori::Vector3f *vec,
                                 float v = 1.f, float v_min = 0.f, float v_max = 0.f,
                                 const char *fmt = "%.3f", ImGuiSliderFlags flags = 0);
+
+	// Helper to display a little (?) mark which shows a tooltip when hovered.
+	// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+	IMGUI_API void HelpMarker(const char* desc);
 } // namespace ImGui
 
 #endif

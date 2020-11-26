@@ -17,18 +17,17 @@
 */
 
 #include <nori/block.h>
-#ifndef DISABLE_NORI_GUI
-
-#ifdef NORI_USE_NANOGUI
-#include <nori/gui.h>
-#else
-#include <nori/ImguiScreen.h>
-#endif /* NORI_USE_NANOGUI */
-
-#else /* DISABLE_NORI_GUI */
-#include <nori/render.h>
-#endif /* DISABLE_NORI_GUI */
 #include <filesystem/path.h>
+
+#ifdef DISABLE_NORI_GUI
+#  include <nori/render.h>
+#else
+#  ifdef NORI_USE_NANOGUI
+#    include <nori/gui.h>
+#  else // NORI_USE_IMGUI
+#    include <nori/ImguiScreen.h>
+#  endif
+#endif
 
 int main(int argc, char **argv)
 {

@@ -17,29 +17,6 @@ if(NORI_BUILD_DOCS)
   add_subdirectory(docs)
 endif(NORI_BUILD_DOCS)
 
-if(NOT NORI_USE_GUI)
-    message(STATUS "NORI_USE_GUI is off")
-    message(STATUS "Make sure to use the right gcc version:")
-    message(STATUS "module load new gcc/4.9.2 cmake/3.13.5")
-
-    # Disable flag for preprocessor
-    add_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
-else()
-  if(NORI_USE_IMGUI)
-    message(STATUS "Nori uses ImGui")
-  else()
-    add_definitions(-DNORI_USE_NANOGUI)
-    message(STATUS "Nori uses Nanogui")
-  endif()
-endif()
-
-if(NORI_USE_VOLUMES)
-  message(STATUS "Nori uses Volumes")
-  add_definitions(-DNORI_USE_VOLUMES)
-else()
-  message(STATUS "Nori doesn't use Volumes")
-endif()
-
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
 add_executable(nori
@@ -125,11 +102,15 @@ add_executable(nori
   src/camera.cpp
   src/transform.cpp
   src/PreviewIntegrator.cpp
+  src/isophase.cpp
+  src/anisophase.cpp
 )
 
 if(NORI_USE_VOLUMES)
   target_sources(nori PRIVATE
-     src/volume.cpp
+    include/nori/volume.h
+    src/volume.vdb.cpp
+    src/volume.shape.cpp
   )
 endif()
 
@@ -158,21 +139,56 @@ if(NORI_USE_GUI)
       include/nori/gui.h
       src/gui.cpp
     )
-  
-    # The following lines build the warping test application
-    add_executable(warptest
+  endif(NORI_USE_IMGUI)
+
+  # The following lines build the warping test application
+  add_executable(warptest
       include/nori/warp.h
       src/warp.cpp
       src/warptest.cpp
       src/microfacet.cpp
+      src/isophase.cpp
+      src/anisophase.cpp
       src/object.cpp
       src/proplist.cpp
       src/common.cpp
       )
-    add_dependencies(warptest nori)
-    target_link_libraries(warptest nanogui glew ${extra_libs})
-  endif(NORI_USE_IMGUI)
+  add_dependencies(warptest nori)
+  target_link_libraries(warptest nanogui glew ${extra_libs})
+  target_compile_definitions(warptest PRIVATE -DNORI_USE_NANOGUI)
 endif(NORI_USE_GUI)
+
+# -- Add C++ defines
+# The following C++ macros may be defined:
+# DISABLE_NORI_GUI
+# NORI_USE_IMGUI
+# NORI_USE_NANOGUI
+# NORI_USE_VOLUMES
+
+if(NOT NORI_USE_GUI)
+  message(STATUS "NORI_USE_GUI is off")
+  message(STATUS "Make sure to use the right gcc version:")
+  message(STATUS "module load new gcc/4.9.2 cmake/3.13.5")
+
+  # Disable flag for preprocessor
+  compile_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
+else()
+  if(NORI_USE_IMGUI)
+    target_compile_definitions(nori PRIVATE -DNORI_USE_IMGUI)
+    message(STATUS "Nori uses ImGui")
+  else()
+    target_compile_definitions(nori PRIVATE -DNORI_USE_NANOGUI)
+    message(STATUS "Nori uses Nanogui")
+  endif()
+endif()
+
+if(NORI_USE_VOLUMES)
+  message(STATUS "Nori uses Volumes")
+  target_compile_definitions(nori PUBLIC -DNORI_USE_VOLUMES)
+else()
+  message(STATUS "Nori doesn't use Volumes")
+endif()
+
 
 # Nori depends on some libraries created in CMakeConfig.txt. The following two
 # lines ensure that Nori is built *after* those libraries have been created.

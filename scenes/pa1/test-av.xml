@@ -32,18 +32,18 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<translate value="0,1,0"/>
 			</transform>
-		</mesh>
-		<mesh type="obj">
+		</shape>
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<translate value="0,-1,0"/>
 			</transform>
-		</mesh>
+		</shape>
 	</scene>
 
 
@@ -65,18 +65,18 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<translate value="0,0.5,0"/>
 			</transform>
-		</mesh>
-		<mesh type="obj">
+		</shape>
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<translate value="0,-0.5,0"/>
 			</transform>
-		</mesh>
+		</shape>
 	</scene>
 
 	<!-- Test 3: d=2,r=2 => res=2/sqrt(2^2+2^2) -->
@@ -97,20 +97,20 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<scale value="2,2,2"/>
 				<translate value="0,1,0"/>
 			</transform>
-		</mesh>
-		<mesh type="obj">
+		</shape>
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<scale value="2,2,2"/>
 				<translate value="0,-1,0"/>
 			</transform>
-		</mesh>
+		</shape>
 	</scene>
 
 
@@ -132,19 +132,19 @@
 			<integer name="height" value="1"/>
 		</camera>
 
-		<mesh type="obj">
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<scale value="2,2,2"/>
 				<translate value="0,1,0"/>
 			</transform>
-		</mesh>
-		<mesh type="obj">
+		</shape>
+		<shape type="obj">
 			<string name="filename" value="disk.obj"/>
 			<transform name="toWorld">
 				<scale value="2,2,2"/>
 				<translate value="0,-1,0"/>
 			</transform>
-		</mesh>
+		</shape>
 	</scene>
 </test>

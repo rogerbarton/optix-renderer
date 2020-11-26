@@ -70,7 +70,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			return "PreviewIntegrator[]";
 		}
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Preview");
 		virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif

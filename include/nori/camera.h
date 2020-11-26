@@ -70,7 +70,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return ECamera; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Camera Base");
     virtual bool getImGuiNodes() override;
 #endif

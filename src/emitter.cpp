@@ -18,7 +18,7 @@ NORI_NAMESPACE_BEGIN
 		// 	m_shape->update(gui->m_shape);
 	}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	bool Emitter::getImGuiNodes()
 	{
 		ImGui::PushID(EEmitter);

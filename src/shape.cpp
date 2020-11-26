@@ -101,7 +101,7 @@ std::string Intersection::toString() const
         indent(geoFrame.toString()),
         mesh ? mesh->toString() : std::string("null"));
 }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 bool Shape::getImGuiNodes()
 {
     ImGui::PushID(EShape);

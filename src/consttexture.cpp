@@ -34,7 +34,7 @@ public:
     {
         return m_value;
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Constant");
     virtual bool getImGuiNodes() override { return false; }
 #endif
@@ -68,7 +68,7 @@ std::string ConstantTexture<Color3f>::toString() const
         "ConstantTexture[ %s ]",
         m_value.toString());
 }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 template <>
 bool ConstantTexture<float>::getImGuiNodes()
 {

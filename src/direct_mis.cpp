@@ -141,7 +141,7 @@ public:
   {
     return std::string("DirectMISIntegrator[]");
   }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Direct MIS");
 	virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif

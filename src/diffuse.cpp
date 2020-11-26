@@ -149,7 +149,7 @@ public:
     }
 
     virtual EClassType getClassType() const override { return EBSDF; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Diffuse");
 	virtual bool getImGuiNodes() override
 	{

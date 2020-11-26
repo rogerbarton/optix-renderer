@@ -154,4 +154,37 @@ Vector3f Warp::squareToUniformTriangle(const Point2f &sample) {
   return Vector3f(u, v, 1.f - u - v);
 }
 
+Vector3f Warp::squareToHenyeyGreenstein(const Point2f &sample, float g)
+{
+	/**
+	 * See https://www.oceanopticsbook.info/view/scattering/level-2/the-henyey-greenstein-phase-function
+	 * phase function integral phi=[pi/2, pi = *partial* cdf =
+	 *   B_HG = (1 - g) / 2g *((1 + g)/sqrt(1 + g^2) - 1)
+	 */
+	// TODO: Use inversion method
+
+	return 0;
+}
+
+float Warp::squareToHenyeyGreensteinPdf(const Vector3f &m, float g)
+{
+	const float cosTheta = Frame::cosTheta(m);
+	const float g2 = g * g;
+	return 0.25f / M_PI * (1 - g2) / std::pow(1 + g2 - 2 * g * cosTheta, 1.5f);
+}
+
+Vector3f Warp::squareToSchlick(const Point2f &sample, float g)
+{
+	// TODO: Use inversion method
+
+	return 0;
+}
+
+float Warp::squareToSchlickPdf(const Vector3f &m, float g)
+{
+	const float k = 1.55f * g - 0.55f * std::pow(g, 3);
+	const float factor = 1 - k * Frame::cosTheta(m);
+	return 0.25f / M_PI * (1 - k * k) / factor;
+}
+
 NORI_NAMESPACE_END

@@ -99,7 +99,7 @@ public:
     /// Release all memory
     virtual ~Shape();
 
-	virtual NoriObject *cloneAndInit() override = 0;
+	NoriObject *cloneAndInit() override = 0;
 
 	/**
 	 * Finish initialization for other components
@@ -161,7 +161,7 @@ public:
      * */
     virtual EClassType getClassType() const override { return EShape; }
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Shape");
 	virtual bool getImGuiNodes() override;
 #endif

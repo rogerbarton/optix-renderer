@@ -56,7 +56,7 @@ public:
 	virtual unsigned int getHeight() {
 		return 1;
 	}
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Texture Base");
 	virtual bool getImGuiNodes() override { return false; }
 #endif

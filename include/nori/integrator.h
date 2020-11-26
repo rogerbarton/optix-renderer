@@ -59,7 +59,7 @@ public:
      * provided by this instance
      * */
     virtual EClassType getClassType() const override { return EIntegrator; }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Integrator Base");
 	virtual bool getImGuiNodes() override { return false; }
 #endif

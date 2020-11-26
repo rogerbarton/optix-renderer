@@ -26,7 +26,7 @@
 	<envmap type="png_env"/>
 	
 	
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="0,0,0"/>
 		<float name="radius" value="20"/>
 		<bsdf type="diffuse">
@@ -34,5 +34,5 @@
 				<string name="filename" value="../res/wooden_motel.png"/>
 			</texture>
 		</bsdf>
-	</mesh>
+	</shape>
 </scene>

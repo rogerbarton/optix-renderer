@@ -30,7 +30,7 @@
 		</texture>
 	</emitter>
 
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="0,0,0"/>
 		<float name="radius" value="20"/>
 		<bsdf type="diffuse">
@@ -38,10 +38,10 @@
 				<string name="filename" value="../res/photo_studio_01.png"/>
 			</texture>-->
 		</bsdf>
-	</mesh>
+	</shape>
 
 	<!--
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="150,0,0"/>
 		<float name="radius" value="20"/>
 		<bsdf type="diffuse">
@@ -50,5 +50,5 @@
 		<emitter type="area">
 			<color name="radiance" value="10, 10, 10"/>
 		</emitter>
-	</mesh>-->
+	</shape>-->
 </scene>

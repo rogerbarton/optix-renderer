@@ -24,7 +24,7 @@
 	</camera>
 
 	<!-- Load a sphere -->
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="0,0,2"/>
 		<float name="radius" value="0.5"/>
 		<bsdf type="diffuse">
@@ -33,10 +33,10 @@
 		<emitter type="area">
 			<color name="radiance" value="0,16,0"/>
 		</emitter>
-	</mesh>
+	</shape>
 
 	<!-- Ground plane -->
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="../../pa1/plane.obj"/>
 
 		<bsdf type="diffuse">
@@ -48,7 +48,7 @@
 			<rotate axis="1,0,0" angle="90"/>
 		</transform>
 
-	</mesh>
+	</shape>
 
 
 </scene>

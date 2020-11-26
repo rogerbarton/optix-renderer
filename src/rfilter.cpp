@@ -50,7 +50,7 @@ public:
     {
         return tfm::format("GaussianFilter[radius=%f, stddev=%f]", m_radius, m_stddev);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Gaussian");
     virtual bool getImGuiNodes() override
     {
@@ -115,7 +115,7 @@ public:
     {
         return tfm::format("MitchellNetravaliFilter[radius=%f, B=%f, C=%f]", m_radius, m_B, m_C);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Mitchell-Netravali");
     virtual bool getImGuiNodes() override
     {
@@ -166,7 +166,7 @@ public:
     {
         return "TentFilter[]";
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Tent");
     virtual bool getImGuiNodes() override
     {
@@ -195,7 +195,7 @@ public:
     {
         return "BoxFilter[]";
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Box");
     virtual bool getImGuiNodes() override
     {

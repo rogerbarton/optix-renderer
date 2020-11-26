@@ -3,51 +3,22 @@
 #include <openvdb/tools/LevelSetSphere.h>
 #include <nanovdb/util/OpenToNanoVDB.h>
 
-#include <iostream>
-
 NORI_NAMESPACE_BEGIN
 
-	Volume::Volume(const PropertyList& props)
+	void Volume::loadFromFile()
 	{
-		filename = getFileResolver()->resolve(props.getString("filename"));
-		if (!filename.exists())
-			throw NoriException(tfm::format("Volume: file not found %s", filename).c_str());
-	}
-
-	NoriObject *Volume::cloneAndInit()
-	{
-		auto clone = new Volume{};
-		return clone;
-	}
-
-	void Volume::update(const NoriObject *guiObject)
-	{
-		const auto *gui = static_cast<const Volume *>(guiObject);
-		if (!gui->touched) return;
-		gui->touched = false;
-
-		// reload file if the filename has changed. TODO: reload if file has been touched
-		if (filename.str() != gui->filename.str())
-		{
-			filename = gui->filename;
-			loadFromFile();
-		}
-	}
-
-	void Volume::loadFromFile() {
 		const auto originalExtension = filename.extension();
 
 		// NanoVDB has its own file format
 		// We cache the converted file, and update it if the original .vdb file has been touched
-		if (originalExtension == "vdb")
+		if (originalExtension == ".vdb")
 		{
-			std::filesystem::path filenameStd{filename.str()};
-			std::filesystem::path filenameNvdb{filenameStd};
+			std::filesystem::path filenameNvdb{filename};
 			filenameNvdb.replace_extension(".nvdb");
 
 			// Check if cache exists and is up to date
 			if (!std::filesystem::exists(filenameNvdb) ||
-			    std::filesystem::last_write_time(filenameStd) > std::filesystem::last_write_time(filenameNvdb))
+			    std::filesystem::last_write_time(filename) > std::filesystem::last_write_time(filenameNvdb))
 			{
 				std::cout << "Updating .nvdb cache..." << std::endl;
 				loadOpenVdbAndCacheNanoVdb(filenameNvdb);
@@ -60,24 +31,17 @@ NORI_NAMESPACE_BEGIN
 				loadNanoVdb();
 			}
 		}
-		else if (originalExtension == "nvdb")
+		else if (originalExtension == ".nvdb")
 			loadNanoVdb();
 		else
-			throw NoriException("Volume: file extension .%s unknown.", originalExtension);
+			throw NoriException("Volume: file extension %s unknown.", originalExtension);
 	}
 
-	std::string Volume::toString() const
+	void
+	Volume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
+	                 nanovdb::NanoGrid<float> *&grid)
 	{
-		return tfm::format("Volume[\n"
-		                   "  filename = %s,\n"
-		                   "]",
-		                   filename);
-	}
-
-	void Volume::readGrid(filesystem::path& file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer>& gridHandle,
-	                      nanovdb::NanoGrid<float>*& grid)
-	{
-		gridHandle = nanovdb::io::readGrid(filename.str(), gridId);
+		gridHandle = nanovdb::io::readGrid(filename.string(), gridId);
 
 		// -- Density
 		{
@@ -88,7 +52,7 @@ NORI_NAMESPACE_BEGIN
 
 			if (!grid)
 				throw NoriException("GridHandle %i does not contain a grid with value type float. (%s)",
-				                    gridId, file.str());
+				                    gridId, file.string());
 
 			printGridData(grid);
 		}
@@ -107,13 +71,13 @@ NORI_NAMESPACE_BEGIN
 			printf("(%3i,0,0) NanoVDB cpu: % -4.2f\n", i, densityAcc.getValue(nanovdb::Coord(i, 0, 0)));
 	}
 
-	void Volume::loadOpenVdbAndCacheNanoVdb(const std::filesystem::path& cacheFilename) const
+	void Volume::loadOpenVdbAndCacheNanoVdb(const std::filesystem::path &cacheFilename) const
 	{
 		try
 		{
 			// -- Read all grids from the OpenVDB .vdb file
 			openvdb::initialize();
-			openvdb::io::File file(filename.str());
+			openvdb::io::File file(filename.string());
 			file.open();
 
 			openvdb::FloatGrid::Ptr              ovdbDensityGrid;
@@ -153,26 +117,26 @@ NORI_NAMESPACE_BEGIN
 
 			openvdb::uninitialize();
 		}
-		catch (const std::exception& e)
+		catch (const std::exception &e)
 		{
 			std::cerr << "loadOpenVdbAndCacheNanoVdb exception occurred: " << e.what() << std::endl;
 			openvdb::uninitialize();
 		}
 	}
 
-	void Volume::writeToNanoVdb(const std::string& outfile) const
+	void Volume::writeToNanoVdb(const std::string &outfile) const
 	{
 		try
 		{
 			nanovdb::io::writeGrid(outfile, densityHandle);
 		}
-		catch (const std::exception& e)
+		catch (const std::exception &e)
 		{
 			std::cerr << "Volume: writeToNanoVdb exception occurred: " << e.what() << std::endl;
 		}
 	}
 
-	void Volume::printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer>& gridHandle)
+	void Volume::printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle)
 	{
 		const auto meta = gridHandle.gridMetaData();
 		std::cout << "\t" << meta->gridName() << std::endl;
@@ -180,13 +144,11 @@ NORI_NAMESPACE_BEGIN
 		std::cout << "\t grid class   : " << static_cast<int>(meta->gridClass()) << std::endl;
 	}
 
-	void Volume::printGridData(const nanovdb::NanoGrid<float>* grid)
+	void Volume::printGridData(const nanovdb::NanoGrid<float> *grid)
 	{
 		std::cout << "\t active voxels: " << static_cast<unsigned long>(grid->activeVoxelCount()) << std::endl;
 		std::cout << "\t voxel size   : " << grid->voxelSize()[0] << ", " << grid->voxelSize()[1] << ", "
 		          << grid->voxelSize()[2] << std::endl;
 	}
-
-	NORI_REGISTER_CLASS(Volume, "volume");
 
 NORI_NAMESPACE_END

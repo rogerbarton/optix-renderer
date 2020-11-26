@@ -30,6 +30,7 @@ void Mesh::update(const NoriObject *guiObject)
 	const auto *gui = static_cast<const Mesh *>(guiObject);
 	if(gui->geometryTouched)
 	{
+		m_pdf = DiscretePDF();
 		m_pdf.reserve(getPrimitiveCount());
 		for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
 			m_pdf.append(surfaceArea(i));
@@ -205,6 +206,13 @@ std::string Mesh::toString() const
         m_F.cols(),
         m_bsdf ? indent(m_bsdf->toString()) : std::string("null"),
         m_emitter ? indent(m_emitter->toString()) : std::string("null"));
+}
+
+bool Mesh::getImGuiNodes() {
+	ImGui::PushID(EShape);
+	touched |= Shape::getImGuiNodes();
+	ImGui::PopID();
+	return touched;
 }
 
 NORI_NAMESPACE_END

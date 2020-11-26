@@ -27,7 +27,7 @@
 
 	</emitter>-->
 
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="-1.25,0,0"/>
 		<float name="radius" value="0.1"/>
 		<emitter type="area">
@@ -36,9 +36,9 @@
 		<bsdf type="diffuse">
 			<color name="albedo" value="0,0,0"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="-3.75,0,0"/>
 		<float name="radius" value="0.03333"/>
 		<emitter type="area">
@@ -47,9 +47,9 @@
 		<bsdf type="diffuse">
 			<color name="albedo" value="0,0,0"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="1.25,0,0"/>
 		<float name="radius" value="0.3"/>
 		<emitter type="area">
@@ -58,9 +58,9 @@
 		<bsdf type="diffuse">
 			<color name="albedo" value="0,0,0"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="sphere">
+	<shape type="sphere">
 		<point name="center" value="3.75,0,0"/>
 		<float name="radius" value="0.9"/>
 		<emitter type="area">
@@ -69,44 +69,44 @@
 		<bsdf type="diffuse">
 			<color name="albedo" value="0,0,0"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plate1.obj"/>
 		<bsdf type="microfacet">
 			<color name="kd" value="0.0175, 0.0225, 0.0325"/>
 			<float name="alpha" value="0.005"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plate2.obj"/>
 		<bsdf type="microfacet">
 			<color name="kd" value="0.0175, 0.0225, 0.0325"/>
 			<float name="alpha" value="0.02"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plate3.obj"/>
 		<bsdf type="microfacet">
 			<color name="kd" value="0.0175, 0.0225, 0.0325"/>
 			<float name="alpha" value="0.05"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="plate4.obj"/>
 		<bsdf type="microfacet">
 			<color name="kd" value="0.0175, 0.0225, 0.0325"/>
 			<float name="alpha" value="0.1"/>
 		</bsdf>
-	</mesh>
+	</shape>
 
-	<mesh type="obj">
+	<shape type="obj">
 		<string name="filename" value="floor.obj"/>
 		<bsdf type="diffuse">
 			<color name="albedo" value="0.1 0.1 0.1"/>
 		</bsdf>
-	</mesh>
+	</shape>
 </scene>

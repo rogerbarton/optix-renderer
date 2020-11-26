@@ -289,7 +289,7 @@ NORI_NAMESPACE_BEGIN
 		);
 	}
 
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 
 	bool Scene::getImGuiNodes()
 	{

@@ -77,7 +77,7 @@ public:
                            "]",
                            sigma_r, sigma_d, inner_range);
     }
-#ifndef NORI_USE_NANOGUI
+#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Simple Denoier");
 	virtual bool getImGuiNodes() override
 	{

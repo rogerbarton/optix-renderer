@@ -19,7 +19,7 @@
 		<integer name="height" value="800"/>
 	</camera>
   
-  <mesh type="obj">
+  <shape type="obj">
     <string name="filename" value="../meshes/camelhead2.obj"/>
 
     <!-- set all values to 0 for starter -->
@@ -36,7 +36,7 @@
       <float name="clearcoatGloss" value="0"/>-->
       <color name="baseColor" value=".819,.67,.157"/>
     </bsdf>
-  </mesh>
+  </shape>
 
   <emitter type="envmap">
     <texture type="constant_color" name="albedo">
