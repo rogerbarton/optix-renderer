@@ -104,6 +104,7 @@ add_executable(nori
   src/PreviewIntegrator.cpp
   src/isophase.cpp
   src/anisophase.cpp
+  src/spotlight.cpp
 )
 
 if(NORI_USE_VOLUMES)
