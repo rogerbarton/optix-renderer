@@ -46,6 +46,15 @@ struct Histogram
         cumulative += value;
         map[cumulative] = upair(i, j);
     }
+
+    int size() const {
+        return map.size();
+    }
+
+    void clear() {
+        cumulative = 0.f;
+        map.clear();
+    }
 };
 
 /**

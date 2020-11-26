@@ -81,7 +81,7 @@ public:
         return tfm::format("Independent[sampleCount=%i]", m_sampleCount);
     }
 
-    std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram &) override
+    std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block) override
     {
         // Independent sampler simply takes all pixels once
         Vector2i size = block.getSize();

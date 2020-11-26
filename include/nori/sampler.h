@@ -104,9 +104,15 @@ public:
     void setSampleCount(int sampleCount) { m_sampleCount = sampleCount; }
 
     /// create pixels to sample based on cumulative variance probabilities
-    virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block, const Histogram &histogram) = 0;
+    virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block) = 0;
 
-    virtual bool computeVariance() const { return false; }
+    /// returns true if this block must be rendered
+    virtual bool computeVariance(const ImageBlock& block) {return false;}
+
+    /// returns true if this sampler is adaptive or not (if we should compute the variance)
+    virtual bool isAdaptive() const { return false; }
+
+    virtual void writeVarianceMatrix(ImageBlock& block, bool fullColor=false) {}
 
     /**
      * \brief Return the type of object (i.e. Mesh/Sampler/etc.) 
