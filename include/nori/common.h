@@ -271,6 +271,11 @@ extern float fresnel(float cosThetaI, float extIOR, float intIOR);
  */
 extern filesystem::resolver *getFileResolver();
 
+/// computes the variance from a given imageblock
+class Color3f;// forward declaration
+class ImageBlock; // fw decl.
+Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock& block);
+
 NORI_NAMESPACE_END
 
 #endif /* __NORI_COMMON_H */

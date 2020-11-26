@@ -137,6 +137,16 @@ std::string ImageBlock::toString() const {
         m_offset.toString(), m_size.toString());
 }
 
+std::ostream& operator<<(std::ostream& out, const ImageBlock& block) {
+    for(int i = block.getBorderSize(); i < block.getSize().x()+block.getBorderSize(); i++) {
+        for(int j = block.getBorderSize(); j < block.getSize().y()+block.getBorderSize(); j++) {
+            out << tfm::format("%.2f",block(i,j).divideByFilterWeight().getLuminance()) << " ";
+        }
+        out << std::endl;
+    }
+    return out;
+}
+
 BlockGenerator::BlockGenerator(const Vector2i &size, int blockSize)
         : m_size(size), m_blockSize(blockSize) {
     m_numBlocks = Vector2i(

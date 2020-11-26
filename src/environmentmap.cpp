@@ -111,7 +111,6 @@ public:
 		lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 
 		lRec.pdf = pdf(lRec);
-
 		return eval(lRec) / lRec.pdf;
 	}
 
@@ -211,7 +210,7 @@ private:
 				probabilities(i, j) = col.getLuminance(); // bias to possibly select every one once
 			}
 		}
-		probabilities.normalize();
+		//probabilities.normalize();
 		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)

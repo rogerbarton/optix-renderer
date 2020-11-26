@@ -21,6 +21,8 @@
 #include <Eigen/LU>
 #include <filesystem/resolver.h>
 #include <iomanip>
+#include <nori/color.h>
+#include <nori/block.h>
 
 #if defined(PLATFORM_LINUX)
 #include <malloc.h>
@@ -332,6 +334,36 @@ float fresnel(float cosThetaI, float extIOR, float intIOR)
     float Rp = (etaT * cosThetaI - etaI * cosThetaT) / (etaT * cosThetaI + etaI * cosThetaT);
 
     return (Rs * Rs + Rp * Rp) / 2.0f;
+}
+
+Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock &block)
+{
+    Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize().y());
+    for (int i = 0; i < block.getSize().x(); i++)
+    {
+        for (int j = 0; j < block.getSize().y(); j++)
+        {
+            Color3f curr = Color3f(0.f);
+
+            for (int k = -1; k < 2; k++)
+            {
+                for (int l = -1; l < 2; l++)
+                {
+                    Color3f blockCol(0.f);
+                    if (l == 0 && k == 0)
+                    {
+                        curr += 8.f * block(i + k + block.getBorderSize(), j + l + block.getBorderSize()).divideByFilterWeight();
+                    }
+                    else
+                    {
+                        curr -= 1.f * block(i + k + block.getBorderSize(), j + l + block.getBorderSize()).divideByFilterWeight();
+                    }
+                }
+            }
+            variance(i, j) = curr.cwiseAbs();
+        }
+    }
+    return variance;
 }
 
 NORI_NAMESPACE_END

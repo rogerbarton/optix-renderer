@@ -5,7 +5,7 @@
 NORI_NAMESPACE_BEGIN
 
 /*
- * THis class implements adaptive sampling based on the variance of the current image
+ * This class implements adaptive sampling based on the variance of the current image
  * All functions except getSampleIndices are the same as for the independent sampler
  * 
  * This class is based on "Robust Adaptive Sampling for Monte-Carlo-Based Rendering",
@@ -82,6 +82,8 @@ public:
             // after many retries, go to next
             return false;
         }
+
+        // check if we must exit, return false to stop rendering this block
         if (m_finished)
             return false;
 
@@ -91,71 +93,33 @@ public:
         if (m_sampleRound < initialUniform)
             return true; // true to render and don't compute variance
 
-        Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(m_oldVariance.rows(), m_oldVariance.cols());
-        for (int i = block.getBorderSize(); i < block.rows() - block.getBorderSize(); i++)
-        {
-            for (int j = block.getBorderSize(); j < block.cols() - block.getBorderSize(); j++)
-            {
-                Eigen::Array<float, -1, -1> weights(3, 3);
-                weights << 0.f, 1.f, 1.f, 1.f, -3.f, 0.f, 0.f, 0.f, 0.f;
+        Eigen::Matrix<Color3f, -1, -1> variance = computeVarianceFromImage(block);
 
-                // we use array multiplication == cwise product
-                Color4f curr = Color4f(0.f);
-                for (int k = -1; k < 2; k++)
-                {
-                    for (int l = -1; l < 2; l++)
-                    {
-                        if (l == 0 && k == 0)
-                        {
-                            curr -= 8.f * block(i + k, j + l);
-                        }
-                        else
-                        {
-                            curr += block(i + k, j + l);
-                        }
-                    }
-                }
-                Color3f sum = curr.divideByFilterWeight();
-                variance(i - block.getBorderSize(), j - block.getBorderSize()) = sum;
-            }
-        }
-
-        if (variance.sum().getLuminance() < Epsilon)
+        if (std::abs(variance.sum().getLuminance()) < Epsilon)
         {
-            m_oldNorm = (m_oldVariance - variance).sum().getLuminance();
+            m_oldNorm = std::abs((m_oldVariance - variance).sum().getLuminance());
             m_oldVariance = variance;
             return false; // stop immediately, because we have 0 variance in this block.
         }
-
-        //variance.normalize();
 
         for (int i = 0; i < variance.rows(); i++)
         {
             for (int j = 0; j < variance.cols(); j++)
             {
-                histogram.add_element(i, j, variance(i, j).getLuminance());
+                histogram.add_element(i, j, std::abs(variance(i, j).getLuminance()));
             }
         }
 
         // if decreasing variance, render again
-        float newNorm = (m_oldVariance - variance).sum().getLuminance();
-        if (newNorm < m_oldNorm)
-        {
-            m_notImproving = 0; // reset m_notImproving, because we had an improvement
-        }
-        /* we want X samples not improving to stop */
-        else if (m_notImproving < keepImproving)
-        {
-            m_notImproving++;
-        }
-        else
-        {
-            /* not decreasing anymore, stop now */
-            return false;
-        }
+        float newNorm = std::abs((m_oldVariance - variance).sum().getLuminance());
 
         m_oldNorm = newNorm;
         m_oldVariance = variance;
+
+        // stop improving this block.
+        if (newNorm < m_oldNorm)
+            return false;
+
         return true; // rerender
     }
 
@@ -164,6 +128,7 @@ public:
      */
     std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block) override
     {
+        counter++;
         Vector2i size = block.getSize();
         std::vector<std::pair<int, int>> result;
         result.reserve(size.x() * size.y());
@@ -195,7 +160,7 @@ public:
             }
             else
             {
-                throw NoriException("Adaptive: histogram could not find data point...");
+                throw NoriException("Adaptive: histogram could not find data point..., round: %i, cumultative: %f", m_sampleRound, histogram.cumulative);
             }
         }
 
@@ -205,14 +170,28 @@ public:
     void writeVarianceMatrix(ImageBlock &block, bool fullColor) override
     {
         // write my variance matrix in here
+
+        // there are several things one could write
+        // a) the count of samples one pixel had
+        // b) the variance (colored)
+        // c) the variance (luminance)
+        // d) the variance (either way) but on the whole block as one number
+
+        //Color3f col2Write = Color3f(counter - m_sampleCount * initialUniform) / 255.f;
+        /*if(fullColor)
+            col2Write = m_oldVariance.mean().cwiseAbs();
+        else
+            col2Write = Color3f(std::abs(m_oldVariance.mean().getLuminance()));
+        */
         for (int i = 0; i < m_oldVariance.rows(); i++)
         {
             for (int j = 0; j < m_oldVariance.cols(); j++)
             {
+                //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
                 if (fullColor)
-                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(m_oldVariance(i, j).cwiseAbs()));
+                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(m_oldVariance(i, j)));
                 else
-                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(std::abs(m_oldVariance(i, j).getLuminance())));
+                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(m_oldVariance(i, j).getLuminance()));
             }
         }
     }
@@ -272,6 +251,8 @@ private:
     int m_notImproving = 0;
     int initialUniform;
     int maxRetries;
+
+    int counter = 0;
 };
 
 NORI_REGISTER_CLASS(AdaptiveSampler, "adaptive");

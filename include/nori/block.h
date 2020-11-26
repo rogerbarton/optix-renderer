@@ -114,6 +114,7 @@ public:
 
     /// Return a human-readable string summary
     std::string toString() const;
+
 protected:
     Point2i m_offset;
     Vector2i m_size;
@@ -126,6 +127,9 @@ protected:
     uint32_t m_blockId; // id given by the block generator
     mutable tbb::mutex m_mutex;
 };
+
+std::ostream& operator<<(std::ostream& out, const ImageBlock& block);
+
 
 /**
  * \brief Spiraling block generator

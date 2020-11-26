@@ -158,7 +158,7 @@ void RenderThread::renderThreadMain()
 	/* Create a block generator (i.e. a work scheduler) */
 	Vector2i outputSize = camera->getOutputSize();
 
-	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? NORI_BLOCK_SIZE_ADAPTIVE : NORI_BLOCK_SIZE;
+	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? 8 : NORI_BLOCK_SIZE;
 	BlockGenerator blockGenerator(outputSize, blockSize);
 
 	Timer timer;
@@ -265,7 +265,7 @@ void RenderThread::renderThreadMain()
 	if (m_renderScene->getSampler()->isAdaptive())
 	{
 		BlockGenerator blockGenerator(outputSize, blockSize);
-		ReconstructionFilter* rf = static_cast<ReconstructionFilter*>(NoriObjectFactory::createInstance("box", PropertyList()));
+		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box", PropertyList()));
 		ImageBlock currVarBlock(Vector2i(blockSize), rf);
 
 		ImageBlock fullVarianceMatrix(camera->getOutputSize(), rf);
@@ -277,7 +277,7 @@ void RenderThread::renderThreadMain()
 			blockGenerator.next(currVarBlock);
 			int id = currVarBlock.getBlockId();
 			currVarBlock.clear();
-			samplers.at(id)->writeVarianceMatrix(currVarBlock, true);
+			samplers.at(id)->writeVarianceMatrix(currVarBlock, false);
 
 			fullVarianceMatrix.put(currVarBlock);
 		}
@@ -286,6 +286,8 @@ void RenderThread::renderThreadMain()
 
 		delete rf;
 	}
+
+	std::cout << "Mean Luminance of variance of m_block: " << computeVarianceFromImage(m_block).mean().getLuminance() << std::endl;
 
 	//delete m_scene;
 	//m_scene = nullptr;
