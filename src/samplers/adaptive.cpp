@@ -40,7 +40,7 @@ public:
             block.getOffset().x(),
             block.getOffset().y());
         // .y() did not work, using [1] instead
-        m_oldVariance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize()[1]);
+        m_oldVariance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().y(), block.getSize().x());
         dpdf.reserve(m_oldVariance.size());
     }
     void generate() override {}

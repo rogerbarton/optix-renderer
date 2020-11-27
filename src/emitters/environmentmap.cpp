@@ -82,8 +82,8 @@ public:
 		size_t elem = dpdf.sample(sample.x());
 
 		// convert result (kind of uv coords) into direction
-		float i = int(elem / m_map->getWidth()) / (float)m_map->getHeight();
-		float j = int(elem % m_map->getWidth()) / (float)m_map->getWidth();
+		float i = int(elem / m_map->getHeight()) / (float)m_map->getHeight();
+		float j = int(elem % m_map->getHeight()) / (float)m_map->getWidth();
 
 		Vector3f v;
 		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
@@ -196,7 +196,7 @@ private:
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
-				dpdf.append(col.getLuminance()); // bias to possibly select every one once
+				dpdf.append(col.getLuminance());
 			}
 		}
 
