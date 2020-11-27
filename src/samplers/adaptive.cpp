@@ -18,7 +18,7 @@ public:
     explicit AdaptiveSampler(const PropertyList &propList)
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
-        initialUniform = propList.getInteger("initialUniform", 2);
+        initialUniform = clamp(propList.getInteger("initialUniform", 2), 1, m_sampleCount);
     }
     NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
     NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
@@ -136,6 +136,8 @@ public:
         std::vector<std::pair<int, int>> result;
         result.reserve(size.x() * size.y());
 
+        totalSamples += size.x() * size.y();
+
         if (dpdf.size() == 0)
         {
             // uniform sampling, every pixel
@@ -161,8 +163,6 @@ public:
             int col = elem % size.x();
             result.push_back({row,col});
         }
-
-        totalSamples += size.x() * size.y();
 
         return result;
     }

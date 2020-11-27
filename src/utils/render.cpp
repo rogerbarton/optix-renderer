@@ -232,6 +232,9 @@ void RenderThread::renderThreadMain()
 		};
 		tbb::parallel_for(range, map);
 
+		if (m_renderStatus == ERenderStatus::Interrupt)
+			break;
+
 		// do these in serial, not parallel (potential race condition)
 		for (int i = 0; i < samplers.size(); i++)
 		{

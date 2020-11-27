@@ -338,11 +338,11 @@ float fresnel(float cosThetaI, float extIOR, float intIOR)
 
 Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock &block)
 {
-    Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize().y());
+    Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize()[1]);
     const int bs = block.getBorderSize();
-    for (int i = 0; i < block.getSize().x(); i++)
+    for (int i = 1; i < block.getSize().x()-1; i++)
     {
-        for (int j = 0; j < block.getSize().y(); j++)
+        for (int j = 1; j < block.getSize().y()-1; j++)
         {
             Color4f middle = 16.f * block(i + bs, j + bs);
             Color4f all = block.block(i + bs - 1, j + bs - 1, 3, 3).sum();
