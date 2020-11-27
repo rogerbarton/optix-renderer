@@ -41,11 +41,13 @@ public:
     void stopRendering();
 	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 
+#ifdef NORI_USE_IMGUI
 	/**
 	 * Draws gui specific to rendering. Does not draw the scene gui.
 	 */
 	void drawRenderGui();
 	void drawSceneGui();
+#endif
 
 	Scene *m_guiScene       = nullptr;
 	Scene *m_renderScene    = nullptr;

@@ -102,6 +102,10 @@ public:
     /// sets the current sample round
     void setSampleRound(int sampleRound) { m_sampleRound = sampleRound; }
     void setSampleCount(int sampleCount) { m_sampleCount = sampleCount; }
+    
+    unsigned long long getTotalSamples() const { return totalSamples; }
+    void setTotalSamples(unsigned long long i) { totalSamples = i; }
+    void addToTotalSamples(unsigned long long i) { totalSamples += i; }
 
     /// create pixels to sample based on cumulative variance probabilities
     virtual std::vector<std::pair<int, int>> getSampleIndices(const ImageBlock &block) = 0;
@@ -132,12 +136,23 @@ public:
 		touched |= ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
 		ImGui::NextColumn();
 		ImGui::PopID();
+
+        ImGui::PushID(42);
+        ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("totalSamples", ImGuiLeafNodeFlags, "Total Samples Placed");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Text("%llu", totalSamples);
+		ImGui::NextColumn();
+		ImGui::PopID();
+
 		return touched;
 	}
 #endif
 protected:
     int m_sampleCount;
     int m_sampleRound;
+    unsigned long long totalSamples = 0;
 };
 
 NORI_NAMESPACE_END

@@ -20,13 +20,13 @@
 #include <filesystem/path.h>
 
 #ifdef DISABLE_NORI_GUI
-#  include <nori/render.h>
+#include <nori/render.h>
 #else
-#  ifdef NORI_USE_NANOGUI
-#    include <nori/gui.h>
-#  else // NORI_USE_IMGUI
-#    include <nori/ImguiScreen.h>
-#  endif
+#ifdef NORI_USE_NANOGUI
+#include <nori/gui.h>
+#else // NORI_USE_IMGUI
+#include <nori/ImguiScreen.h>
+#endif
 #endif
 
 int main(int argc, char **argv)
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();
-#else
+#else /* NORI_USE_IMGUI */
         screen->mainloop();
         delete screen;
 
@@ -89,10 +89,12 @@ int main(int argc, char **argv)
             if (path.extension() == "xml")
             {
                 /* Render the XML scene file */
-                m_renderThread.renderScene(filename);
+                m_renderThread.loadScene(path.str());
                 // waiting until rendere is finished
                 while (m_renderThread.isBusy())
-                    ;
+                {
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
             }
             else
             {

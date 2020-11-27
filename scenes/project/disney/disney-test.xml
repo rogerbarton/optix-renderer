@@ -1,7 +1,8 @@
 <scene>
 
-	<sampler type="independent">
-		<integer name="sampleCount" value="512"/>
+	<sampler type="adaptive">
+		<integer name="sampleCount" value="100"/>
+    <integer name="initialUniform" value="2"/>
 	</sampler>
 
 	<integrator type="path_mis"/>
@@ -39,13 +40,13 @@
   </shape>
 
   <emitter type="envmap">
-    <texture type="constant_color" name="albedo">
+    <!--<texture type="constant_color" name="albedo">
       <color name="value" value="0.1,0.1,0.1"/>
-    </texture>
-    <!--<texture type="png_texture" name="albedo">
+    </texture>-->
+    <texture type="png_texture" name="albedo">
       <string name="filename" value="../res/small_cave_2k.hdr"/>
       <vector name="eulerAngles" value="90,90,180"/>
-    </texture>-->
+    </texture>
   </emitter>
   
   <emitter type="point">

@@ -168,11 +168,9 @@ endif(NORI_USE_GUI)
 
 if(NOT NORI_USE_GUI)
   message(STATUS "NORI_USE_GUI is off")
-  message(STATUS "Make sure to use the right gcc version:")
-  message(STATUS "module load new gcc/4.9.2 cmake/3.13.5")
 
   # Disable flag for preprocessor
-  compile_definitions(-DDISABLE_NORI_GUI -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ACCESS)
+  target_compile_definitions(nori PRIVATE -DDISABLE_NORI_GUI)
 else()
   if(NORI_USE_IMGUI)
     target_compile_definitions(nori PRIVATE -DNORI_USE_IMGUI)

@@ -173,7 +173,7 @@ void RenderThread::renderThreadMain()
 	samplers.resize(numBlocks);
 
 	//numSamples = m_renderScene->getSampler()->isAdaptive() ? 1 : numSamples; // for adaptive, we only use one sample
-
+	std::cout << std::endl;
 	for (uint32_t k = 0; k < numSamples; ++k)
 	{
 		m_progress = k / float(numSamples);
@@ -232,11 +232,18 @@ void RenderThread::renderThreadMain()
 		};
 		tbb::parallel_for(range, map);
 
+		// do these in serial, not parallel (potential race condition)
+		for (int i = 0; i < samplers.size(); i++)
+		{
+			m_renderScene->getSampler()->addToTotalSamples(samplers.at(i)->getTotalSamples());
+			samplers.at(i)->setTotalSamples(0);
+		}
+
 		blockGenerator.reset();
 	}
 
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
-
+	cout << "Total Samples Placed: " << m_renderScene->getSampler()->getTotalSamples() << std::endl;
 	if (m_previewMode || m_renderStatus == ERenderStatus::Interrupt)
 	{
 		// stop the rendering here, don't save
@@ -329,6 +336,7 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 	}
 }
 
+#ifdef NORI_USE_IMGUI
 void RenderThread::drawRenderGui()
 {
 	m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
@@ -371,5 +379,6 @@ void RenderThread::drawSceneGui()
 	if ((m_autoUpdate || m_previewMode) && m_guiSceneTouched)
 		restartRender();
 }
+#endif
 
 NORI_NAMESPACE_END

@@ -17,9 +17,7 @@ public:
     explicit AdaptiveSampler(const PropertyList &propList)
     {
         m_sampleCount = propList.getInteger("sampleCount", 1);
-        keepImproving = propList.getInteger("keepImproving", 3);
         initialUniform = propList.getInteger("initialUniform", 2);
-        maxRetries = propList.getInteger("maxRetries", 1000);
     }
     NORI_OBJECT_DEFAULT_CLONE(AdaptiveSampler)
     NORI_OBJECT_DEFAULT_UPDATE(AdaptiveSampler)
@@ -30,9 +28,8 @@ public:
         cloned->m_sampleCount = m_sampleCount;
         cloned->m_sampleRound = m_sampleRound;
         cloned->m_random = m_random;
-        cloned->keepImproving = keepImproving;
         cloned->initialUniform = initialUniform;
-        cloned->maxRetries = maxRetries;
+        //cloned->totalSamples = totalSamples;
         return std::move(cloned);
     }
 
@@ -62,10 +59,9 @@ public:
     {
         return tfm::format("AdaptiveSampler[\n"
                            "  sampleCount = %i,\n"
-                           "  keepImproving = %i,\n"
                            "  initialUniform = %i\n"
                            "  ]",
-                           m_sampleCount, keepImproving, initialUniform);
+                           m_sampleCount, initialUniform);
     }
 
     bool computeVariance(const ImageBlock &block) override
@@ -77,11 +73,11 @@ public:
             m_oldVariance.setZero();
             m_oldNorm = 10000.f; // set arbitrary high
         }
-        else if (m_sampleRound == maxRetries)
+        /*else if (m_sampleRound == maxRetries)
         {
             // after many retries, go to next
             return false;
-        }
+        }*/
 
         // check if we must exit, return false to stop rendering this block
         if (m_finished)
@@ -113,12 +109,12 @@ public:
         // if decreasing variance, render again
         float newNorm = std::abs((m_oldVariance - variance).sum().getLuminance());
 
+        // stop improving this block.
+        if (newNorm > m_oldNorm)
+            return false;
+
         m_oldNorm = newNorm;
         m_oldVariance = variance;
-
-        // stop improving this block.
-        if (newNorm < m_oldNorm)
-            return false;
 
         return true; // rerender
     }
@@ -164,6 +160,8 @@ public:
             }
         }
 
+        totalSamples += size.x() * size.y();
+
         return result;
     }
 
@@ -202,30 +200,12 @@ public:
     {
         touched |= Sampler::getImGuiNodes();
 
-        ImGui::PushID(1);
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("keepImproving", ImGuiLeafNodeFlags, "Keep Improving");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragInt("##value", &keepImproving, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
         ImGui::PushID(2);
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("initialUniform", ImGuiLeafNodeFlags, "Initial Uniform");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
         touched |= ImGui::DragInt("##value", &initialUniform, 1, 1, m_sampleCount, "%d%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        ImGui::PushID(3);
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("maxRetries", ImGuiLeafNodeFlags, "Max. Retries");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragInt("##value", &maxRetries, 1, 1, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -243,14 +223,11 @@ protected:
 
 private:
     pcg32 m_random;
-    int keepImproving;
     bool m_finished = false;
     Histogram histogram;
     Eigen::Matrix<Color3f, -1, -1> m_oldVariance;
     float m_oldNorm = 10000.f; // arbitrary big
-    int m_notImproving = 0;
     int initialUniform;
-    int maxRetries;
 
     int counter = 0;
 };

@@ -46,7 +46,9 @@ public:
     {
         std::unique_ptr<Independent> cloned(new Independent());
         cloned->m_sampleCount = m_sampleCount;
+        cloned->m_sampleRound = m_sampleRound;
         cloned->m_random = m_random;
+        //cloned->totalSamples = totalSamples;
         return std::move(cloned);
     }
 
@@ -95,6 +97,8 @@ public:
                 result.push_back(std::make_pair(i, j));
             }
         }
+
+        totalSamples += size.x() * size.y();
 
         return result;
     }

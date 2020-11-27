@@ -1,8 +1,8 @@
 #include <nori/transform.h>
 #ifdef NORI_USE_IMGUI
 #include <nori/ImguiHelpers.h>
-#include <Eigen/Geometry>
 #endif
+#include <Eigen/Geometry>
 
 NORI_NAMESPACE_BEGIN
 

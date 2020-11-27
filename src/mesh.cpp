@@ -27,17 +27,17 @@ NORI_NAMESPACE_BEGIN
 
 void Mesh::update(const NoriObject *guiObject)
 {
-	const auto *gui = static_cast<const Mesh *>(guiObject);
-	if(gui->geometryTouched)
-	{
-		m_pdf = DiscretePDF();
-		m_pdf.reserve(getPrimitiveCount());
-		for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
-			m_pdf.append(surfaceArea(i));
-		m_pdf.normalize();
-	}
+    const auto *gui = static_cast<const Mesh *>(guiObject);
+    if (gui->geometryTouched)
+    {
+        m_pdf = DiscretePDF();
+        m_pdf.reserve(getPrimitiveCount());
+        for (uint32_t i = 0; i < getPrimitiveCount(); ++i)
+            m_pdf.append(surfaceArea(i));
+        m_pdf.normalize();
+    }
 
-	Shape::update(guiObject);
+    Shape::update(guiObject);
 }
 
 void Mesh::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
@@ -208,11 +208,14 @@ std::string Mesh::toString() const
         m_emitter ? indent(m_emitter->toString()) : std::string("null"));
 }
 
-bool Mesh::getImGuiNodes() {
-	ImGui::PushID(EShape);
-	touched |= Shape::getImGuiNodes();
-	ImGui::PopID();
-	return touched;
+#ifdef NORI_USE_IMGUI
+bool Mesh::getImGuiNodes()
+{
+    ImGui::PushID(EShape);
+    touched |= Shape::getImGuiNodes();
+    ImGui::PopID();
+    return touched;
 }
+#endif
 
 NORI_NAMESPACE_END
