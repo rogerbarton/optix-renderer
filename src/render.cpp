@@ -158,7 +158,7 @@ void RenderThread::renderThreadMain()
 	/* Create a block generator (i.e. a work scheduler) */
 	Vector2i outputSize = camera->getOutputSize();
 
-	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? 8 : NORI_BLOCK_SIZE;
+	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? NORI_BLOCK_SIZE_ADAPTIVE : NORI_BLOCK_SIZE;
 	BlockGenerator blockGenerator(outputSize, blockSize);
 
 	Timer timer;

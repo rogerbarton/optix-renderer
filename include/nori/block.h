@@ -28,7 +28,7 @@
 #include <tbb/mutex.h>
 
 #define NORI_BLOCK_SIZE 32 /* Block size used for parallelization */
-#define NORI_BLOCK_SIZE_ADAPTIVE 16
+#define NORI_BLOCK_SIZE_ADAPTIVE 4
 
 NORI_NAMESPACE_BEGIN
 
