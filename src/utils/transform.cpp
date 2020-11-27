@@ -39,34 +39,46 @@ bool Transform::getImGuiNodes()
     ImGui::PushID(2);
     ImGui::TreeNodeEx("eulerAngles", ImGuiLeafNodeFlags, "Euler Angles");
     ImGui::SameLine();
-	ImGui::HelpMarker("Rotation is read-only");
+    ImGui::HelpMarker("Use with caution!");
     ImGui::NextColumn();
     ImGui::SetNextItemWidth(-1);
-	ImGui::Text("%f, %f, %f", eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
+    bool rotMatTouched = ImGui::DragVector3f("##value", &eulerAngles, 0.5f, -360, 360, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::PopID();
+    ImGui::NextColumn();
+    touched |= rotMatTouched;
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushID(3);
+    ImGui::TreeNodeEx("scale", ImGuiLeafNodeFlags, "Scale");
+    ImGui::NextColumn();
+    ImGui::SetNextItemWidth(-1);
+    touched |= ImGui::DragVector3f("##value", &scale, 0.01f, 0.01f);
     ImGui::PopID();
     ImGui::NextColumn();
 
-	ImGui::AlignTextToFramePadding();
-	ImGui::PushID(3);
-	ImGui::TreeNodeEx("scale", ImGuiLeafNodeFlags, "Scale");
-	ImGui::NextColumn();
-	ImGui::SetNextItemWidth(-1);
-	touched |= ImGui::DragVector3f("##value", &scale, 0.01f, 0.01f);
-	ImGui::PopID();
-	ImGui::NextColumn();
+    ImGui::NextColumn();
+    ImGui::NextColumn();
+    if (ImGui::Button("Reset"))
+    {
+        touched = true;
+        clear();
+    }
 
-	ImGui::NextColumn();
-	ImGui::NextColumn();
-	if (ImGui::Button("Reset"))
-	{
-		touched = true;
-		clear();
-	}
-
-	if (!touched)
+    if (!touched)
         return touched;
 
-	// Apply translation and scaling, leave rotation
+    // Apply translation and scaling
+    if (rotMatTouched)
+    {
+        eulerAngles *= M_PI / 180.f;
+        rotMat = Eigen::Quaternionf(
+                     Eigen::Quaternionf::Identity() *
+                     Eigen::AngleAxisf(eulerAngles.x(), Eigen::Vector3f::UnitZ()) *
+                     Eigen::AngleAxisf(eulerAngles.y(), Eigen::Vector3f::UnitX())) *
+                 Eigen::AngleAxisf(eulerAngles.z(), Eigen::Vector3f::UnitZ())
+                     .toRotationMatrix();
+    }
+
     m_transform.col(3).head(3) = origin;
     m_transform.block(0, 0, 3, 3) = Eigen::Scaling(scale) * rotMat;
 
@@ -84,9 +96,10 @@ Transform Transform::operator*(const Transform &t) const
 }
 void Transform::update(const Transform &guiObject)
 {
-	if(!guiObject.touched) return;
-	guiObject.touched = false;
-	*this = guiObject;
+    if (!guiObject.touched)
+        return;
+    guiObject.touched = false;
+    *this = guiObject;
 }
 
 NORI_NAMESPACE_END
