@@ -141,9 +141,9 @@ public:
         if (dpdf.size() == 0)
         {
             // uniform sampling, every pixel
-            for (int i = 0; i < size.x(); i++)
+            for (int i = 0; i < size.y(); i++)
             {
-                for (int j = 0; j < size.y(); j++)
+                for (int j = 0; j < size.x(); j++)
                 {
                     result.push_back({i, j});
                 }
