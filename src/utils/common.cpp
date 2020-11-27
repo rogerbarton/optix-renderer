@@ -339,28 +339,23 @@ float fresnel(float cosThetaI, float extIOR, float intIOR)
 Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock &block)
 {
     Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize().y());
+    const int bs = block.getBorderSize();
     for (int i = 0; i < block.getSize().x(); i++)
     {
         for (int j = 0; j < block.getSize().y(); j++)
         {
-            Color3f curr = Color3f(0.f);
+            Color4f middle = 8.f * block(i + bs, j + bs);
+            Color4f out = block(i + bs - 1, j + bs - 1);
+            out += block(i + bs - 1, j + bs - 1);
+            out += block(i + bs - 1, j + bs    );
+            out += block(i + bs - 1, j + bs + 1);
+            out += block(i + bs,     j + bs - 1);
+            out += block(i + bs,     j + bs + 1);
+            out += block(i + bs + 1, j + bs - 1);
+            out += block(i + bs + 1, j + bs    );
+            out += block(i + bs + 1, j + bs + 1);
 
-            for (int k = -1; k < 2; k++)
-            {
-                for (int l = -1; l < 2; l++)
-                {
-                    Color3f blockCol(0.f);
-                    if (l == 0 && k == 0)
-                    {
-                        curr += 8.f * block(i + k + block.getBorderSize(), j + l + block.getBorderSize()).divideByFilterWeight();
-                    }
-                    else
-                    {
-                        curr -= 1.f * block(i + k + block.getBorderSize(), j + l + block.getBorderSize()).divideByFilterWeight();
-                    }
-                }
-            }
-            variance(i, j) = curr.cwiseAbs();
+            variance(i, j) = (middle.divideByFilterWeight() - out.divideByFilterWeight()).cwiseAbs();
         }
     }
     return variance;

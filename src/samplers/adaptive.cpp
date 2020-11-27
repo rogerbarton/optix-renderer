@@ -91,9 +91,10 @@ public:
 
         Eigen::Matrix<Color3f, -1, -1> variance = computeVarianceFromImage(block);
 
+        float var_diff = std::abs((m_oldVariance - variance).sum().getLuminance());
         if (std::abs(variance.sum().getLuminance()) < Epsilon)
         {
-            m_oldNorm = std::abs((m_oldVariance - variance).sum().getLuminance());
+            m_oldNorm = var_diff;
             m_oldVariance = variance;
             return false; // stop immediately, because we have 0 variance in this block.
         }
@@ -107,7 +108,7 @@ public:
         }
 
         // if decreasing variance, render again
-        float newNorm = std::abs((m_oldVariance - variance).sum().getLuminance());
+        float newNorm = var_diff;
 
         // stop improving this block.
         if (newNorm > m_oldNorm)
