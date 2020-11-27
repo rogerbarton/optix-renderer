@@ -345,7 +345,7 @@ Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock &block)
         for (int j = 0; j < block.getSize().y(); j++)
         {
             Color4f middle = 16.f * block(i + bs, j + bs);
-            Color4f all = block.block(i + bs - 1, j + bs - i, 3, 3).sum();
+            Color4f all = block.block(i + bs - 1, j + bs - 1, 3, 3).sum();
             variance(i, j) = (all.divideByFilterWeight() - middle.divideByFilterWeight()).cwiseAbs();
         }
     }
