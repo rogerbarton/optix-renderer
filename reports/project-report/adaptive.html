@@ -35,6 +35,11 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
+            <h4>General Comment</h4>
+            <p>All images shown below were rendered using the Path MIS integrator. The environment map used is <a
+                    href="https://hdrihaven.com/hdri/?h=small_cave">Small Cave from HDRIHaven</a>. All renderings where
+                done using a GUI-less version of nori, in order to possibly try o rule out some lower speed due to the
+                GUI rendering.</p>
             <h4>51 millions samples</h4>
             <p>The following two images are both rendered as long as the total sample count stays below 51 million. It
                 can
@@ -47,8 +52,34 @@
                 has
                 to be done many times).</p>
             <div class="twentytwenty-container">
-                <img src="images/adaptive/adaptive50m.png" alt="Adaptive (51'382'848)" class="img-responsive">
-                <img src="images/adaptive/independent50m.png" alt="Independent (51'200'000)" class="img-responsive">
+                <img src="images/adaptive/adaptive50m.png" alt="Adaptive (42 seconds)" class="img-responsive">
+                <img src="images/adaptive/independent50m.png" alt="Independent (15 seconds)" class="img-responsive">
+            </div>
+
+            <h4>1 Minute of Sampling</h4>
+            <p>As we saw above, the adaptive sampler took much longer than independent sampling. The question arises,
+                what a time constraint would bring. The following images are both rendered with 1 minute of rendering
+                time. The comparison shows a variance in those parts of the image, where both samplers fail. This means
+                that the adaptive sampler is not worse than the independent sampler.</p>
+            <div class="twentytwenty-container">
+                <img src="images/adaptive/adaptive60s.png" alt="Adaptive (70 million samples)" class="img-responsive">
+                <img src="images/adaptive/independent60s.png" alt="Independent (185 million samples)"
+                    class="img-responsive">
+            </div>
+
+            <h4>1 Minute of Sampling, uniform background</h4>
+            <p>If we now use a uniform background, and run both samplers again for one minute, we get the following two
+                images. As we see here, adaptive sampling uses much less samples (a 10th!), but results in nearly the
+                same image! The third image shows the difference of the two images. Wee see uniform variance over the whole camel head and no difference in the (uniform) background.</p>
+            <div class="twentytwenty-container">
+                <img src="images/adaptive/adaptive60s_simple.png" alt="Adaptive (20 million samples)"
+                    class="img-responsive">
+                <img src="images/adaptive/independent60s_simple.png" alt="Independent (200 million samples)"
+                    class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+                <img src="images/adaptive/60s_simple_difference.png" alt=""
+                    class="img-responsive">
             </div>
 
             <h4>Count of Samples</h4>
@@ -58,6 +89,7 @@
                 <img src="images/adaptive/adaptive50m.png" alt="Resulting Image" class="img-responsive">
                 <img src="images/adaptive/count50m.png" alt="Count (normalized)" class="img-responsive">
             </div>
+
             <h4>Variance</h4>
             <p>This next comparison shows the rendered image in constrast to the variance of the image. This plot helps
                 to see at a glance, that the variance computation makes sense and the implementation should be correct.
