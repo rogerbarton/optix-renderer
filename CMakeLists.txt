@@ -55,104 +55,112 @@ add_executable(nori
   include/nori/denoiser.h
 
   # Source code files
-  src/emitter.cpp
-  src/bitmap.cpp
-  src/block.cpp
-  src/bvh.cpp
-  src/chi2test.cpp
-  src/common.cpp
-  src/consttexture.cpp
-  src/checkerboard.cpp
-  src/diffuse.cpp
-  src/independent.cpp
-  src/main.cpp
-  src/mesh.cpp
-  src/obj.cpp
-  src/object.cpp
-  src/parser.cpp
-  src/perspective.cpp
-  src/proplist.cpp
-  src/render.cpp
-  src/rfilter.cpp
-  src/scene.cpp
-  src/shape.cpp
-  src/ttest.cpp
-  src/warp.cpp
-  src/microfacet.cpp
-  src/photon.cpp
-  src/mirror.cpp
-  src/dielectric.cpp
-  src/photonmapper.cpp
-  src/sphere.cpp
-  src/arealight.cpp
-  src/normals.cpp
-  src/av.cpp
-  src/pointlight.cpp
-  src/direct.cpp
-  src/direct_ems.cpp
-  src/direct_mats.cpp
-  src/direct_mis.cpp
-  src/path_mats.cpp
-  src/path_mis.cpp
-  src/disney.cpp
-  src/environmentmap.cpp
-  src/PNGTexture.cpp
-  src/denoiser.cpp
-  src/adaptive.cpp
-  src/camera.cpp
-  src/transform.cpp
-  src/PreviewIntegrator.cpp
-  src/isophase.cpp
-  src/anisophase.cpp
-  src/spotlight.cpp
+  src/utils/bitmap.cpp
+  src/utils/block.cpp
+  src/utils/bvh.cpp
+  src/utils/chi2test.cpp
+  src/utils/common.cpp
+  src/utils/main.cpp
+  src/utils/object.cpp
+  src/utils/parser.cpp
+  src/utils/proplist.cpp
+  src/utils/render.cpp
+  src/utils/ttest.cpp
+  src/utils/scene.cpp
+  src/utils/warp.cpp
+  src/utils/photon.cpp
+  src/utils/transform.cpp
+
+  src/textures/consttexture.cpp
+  src/textures/checkerboard.cpp
+  src/textures/PNGTexture.cpp
+
+  src/bsdf/diffuse.cpp
+  src/bsdf/microfacet.cpp
+  src/bsdf/mirror.cpp
+  src/bsdf/dielectric.cpp
+  src/bsdf/disney.cpp
+  src/bsdf/isophase.cpp
+  src/bsdf/anisophase.cpp
+
+  src/integrators/photonmapper.cpp
+  src/integrators/direct.cpp
+  src/integrators/direct_ems.cpp
+  src/integrators/direct_mats.cpp
+  src/integrators/direct_mis.cpp
+  src/integrators/path_mats.cpp
+  src/integrators/path_mis.cpp
+  src/integrators/normals.cpp
+  src/integrators/av.cpp
+  src/integrators/PreviewIntegrator.cpp
+
+  src/shapes/mesh.cpp
+  src/shapes/obj.cpp
+  src/shapes/shape.cpp
+  src/shapes/sphere.cpp
+
+  src/cameras/camera.cpp
+  src/cameras/perspective.cpp
+  src/cameras/rfilter.cpp
+
+  src/emitters/spotlight.cpp
+  src/emitters/emitter.cpp
+  src/emitters/arealight.cpp
+  src/emitters/pointlight.cpp
+  src/emitters/environmentmap.cpp
+
+  src/denoiser/denoiser.cpp
+
+  src/samplers/adaptive.cpp
+  src/samplers/independent.cpp
 )
 
 if(NORI_USE_VOLUMES)
   target_sources(nori PRIVATE
     include/nori/volume.h
-    src/volume.vdb.cpp
-    src/volume.shape.cpp
+    src/shapes/volume.vdb.cpp
+    src/shapes/volume.shape.cpp
   )
 endif()
 
 add_executable(tonemapper
         include/nori/bitmap.h
-        src/bitmap.cpp
-        src/common.cpp
-        src/hdrToLdr.cpp)
+        src/utils/bitmap.cpp
+        src/utils/common.cpp
+        src/utils/hdrToLdr.cpp)
 
 if(NORI_USE_GUI)
   # Append additional gui sources
   if(NORI_USE_IMGUI)
     target_sources(nori PRIVATE
       include/nori/ImguiScreen.h
-      src/ImguiScreen.cpp
+      src/utils/ImguiScreen.cpp
 
       include/nori/ImguiHelpers.h
-      src/ImGuiHelpers.cpp
+      src/utils/ImGuiHelpers.cpp
 
       include/nori/glutil.h
-      src/glutil.cpp
+      src/utils/glutil.cpp
     )
 
   else(NORI_USE_IMGUI)
     target_sources(nori PRIVATE
       include/nori/gui.h
-      src/gui.cpp
+      src/utils/gui.cpp
     )
   endif(NORI_USE_IMGUI)
 
   # The following lines build the warping test application
   add_executable(warptest
       include/nori/warp.h
-      src/warp.cpp
-      src/warptest.cpp
-      src/microfacet.cpp
-      src/isophase.cpp
-      src/anisophase.cpp
-      src/object.cpp
-      src/proplist.cpp
-      src/common.cpp
+      src/utils/warp.cpp
+      src/utils/warptest.cpp
+      src/bsdf/microfacet.cpp
+      src/bsdf/isophase.cpp
+      src/bsdf/anisophase.cpp
+      src/utils/object.cpp
+      src/utils/proplist.cpp
+      src/utils/common.cpp
       )
   add_dependencies(warptest nori)
   target_link_libraries(warptest nanogui glew ${extra_libs})
