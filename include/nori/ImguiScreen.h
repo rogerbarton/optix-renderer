@@ -9,6 +9,7 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/filebrowser.h>
 #include <nori/normals.h>
+#include <nori/timer.h>
 
 #include <nori/common.h>
 #include <nori/render.h>
@@ -99,21 +100,21 @@ public:
 	void keyReleased(int key, int mods);
 
 	void mouseButtonPressed(int button, int mods);
-    void mouseButtonReleased(int button, int mods);
-    void mouseMove(double xpos, double ypos);
-    void scrollWheel(double xoffset, double yoffset);
+	void mouseButtonReleased(int button, int mods);
+	void mouseMove(double xpos, double ypos);
+	void scrollWheel(double xoffset, double yoffset);
 	void windowResized(int width, int height);
 
 	// -- Scene loading
 	void openXML(const std::string &filename);
 	void openEXR(const std::string &filename);
-	void drop(const std::string& filename);
+	void drop(const std::string &filename);
 
 private:
 	// -- Window state, this must be public for the main.cpp file
 	GLFWwindow *glfwWindow;
 	bool uiShowSceneWindow = true;
-	bool uiShowDemoWindow  = false;
+	bool uiShowDemoWindow = false;
 
 	int windowWidth;
 	int windowHeight;
@@ -137,6 +138,8 @@ private:
 	Vector2i imageOffset = Vector2i(0);
 	float imageZoom = 1.f;
 
+	float targetFramerate = 30.f;
+	Timer fpsTimer;	
 };
 
 NORI_NAMESPACE_END

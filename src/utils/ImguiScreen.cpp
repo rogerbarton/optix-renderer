@@ -88,6 +88,8 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_b
 	m_shader->bind();
 	m_shader->uploadIndices(indices);
 	m_shader->uploadAttrib("position", positions);
+
+	fpsTimer.reset();
 }
 
 void ImguiScreen::drop(const std::string &filename)
@@ -178,6 +180,11 @@ void ImguiScreen::mainloop()
 		glfwSwapBuffers(glfwWindow);
 #endif
 		glfwPollEvents();
+
+		// wait until we reach the FPS limit
+		while (fpsTimer.elapsed() < (1.0f / targetFramerate * 1000.f)){}
+
+		fpsTimer.reset();
 	}
 	glfwTerminate();
 }
@@ -345,6 +352,13 @@ void ImguiScreen::draw()
 
 			ImGui::NewLine();
 
+			ImGui::Text("Target Framerate");
+			ImGui::SameLine();
+			ImGui::PushID(3);
+			ImGui::SliderFloat("##value", &targetFramerate, 1.f, 100.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
+			ImGui::PopID();
+			ImGui::NewLine();
+
 			static float exposureLog = 0.5f;
 			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
 			ImGui::SameLine();
@@ -356,7 +370,7 @@ void ImguiScreen::draw()
 			{
 				ImGui::BeginChild(42);
 				m_renderThread.drawSceneGui();
-				if(!m_renderThread.m_guiScene && ImGui::Button("Open Scene"))
+				if (!m_renderThread.m_guiScene && ImGui::Button("Open Scene"))
 					filebrowser.Open();
 
 				ImGui::EndChild();
@@ -365,7 +379,7 @@ void ImguiScreen::draw()
 		ImGui::End();
 	}
 
-	if(uiShowDemoWindow)
+	if (uiShowDemoWindow)
 		ImGui::ShowDemoWindow(&uiShowDemoWindow);
 }
 
@@ -509,7 +523,7 @@ void ImguiScreen::keyPressed(int key, int mods)
 		uiShowSceneWindow = !uiShowSceneWindow;
 	else if (key == GLFW_KEY_ESCAPE)
 	{
-		if(filebrowser.IsOpened())
+		if (filebrowser.IsOpened())
 			filebrowser.Close();
 		else if (filebrowserSave.IsOpened())
 			filebrowserSave.Close();
@@ -536,8 +550,9 @@ void ImguiScreen::keyReleased(int key, int mods)
 {
 }
 
-void ImguiScreen::mouseButtonPressed(int button, int mods) {
-	if(!m_renderThread.isBusy() && !m_renderThread.m_guiScene)
+void ImguiScreen::mouseButtonPressed(int button, int mods)
+{
+	if (!m_renderThread.isBusy() && !m_renderThread.m_guiScene)
 		filebrowser.Open();
 }
 void ImguiScreen::mouseButtonReleased(int button, int mods) {}
