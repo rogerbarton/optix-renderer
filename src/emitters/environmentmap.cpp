@@ -2,6 +2,7 @@
 #include <nori/texture.h>
 #include <Eigen/Geometry>
 #include <nori/warp.h>
+#include <nori/dpdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -78,21 +79,11 @@ public:
 				   const Point2f &sample) const
 	{
 		// sample any point based on the probabilities
-		Histogram::upair result;
-
-		Histogram::elem_type it = histogram.getElement(sample.x());
-		if (it != histogram.map.end())
-		{
-			result = it->second;
-		}
-		else
-		{
-			throw NoriException("Histogram could not find a data point...");
-		}
+		size_t elem = dpdf.sample(sample.x());
 
 		// convert result (kind of uv coords) into direction
-		float i = result.first / (float)m_map->getHeight();
-		float j = result.second / (float)m_map->getWidth();
+		float i = int(elem / m_map->getWidth()) / (float)m_map->getHeight();
+		float j = int(elem % m_map->getWidth()) / (float)m_map->getWidth();
 
 		Vector3f v;
 		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
@@ -130,11 +121,11 @@ public:
 		unsigned int i = uv.y() / (2.f * M_PI) * m_map->getWidth();
 		unsigned int j = uv.x() * INV_PI * m_map->getHeight();
 
-		i = i + m_map->getHeight() % m_map->getHeight();
-		j = j + m_map->getWidth() % m_map->getWidth();
+		i = (i + m_map->getHeight()) % m_map->getHeight();
+		j = (j + m_map->getWidth()) % m_map->getWidth();
 
 		// second and third part is the probability of sampling one pixel (in solid angles)
-		return probabilities(i, j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
+		return dpdf.at(i * m_map->getWidth() + j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
 	}
 
 	Color3f eval(const EmitterQueryRecord &lRec) const override
@@ -198,31 +189,22 @@ public:
 	}
 
 private:
-	/// calculate the histogram based on the probabilities
 	void calculateProbs()
 	{
-		probabilities = MatrixXf(m_map->getHeight(), m_map->getWidth());
 		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
-				probabilities(i, j) = col.getLuminance(); // bias to possibly select every one once
+				dpdf.append(col.getLuminance()); // bias to possibly select every one once
 			}
 		}
-		//probabilities.normalize();
-		for (unsigned int i = 0; i < m_map->getHeight(); i++)
-		{
-			for (unsigned int j = 0; j < m_map->getWidth(); j++)
-			{
-				histogram.add_element(i, j, probabilities(i, j));
-			}
-		}
+
+		dpdf.normalize();
 	}
 
 	Texture<Color3f> *m_map = nullptr;
-	Histogram histogram;
-	MatrixXf probabilities;
+	DiscretePDF dpdf;
 };
 
 NORI_REGISTER_CLASS(EnvMap, "envmap");

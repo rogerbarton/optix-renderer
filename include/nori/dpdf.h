@@ -66,6 +66,11 @@ public:
         return m_cdf[entry+1] - m_cdf[entry];
     }
 
+    /// Access an entry by its index, using safe at on vector
+    float at(size_t entry) const {
+        return m_cdf.at(entry + 1) - m_cdf.at(entry);
+    }
+
     /// Have the probability densities been normalized?
     bool isNormalized() const {
         return m_normalized;

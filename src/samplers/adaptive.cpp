@@ -1,5 +1,6 @@
 #include <nori/sampler.h>
 #include <nori/block.h>
+#include <nori/dpdf.h>
 #include <pcg32.h>
 
 NORI_NAMESPACE_BEGIN
@@ -38,7 +39,9 @@ public:
         m_random.seed(
             block.getOffset().x(),
             block.getOffset().y());
-        m_oldVariance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.rows() - 2 * block.getBorderSize(), block.cols() - 2 * block.getBorderSize());
+        // .y() did not work, using [1] instead
+        m_oldVariance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().x(), block.getSize()[1]);
+        dpdf.reserve(m_oldVariance.size());
     }
     void generate() override {}
     void advance() override {}
@@ -83,7 +86,7 @@ public:
         if (m_finished)
             return false;
 
-        histogram.clear();
+        dpdf.clear();
 
         // if we are in the initial round, use uniform sampling, don't fill histogram
         if (m_sampleRound < initialUniform)
@@ -103,9 +106,12 @@ public:
         {
             for (int j = 0; j < variance.cols(); j++)
             {
-                histogram.add_element(i, j, std::abs(variance(i, j).getLuminance()));
+                //dpdf.add_element(i, j, std::abs(variance(i, j).getLuminance()));
+                dpdf.append(std::abs(variance(i, j).getLuminance()));
             }
         }
+
+        dpdf.normalize();
 
         // if decreasing variance, render again
         float newNorm = var_diff;
@@ -130,7 +136,7 @@ public:
         std::vector<std::pair<int, int>> result;
         result.reserve(size.x() * size.y());
 
-        if (histogram.size() == 0)
+        if (dpdf.size() == 0)
         {
             // uniform sampling, every pixel
             for (int i = 0; i < size.x(); i++)
@@ -150,15 +156,10 @@ public:
             // https://stackoverflow.com/questions/33426921/pick-a-matrix-cell-according-to-its-probability
 
             // TODO only select 95% (not those with hightes probability)
-            Histogram::elem_type it = histogram.getElement(next1D());
-            if (it != histogram.map.end())
-            {
-                result.push_back(it->second);
-            }
-            else
-            {
-                throw NoriException("Adaptive: histogram could not find data point..., round: %i, cumultative: %f", m_sampleRound, histogram.cumulative);
-            }
+            size_t elem = dpdf.sample(next1D());
+            int row = elem / size.x();
+            int col = elem % size.x();
+            result.push_back({row,col});
         }
 
         totalSamples += size.x() * size.y();
@@ -225,7 +226,7 @@ protected:
 private:
     pcg32 m_random;
     bool m_finished = false;
-    Histogram histogram;
+    DiscretePDF dpdf;
     Eigen::Matrix<Color3f, -1, -1> m_oldVariance;
     float m_oldNorm = 10000.f; // arbitrary big
     int initialUniform;
