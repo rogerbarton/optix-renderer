@@ -77,7 +77,7 @@ public:
 		m_nearClip = gui->m_nearClip;
 		m_farClip = gui->m_farClip;
 		m_lensRadius = gui->m_lensRadius;
-		m_focalDistance = gui->m_lensRadius;
+		m_focalDistance = gui->m_focalDistance;
 
 		// -- Update sub-objects
 		m_rfilter->update(gui->m_rfilter);
