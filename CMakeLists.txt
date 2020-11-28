@@ -1,11 +1,12 @@
 # This is the main CMake build file used to compile Nori
-cmake_minimum_required (VERSION 2.8)
-project("nori")
+cmake_minimum_required(VERSION 3.12)
+project(nori)
 
-option(NORI_USE_GUI                "Build the GUI"               ON)
-option(NORI_USE_IMGUI              "Use ImGui instead of NanoGui, warptest always uses NanoGUI"       ON)
-option(NORI_USE_VOLUMES            "Enable Volumes"              ON)
-option(NORI_BUILD_DOCS             "Build Nori Docs"             OFF)
+option(NORI_USE_GUI "Build the GUI" ON)
+option(NORI_USE_IMGUI "Use ImGui instead of NanoGui, warptest always uses NanoGUI" ON)
+option(NORI_USE_VOLUMES "Enable Volumes" ON)
+option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
+option(NORI_USE_OPTIX "Enable OptiX, requires CUDA" ON)
 
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
@@ -21,133 +22,133 @@ endif(NORI_BUILD_DOCS)
 # code file to Nori, be sure to include it in this list.
 add_executable(nori
 
-  # Header files
-  include/nori/bbox.h
-  include/nori/bitmap.h
-  include/nori/block.h
-  include/nori/bsdf.h
-  include/nori/bvh.h
-  include/nori/camera.h
-  include/nori/color.h
-  include/nori/common.h
-  include/nori/dpdf.h
-  include/nori/frame.h
-  include/nori/integrator.h
-  include/nori/emitter.h
-  include/nori/kdtree.h
-  include/nori/mesh.h
-  include/nori/object.h
-  include/nori/parser.h
-  include/nori/proplist.h
-  include/nori/photon.h
-  include/nori/ray.h
-  include/nori/render.h
-  include/nori/rfilter.h
-  include/nori/sampler.h
-  include/nori/scene.h
-  include/nori/shape.h
-  include/nori/texture.h
-  include/nori/timer.h
-  include/nori/transform.h
-  include/nori/vector.h
-  include/nori/warp.h
-  include/nori/HDRLoader.h
-  include/nori/denoiser.h
+    # Header files
+    include/nori/bbox.h
+    include/nori/bitmap.h
+    include/nori/block.h
+    include/nori/bsdf.h
+    include/nori/bvh.h
+    include/nori/camera.h
+    include/nori/color.h
+    include/nori/common.h
+    include/nori/dpdf.h
+    include/nori/frame.h
+    include/nori/integrator.h
+    include/nori/emitter.h
+    include/nori/kdtree.h
+    include/nori/mesh.h
+    include/nori/object.h
+    include/nori/parser.h
+    include/nori/proplist.h
+    include/nori/photon.h
+    include/nori/ray.h
+    include/nori/render.h
+    include/nori/rfilter.h
+    include/nori/sampler.h
+    include/nori/scene.h
+    include/nori/shape.h
+    include/nori/texture.h
+    include/nori/timer.h
+    include/nori/transform.h
+    include/nori/vector.h
+    include/nori/warp.h
+    include/nori/HDRLoader.h
+    include/nori/denoiser.h
 
-  # Source code files
-  src/utils/bitmap.cpp
-  src/utils/block.cpp
-  src/utils/bvh.cpp
-  src/utils/chi2test.cpp
-  src/utils/common.cpp
-  src/utils/main.cpp
-  src/utils/object.cpp
-  src/utils/parser.cpp
-  src/utils/proplist.cpp
-  src/utils/render.cpp
-  src/utils/ttest.cpp
-  src/utils/scene.cpp
-  src/utils/warp.cpp
-  src/utils/photon.cpp
-  src/utils/transform.cpp
+    # Source code files
+    src/utils/bitmap.cpp
+    src/utils/block.cpp
+    src/utils/bvh.cpp
+    src/utils/chi2test.cpp
+    src/utils/common.cpp
+    src/utils/main.cpp
+    src/utils/object.cpp
+    src/utils/parser.cpp
+    src/utils/proplist.cpp
+    src/utils/render.cpp
+    src/utils/ttest.cpp
+    src/utils/scene.cpp
+    src/utils/warp.cpp
+    src/utils/photon.cpp
+    src/utils/transform.cpp
 
-  src/textures/consttexture.cpp
-  src/textures/checkerboard.cpp
-  src/textures/PNGTexture.cpp
+    src/textures/consttexture.cpp
+    src/textures/checkerboard.cpp
+    src/textures/PNGTexture.cpp
 
-  src/bsdf/diffuse.cpp
-  src/bsdf/microfacet.cpp
-  src/bsdf/mirror.cpp
-  src/bsdf/dielectric.cpp
-  src/bsdf/disney.cpp
-  src/bsdf/isophase.cpp
-  src/bsdf/anisophase.cpp
+    src/bsdf/diffuse.cpp
+    src/bsdf/microfacet.cpp
+    src/bsdf/mirror.cpp
+    src/bsdf/dielectric.cpp
+    src/bsdf/disney.cpp
+    src/bsdf/isophase.cpp
+    src/bsdf/anisophase.cpp
 
-  src/integrators/photonmapper.cpp
-  src/integrators/direct.cpp
-  src/integrators/direct_ems.cpp
-  src/integrators/direct_mats.cpp
-  src/integrators/direct_mis.cpp
-  src/integrators/path_mats.cpp
-  src/integrators/path_mis.cpp
-  src/integrators/normals.cpp
-  src/integrators/av.cpp
-  src/integrators/PreviewIntegrator.cpp
+    src/integrators/photonmapper.cpp
+    src/integrators/direct.cpp
+    src/integrators/direct_ems.cpp
+    src/integrators/direct_mats.cpp
+    src/integrators/direct_mis.cpp
+    src/integrators/path_mats.cpp
+    src/integrators/path_mis.cpp
+    src/integrators/normals.cpp
+    src/integrators/av.cpp
+    src/integrators/PreviewIntegrator.cpp
 
-  src/shapes/mesh.cpp
-  src/shapes/obj.cpp
-  src/shapes/shape.cpp
-  src/shapes/sphere.cpp
+    src/shapes/mesh.cpp
+    src/shapes/obj.cpp
+    src/shapes/shape.cpp
+    src/shapes/sphere.cpp
 
-  src/cameras/camera.cpp
-  src/cameras/perspective.cpp
-  src/cameras/rfilter.cpp
+    src/cameras/camera.cpp
+    src/cameras/perspective.cpp
+    src/cameras/rfilter.cpp
 
-  src/emitters/spotlight.cpp
-  src/emitters/emitter.cpp
-  src/emitters/arealight.cpp
-  src/emitters/pointlight.cpp
-  src/emitters/environmentmap.cpp
+    src/emitters/spotlight.cpp
+    src/emitters/emitter.cpp
+    src/emitters/arealight.cpp
+    src/emitters/pointlight.cpp
+    src/emitters/environmentmap.cpp
 
-  src/denoiser/denoiser.cpp
+    src/denoiser/denoiser.cpp
 
-  src/samplers/adaptive.cpp
-  src/samplers/independent.cpp
-)
+    src/samplers/adaptive.cpp
+    src/samplers/independent.cpp
+    )
 
 if(NORI_USE_VOLUMES)
   target_sources(nori PRIVATE
-    include/nori/volume.h
-    src/shapes/volume.vdb.cpp
-    src/shapes/volume.shape.cpp
-  )
+      include/nori/volume.h
+      src/shapes/volume.vdb.cpp
+      src/shapes/volume.shape.cpp
+      )
 endif()
 
 add_executable(tonemapper
-        include/nori/bitmap.h
-        src/utils/bitmap.cpp
-        src/utils/common.cpp
-        src/utils/hdrToLdr.cpp)
+    include/nori/bitmap.h
+    src/utils/bitmap.cpp
+    src/utils/common.cpp
+    src/utils/hdrToLdr.cpp)
 
 if(NORI_USE_GUI)
   # Append additional gui sources
   if(NORI_USE_IMGUI)
     target_sources(nori PRIVATE
-      include/nori/ImguiScreen.h
-      src/utils/ImguiScreen.cpp
+        include/nori/ImguiScreen.h
+        src/utils/ImguiScreen.cpp
 
-      include/nori/ImguiHelpers.h
-      src/utils/ImGuiHelpers.cpp
+        include/nori/ImguiHelpers.h
+        src/utils/ImGuiHelpers.cpp
 
-      include/nori/glutil.h
-      src/utils/glutil.cpp
-    )
+        include/nori/glutil.h
+        src/utils/glutil.cpp
+        )
 
   else(NORI_USE_IMGUI)
     target_sources(nori PRIVATE
-      include/nori/gui.h
-      src/utils/gui.cpp
-    )
+        include/nori/gui.h
+        src/utils/gui.cpp
+        )
   endif(NORI_USE_IMGUI)
 
   # The following lines build the warping test application
@@ -166,6 +167,66 @@ if(NORI_USE_GUI)
   target_link_libraries(warptest nanogui glew ${extra_libs})
   target_compile_definitions(warptest PRIVATE -DNORI_USE_NANOGUI)
 endif(NORI_USE_GUI)
+
+if(NORI_USE_OPTIX)
+  # Based on NanoVDB OptiX viewer
+  cmake_policy(SET CMP0074 NEW) # find_package: Search in <PackageName>_ROOT variable
+  set(OptiX_ROOT ${CMAKE_SOURCE_DIR}/ext/optix)
+  find_package(CUDA)
+  find_package(OptiX)
+
+  if(CUDA_FOUND AND OptiX_FOUND)
+    set(CMAKE_CUDA_STANDARD 14)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+    set(NANOVDB_CUDA_EXTENDED_LAMBDA "--expt-extended-lambda")
+    if(CUDA_VERSION_MAJOR GREATER_EQUAL 11)
+      set(NANOVDB_CUDA_EXTENDED_LAMBDA "--extended-lambda")
+    endif()
+
+    set(CMAKE_CUDA_FLAGS
+        "${NANOVDB_CUDA_EXTENDED_LAMBDA} -use_fast_math -lineinfo")
+
+    # find NVRTC library.
+    find_library(
+        CUDA_nvrtc_LIBRARY nvrtc "${CUDA_TOOLKIT_ROOT_DIR}/lib/x64"
+        "${CUDA_TOOLKIT_ROOT_DIR}/lib64" "${CUDA_TOOLKIT_ROOT_DIR}/lib/Win32")
+
+    # workaround for win32 bug when nvcc "--keep" is used.
+    if(WIN32)
+      if(NANOVDB_CUDA_KEEP_PTX)
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/Release")
+        set(CMAKE_CUDA_FLAGS_RELEASE
+            " --source-in-ptx --keep ${CMAKE_CUDA_FLAGS_RELEASE}")
+      endif()
+    endif()
+
+    enable_language(CUDA)
+
+    target_include_directories(nori PRIVATE
+        ${CUDA_INCLUDE_DIRS}
+        ${OptiX_INCLUDE_DIR}
+        )
+
+    target_compile_definitions(nori PRIVATE
+        "-DNORI_USE_OPTIX"
+        "-DNORI_NVRTC_OPTIX_DIR=\"${OptiX_INCLUDE_DIR}\""
+        "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRECTORY}\"")
+
+    target_sources(nori PRIVATE
+        include/nori/optix/OptixRenderer.h
+        src/optix/OptixRenderer.cpp
+        )
+
+    target_link_libraries(nori
+        ${CUDA_LIBRARIES}
+        ${CUDA_nvrtc_LIBRARY}
+        # OptiX is header only
+        )
+
+    message(STATUS "Nori uses OptiX")
+  endif()
+endif()
 
 # -- Add C++ defines
 # The following C++ macros may be defined:
@@ -212,9 +273,9 @@ target_link_libraries(tonemapper ${extra_libs})
 target_link_libraries(nori ${extra_libs})
 
 set_target_properties(nori PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
-        )
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+    )
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
