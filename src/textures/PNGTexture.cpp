@@ -63,12 +63,18 @@ NORI_NAMESPACE_BEGIN
 				if (sRgb)
 				{
 					for (unsigned int i = 0; i < data.size(); ++i)
-						data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 256);
+						data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255);
 				}
 				else
 				{
+					// Normal map
 					for (unsigned int i = 0; i < data.size(); ++i)
-						data[i] = static_cast<float>(tmp[i]) / 256;
+					{
+						data[i] = static_cast<float>(tmp[i]) / 255 * 2 - 1;
+						// Check normalized, may have compression artefacts
+						if ((i + 1) % 3 == 0)
+							Eigen::Map<Eigen::Vector3f>(data.data() + i - 2).normalize();
+					}
 				}
 			}
 			else if (extension == ".hdr")

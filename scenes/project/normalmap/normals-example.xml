@@ -5,7 +5,7 @@
 	</sampler>
 
 	<!-- Use the normal integrator -->
-	<integrator type="normals"/>
+	<integrator type="path_mis"/>
 
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
@@ -24,17 +24,17 @@
 	<shape type="obj">
 		<string name="filename" value="../meshes/plane.obj"/>
 		
-		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-primitives.png"/>
-		</texture>
+		<!-- <texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-test.png"/>
+		</texture> -->
 
 		<transform name="toWorld">
 			<scale value="5,5,5"/>
 		</transform>
 	</shape>
 
-	<shape type="sphere">
-        <point name="center" value="0,1,0"/>
-        <float name="radius" value="0.5"/>
-    </shape>
+	<emitter type="point">
+		<point name="position" value="0,2,0"/>
+		<color name="power" value="100,100,100"/>
+	</emitter>
 </scene>
