@@ -34,30 +34,8 @@ public:
 	MouseState() {}
 	~MouseState() {}
 
-	void onMouseClick(double xPos, double yPos, int button, int action, int _mods)
-	{
-		mods = _mods;
-
-		lastMouseX = xPos;
-		lastMouseY = yPos;
-
-		dragging = (action == GLFW_PRESS);
-
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-			lButtonPressed = (action != GLFW_RELEASE);
-		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-			mButtonPressed = (action != GLFW_RELEASE);
-		if (button == GLFW_MOUSE_BUTTON_RIGHT)
-			rButtonPressed = (action != GLFW_RELEASE);
-	}
-
-	void onMouseMove(double xPos, double yPos)
-	{
-		mouseMoveX = lastMouseX - xPos;
-		mouseMoveY = -lastMouseY + yPos;
-		lastMouseX = xPos;
-		lastMouseY = yPos;
-	}
+	void onMouseClick(double xPos, double yPos, int button, int action, int _mods);
+	void onMouseMove(double xPos, double yPos);
 };
 
 typedef std::map<int, bool> KeyboardState;

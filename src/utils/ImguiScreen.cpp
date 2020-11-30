@@ -527,7 +527,7 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if (key == GLFW_KEY_O && mods & GLFW_MOD_CONTROL)
+	if (key == GLFW_KEY_O)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
 		uiShowSceneWindow = !uiShowSceneWindow;
@@ -542,10 +542,8 @@ void ImguiScreen::keyPressed(int key, int mods)
 	}
 	else if (key == GLFW_KEY_F5)
 		m_renderThread.restartRender();
-	else if (key == GLFW_KEY_E && mods & GLFW_MOD_CONTROL)
-	{
+	else if (key == GLFW_KEY_E)
 		filebrowserSave.Open();
-	}
 	else if (key == GLFW_KEY_0)
 		centerImage();
 	else if (key == GLFW_KEY_1)
@@ -643,6 +641,30 @@ void ImguiScreen::initImGui()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	//    imGuiIo.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.f);
+}
+
+
+void nori::MouseState::onMouseClick(double xPos, double yPos, int button, int action, int _mods) {
+	mods = _mods;
+
+	lastMouseX = xPos;
+	lastMouseY = yPos;
+
+	dragging = (action == GLFW_PRESS);
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+		lButtonPressed = (action != GLFW_RELEASE);
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+		mButtonPressed = (action != GLFW_RELEASE);
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
+		rButtonPressed = (action != GLFW_RELEASE);
+}
+
+void nori::MouseState::onMouseMove(double xPos, double yPos) {
+	mouseMoveX = lastMouseX - xPos;
+	mouseMoveY = -lastMouseY + yPos;
+	lastMouseX = xPos;
+	lastMouseY = yPos;
 }
 
 NORI_NAMESPACE_END
