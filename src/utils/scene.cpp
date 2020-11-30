@@ -112,7 +112,10 @@ NORI_NAMESPACE_BEGIN
 
 			// Update shape pointer in emitter (!)
 			if (clone->m_shapes[i]->isEmitter())
-				m_emitters[shapeToEmitter[i]]->setShape(clone->m_shapes[i]);
+			{
+				clone->m_emitters[shapeToEmitter[i]] = clone->m_shapes[i]->m_emitter;
+				clone->m_emitters[shapeToEmitter[i]]->setShape(clone->m_shapes[i]);
+			}
 		}
 
 #ifdef NORI_USE_VOLUMES
