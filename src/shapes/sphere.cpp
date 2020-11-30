@@ -148,7 +148,7 @@ public:
         ImGui::TreeNodeEx("center", ImGuiLeafNodeFlags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    transformTouched |= ImGui::DragPoint3f("##value", &m_position);
+	    transformTouched |= ImGui::DragPoint3f("##value", &m_position, 0.02f);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();

@@ -41,9 +41,33 @@
 			<string name="filename" value="../res/normal-identity.png"/>
 		</texture>
     </shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cube.obj"/>
+		
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-identity.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<translate value="2,.5,-2"/>
+		</transform>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cone.obj"/>
+		
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-identity.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<translate value="1.5,.5,-4"/>
+		</transform>
+	</shape>
 	
 	<emitter type="point">
-		<point name="position" value="0,1,-3"/>
+		<point name="position" value="0,2,-3"/>
 		<color name="power" value="1000,1000,1000"/>
 	</emitter>
 </scene>

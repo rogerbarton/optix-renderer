@@ -26,7 +26,6 @@
 		
 		<texture type="png_texture" name="normal">
 			<string name="filename" value="../res/normal-identity.png"/>
-			<boolean name="sphericalTexture" value="false"/>
 		</texture>
 
 		<transform name="toWorld">
@@ -42,4 +41,28 @@
 			<string name="filename" value="../res/normal-identity.png"/>
 		</texture>
     </shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cube.obj"/>
+		
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-identity.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<translate value="2,.5,-2"/>
+		</transform>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cone.obj"/>
+		
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-identity.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<translate value="1.5,.5,-4"/>
+		</transform>
+	</shape>
 </scene>

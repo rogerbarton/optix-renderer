@@ -19,6 +19,7 @@
 #include <nori/shape.h>
 #include <nori/bsdf.h>
 #include <nori/emitter.h>
+#include <Eigen/Dense>
 //#include <nori/warp.h>
 //#include <Eigen/Geometry>
 
@@ -66,13 +67,26 @@ void Shape::applyNormalMap(Intersection &its) const
 	if (!m_normalMap) return;
 
 	// note: normal map already normalized
-	const Normal3f n = m_normalMap->eval(its.uv);
+	const Normal3f nmap = m_normalMap->eval(its.uv);
 
 	// For validation, use global normals first and then check that they match when using the existing shading frame
 	// Used for normals-identity-global
 	// its.shFrame = Frame(Normal3f(n.x(), n.y(), n.z()));
 
-	its.shFrame = Frame(Frame(its.shFrame.n).toWorld(n));
+	// its.shFrame = Frame(its.shFrame.toWorld(n));
+
+	auto& f = its.shFrame;
+	Vector3f s2 = f.toWorld(f.s);
+	Vector3f t2 = f.toWorld(f.t);
+	Eigen::Matrix3f tbn;
+	tbn << f.s, f.t, f.n;
+	Vector3f n2 = (tbn * nmap).normalized();
+
+	f.s = s2;
+	f.t = t2;
+	f.n = n2;
+
+	f = Frame(n2);
 }
 
 void Shape::addChild(NoriObject *obj)
