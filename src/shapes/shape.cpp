@@ -63,9 +63,16 @@ Shape::~Shape()
 
 void Shape::applyNormalMap(Intersection &its) const
 {
-	if(!m_normalMap) return;
+	if (!m_normalMap) return;
 
-	its.shFrame = Frame(Frame(its.shFrame.n).toLocal(m_normalMap->eval(its.uv)));
+	// note: normal map already normalized
+	const Normal3f n = m_normalMap->eval(its.uv);
+
+	// For validation, use global normals first and then check that they match when using the existing shading frame
+	// Used for normals-identity-global
+	// its.shFrame = Frame(Normal3f(n.x(), n.z(), n.y()));
+
+	its.shFrame = Frame(Frame(its.shFrame.n).toLocal(n));
 }
 
 void Shape::addChild(NoriObject *obj)

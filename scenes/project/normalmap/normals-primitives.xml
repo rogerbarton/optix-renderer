@@ -1,0 +1,41 @@
+<scene>
+	<!-- Independent sample generator, user-selected samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="32"/>
+	</sampler>
+
+	<!-- Use the normal integrator -->
+	<!-- <integrator type="path_mis"/> -->
+	<integrator type="normals"/>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<rotate angle="30" axis="1,0,0"/>
+			<translate value="0,6,-11"/>
+		</transform>
+
+		<float name="fov" value="40"/>
+
+		<integer name="width" value="800"/>
+		<integer name="height" value="600"/>
+	</camera>
+
+	<!-- Ground plane -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/plane.obj"/>
+		
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-primitives.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<scale value="5,5,5"/>
+		</transform>
+	</shape>
+
+	<shape type="sphere">
+        <point name="center" value="0,1,0"/>
+        <float name="radius" value="0.5"/>
+    </shape>
+</scene>
