@@ -22,6 +22,7 @@
 #include <nori/object.h>
 #include <nori/frame.h>
 #include <nori/bbox.h>
+#include <nori/texture.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -156,6 +157,11 @@ public:
     virtual float pdfSurface(const ShapeQueryRecord &sRec) const = 0;
 
     /**
+     * Apply the normal map to modify the intersecion shading normal
+     */
+	void applyNormalMap(Intersection &its) const;
+
+    /**
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
      * provided by this instance
      * */
@@ -176,10 +182,11 @@ public:
 	 */
 	mutable bool geometryTouched = true;
     Emitter *m_emitter = nullptr; ///< Associated emitter, if any
-protected:
-    BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
+	protected:
+	Texture<Normal3f> *m_normalMap = nullptr;
+	BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
     BoundingBox3f m_bbox;         ///< Bounding box of the mesh
-};
+	};
 
 NORI_NAMESPACE_END
 

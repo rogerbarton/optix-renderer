@@ -31,6 +31,8 @@ void Shape::cloneAndInit(Shape *clone)
 		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
 
 	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
+	if(m_normalMap)
+		clone->m_normalMap = static_cast<Texture<Normal3f>*>(m_normalMap->cloneAndInit());
 
 	if(m_emitter)
 	{
@@ -43,6 +45,8 @@ void Shape::update(const NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const Shape *>(guiObject);
 	m_bsdf->update(gui->m_bsdf);
+	if(m_normalMap)
+		m_normalMap->update(gui->m_normalMap);
 
 	// Note: Emitter updated by scene
 	// if(m_emitter)
@@ -52,7 +56,16 @@ void Shape::update(const NoriObject *guiObject)
 Shape::~Shape()
 {
 	delete m_bsdf;
+	delete m_normalMap;
 	//delete m_emitter; // Emitter is parent of Shape
+}
+
+
+void Shape::applyNormalMap(Intersection &its) const
+{
+	if(!m_normalMap) return;
+
+	its.shFrame = Frame(Frame(its.shFrame.n).toLocal(m_normalMap->eval(its.uv)));
 }
 
 void Shape::addChild(NoriObject *obj)
@@ -73,6 +86,17 @@ void Shape::addChild(NoriObject *obj)
         m_emitter = static_cast<Emitter *>(obj);
         m_emitter->setShape(static_cast<Shape *>(this));
         break;
+
+    case ETexture:
+	    if (obj->getIdName() == "normal")
+	    {
+		    if (m_normalMap)
+			    throw NoriException("There is already a normal map defined!");
+		    m_normalMap = static_cast<Texture<Normal3f> *>(obj);
+	    }
+	    else
+		    throw NoriException("Shape does not have a texture with name: %s", obj->getIdName());
+	    break;
 
     default:
         throw NoriException("Shape::addChild(<%s>) is not supported!",
@@ -134,6 +158,20 @@ bool Shape::getImGuiNodes()
             ImGui::TreePop();
         }
     }
+
+	bool normalMapOpen = ImGui::TreeNode("Normal Map");
+	ImGui::NextColumn();
+	ImGui::AlignTextToFramePadding();
+
+	ImGui::Text(m_normalMap ? m_normalMap->getImGuiName().c_str() : "None");
+	ImGui::NextColumn();
+	if (normalMapOpen)
+	{
+		if(m_normalMap)
+			touched |= m_normalMap->getImGuiNodes();
+		ImGui::TreePop();
+	}
+
     ImGui::PopID();
     return touched;
 }
