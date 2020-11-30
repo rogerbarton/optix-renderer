@@ -31,6 +31,12 @@ class Diffuse : public BSDF
 public:
     explicit Diffuse(const PropertyList &propList) : m_albedo(nullptr)
     {
+	    if (propList.has("albedo"))
+	    {
+		    PropertyList l;
+		    l.setColor("value", propList.getColor("albedo", Color3f(0.5f)));
+		    m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+	    }
     }
 
 	NoriObject *cloneAndInit() override {
