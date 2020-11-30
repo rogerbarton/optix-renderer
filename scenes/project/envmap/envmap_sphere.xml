@@ -27,6 +27,7 @@
 		<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/wooden_motel.png"/>
 			<vector name="eulerAngles" value="180,180,0"/>
+			<boolean name="sphericalTexture" value="true"/>
 		</texture>
 	</emitter>
 
@@ -36,6 +37,7 @@
 		<bsdf type="diffuse">
 			<!--<texture type="png_texture" name="albedo">
 				<string name="filename" value="../res/photo_studio_01.png"/>
+				<boolean name="sphericalTexture" value="true"/>
 			</texture>-->
 		</bsdf>
 	</shape>

@@ -46,6 +46,7 @@
     <texture type="png_texture" name="albedo">
       <string name="filename" value="../res/small_cave_2k.hdr"/>
       <vector name="eulerAngles" value="90,90,180"/>
+      <boolean name="sphericalTexture" value="true"/>
     </texture>
   </emitter>
   

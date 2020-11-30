@@ -32,6 +32,7 @@
 		<bsdf type="diffuse">
 			<texture type="png_texture" name="albedo">
 				<string name="filename" value="../res/wooden_motel.png"/>
+				<boolean name="sphericalTexture" value="true"/>
 			</texture>
 		</bsdf>
 	</shape>

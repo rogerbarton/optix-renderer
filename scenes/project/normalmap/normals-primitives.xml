@@ -27,6 +27,7 @@
 		
 		<texture type="png_texture" name="normal">
 			<string name="filename" value="../res/normal-primitives.png"/>
+			<boolean name="sphericalTexture" value="false"/>
 		</texture>
 
 		<transform name="toWorld">

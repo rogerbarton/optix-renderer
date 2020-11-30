@@ -27,6 +27,7 @@
 		<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/envmap-test.png"/>
 			<vector name="eulerAngles" value="270,45,-45"/>
+			<boolean name="sphericalTexture" value="true"/>
 		</texture>
 	</emitter>
 	

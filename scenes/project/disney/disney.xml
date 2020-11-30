@@ -24,6 +24,7 @@
     <emitter type="envmap">
         <texture type="png_texture" name="albedo">
             <string name="filename" value="../res/rooitou_park.png"/>
+            <boolean name="sphericalTexture" value="true"/>
         </texture>
         <float name="offsetU" value="0.0"/>
         <float name="offsetV" value="0.0"/>

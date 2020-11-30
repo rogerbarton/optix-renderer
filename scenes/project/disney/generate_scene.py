@@ -80,6 +80,7 @@ with open(out_file, "w") as wr:
     <emitter type="envmap">
 		<!--<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/canyon1.png"/>
+            <boolean name="sphericalTexture" value="true"/>
 		</texture>-->
 	</emitter>
     """)
