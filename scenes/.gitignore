@@ -1,4 +1,5 @@
 *.exr
 *.png
+!project/res/*.png
 *.nvdb
 *.dat
