@@ -70,9 +70,9 @@ void Shape::applyNormalMap(Intersection &its) const
 
 	// For validation, use global normals first and then check that they match when using the existing shading frame
 	// Used for normals-identity-global
-	// its.shFrame = Frame(Normal3f(n.x(), n.z(), n.y()));
+	// its.shFrame = Frame(Normal3f(n.x(), n.y(), n.z()));
 
-	its.shFrame = Frame(Frame(its.shFrame.n).toLocal(n));
+	its.shFrame = Frame(Frame(its.shFrame.n).toWorld(n));
 }
 
 void Shape::addChild(NoriObject *obj)

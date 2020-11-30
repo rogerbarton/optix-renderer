@@ -23,11 +23,6 @@
 	<!-- Ground plane -->
 	<shape type="obj">
 		<string name="filename" value="../meshes/plane.obj"/>
-		
-		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-identity-y.png"/>
-		</texture>
-
 		<transform name="toWorld">
 			<scale value="5,5,5"/>
 		</transform>
@@ -36,9 +31,5 @@
 	<shape type="sphere">
         <point name="center" value="0,1,0"/>
         <float name="radius" value="1"/>
-
-		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-identity-y.png"/>
-		</texture>
     </shape>
 </scene>

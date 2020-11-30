@@ -23,7 +23,7 @@ public:
 		scaleU = props.getFloat("scaleU", 1.f);
 		scaleV = props.getFloat("scaleV", 1.f);
 		eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
-		sphericalTexture = props.getBoolean("sphericalTexture");
+		sphericalTexture = props.getBoolean("sphericalTexture", false);
 		offsetU = props.getFloat("offsetU", 0.f);
 		offsetV = props.getFloat("offsetV", 0.f);
 	}
