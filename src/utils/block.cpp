@@ -93,6 +93,7 @@ void ImageBlock::fromBitmap(const Bitmap &bitmap) {
 void ImageBlock::put(const Point2f &_pos, const Color3f &value) {
     if (!value.isValid()) {
         /* If this happens, go fix your code instead of removing this warning ;) */
+        //throw NoriException("Integrator: computed an invalid radiance value: %s", value.toString());
         cerr << "Integrator: computed an invalid radiance value: " << value.toString() << endl;
         return;
     }
@@ -138,8 +139,8 @@ std::string ImageBlock::toString() const {
 }
 
 std::ostream& operator<<(std::ostream& out, const ImageBlock& block) {
-    for(int i = block.getBorderSize(); i < block.getSize().x()+block.getBorderSize(); i++) {
-        for(int j = block.getBorderSize(); j < block.getSize().y()+block.getBorderSize(); j++) {
+    for(int i = block.getBorderSize(); i < block.getSize().y()+block.getBorderSize(); i++) {
+        for(int j = block.getBorderSize(); j < block.getSize().x()+block.getBorderSize(); j++) {
             out << tfm::format("%.2f",block(i,j).divideByFilterWeight().getLuminance()) << " ";
         }
         out << std::endl;

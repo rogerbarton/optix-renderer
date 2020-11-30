@@ -1,0 +1,38 @@
+<!-- Table scene, Copyright (c) 2012 by Olesya Jakob -->
+<!-- Changes by Matthias Busenhart -->
+
+<scene>
+	<!-- Independent sample generator, 128 samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="50"/>
+	</sampler>
+
+	<!-- Use the path tracer with multiple importance sampling -->
+	<integrator type="path_mis"/>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="-50, 0, 0" origin="0, 0, 0" up="0, 0, -1"/>
+		</transform>
+
+		<float name="fov" value="85"/>
+
+		<integer name="width" value="800"/>
+		<integer name="height" value="800"/>
+	</camera>
+
+	<emitter type="envmap">
+		<texture type="png_texture" name="albedo">
+			<string name="filename" value="../res/envmap-test.png"/>
+			<vector name="eulerAngles" value="270,45,-45"/>
+		</texture>
+	</emitter>
+	
+	<shape type="sphere">
+		<point name="center" value="0,0,0"/>
+		<float name="radius" value="20"/>
+		<bsdf type="diffuse"></bsdf>
+	</shape>
+</scene>

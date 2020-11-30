@@ -102,6 +102,9 @@ public:
 		lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 
 		lRec.pdf = pdf(lRec);
+
+		if(lRec.pdf < Epsilon) return Color3f(0.f);
+
 		return eval(lRec) / lRec.pdf;
 	}
 
@@ -114,7 +117,7 @@ public:
 			return Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f));
 		}
 
-		Vector3f target = lRec.p;
+		Vector3f target = lRec.p.normalized();
 		Point2f uv = sphericalCoordinates(target);
 
 		// convert these uv coords into x and y for the probability
@@ -191,12 +194,13 @@ public:
 private:
 	void calculateProbs()
 	{
+		dpdf.clear();
 		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
-				dpdf.append(col.getLuminance());
+				dpdf.append(std::abs(col.getLuminance()) + Epsilon); // add epsilon to add prob to select every pixel once
 			}
 		}
 
