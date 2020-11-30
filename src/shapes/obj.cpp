@@ -164,7 +164,7 @@ public:
 	    for (uint32_t i = 0; i < vertices.size(); ++i)
 		    m_V.col(i) = positions.at(vertices[i].p - 1);
 
-	    m_N.resize(3, vertices.empty() ? 0 : vertices.size());
+	    m_N.resize(3, normals.empty() ? 0 : vertices.size());
 	    if (!normals.empty())
 	    {
 		    for (uint32_t i = 0; i < vertices.size(); ++i)
