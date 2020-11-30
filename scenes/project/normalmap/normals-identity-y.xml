@@ -25,8 +25,7 @@
 		<string name="filename" value="../meshes/plane.obj"/>
 		
 		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-identity.png"/>
-			<boolean name="sphericalTexture" value="false"/>
+			<string name="filename" value="../res/normal-identity-y.png"/>
 		</texture>
 
 		<transform name="toWorld">
@@ -39,7 +38,7 @@
         <float name="radius" value="0.5"/>
 
 		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-identity.png"/>
+			<string name="filename" value="../res/normal-identity-y.png"/>
 		</texture>
     </shape>
 </scene>
