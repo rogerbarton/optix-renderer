@@ -25,7 +25,7 @@
 		<string name="filename" value="../meshes/plane.obj"/>
 		
 		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-neutral.png"/>
+			<string name="filename" value="../res/normal-identity.png"/>
 		</texture>
 
 		<transform name="toWorld">
