@@ -12,7 +12,6 @@
 
     <link href="resources/bootstrap.min.css" rel="stylesheet">
     <link href="resources/offcanvas.css" rel="stylesheet">
-    <link href="resources/custom2014.css" rel="stylesheet">
     <link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -22,6 +21,50 @@
 </head>
 
 <body>
+    <nav class="navbar bg-dark navbar-expand-lg navbar-dark fixed-top">
+        <a class="navbar-brand" href="enori.html">ENori</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbarContent" class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="enori.html">ENori</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMatthias" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Matthias
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMatthias">
+                        <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
+                        <a class="dropdown-item" href="disney.html">Disney BSDF</a>
+                        <a class="dropdown-item" href="envmap.html">Envinronment Map Emitter</a>
+                        <a class="dropdown-item" href="images.html">Images as Textures</a>
+                        <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRoger" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Roger
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownRoger">
+                        <a class="dropdown-item active" href="anisotropic.html">Anisotropic Phase Function</a>
+                        <a class="dropdown-item" href="blender.html">Blender</a>
+                        <a class="dropdown-item active" href="dof.html">Depth of Field</a>
+                        <a class="dropdown-item" href="emissive_medium.html">Emissive Participating Media</a>
+                        <a class="dropdown-item" href="heterogenous_media.html">Hetergoenous Participating Media</a>
+                        <a class="dropdown-item" href="normal.html">Normal Mapping</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="container headerBar">
         <h1>Depth of Field (Roger, 5pt)</h1>
@@ -50,6 +93,13 @@
                 <!-- TODO: Show test renders, decribe how the rendered image is correct? -->
             </p>
 
+            <h4>Table scene</h4>
+
+            <!--<div class="twentytwenty-container">
+                <img src="images/dof/dof-table.jpg" alt="Mine" class="img-responsive">
+                <img src="images/dof/dof-table-ref.jpg" alt="Reference" class="img-responsive">
+            </div> <br>-->
+
             <!-- ================================================================= -->
 
 
@@ -60,7 +110,6 @@
     <!-- Bootstrap core JavaScript -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="resources/bootstrap.min.js"></script>
-    <script src="/js/offcanvas.js"></script>
     <script src="resources/jquery.event.move.js"></script>
     <script src="resources/jquery.twentytwenty.js"></script>
 

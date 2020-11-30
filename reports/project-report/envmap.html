@@ -42,8 +42,8 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMatthias">
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
-                        <a class="dropdown-item active" href="disney.html">Disney BSDF</a>
-                        <a class="dropdown-item" href="envmap.html">Envinronment Map Emitter</a>
+                        <a class="dropdown-item" href="disney.html">Disney BSDF</a>
+                        <a class="dropdown-item active" href="envmap.html">Envinronment Map Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -65,87 +65,53 @@
             </ul>
         </div>
     </nav>
+
     <div class="container headerBar">
-        <h1>Disney BSDF (Matthias, 15pt)</h1>
+        <h1>Environment Map Emitter (Matthias, 15pt)</h1>
     </div>
+
+    <!-- TODO:
+        - Block size
+        - explain how it works
+        - explain stencil
+    -->
 
     <div class="container contentWrapper">
         <div class="pageContent">
-            <p>This implementation is based on <a
-                    href="https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf">this github link</a>.</p>
-            <p>To verify the disney BSDF, I render each parameter with different values. The resulting images are
-                compared against the image on <a
-                    href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">these
-                    slides (slide 3)</a>. All images are rendered with the Path MIS integartor and 512 samples per
-                pixel.</p>
-
+            <h4>General Comment</h4>
+            <p>All images shown below were rendered using the adaptive sampler with 50 as the sample count.</p>
+            <h4>Simple Black/White</h4>
+            <p>In order to see if the envinronment map actually works, a simple image was created. This image (altough
+                mapped onto the sphere) allows to see, if the environment map eluminates from everywhere or just from
+                those pixels which actually have a color.</p>
             <div class="twentytwenty-container">
-                <img src="images/disney/baseline.png" alt="All 0" class="img-responsive">
-                <img src="images/disney/default.png" alt="Default parameters" class="img-responsive">
+                <img src="images/envmap/envmap-test.png" alt="" class="img-responsive">
+            </div>
+            <p>With the help of this image, used as an environment map, we can easily see if the illumination works and
+                if diffuse objects have uniform variance (which comes from the sampler).</p>
+
+            <h4>Difference between Path MIS and Path MATS</h4>
+            <p>This image comparison shows the difference between Path MIS and Path MATS. As we can see, both produce
+                the same result except for uniform variance.</p>
+            <div class="twentytwenty-container">
+                <img src="images/envmap/envmap-mats.png" alt="Path MATS" class="img-responsive">
+                <img src="images/envmap/envmap-mis.png" alt="Path MIS" class="img-responsive">
             </div>
 
-            <h4>Impact of Metallic</h4>
+            <h4>Images as Environment Maps</h4>
+            <p>I wrote a custom class, HDRLoader, which can load hdr files from <a
+                    href="https://hdrihaven.com/">HDRIHaven</a> into nori. With this class, we can use any of a huge
+                selection of environment maps from the webpage. The following comparison was rendered using 128 samples
+                using the independent sampler. We see that on the spere is kind of a color according to the envinronment
+                map in this direction. This proofs visually, that the envinronment map emitter should work as intended.
+            </p>
             <div class="twentytwenty-container">
-                <img src="images/disney/metallic/metallic0.5.png" alt="Metallic 0.5" class="img-responsive">
-                <img src="images/disney/metallic/metallic1.png" alt="Metallic 1.0" class="img-responsive">
+                <img src="images/envmap/hdri-mats.png" alt="Path MATS" class="img-responsive">
+                <img src="images/envmap/hdri-mis.png" alt="Path MIS" class="img-responsive">
             </div>
 
-            <h4>Impact of Roughness</h4>
-            <div class="twentytwenty-container">
-                <img src="images/disney/roughness/roughness0.png" alt="Roughness 0" class="img-responsive">
-                <img src="images/disney/roughness/roughness1.png" alt="Rougness 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Specular</h4>
-            <div class="twentytwenty-container">
-                <img src="images/disney/specular/specular0.png" alt="Specular 0" class="img-responsive">
-                <img src="images/disney/specular/specular1.png" alt="Specular 1.0" class="img-responsive">
-                <img src="images/disney/specular/specular0.33.png" alt="Specular 0.33" class="img-responsive">
-                <img src="images/disney/specular/specular0.66.png" alt="Specular 0.66" class="img-responsive">
-            </div>
-
-            <h4>Impact of Clearcoat</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default" class="img-responsive">
-                <img src="images/disney/clearcoat/clearcoat1.png" alt="Clearcoat 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Clearcoat Gloss</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default (clearcoat gloss 1)" class="img-responsive">
-                <img src="images/disney/clearcoatGloss/clearcoatGloss0.png" alt="Clearcoat Gloss 0"
-                    class="img-responsive">
-            </div>
-
-            <h4>Impact of Subsurface</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default" class="img-responsive">
-                <img src="images/disney/subsurface/subsurface1.png" alt="Subsurface 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Specular Tint</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default (Specular 0.5)" class="img-responsive">
-                <img src="images/disney/specularTint/specularTint1.png" alt="Specular Tint 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Sheen</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default" class="img-responsive">
-                <img src="images/disney/sheen/sheen1.png" alt="Sheen 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Sheen Tint</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/sheenTint/sheenTint0.png" alt="Sheen Tint 0" class="img-responsive">
-                <img src="images/disney/sheenTint/sheenTint1.png" alt="Sheen Tint 1" class="img-responsive">
-            </div>
+            <h4>Constant Color</h4>
+            <p>Finally, the implementation will also support constant colors as an environment map. Some images of this can be found on the <a href="disney.html">Disney BSDF</a> page.</p>
 
             <!-- ================================================================= -->
 
@@ -159,7 +125,6 @@
     <script src="resources/bootstrap.min.js"></script>
     <script src="resources/jquery.event.move.js"></script>
     <script src="resources/jquery.twentytwenty.js"></script>
-
 
     <script>
         $(window).load(function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5 }); });
