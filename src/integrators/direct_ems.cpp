@@ -28,7 +28,7 @@ public:
     Color3f result(0.f); // final color
 
     // get colliding object and shape
-    auto shape = its.mesh;
+    auto shape = its.shape;
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result

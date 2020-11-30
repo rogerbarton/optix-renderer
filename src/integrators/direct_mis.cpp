@@ -35,7 +35,7 @@ public:
     float w_mat = 0.f;
 
     // get colliding object and shape
-    auto shape = its.mesh;
+    auto shape = its.shape;
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
@@ -106,10 +106,10 @@ public:
       // compute sampled ray interaction point
       Intersection secondaryIts;
 
-      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.mesh->isEmitter())
+      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.shape->isEmitter())
       {
         EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
-        auto ems = secondaryIts.mesh->getEmitter();
+        auto ems = secondaryIts.shape->getEmitter();
 
         result_mats = bsdf_color * ems->eval(secondaryEQR); // / scene->getLights().size();
 

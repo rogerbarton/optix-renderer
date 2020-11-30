@@ -44,7 +44,7 @@ public:
             }
 
             // get colliding object and shape
-            const Shape *shape = its.mesh;
+            const Shape *shape = its.shape;
             const BSDF *bsdf = shape->getBSDF();
 
             // if shape is emitter, add eval to result
@@ -118,11 +118,11 @@ public:
                 Intersection itsS;
                 if (scene->rayIntersect(shadowray, itsS))
                 {
-                    if (itsS.mesh->isEmitter())
+                    if (itsS.shape->isEmitter())
                     {
                         EmitterQueryRecord eqr_mats(its.p, itsS.p, itsS.shFrame.n);
                         pdfmat = bsdf->pdf(bRec_MATS);
-                        pdfmat_ems = itsS.mesh->getEmitter()->pdf(eqr_mats) / scene->getLights().size();
+                        pdfmat_ems = itsS.shape->getEmitter()->pdf(eqr_mats) / scene->getLights().size();
 
                         if ((pdfmat + pdfmat_ems) > Epsilon)
                         {

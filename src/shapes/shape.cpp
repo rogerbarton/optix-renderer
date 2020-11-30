@@ -82,7 +82,7 @@ void Shape::addChild(NoriObject *obj)
 
 std::string Intersection::toString() const
 {
-    if (!mesh)
+    if (!shape)
         return "Intersection[invalid]";
 
     return tfm::format(
@@ -99,7 +99,7 @@ std::string Intersection::toString() const
         uv.toString(),
         indent(shFrame.toString()),
         indent(geoFrame.toString()),
-        mesh ? mesh->toString() : std::string("null"));
+        shape ? shape->toString() : std::string("null"));
 }
 #ifdef NORI_USE_IMGUI
 bool Shape::getImGuiNodes()

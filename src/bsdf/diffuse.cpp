@@ -153,7 +153,7 @@ public:
 	NORI_OBJECT_IMGUI_NAME("Diffuse");
 	virtual bool getImGuiNodes() override
 	{
-		bool node_open = ImGui::TreeNode("Texture");
+		bool node_open = ImGui::TreeNode("Albedo");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
 

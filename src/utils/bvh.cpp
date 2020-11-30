@@ -441,7 +441,7 @@ bool BVH::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) con
                     foundIntersection = true;
                     ray.maxt = its.t = t;
                     its.uv = Point2f(u, v);
-                    its.mesh = shape;
+                    its.shape = shape;
                     f = idx;
                 }
             }
@@ -453,7 +453,7 @@ bool BVH::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) con
     }
 
     if (foundIntersection) {
-        its.mesh->setHitInformation(f,ray,its);
+        its.shape->setHitInformation(f, ray, its);
     }
 
     return foundIntersection;

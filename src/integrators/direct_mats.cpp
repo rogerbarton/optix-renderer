@@ -31,7 +31,7 @@ public:
     }
 
     // get colliding object and shape
-    auto shape = its.mesh;
+    auto shape = its.shape;
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
@@ -72,11 +72,11 @@ public:
     }
 
     // test if emitter was hit
-    if (secondaryIts.mesh->isEmitter())
+    if (secondaryIts.shape->isEmitter())
     {
       EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
 
-      result += secondaryIts.mesh->getEmitter()->eval(secondaryEQR) * bsdf_col;
+      result += secondaryIts.shape->getEmitter()->eval(secondaryEQR) * bsdf_col;
     }
 
     return result;

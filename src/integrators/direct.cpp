@@ -31,7 +31,7 @@ public:
     Color3f result; // final Color
 
     // get colliding object
-    auto shape = its.mesh;
+    auto shape = its.shape;
     auto bsdf = shape->getBSDF();
     // primary ray, pointing to camera
     Vector3f wo = its.toLocal((ray.o - its.p).normalized());

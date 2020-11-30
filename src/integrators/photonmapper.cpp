@@ -101,7 +101,7 @@ public:
                     break;
                 }
 
-                const Shape *shape = its.mesh;
+                const Shape *shape = its.shape;
                 const BSDF *bsdf = shape->getBSDF();
 
                 // check if diffuse
@@ -190,7 +190,7 @@ public:
             }
 
             // get colliding object and shape
-            const Shape *shape = its.mesh;
+            const Shape *shape = its.shape;
             const BSDF *bsdf = shape->getBSDF();
 
             // if shape is emitter, add eval to result

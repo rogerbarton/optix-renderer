@@ -46,10 +46,10 @@ struct Intersection
     /// Geometric frame (based on the true geometry)
     Frame geoFrame;
     /// Pointer to the associated shape
-    const Shape *mesh;
+    const Shape *shape;
 
     /// Create an uninitialized intersection record
-    Intersection() : mesh(nullptr) {}
+    Intersection() : shape(nullptr) {}
 
     /// Transform a direction vector into the local shading frame
     Vector3f toLocal(const Vector3f &d) const
