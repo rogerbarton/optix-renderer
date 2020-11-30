@@ -8,6 +8,7 @@
 #include <map>
 #include <algorithm>
 #include <filesystem/path.h>
+#include <filesystem>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -94,17 +95,26 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_b
 
 void ImguiScreen::drop(const std::string &filename)
 {
-	filesystem::path path = filesystem::path(filename);
+	std::filesystem::path path(filename);
 
-	if (path.extension() == "xml")
+	if (path.extension() == ".xml")
 	{
 		/* Render the XML scene file */
 		openXML(filename);
 	}
-	else if (path.extension() == "exr")
+	else if (path.extension() == ".exr")
 	{
 		/* Alternatively, provide a basic OpenEXR image viewer */
 		openEXR(filename);
+
+		// auto tone map
+		m_block.lock();
+		Bitmap *bm = m_block.toBitmap();
+		m_block.unlock();
+
+		const std::string outfile = std::filesystem::path(path).replace_extension(".png").string();
+		bm->saveToLDR(outfile);
+		std::cout << "PNG file saved to " << outfile << std::endl;
 	}
 	else
 	{
