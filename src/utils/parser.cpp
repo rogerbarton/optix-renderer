@@ -200,6 +200,8 @@ NoriObject *loadFromXML(const std::string &filename)
             {
                 //check_attributes(node, { "type" });
 
+                propList.setString("name", node.attribute("name").value());
+
                 /* This is an object, first instantiate it */
                 result = NoriObjectFactory::createInstance(
                     node.attribute("type").value(),

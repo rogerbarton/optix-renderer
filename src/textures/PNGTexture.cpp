@@ -15,7 +15,7 @@ NORI_NAMESPACE_BEGIN
 		explicit PNGTexture(const PropertyList &props)
 		{
 			filename    = getFileResolver()->resolve(props.getString("filename")).str();
-			sRgb        = props.getBoolean("sRGB", getIdName() != "normal");
+			sRgb        = props.getBoolean("sRGB", props.getString("name") != "normal");
 			scaleU      = props.getFloat("scaleU", 1.f);
 			scaleV      = props.getFloat("scaleV", 1.f);
 			eulerAngles = props.getVector3("eulerAngles", Vector3f(0.f)) * M_PI / 180.f;
