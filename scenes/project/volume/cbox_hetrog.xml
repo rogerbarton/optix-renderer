@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="path_mis"/>
+	<integrator type="path_vol_mats"/>
 
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
@@ -18,10 +18,35 @@
 		<integer name="sampleCount" value="128"/>
 	</sampler>
 
+	<!-- Volumes -->
 	<shape type="volume">
 		<string name="filename" value="fluid_data_0050.vdb"/>
+		
+		<medium type="homog">
+			<!-- <phase type="anisophase"/> --> 
+		</medium>
+	</shape>
+	
+	<shape type="sphere">
+		<point name="center" value="0.445800 0.332100 0.376700" />
+		<float name="radius" value="0.3263" />
+
+		<!-- <bsdf type="dielectric"/> -->
+		<medium type="homog">
+			<!-- <phase type="anisophase"/> --> 
+		</medium>
 	</shape>
 
+	<!-- Lights -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/cbox/light.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="15 15 15"/>
+		</emitter>
+	</shape>
+
+	<!-- Rest of Scene -->
 	<shape type="obj">
 		<string name="filename" value="../meshes/cbox/walls.obj"/>
 
@@ -51,20 +76,5 @@
 		<float name="radius" value="0.3263" />
 
 		<bsdf type="mirror"/>
-	</shape>
-
-	<shape type="sphere">
-		<point name="center" value="0.445800 0.332100 0.376700" />
-		<float name="radius" value="0.3263" />
-
-		<bsdf type="dielectric"/>
-	</shape>
-
-	<shape type="obj">
-		<string name="filename" value="../meshes/cbox/light.obj"/>
-
-		<emitter type="area">
-			<color name="radiance" value="15 15 15"/>
-		</emitter>
 	</shape>
 </scene>

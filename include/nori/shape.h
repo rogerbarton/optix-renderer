@@ -23,6 +23,7 @@
 #include <nori/frame.h>
 #include <nori/bbox.h>
 #include <nori/texture.h>
+#include <nori/medium.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -129,6 +130,8 @@ public:
     const BSDF *getBSDF() const { return m_bsdf; }
     BSDF *getBSDFNonConst() { return m_bsdf; }
 
+    const Medium* getMedium() const { return m_medium; }
+
     /// Return the total number of primitives in this shape
     virtual uint32_t getPrimitiveCount() const { return 1; }
 
@@ -182,11 +185,12 @@ public:
 	 */
 	mutable bool geometryTouched = true;
     Emitter *m_emitter = nullptr; ///< Associated emitter, if any
-	protected:
+protected:
 	Texture<Normal3f> *m_normalMap = nullptr;
 	BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
     BoundingBox3f m_bbox;         ///< Bounding box of the mesh
-	};
+	Medium * m_medium = nullptr;  ///< Associated medium inside the shape, vacuum if null
+};
 
 NORI_NAMESPACE_END
 

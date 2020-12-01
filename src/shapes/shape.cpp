@@ -27,11 +27,11 @@ NORI_NAMESPACE_BEGIN
 
 void Shape::cloneAndInit(Shape *clone)
 {
-	// If no material was assigned, instantiate a diffuse BRDF
-	if (!m_bsdf)
+	// If no material or medium was assigned, instantiate a diffuse BRDF
+	if (!m_bsdf && !m_medium)
 		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
-
 	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
+
 	if(m_normalMap)
 		clone->m_normalMap = static_cast<Texture<Normal3f>*>(m_normalMap->cloneAndInit());
 
@@ -107,6 +107,12 @@ void Shape::addChild(NoriObject *obj)
         m_emitter = static_cast<Emitter *>(obj);
         m_emitter->setShape(static_cast<Shape *>(this));
         break;
+
+    case EMedium:
+	    if (m_medium)
+		    throw NoriException("Shape: tried to register multiple Medium instances.");
+	    m_medium = static_cast<Medium *>(obj);
+	    break;
 
     case ETexture:
 	    if (obj->getIdName() == "normal")

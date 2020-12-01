@@ -138,6 +138,7 @@ public:
             m_bsdf ? indent(m_bsdf->toString()) : std::string("null"),
             m_emitter ? indent(m_emitter->toString()) : std::string("null"));
     }
+
 #ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Sphere");
     virtual bool getImGuiNodes() override
@@ -161,7 +162,7 @@ public:
         touched |= geometryTouched | transformTouched;
         return touched;
     }
-    #endif
+#endif
 
 protected:
     Point3f m_position;

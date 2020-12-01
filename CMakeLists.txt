@@ -54,6 +54,8 @@ add_executable(nori
     include/nori/warp.h
     include/nori/HDRLoader.h
     include/nori/denoiser.h
+    include/nori/medium.h
+    include/nori/phase.h
 
     # Source code files
     src/utils/bitmap.cpp
@@ -114,6 +116,10 @@ add_executable(nori
 
     src/samplers/adaptive.cpp
     src/samplers/independent.cpp
+
+    src/media/medium.cpp
+    src/media/homogmedium.cpp
+    src/media/heterogmedium.cpp
     )
 
 if(NORI_USE_VOLUMES)

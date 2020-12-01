@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="path_mis"/>
+	<integrator type="path_vol_mats"/>
 	<sampler type="independent">
 		<integer name="sampleCount" value="128"/>
 	</sampler>
@@ -24,7 +24,7 @@
 
 		<!-- <bsdf type="dielectric"/> -->
 		<medium type="homog">
-			<phase type="iso"/>
+			<!-- <phase type="anisophase"/> --> 
 		</medium>
 	</shape>
 
