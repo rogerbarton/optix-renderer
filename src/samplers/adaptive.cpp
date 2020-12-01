@@ -40,7 +40,7 @@ public:
             block.getOffset().x(),
             block.getOffset().y());
         // .y() did not work, using [1] instead
-        m_oldVariance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize().y(), block.getSize().x());
+        m_oldVariance = Eigen::MatrixXf::Zero(block.getSize().y(), block.getSize().x());
         dpdf.reserve(m_oldVariance.size());
     }
     void generate() override {}
@@ -92,10 +92,10 @@ public:
         if (m_sampleRound < initialUniform)
             return true; // true to render and don't compute variance
 
-        Eigen::Matrix<Color3f, -1, -1> variance = computeVarianceFromImage(block);
+        Eigen::MatrixXf variance = computeVarianceFromImage(block);
 
-        float var_diff = std::abs((m_oldVariance - variance).sum().getLuminance());
-        if (std::abs(variance.sum().getLuminance()) < Epsilon)
+        float var_diff = std::abs((m_oldVariance - variance).sum());
+        if (std::abs(variance.sum()) < Epsilon)
         {
             m_oldNorm = var_diff;
             m_oldVariance = variance;
@@ -107,7 +107,7 @@ public:
             for (int j = 0; j < variance.cols(); j++)
             {
                 //dpdf.add_element(i, j, std::abs(variance(i, j).getLuminance()));
-                dpdf.append(std::abs(variance(i, j).getLuminance()));
+                dpdf.append(variance(i, j));
             }
         }
 
@@ -161,13 +161,13 @@ public:
             size_t elem = dpdf.sample(next1D());
             int row = elem / size.x();
             int col = elem % size.x();
-            result.push_back({row,col});
+            result.push_back({row, col});
         }
 
         return result;
     }
 
-    void writeVarianceMatrix(ImageBlock &block, bool fullColor) override
+    void writeVarianceMatrix(ImageBlock &block) override
     {
         // write my variance matrix in here
 
@@ -188,10 +188,7 @@ public:
             for (int j = 0; j < m_oldVariance.cols(); j++)
             {
                 //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
-                if (fullColor)
-                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(m_oldVariance(i, j)));
-                else
-                    block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(Color3f(m_oldVariance(i, j).getLuminance()));
+                block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(m_oldVariance(i, j));
             }
         }
     }
@@ -227,7 +224,7 @@ private:
     pcg32 m_random;
     bool m_finished = false;
     DiscretePDF dpdf;
-    Eigen::Matrix<Color3f, -1, -1> m_oldVariance;
+    Eigen::MatrixXf m_oldVariance;
     float m_oldNorm = 10000.f; // arbitrary big
     int initialUniform;
 

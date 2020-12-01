@@ -271,10 +271,11 @@ extern float fresnel(float cosThetaI, float extIOR, float intIOR);
  */
 extern filesystem::resolver *getFileResolver();
 
-/// computes the variance from a given imageblock
-struct Color3f;// forward declaration
+/// computes the normalized variance from a given imageblock
+// A Local Variance-Based Bilateral Filtering for Artifact-Free Detail- and Edge-Preserving Smoothing, equation 4/5
+struct Color4f;// forward declaration
 class ImageBlock; // fw decl.
-Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock& block);
+Eigen::MatrixXf computeVarianceFromImage(const ImageBlock& block);
 
 NORI_NAMESPACE_END
 

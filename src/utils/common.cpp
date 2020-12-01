@@ -336,19 +336,49 @@ float fresnel(float cosThetaI, float extIOR, float intIOR)
     return (Rs * Rs + Rp * Rp) / 2.0f;
 }
 
-Eigen::Matrix<Color3f, -1, -1> computeVarianceFromImage(const ImageBlock &block)
+Eigen::MatrixXf computeVarianceFromImage(const ImageBlock &block)
 {
-    Eigen::Matrix<Color3f, -1, -1> variance = Eigen::Matrix<Color3f, -1, -1>::Zero(block.getSize()[1], block.getSize()[0]);
+    Eigen::MatrixXf variance = Eigen::MatrixXf::Zero(block.getSize()[1], block.getSize()[0]);
     const int bs = block.getBorderSize();
-    for (int i = 1; i < block.getSize().y()-1; i++)
+    for (int i = 1; i < block.getSize().y() - 1; i++)
     {
-        for (int j = 1; j < block.getSize().x()-1; j++)
+        for (int j = 1; j < block.getSize().x() - 1; j++)
         {
-            Color4f middle = 16.f * block(i + bs, j + bs);
-            Color4f all = block.block(i + bs - 1, j + bs - 1, 3, 3).sum();
-            variance(i, j) = (all.divideByFilterWeight() - middle.divideByFilterWeight()).cwiseAbs();
+            float mean = 0.f;
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    mean += block(i + bs - 1 + k, j + bs - 1 + l).divideByFilterWeight().getLuminance();
+                }
+            }
+
+            mean /= 9.f;
+
+            float col = 0.f;
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    col += 1.f / 9.f * std::pow(block(i + bs - 1 + k, j + bs - 1 + l).divideByFilterWeight().getLuminance() - mean, 2);
+                }
+            }
+
+            variance(i, j) = col;
         }
     }
+
+    // normalize variances
+    float max_ = variance.block(1, 1, block.getSize().y() - 2, block.getSize().x() - 2).maxCoeff();
+    float min_ = variance.block(1, 1, block.getSize().y() - 2, block.getSize().x() - 2).minCoeff();
+    for (int i = 1; i < block.getSize().y() - 1; i++)
+    {
+        for (int j = 1; j < block.getSize().x() - 1; j++)
+        {
+            variance(i, j) = 1.f + (variance(i, j) - min_) / (max_ - min_) * 0.254f;
+        }
+    }
+
     return variance;
 }
 

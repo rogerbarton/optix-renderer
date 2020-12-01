@@ -119,7 +119,6 @@ void RenderThread::loadScene(const std::string &filename)
 	if (lastdot != std::string::npos)
 		outputName.erase(lastdot, std::string::npos);
 
-	outputNameDenoised = outputName + "_denoised.exr";
 	outputNameVariance = outputName + "_variance.exr";
 	outputName += ".exr";
 
@@ -245,6 +244,11 @@ void RenderThread::renderThreadMain()
 		blockGenerator.reset();
 	}
 
+	if (m_renderScene->getDenoiser())
+	{
+		m_renderScene->getDenoiser()->denoise(&m_block);
+	}
+
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
 	cout << "Total Samples Placed: " << m_renderScene->getSampler()->getTotalSamples() << std::endl;
 	if (m_previewMode || m_renderStatus == ERenderStatus::Interrupt)
@@ -259,13 +263,6 @@ void RenderThread::renderThreadMain()
 	m_block.lock();
 	std::unique_ptr<Bitmap> bitmap(m_block.toBitmap());
 	m_block.unlock();
-
-	/* apply the denoiser */
-	if (m_renderScene->getDenoiser())
-	{
-		std::unique_ptr<Bitmap> bitmap_denoised(m_renderScene->getDenoiser()->denoise(bitmap.get()));
-		bitmap_denoised->save(outputNameDenoised);
-	}
 
 	/* Save using the OpenEXR format */
 	bitmap->save(outputName);
@@ -287,7 +284,7 @@ void RenderThread::renderThreadMain()
 			blockGenerator.next(currVarBlock);
 			int id = currVarBlock.getBlockId();
 			currVarBlock.clear();
-			samplers.at(id)->writeVarianceMatrix(currVarBlock, false);
+			samplers.at(id)->writeVarianceMatrix(currVarBlock);
 
 			fullVarianceMatrix.put(currVarBlock);
 		}
@@ -296,7 +293,7 @@ void RenderThread::renderThreadMain()
 
 		delete rf;
 	}
-	std::cout << "Mean Luminance of variance of m_block: " << computeVarianceFromImage(m_block).mean().getLuminance() << std::endl;
+	std::cout << "Mean Luminance of variance of m_block: " << computeVarianceFromImage(m_block).mean() << std::endl;
 
 	//delete m_scene;
 	//m_scene = nullptr;
