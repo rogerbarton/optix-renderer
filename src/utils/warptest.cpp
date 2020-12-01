@@ -18,6 +18,7 @@
 
 #include <nori/warp.h>
 #include <nori/bsdf.h>
+#include <nori/phase.h>
 #include <nanogui/screen.h>
 #include <nanogui/glutil.h>
 #include <nanogui/label.h>
@@ -51,6 +52,8 @@ using nori::Warp;
 using nori::PropertyList;
 using nori::BSDF;
 using nori::BSDFQueryRecord;
+using nori::PhaseFunction;
+using nori::PhaseQueryRecord;
 using nori::Color3f;
 
 class WarpTest : public Screen {
@@ -76,7 +79,7 @@ public:
         AnisoPhase
     };
 
-    WarpTest(): Screen(Vector2i(800, 600), "Assignment 2: Sampling and Warping"), m_bRec(Vector3f()) {
+    WarpTest(): Screen(Vector2i(800, 600), "Assignment 2: Sampling and Warping"), m_bRec(Vector3f()), m_pRec(Vector3f()) {
         initializeGUI();
         m_drawHistogram = false;
     }
@@ -103,12 +106,16 @@ public:
             case Beckmann: result << Warp::squareToBeckmann(sample, parameterValue); break;
             case HenyeyGreenstein: result << Warp::squareToHenyeyGreenstein(sample, parameterValue); break;
             case Schlick: result << Warp::squareToSchlick(sample, parameterValue); break;
-            case MicrofacetBRDF:
+            case MicrofacetBRDF: {
+	            BSDFQueryRecord bRec(m_bRec);
+	            float value = m_brdf->sample(bRec, sample).getLuminance();
+	            return std::make_pair(bRec.wo, value == 0 ? 0.f : m_brdf->eval(bRec)[0]);
+            }
             case IsoPhase:
             case AnisoPhase: {
-                BSDFQueryRecord bRec(m_bRec);
-                float value = m_brdf->sample(bRec, sample).getLuminance();
-                return std::make_pair(bRec.wo, value == 0 ? 0.f : m_brdf->eval(bRec)[0]);
+                PhaseQueryRecord pRec(m_pRec);
+                float value = m_phase->sample(pRec, sample).getLuminance();
+                return std::make_pair(pRec.wo, value == 0 ? 0.f : 1.f);
              }
         }
 
@@ -169,18 +176,18 @@ public:
 	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
         else if (warpType == IsoPhase) {
-	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("isophase", PropertyList()));
+	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("isophase", PropertyList()));
 
 	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
-	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+	        m_pRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
         else if (warpType == AnisoPhase) {
 	        PropertyList list;
 	        list.setFloat("g", parameterValue);
-	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("anisophase", list));
+	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("anisophase", list));
 
 	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
-	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+	        m_pRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
 
         /* Generate the point positions */
@@ -495,11 +502,16 @@ public:
 	                return Warp::squareToHenyeyGreensteinPdf(v, parameterValue);
                 else if (warpType == Schlick)
 	                return Warp::squareToSchlickPdf(v, parameterValue);
-                else if (warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase) {
+                else if (warpType == MicrofacetBRDF) {
                     BSDFQueryRecord bRec(m_bRec);
                     bRec.wo = v;
                     bRec.measure = nori::ESolidAngle;
                     return m_brdf->pdf(bRec);
+                }
+                else if (warpType == IsoPhase || warpType == AnisoPhase) {
+                    PhaseQueryRecord pRec(m_pRec);
+	                pRec.wo = v;
+                    return m_phase->pdf(pRec);
                 } else {
                     throw NoriException("Invalid warp type");
                 }
@@ -798,7 +810,9 @@ private:
     int m_pointCount, m_lineCount;
     bool m_drawHistogram;
     std::unique_ptr<BSDF> m_brdf;
+    std::unique_ptr<PhaseFunction> m_phase;
     BSDFQueryRecord m_bRec;
+    PhaseQueryRecord m_pRec;
     std::pair<bool, std::string> m_testResult;
 };
 
