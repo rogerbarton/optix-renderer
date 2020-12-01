@@ -75,6 +75,9 @@ public:
             m_finished = false;
             m_oldVariance.setZero();
             m_oldNorm = 10000.f; // set arbitrary high
+        } else if(m_sampleRound == 1000) {
+            // finish at 1000 samples
+            return false;
         }
 
         // check if we must exit, return false to stop rendering this block
@@ -98,6 +101,8 @@ public:
             m_oldVariance = variance;
             return false; // stop immediately, because we have 0 variance in this block.
         }
+
+        variance.normalize();
 
         for (int i = 0; i < variance.rows(); i++)
         {
@@ -174,13 +179,13 @@ public:
         // c) the variance (luminance)
         // d) the variance (either way) but on the whole block as one number
 
-        Color3f col2Write = Color3f(counter);
+        //Color3f col2Write = Color3f(counter);
         for (int i = 0; i < m_oldVariance.rows(); i++)
         {
             for (int j = 0; j < m_oldVariance.cols(); j++)
             {
-                block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
-                //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(m_oldVariance(i, j));
+                //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
+                block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(m_oldVariance(i, j));
             }
         }
     }
