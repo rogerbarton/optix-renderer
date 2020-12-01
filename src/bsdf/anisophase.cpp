@@ -1,4 +1,8 @@
-#include <nori/bsdf.h>
+//
+// Created by roger on 01/12/2020.
+//
+
+#include <nori/phase.h>
 #include <nori/frame.h>
 #include <nori/warp.h>
 
@@ -7,7 +11,7 @@ NORI_NAMESPACE_BEGIN
 	/**
 	 * Anisotropic phase function for volumes based on Henyey-Greenstein.
 	 */
-	class AnisoPhase : public BSDF
+	class AnisoPhase : public PhaseFunction
 	{
 	public:
 		explicit AnisoPhase(const PropertyList &propList)
@@ -17,26 +21,18 @@ NORI_NAMESPACE_BEGIN
 		NORI_OBJECT_DEFAULT_CLONE(AnisoPhase)
 		NORI_OBJECT_DEFAULT_UPDATE(AnisoPhase)
 
-
-		/// Evaluate the BRDF for the given pair of directions
-		Color3f eval(const BSDFQueryRecord &bRec) const override
-		{
-			return Color3f(1.f);
-		}
-
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
-		float pdf(const BSDFQueryRecord &bRec) const override
+		float pdf(const PhaseQueryRecord &bRec) const override
 		{
 			return Warp::squareToHenyeyGreensteinPdf(Frame(bRec.wi).toLocal(bRec.wo), m_g);
 		}
 
 		/// Sample the BRDF
-		Color3f sample(BSDFQueryRecord &bRec,
-		                       const Point2f &sample) const override
+		Color3f sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
 		{
 			bRec.wo = Warp::squareToHenyeyGreenstein(sample, m_g);
 
-			return eval(bRec) / pdf(bRec) * Frame::cosTheta(bRec.wo);
+			return 1.f / pdf(bRec) * Frame::cosTheta(bRec.wo);
 		}
 
 		std::string toString() const override
@@ -50,7 +46,7 @@ NORI_NAMESPACE_BEGIN
 		NORI_OBJECT_IMGUI_NAME("Anisotropic Phase");
 		bool getImGuiNodes() override
 		{
-			touched |= BSDF::getImGuiNodes();
+			touched |= PhaseFunction::getImGuiNodes();
 
 			ImGui::AlignTextToFramePadding();
 			ImGui::PushID(1);

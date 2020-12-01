@@ -6,6 +6,8 @@
 
 #include <nori/object.h>
 
+#include <utility>
+
 NORI_NAMESPACE_BEGIN
 
 	struct PhaseQueryRecord
@@ -16,8 +18,8 @@ NORI_NAMESPACE_BEGIN
 		// Outgoing direction (in the local frame)
 		Vector3f wo;
 
-		PhaseQueryRecord(const Vector3f &wi) : wi(wi) {}
-		PhaseQueryRecord(const Vector3f &wi, const Vector3f &wo) : wi(wi), wo(wo) {}
+		PhaseQueryRecord(Vector3f wi) : wi(std::move(wi)) {}
+		PhaseQueryRecord(Vector3f wi, Vector3f wo) : wi(std::move(wi)), wo(std::move(wo)) {}
 	};
 
 	/**
