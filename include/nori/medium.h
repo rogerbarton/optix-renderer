@@ -26,10 +26,11 @@ NORI_NAMESPACE_BEGIN
 	struct Medium : NoriObject
 	{
 		/**
-		 * Samples the free flight distance to the next interaction
+		 * Samples the free flight distance to the next interaction inside the medium.
+		 * Note: intersections with the scene and medium boundary should be handled separately
 		 * @return the time until the next interaction
 		 */
-		virtual float sampleTr(MediumQueryRecord &mRec, const Point2f &sample) const = 0;
+		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const = 0;
 
 		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
 
