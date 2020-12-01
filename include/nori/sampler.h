@@ -116,7 +116,7 @@ public:
     /// returns true if this sampler is adaptive or not (if we should compute the variance)
     virtual bool isAdaptive() const { return false; }
 
-    virtual void writeVarianceMatrix(ImageBlock& block, bool fullColor=false) {}
+    virtual void writeVarianceMatrix(ImageBlock& block) {}
 
     /**
      * \brief Return the type of object (i.e. Mesh/Sampler/etc.) 
@@ -134,15 +134,6 @@ public:
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
 		touched |= ImGui::DragInt("##value", &m_sampleCount, 1, 0, SLIDER_MAX_INT, "%d%", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::NextColumn();
-		ImGui::PopID();
-
-        ImGui::PushID(42);
-        ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("totalSamples", ImGuiLeafNodeFlags, "Total Samples Placed");
-		ImGui::NextColumn();
-		ImGui::SetNextItemWidth(-1);
-		ImGui::Text("%llu", totalSamples);
 		ImGui::NextColumn();
 		ImGui::PopID();
 

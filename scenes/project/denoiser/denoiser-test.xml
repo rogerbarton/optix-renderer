@@ -1,0 +1,104 @@
+<!-- Table scene, Copyright (c) 2012 by Olesya Jakob -->
+
+<scene>
+	<!-- Independent sample generator, 512 samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="16"/>
+	</sampler>
+
+	<!-- Use the path tracer with multiple importance sampling -->
+	<integrator type="path_mis">
+	</integrator>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0, 0, 0" 
+				origin="40, -80, 40" 
+				up="0, 0, 1"/>
+		</transform>
+
+		<!-- Field of view: 35 degrees -->
+		<float name="fov" value="35"/>
+
+		<!-- 800x600 pixels -->
+		<integer name="width" value="800"/>
+		<integer name="height" value="600"/>
+	</camera>
+	
+	<denoiser type="simple">
+		<float name="sigma_d" value="6.0"/>
+		<float name="k" value="1.5"/>
+		<integer name="range" value="7"/>
+	</denoiser>
+
+	<!-- Two light sources  -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/plane.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="3,3,2.5"/>
+		</emitter>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0,0,0"/>
+		</bsdf>
+
+
+		<transform name="toWorld">
+			<scale value="0.06,0.06,-1"/>
+			<translate value="10,0,25"/>
+		</transform>
+	</shape>
+	
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/plane.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="1,1,1.6"/>
+		</emitter>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0,0,0"/>
+		</bsdf>
+
+
+		<transform name="toWorld">
+			<scale value="0.3,0.3,-1"/>
+			<translate value="0,0,60"/>
+		</transform>
+	</shape>
+
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/curvy_bowl.obj"/>
+
+		<bsdf type="diffuse">
+			<!-- <color name="kd" value="0, 0, 0"/> -->
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="3,0,0"/>
+		</transform>
+	</shape>
+
+
+
+	<!-- Diffuse floor -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/plane.obj"/>
+
+		<bsdf type="diffuse">
+			<texture type="checkerboard_color" name="albedo">
+								<vector name="scale" value="0.1,0.2"/>
+                <color name="value1" value="0.8,0.8,0.8"/>
+                <color name="value2" value="0.2,0.2,0.2"/>
+            </texture>
+		</bsdf>
+
+		<transform name="toWorld">
+			<scale value="0.2,0.35,0.5"/>
+			<translate value="-35,25,0"/>
+		</transform>
+
+	</shape>
+</scene>

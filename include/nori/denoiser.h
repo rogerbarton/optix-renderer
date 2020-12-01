@@ -1,7 +1,6 @@
 #pragma once
 
 #include <nori/object.h>
-#include <nori/bitmap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -12,13 +11,13 @@ public:
     {
         return EDenoiser;
     }
-    virtual Bitmap *denoise(const Bitmap *bitmap) const = 0;
+    virtual void denoise(ImageBlock* block) const = 0;
     virtual std::string toString() const override
     {
         return tfm::format("Denoiser[]");
     }
 #ifdef NORI_USE_IMGUI
-	NORI_OBJECT_IMGUI_NAME("Denoiser Base");
+    NORI_OBJECT_IMGUI_NAME("Denoiser Base");
     virtual bool getImGuiNodes() override { return false; }
 #endif
 };

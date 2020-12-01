@@ -73,12 +73,48 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
-
+            <p>This implementaion is based on the work by Pham et al. <a href="#ref-1">[1]</a>.</p>
+            <p>The groundturth is rendered using Path MIS, 1024 samples per pixel. It took 5 minutes. The image used for
+                denoising is sampled with 16 samples per pixel and took roughly 20 seconds. Since the denoising is
+                implemented inside nori and C++, it is fast. Denoising an image of this size (800x600) takes about one
+                second (heavily dependent on the parameters).</p>
             <!-- ================================================================= -->
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/groundtruth.png" alt="Groundtruth" class="img-responsive">
+                <img src="images/denoiser/without-denoising.png" alt="16 samples per pixel, without denoising"
+                    class="img-responsive">
+            </div>
+            <h4>Comparison between groundtruth and denoised</h4>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/groundtruth.png" alt="Groundtruth" class="img-responsive">
+                <img src="images/denoiser/denoising-1.png" alt="16 samples per pixel, without denoising"
+                    class="img-responsive">
+            </div>
 
+            <h4>Comparison of denoised vs not denoised (16 samples per pixel)</h4>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/without-denoising.png" alt="No Denoising" class="img-responsive">
+                <img src="images/denoiser/denoising-1.png" alt="Denoising" class="img-responsive">
+            </div>
 
+            <h4>Impact of sigma D</h4>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/impact_sigma_d_0.1.png" alt="0.1" class="img-responsive">
+                <img src="images/denoiser/impact_sigma_d_100.png" alt="100" class="img-responsive">
+            </div>
+
+            <h4>Impact of sigma_vr</h4>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/impact_sigma_vr_0.1.png" alt="0.1" class="img-responsive">
+                <img src="images/denoiser/impact_sigma_vr_10.png" alt="10" class="img-responsive">
+            </div>
         </div>
+
+        <h4 id="references">References</h4>
+        <p id="ref-1">Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for Artifact-Free
+            Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
     </div>
+
 
 
     <!-- Bootstrap core JavaScript -->
