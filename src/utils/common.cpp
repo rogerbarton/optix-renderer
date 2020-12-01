@@ -340,42 +340,58 @@ Eigen::MatrixXf computeVarianceFromImage(const ImageBlock &block)
 {
     Eigen::MatrixXf variance = Eigen::MatrixXf::Zero(block.getSize()[1], block.getSize()[0]);
     const int bs = block.getBorderSize();
-    for (int i = 1; i < block.getSize().y() - 1; i++)
+    for (int i = 0; i < block.getSize().y(); i++)
     {
-        for (int j = 1; j < block.getSize().x() - 1; j++)
+        for (int j = 0; j < block.getSize().x(); j++)
         {
             float mean = 0.f;
+            float sum = 0.f;
             for (int k = 0; k < 3; k++)
             {
                 for (int l = 0; l < 3; l++)
                 {
-                    mean += block(i + bs - 1 + k, j + bs - 1 + l).divideByFilterWeight().getLuminance();
+                    int i_ = clamp(i - 1 + k, 0, block.getSize().y());
+                    int j_ = clamp(j - 1 + l, 0, block.getSize().x());
+                    if (i_ != i - 1 + k || j_ != j - 1 + l)
+                        continue;
+                    mean += std::abs(block(i_ + bs, j_ + bs).divideByFilterWeight().getLuminance());
+                    sum += 1.f;
                 }
             }
 
-            mean /= 9.f;
+            mean /= sum;
 
             float col = 0.f;
             for (int k = 0; k < 3; k++)
             {
                 for (int l = 0; l < 3; l++)
                 {
-                    col += 1.f / 9.f * std::pow(block(i + bs - 1 + k, j + bs - 1 + l).divideByFilterWeight().getLuminance() - mean, 2);
+                    int i_ = clamp(i - 1 + k, 0, block.getSize().y());
+                    int j_ = clamp(j - 1 + l, 0, block.getSize().x());
+                    if (i_ != i - 1 + k || j_ != j - 1 + l)
+                        continue;
+                    col += 1.f / sum * std::pow(std::abs(block(i_ + bs, j_ + bs).divideByFilterWeight().getLuminance()) - mean, 2);
                 }
             }
-
             variance(i, j) = col;
         }
     }
 
     // normalize variances
-    float max_ = variance.block(1, 1, block.getSize().y() - 2, block.getSize().x() - 2).maxCoeff();
-    float min_ = variance.block(1, 1, block.getSize().y() - 2, block.getSize().x() - 2).minCoeff();
-    for (int i = 1; i < block.getSize().y() - 1; i++)
+    float max_ = variance.maxCoeff();
+    float min_ = variance.minCoeff();
+    if (max_ - min_ < Epsilon)
     {
-        for (int j = 1; j < block.getSize().x() - 1; j++)
+        variance.setZero();
+    }
+    else
+    {
+        for (int i = 0; i < block.getSize().y(); i++)
         {
-            variance(i, j) = 1.f + (variance(i, j) - min_) / (max_ - min_) * 0.254f;
+            for (int j = 0; j < block.getSize().x(); j++)
+            {
+                variance(i, j) = 1.f + (variance(i, j) - min_) / (max_ - min_) * 0.254f;
+            }
         }
     }
 

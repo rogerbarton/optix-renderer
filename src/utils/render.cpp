@@ -293,7 +293,7 @@ void RenderThread::renderThreadMain()
 
 		delete rf;
 	}
-	std::cout << "Mean Luminance of variance of m_block: " << computeVarianceFromImage(m_block).mean() << std::endl;
+	std::cout << "Mean variance of m_block: " << computeVarianceFromImage(m_block).mean() << std::endl;
 
 	//delete m_scene;
 	//m_scene = nullptr;

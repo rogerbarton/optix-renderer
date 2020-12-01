@@ -76,11 +76,6 @@ public:
             m_oldVariance.setZero();
             m_oldNorm = 10000.f; // set arbitrary high
         }
-        /*else if (m_sampleRound == maxRetries)
-        {
-            // after many retries, go to next
-            return false;
-        }*/
 
         // check if we must exit, return false to stop rendering this block
         if (m_finished)
@@ -95,7 +90,9 @@ public:
         Eigen::MatrixXf variance = computeVarianceFromImage(block);
 
         float var_diff = std::abs((m_oldVariance - variance).sum());
-        if (std::abs(variance.sum()) < Epsilon)
+
+        // check if we have a one everywhere (normalized variance)
+        if (std::abs(variance.maxCoeff() - 1.f) < Epsilon && std::abs(variance.minCoeff() - 1.f) < Epsilon)
         {
             m_oldNorm = var_diff;
             m_oldVariance = variance;
@@ -177,18 +174,13 @@ public:
         // c) the variance (luminance)
         // d) the variance (either way) but on the whole block as one number
 
-        //Color3f col2Write = Color3f(counter - m_sampleCount * initialUniform) / 255.f;
-        /*if(fullColor)
-            col2Write = m_oldVariance.mean().cwiseAbs();
-        else
-            col2Write = Color3f(std::abs(m_oldVariance.mean().getLuminance()));
-        */
+        Color3f col2Write = Color3f(counter);
         for (int i = 0; i < m_oldVariance.rows(); i++)
         {
             for (int j = 0; j < m_oldVariance.cols(); j++)
             {
-                //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
-                block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(m_oldVariance(i, j));
+                block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(col2Write);
+                //block(i + block.getBorderSize(), j + block.getBorderSize()) = Color4f(m_oldVariance(i, j));
             }
         }
     }
