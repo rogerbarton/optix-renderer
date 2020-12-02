@@ -3,7 +3,7 @@
 <scene>
 	<integrator type="path_vol_mats"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="128"/>
+		<integer name="sampleCount" value="2048"/>
 	</sampler>
 
 	<camera type="perspective">
@@ -49,6 +49,19 @@
 		<float name="radius" value="0.3263" />
 
 		<bsdf type="mirror"/>
+	</shape>
+
+	<!-- Glass to test caustics -->
+	<shape type="sphere">
+		<point name="center" value="0.32, 0.9, 0.16" />
+		<float name="radius" value="0.25" />
+
+		<!-- Medium inside glass -->
+		<!-- <medium type="homog">
+			<phase type="anisophase"/> 
+		</medium> -->
+
+		<bsdf type="dielectric"/>
 	</shape>
 
 	<shape type="obj">

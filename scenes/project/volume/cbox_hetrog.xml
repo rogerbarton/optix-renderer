@@ -2,6 +2,9 @@
 
 <scene>
 	<integrator type="path_vol_mats"/>
+	<sampler type="independent">
+		<integer name="sampleCount" value="2048"/>
+	</sampler>
 
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
@@ -13,10 +16,6 @@
 		<integer name="height" value="600"/>
 		<integer name="width" value="800"/>
 	</camera>
-
-	<sampler type="independent">
-		<integer name="sampleCount" value="128"/>
-	</sampler>
 
 	<!-- Ambient Media (default vacuum) -->
 	<!-- <medium type="homog">

@@ -71,7 +71,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::TreeNodeEx("sigma_a", ImGuiLeafNodeFlags, "Sigma_a (Absorption)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			touched |= ImGui::DragFloat("##value", &m_sigma_a, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
+			touched |= ImGui::DragFloat("##sigma_a", &m_sigma_a, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
 			                            ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 
@@ -79,7 +79,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::TreeNodeEx("sigma_s", ImGuiLeafNodeFlags, "Sigma_s (Scattering)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			touched |= ImGui::DragFloat("##value", &m_sigma_s, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
+			touched |= ImGui::DragFloat("##sigma_s", &m_sigma_s, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
 			                            ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 

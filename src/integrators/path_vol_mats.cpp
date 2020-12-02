@@ -88,9 +88,9 @@ NORI_NAMESPACE_BEGIN
 					}
 
 					// Update current medium, if entering or leaving shape (note: overlaps unhandled)
-					medium = wo.dot(its.geoFrame.n) > 0.f ?
-					         scene->getAmbientMedium() : // leaving
-					         its.shape->getMedium();     // entering
+					medium = wo.dot(its.geoFrame.n) < 0.f && its.shape->getMedium() ?
+					         its.shape->getMedium() :     // entering
+					         scene->getAmbientMedium();   // leaving
 				}
 
 				ray = Ray3f(p, wo);
