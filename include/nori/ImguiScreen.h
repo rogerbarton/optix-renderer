@@ -7,6 +7,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <imgui/imgui_stdlib.h>
 #include <imgui/filebrowser.h>
 #include <nori/normals.h>
 #include <nori/timer.h>
