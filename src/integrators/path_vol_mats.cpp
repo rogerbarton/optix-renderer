@@ -22,8 +22,9 @@ NORI_NAMESPACE_BEGIN
 			Color3f Li         = Color3f(0.f);
 			Color3f throughput = Color3f(1.f);
 
-			const Medium *medium = nullptr;
-			Ray3f  ray     = _ray;
+			// Start in ambient scene medium for now
+			const Medium *medium = scene->getAmbientMedium();
+			Ray3f        ray     = _ray;
 
 			int bounces = 0;
 			while (true)
@@ -32,49 +33,24 @@ NORI_NAMESPACE_BEGIN
 				if (!scene->rayIntersect(ray, its))
 					break; // miss scene
 
-				if (medium)
-				{
-					MediumQueryRecord mRec(ray);
-					const float tm = medium->sampleFreePath(mRec, sampler->next1D());
-					if(tm < its.t)
-					{
-						// medium interaction
-					}
-					else
-					{
-						// surface interaction + medium transmittance
-						if (its.shape->getBSDF())
-						{
+				// -- Find next interaction point
+				MediumQueryRecord mRec(ray);
+				const float       tm                  = medium->sampleFreePath(mRec, sampler->next1D());
+				const bool        isMediumInteraction = tm < its.t;
 
-						}
-						else // its.shape->getMedium()
-						{
-							// Change in medium, ray direction const
-						}
-					}
+				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
-					Color3f Tr = medium->getTransmittance(ray.o, its.p);
-				}
-				else
-				{
-					// Vacuum
-					if (its.shape->getBSDF())
-					{
+				float Tr = medium->getTransmittance(ray.o, p);
+				throughput *= Tr; // Not sure about this?? XXX
 
-					}
-					else // its.shape->getMedium()
-					{
-						// Change in medium, ray direction const
-					}
-				}
-
-				if (its.shape->isEmitter())
+				// -- Apply captured emission
+				if (!isMediumInteraction && its.shape->isEmitter())
 				{
 					EmitterQueryRecord lRec{ray.o, its.p, its.shFrame.n};
 					Li += throughput * its.shape->getEmitter()->eval(lRec);
 				}
 
-				// Russian roulette with success probability
+				// -- Russian roulette with success probability
 				{
 					const float rouletteSuccess = std::min(throughput.maxCoeff(), 0.99f);
 
@@ -84,49 +60,56 @@ NORI_NAMESPACE_BEGIN
 					throughput /= rouletteSuccess;
 				}
 
-				// Sample interaction for next ray
-				Vector3f p  = its.p;
+				// -- Determine next ray
 				Vector3f wo = ray.d; // default is unperturbed ray
-				if (its.shape->getBSDF())
+				if (isMediumInteraction)
 				{
-					const BSDF      *bsdf = its.shape->getBSDF();
-					BSDFQueryRecord bRec{its.toLocal(-ray.d)};
-					bRec.uv = its.uv;
+					// Next interaction is in medium => Sample phase
 
-					throughput *= bsdf->sample(bRec, sampler->next2D());
-					// Note w_i . n is the cosTheta term included in the sample function
-					wo      = its.toWorld(bRec.wo);
-				}
-				else
-				{
-					// Use medium
 					PhaseQueryRecord pRec(its.toLocal(-ray.d));
 					// TODO: how to adjust throughput?
 					throughput *= its.shape->getMedium()->getPhase()->sample(pRec, sampler->next2D());
 					wo = its.toWorld(pRec.wo);
+				}
+				else
+				{
+					// Next interaction is on a surface => sample surface
+					if (its.shape->getBSDF())
+					{
+						// Surface interaction
+						const BSDF      *bsdf = its.shape->getBSDF();
+						BSDFQueryRecord bRec{its.toLocal(-ray.d)};
+						bRec.uv = its.uv;
+
+						throughput *= bsdf->sample(bRec, sampler->next2D());
+						// Note w_i . n is the cosTheta term included in the sample function
+						wo      = its.toWorld(bRec.wo);
+					}
 
 					// Update current medium, if entering or leaving shape (note: overlaps unhandled)
-					medium = pRec.wi.dot(its.geoFrame.n) < 0.f ? nullptr : its.shape->getMedium();
+					medium = wo.dot(its.geoFrame.n) > 0.f ?
+					         scene->getAmbientMedium() : // leaving
+					         its.shape->getMedium();     // entering
 				}
 
-				ray = Ray3f(its.p, wo);
+				ray = Ray3f(p, wo);
 
 				bounces++;
 			}
 
-	    return Li;
-    }
+			return Li;
+		}
 
-    std::string toString() const
-    {
-        return std::string("PathVolMATSIntegrator[]");
-    }
+		std::string toString() const
+		{
+			return std::string("PathVolMATSIntegrator[]");
+		}
 #ifdef NORI_USE_IMGUI
-	NORI_OBJECT_IMGUI_NAME("Path MATS w/ Volumes");
-    virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
+		NORI_OBJECT_IMGUI_NAME("Path MATS w/ Volumes");
+		virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
-protected:
-};
+	protected:
+	};
 
-NORI_REGISTER_CLASS(PathVolMATSIntegrator, "path_vol_mats");
+	NORI_REGISTER_CLASS(PathVolMATSIntegrator, "path_vol_mats");
 NORI_NAMESPACE_END

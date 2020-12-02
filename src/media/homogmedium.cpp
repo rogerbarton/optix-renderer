@@ -10,8 +10,8 @@ NORI_NAMESPACE_BEGIN
 	{
 		explicit HomogeneousMedium(const PropertyList &propList)
 		{
-			m_sigma_a = propList.getFloat("sigma_a", 0);
-			m_sigma_s = propList.getFloat("sigma_s", 0.5f);
+			m_sigma_a = propList.getFloat("sigma_a", 0.5f);
+			m_sigma_s = propList.getFloat("sigma_s", 0); // Beer's law medium as default
 		}
 
 		NoriObject *cloneAndInit() override
