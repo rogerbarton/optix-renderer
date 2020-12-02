@@ -20,6 +20,10 @@ NORI_NAMESPACE_BEGIN
 		m_phase->update(gui->m_phase);
 	}
 
+	Medium::~Medium () {
+		delete m_phase;
+	}
+
 	void Medium::addChild(NoriObject *obj)
 	{
 		switch (obj->getClassType())
@@ -33,6 +37,28 @@ NORI_NAMESPACE_BEGIN
 			default:
 				throw NoriException("Medium::addChild(<%s>) is not supported!", classTypeName(obj->getClassType()));
 		}
+	}
+	bool Medium::getImGuiNodes()
+	{
+		ImGui::PushID(EMedium);
+
+		if (m_phase)
+		{
+			bool nodeOpen = ImGui::TreeNode("Phase Function");
+			ImGui::NextColumn();
+			ImGui::AlignTextToFramePadding();
+
+			ImGui::Text(m_phase->getImGuiName().c_str());
+			ImGui::NextColumn();
+			if (nodeOpen)
+			{
+				touched |= m_phase->getImGuiNodes();
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::PopID();
+		return touched;
 	}
 
 NORI_NAMESPACE_END

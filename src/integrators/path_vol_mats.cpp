@@ -68,7 +68,8 @@ NORI_NAMESPACE_BEGIN
 
 					PhaseQueryRecord pRec(its.toLocal(-ray.d));
 					// TODO: how to adjust throughput?
-					throughput *= its.shape->getMedium()->getPhase()->sample(pRec, sampler->next2D());
+					// BUG: handle objects where medium is null
+					throughput *= medium->getPhase()->sample(pRec, sampler->next2D());
 					wo = its.toWorld(pRec.wo);
 				}
 				else

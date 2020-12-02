@@ -37,6 +37,7 @@ NORI_NAMESPACE_BEGIN
 		delete m_sampler;
 		delete m_camera;
 		delete m_integrator;
+		delete m_previewIntegrator;
 		for (auto s : m_shapes)
 			delete s;
 		for (auto e : m_emitters)
@@ -45,8 +46,7 @@ NORI_NAMESPACE_BEGIN
 
 		// delete m_envmap; // Already deleted as an emitter
 		delete m_denoiser;
-
-		delete m_previewIntegrator;
+		delete m_ambientMedium;
 	}
 
 	NoriObject *Scene::cloneAndInit()
@@ -285,6 +285,7 @@ NORI_NAMESPACE_BEGIN
 				"  %s  }\n"
 				"  envmap = %s,\n"
 				"  denoiser = %s,\n"
+				"  ambient medium = %s,\n"
 				"  volumes {\n"
 				"  %s  }\n"
 				"]",
@@ -295,6 +296,7 @@ NORI_NAMESPACE_BEGIN
 				indent(lights, 2),
 				m_envmap ? indent(m_envmap->toString()) : "nullptr",
 				m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
+				indent(m_ambientMedium->toString()),
 #ifdef NORI_USE_VOLUMES
 				indent(volumes, 2)
 #else
@@ -377,6 +379,24 @@ NORI_NAMESPACE_BEGIN
 				ImGui::TreePop();
 			}
 		}
+
+		if (m_ambientMedium)
+		{
+			bool node_open = ImGui::TreeNode("Ambient Medium");
+			ImGui::NextColumn();
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text(m_ambientMedium->getImGuiName().c_str());
+			ImGui::NextColumn();
+			if (node_open)
+			{
+				touched |= m_ambientMedium->getImGuiNodes();
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::Separator();
+		ImGui::NextColumn();
+		ImGui::NextColumn();
 
 		bool node_open_shapes = ImGui::TreeNode("Shapes");
 		ImGui::NextColumn();

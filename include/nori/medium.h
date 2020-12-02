@@ -42,12 +42,14 @@ NORI_NAMESPACE_BEGIN
 
 		void update(const NoriObject *guiObject) override;
 
+		virtual ~Medium();
+
 		void addChild(NoriObject *child) override;
 		EClassType getClassType() const override { return EMedium; }
 
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Medium Base");
-		virtual bool getImGuiNodes() override { return false; }
+		virtual bool getImGuiNodes() override;
 #endif
 
 	protected:

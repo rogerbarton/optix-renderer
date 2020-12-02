@@ -68,7 +68,7 @@ NORI_NAMESPACE_BEGIN
 			touched |= Medium::getImGuiNodes();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_a (Absorption)", ImGuiLeafNodeFlags, "Radius");
+			ImGui::TreeNodeEx("sigma_a", ImGuiLeafNodeFlags, "Sigma_a (Absorption)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			touched |= ImGui::DragFloat("##value", &m_sigma_a, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
@@ -76,36 +76,33 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_s (Scattering)", ImGuiLeafNodeFlags, "Radius");
+			ImGui::TreeNodeEx("sigma_s", ImGuiLeafNodeFlags, "Sigma_s (Scattering)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			touched |= ImGui::DragFloat("##value", &m_sigma_s, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
 			                            ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 
-			// Recalculate displayed derived properties
-			if (touched)
-			{
-				m_sigma_t = m_sigma_a + m_sigma_s;
-				m_albedo  = m_sigma_t > Epsilon ? m_sigma_s / m_sigma_t : 0.f;
-			}
+			// -- Display derived properties
+			m_sigma_t = m_sigma_a + m_sigma_s;
+			m_albedo  = m_sigma_t > Epsilon ? m_sigma_s / m_sigma_t : 0.f;
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_t (Extinction)", ImGuiLeafNodeFlags, "Radius");
+			ImGui::TreeNodeEx("sigma_t", ImGuiLeafNodeFlags, "Sigma_t (Extinction)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::Text("%f", m_sigma_t);
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Mean free path", ImGuiLeafNodeFlags, "Radius");
+			ImGui::TreeNodeEx("freepath", ImGuiLeafNodeFlags, "Mean free path");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::Text("%f", 1.f / m_sigma_t);
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("albedo", ImGuiLeafNodeFlags, "Radius");
+			ImGui::TreeNodeEx("albedo", ImGuiLeafNodeFlags, "Albedo");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::Text("%f", m_albedo);

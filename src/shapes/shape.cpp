@@ -30,7 +30,8 @@ void Shape::cloneAndInit(Shape *clone)
 	// If no material or medium was assigned, instantiate a diffuse BRDF
 	if (!m_bsdf && !m_medium)
 		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
-	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
+	if(m_bsdf)
+		clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
 	if (m_medium)
 		clone->m_medium = static_cast<Medium *>(m_medium->cloneAndInit());
@@ -48,7 +49,8 @@ void Shape::cloneAndInit(Shape *clone)
 void Shape::update(const NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const Shape *>(guiObject);
-	m_bsdf->update(gui->m_bsdf);
+	if(m_bsdf)
+		m_bsdf->update(gui->m_bsdf);
 
 	if (m_medium)
 		m_medium->update(gui->m_medium);
@@ -65,6 +67,7 @@ Shape::~Shape()
 {
 	delete m_bsdf;
 	delete m_normalMap;
+	delete m_medium;
 	//delete m_emitter; // Emitter is parent of Shape
 }
 
@@ -165,13 +168,13 @@ bool Shape::getImGuiNodes()
     ImGui::PushID(EShape);
     if (m_bsdf)
     {
-        bool node_open_bsdf = ImGui::TreeNode("BSDF");
+        bool nodeOpen = ImGui::TreeNode("BSDF");
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
         ImGui::Text(m_bsdf->getImGuiName().c_str());
         ImGui::NextColumn();
-        if (node_open_bsdf)
+        if (nodeOpen)
         {
             touched |= m_bsdf->getImGuiNodes();
             ImGui::TreePop();
@@ -180,30 +183,47 @@ bool Shape::getImGuiNodes()
 
     if (m_emitter)
     {
-        bool node_open_emitter = ImGui::TreeNode("Emitter");
+        bool nodeOpen = ImGui::TreeNode("Emitter");
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
 
         ImGui::Text(m_emitter->getImGuiName().c_str());
         ImGui::NextColumn();
-        if (node_open_emitter)
+        if (nodeOpen)
         {
             touched |= m_emitter->getImGuiNodes();
             ImGui::TreePop();
         }
     }
 
-	bool normalMapOpen = ImGui::TreeNode("Normal Map");
-	ImGui::NextColumn();
-	ImGui::AlignTextToFramePadding();
+    if(m_normalMap)
+    {
+	    bool nodeOpen = ImGui::TreeNode("Normal Map");
+	    ImGui::NextColumn();
+	    ImGui::AlignTextToFramePadding();
 
-	ImGui::Text(m_normalMap ? m_normalMap->getImGuiName().c_str() : "None");
-	ImGui::NextColumn();
-	if (normalMapOpen)
+	    ImGui::Text(m_normalMap->getImGuiName().c_str());
+	    ImGui::NextColumn();
+	    if (nodeOpen)
+	    {
+		    touched |= m_normalMap->getImGuiNodes();
+		    ImGui::TreePop();
+	    }
+    }
+
+	if (m_medium)
 	{
-		if(m_normalMap)
-			touched |= m_normalMap->getImGuiNodes();
-		ImGui::TreePop();
+		bool nodeOpen = ImGui::TreeNode("Medium");
+		ImGui::NextColumn();
+		ImGui::AlignTextToFramePadding();
+
+		ImGui::Text(m_medium->getImGuiName().c_str());
+		ImGui::NextColumn();
+		if (nodeOpen)
+		{
+			touched |= m_medium->getImGuiNodes();
+			ImGui::TreePop();
+		}
 	}
 
     ImGui::PopID();
