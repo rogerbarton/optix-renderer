@@ -16,68 +16,46 @@ public:
 	NORI_OBJECT_DEFAULT_CLONE(PathVolMATSIntegrator)
 	NORI_OBJECT_DEFAULT_UPDATE(PathVolMATSIntegrator)
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &_ray) const override
     {
-        Color3f Li = Color3f(0.f); // initial radiance§
-        Color3f t = Color3f(1.f);  // initial throughput
-        Color3f bsdf_color = Color3f(0.f);
-        Ray3f traceRay(ray);
-        int counter = 0;
-        while (true)
-        {
-            Intersection its;
-            if (!scene->rayIntersect(traceRay, its))
-            {
-                if (scene->getEnvMap())
-                {
-                    EmitterQueryRecord eqr;
-                    eqr.wi = traceRay.d;
-                    Li += t * scene->getEnvMap()->eval(eqr);
-                }
-                break;
-            }
+	    Color3f Li = Color3f(0.f);
+	    Color3f throughput = Color3f(1.f);
 
-            // get colliding object and shape
-            const Shape *shape = its.shape;
-            const BSDF *bsdf = shape->getBSDF();
+	    Ray3f ray = _ray;
+	    int bounces = 0;
+	    while (true) {
+		    Intersection its;
+		    if (!scene->rayIntersect(ray, its))
+			    break; // miss scene
 
-            // if shape is emitter, add eval to result
-            if (shape->isEmitter())
-            {
-                auto emitter = shape->getEmitter();
-                EmitterQueryRecord eqr(traceRay.o, its.p, its.shFrame.n);
-                Li += t * emitter->eval(eqr);
-            }
+		    if (its.shape->isEmitter()) {
+			    EmitterQueryRecord lRec{ray.o, its.p, its.shFrame.n};
+			    Li += throughput * its.shape->getEmitter()->eval(lRec);
+		    }
 
-            float succ_prob = std::min(t.maxCoeff(), 0.99f);
-            if (counter < 3)
-            {
-                counter++;
-            }
-            else if (sampler->next1D() > succ_prob)
-            {
-                break;
-            }
-            else
-            {
-                t = t / succ_prob;
-            }
+		    // Russian roulette with success probability
+		    {
+			    const float rouletteSuccess = std::min(throughput.maxCoeff(), 0.99f);
 
-            BSDFQueryRecord bRec(its.toLocal(-traceRay.d));
-            bRec.uv = its.uv;
-            bRec.p = its.p;
-            bRec.measure = ESolidAngle;
+			    if (sampler->next1D() > rouletteSuccess || rouletteSuccess < Epsilon)
+				    break;
+			    // Adjust throughput in case of survival
+			    throughput /= rouletteSuccess;
+		    }
 
-            // Sample BSDF
-            bsdf_color = bsdf->sample(bRec, sampler->next2D());
+		    auto bsdf = its.shape->getBSDF();
+		    BSDFQueryRecord bRec{its.toLocal(-ray.d)};
+		    bRec.uv = its.uv;
 
-            t = t * bsdf_color;
+		    throughput *= bsdf->sample(bRec, sampler->next2D());
+		    // Note w_i . n is the cosTheta term included in the sample function
 
-            // create next ray to trace
-            traceRay = Ray3f(its.p, its.toWorld(bRec.wo));
-        }
+		    ray = Ray3f(its.p, its.toWorld(bRec.wo));
 
-        return Li;
+		    bounces++;
+	    }
+
+	    return Li;
     }
 
     std::string toString() const
