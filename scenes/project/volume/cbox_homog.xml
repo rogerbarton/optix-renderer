@@ -17,6 +17,11 @@
 		<integer name="width" value="800"/>
 	</camera>
 
+	<!-- Ambient Media (default vacuum) -->
+	<!-- <medium type="homog">
+		<phase type="anisophase"/> 
+	</medium> -->
+
 	<!-- Volumes -->
 	<shape type="sphere">
 		<point name="center" value="0.445800 0.332100 0.376700" />

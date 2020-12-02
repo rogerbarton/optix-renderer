@@ -18,6 +18,11 @@
 		<integer name="sampleCount" value="128"/>
 	</sampler>
 
+	<!-- Ambient Media (default vacuum) -->
+	<!-- <medium type="homog">
+		<phase type="anisophase"/> 
+	</medium> -->
+
 	<!-- Volumes -->
 	<shape type="volume">
 		<string name="filename" value="fluid_data_0050.vdb"/>

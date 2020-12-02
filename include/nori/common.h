@@ -131,7 +131,7 @@ class Shape;
 class NoriObject;
 class NoriObjectFactory;
 class NoriScreen;
-class PhaseFunction;
+struct PhaseFunction;
 class ReconstructionFilter;
 class Sampler;
 class Scene;

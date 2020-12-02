@@ -11,9 +11,8 @@ NORI_NAMESPACE_BEGIN
 	/**
 	 * Simple isotropic phase function for volumes. Scatters uniformly in all directions.
 	 */
-	class IsoPhase : public PhaseFunction
+	struct IsoPhase : public PhaseFunction
 	{
-	public:
 		explicit IsoPhase(const PropertyList &propList) {}
 		NORI_OBJECT_DEFAULT_CLONE(IsoPhase)
 		NORI_OBJECT_DEFAULT_UPDATE(IsoPhase)

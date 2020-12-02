@@ -11,9 +11,8 @@ NORI_NAMESPACE_BEGIN
 	/**
 	 * Anisotropic phase function for volumes based on Henyey-Greenstein.
 	 */
-	class AnisoPhase : public PhaseFunction
+	struct AnisoPhase : public PhaseFunction
 	{
-	public:
 		explicit AnisoPhase(const PropertyList &propList)
 		{
 			m_g = propList.getFloat("g", 0);
