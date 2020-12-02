@@ -38,6 +38,8 @@ add_library(imgui STATIC
     imgui_impl_opengl3.h
     imgui_internal.h
     imgui_widgets.cpp
+    imgui_stdlib.h
+    imgui_stdlib.cpp
     imstb_rectpack.h
     imstb_textedit.h
     imstb_truetype.h
