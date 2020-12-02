@@ -11,16 +11,12 @@
 
 NORI_NAMESPACE_BEGIN
 
+	// TODO: obsolete for homog at the moment as the phase function sampling is done separately
 	struct MediumQueryRecord
 	{
-		// Incident direction (in the local frame)
-		Vector3f wi;
+		Ray3f ray;
 
-		// Outgoing direction (in the local frame)
-		Vector3f wo;
-
-		MediumQueryRecord(Vector3f wi) : wi(std::move(wi)) {}
-		MediumQueryRecord(Vector3f wi, Vector3f wo) : wi(std::move(wi)), wo(std::move(wo)) {}
+		explicit MediumQueryRecord(const Ray3f& ray) : ray(ray) {}
 	};
 
 	struct Medium : NoriObject
@@ -30,9 +26,11 @@ NORI_NAMESPACE_BEGIN
 		 * Note: intersections with the scene and medium boundary should be handled separately
 		 * @return the time until the next interaction
 		 */
-		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const = 0;
+		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const = 0;
 
 		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
+
+		const PhaseFunction* getPhase() const { return m_phase; }
 
 		/**
 		 * Finish initialization for other components

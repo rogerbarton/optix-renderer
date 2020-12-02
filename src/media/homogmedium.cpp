@@ -37,7 +37,7 @@ NORI_NAMESPACE_BEGIN
 			m_albedo  = m_sigma_t > Epsilon ? m_sigma_s / m_sigma_t : 0.f;
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const override
 		{
 			// Sample proportional to transmittance
 			// TODO: check this
