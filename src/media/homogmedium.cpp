@@ -45,7 +45,7 @@ NORI_NAMESPACE_BEGIN
 			       -std::log(sample.x()) / m_sigma_t;
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override
+		float getTransmittance(const Vector3f &from, const Vector3f &to) const override
 		{
 			return std::exp(-m_sigma_t * (from - to).norm());
 		}

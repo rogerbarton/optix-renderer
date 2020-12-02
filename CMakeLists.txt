@@ -120,6 +120,7 @@ add_executable(nori
     src/samplers/independent.cpp
 
     src/media/medium.cpp
+    src/media/vacuum.cpp
     src/media/homogmedium.cpp
     src/media/heterogmedium.cpp
     )

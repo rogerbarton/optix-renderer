@@ -32,10 +32,13 @@ void Shape::cloneAndInit(Shape *clone)
 		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
 	clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
-	if(m_normalMap)
-		clone->m_normalMap = static_cast<Texture<Normal3f>*>(m_normalMap->cloneAndInit());
+	if (m_medium)
+		clone->m_medium = static_cast<Medium *>(m_medium->cloneAndInit());
 
-	if(m_emitter)
+	if (m_normalMap)
+		clone->m_normalMap = static_cast<Texture<Normal3f> *>(m_normalMap->cloneAndInit());
+
+	if (m_emitter)
 	{
 		clone->m_emitter = static_cast<Emitter *>(m_emitter->cloneAndInit());
 		clone->m_emitter->setShape(clone);
@@ -46,7 +49,11 @@ void Shape::update(const NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const Shape *>(guiObject);
 	m_bsdf->update(gui->m_bsdf);
-	if(m_normalMap)
+
+	if (m_medium)
+		m_medium->update(gui->m_medium);
+
+	if (m_normalMap)
 		m_normalMap->update(gui->m_normalMap);
 
 	// Note: Emitter updated by scene

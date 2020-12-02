@@ -98,15 +98,11 @@ NORI_NAMESPACE_BEGIN
 		}
 #endif
 
-    Emitter *getEnvMap() const
-    {
-        return m_envmap;
-    }
+		Emitter *getEnvMap() const { return m_envmap; }
 
-		Denoiser *getDenoiser() const
-		{
-			return m_denoiser;
-		}
+		Denoiser *getDenoiser() const { return m_denoiser; }
+
+		Medium *getAmbientMedium() const { return m_ambientMedium; }
 
 		/**
 		 * \brief Intersect a ray against all triangles stored in the scene
@@ -186,9 +182,10 @@ NORI_NAMESPACE_BEGIN
 		Sampler *m_sampler = nullptr;
 		Camera  *m_camera  = nullptr;
 		BVH     *m_bvh     = nullptr;
-      
-      Emitter *m_envmap    = nullptr;
-      Denoiser *m_denoiser = nullptr;
+
+		Emitter  *m_envmap   = nullptr;
+		Denoiser *m_denoiser = nullptr;
+		Medium * m_ambientMedium = nullptr;
 
 		std::vector<Emitter *> m_emitters;
 

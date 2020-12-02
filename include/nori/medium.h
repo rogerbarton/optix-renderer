@@ -28,9 +28,11 @@ NORI_NAMESPACE_BEGIN
 		 */
 		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const = 0;
 
-		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
+		virtual float getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
 
 		const PhaseFunction* getPhase() const { return m_phase; }
+
+		NoriObject *cloneAndInit() override = 0;
 
 		/**
 		 * Finish initialization for other components
