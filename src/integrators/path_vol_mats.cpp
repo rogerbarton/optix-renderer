@@ -41,7 +41,7 @@ NORI_NAMESPACE_BEGIN
 				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
 				float Tr = medium->getTransmittance(ray.o, p);
-				throughput *= Tr; // Not sure about this?? XXX
+				throughput *= Tr; // TODO: Not sure about this? Do after adding emission Li?
 
 				// -- Apply captured emission
 				if (!isMediumInteraction && its.shape->isEmitter())
@@ -65,10 +65,8 @@ NORI_NAMESPACE_BEGIN
 				if (isMediumInteraction)
 				{
 					// Next interaction is in medium => Sample phase
-
 					PhaseQueryRecord pRec(its.toLocal(-ray.d));
 					// TODO: how to adjust throughput?
-					// BUG: handle objects where medium is null
 					throughput *= medium->getPhase()->sample(pRec, sampler->next2D());
 					wo = its.toWorld(pRec.wo);
 				}

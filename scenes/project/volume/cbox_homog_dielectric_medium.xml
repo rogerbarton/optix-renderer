@@ -51,6 +51,19 @@
 		<bsdf type="mirror"/>
 	</shape>
 
+	<!-- Glass to test caustics -->
+	<shape type="sphere">
+		<point name="center" value="0.32, 0.9, 0.16" />
+		<float name="radius" value="0.25" />
+
+		<!-- Medium inside glass -->
+		<medium type="homog">
+			<!-- <phase type="anisophase"/>  -->
+		</medium>
+
+		<bsdf type="dielectric"/>
+	</shape>
+
 	<shape type="obj">
 		<string name="filename" value="../meshes/cbox/walls.obj"/>
 
