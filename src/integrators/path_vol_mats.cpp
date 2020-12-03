@@ -86,7 +86,8 @@ NORI_NAMESPACE_BEGIN
 					}
 
 					// Update current medium, if entering or leaving shape (note: overlaps unhandled)
-					medium = wo.dot(its.geoFrame.n) < 0.f && its.shape->getMedium() ?
+					if(ray.d.dot(wo) > 0) // change in shape, else reflected
+						medium = wo.dot(its.geoFrame.n) < 0.f && its.shape->getMedium() ?
 					         its.shape->getMedium() :     // entering
 					         scene->getAmbientMedium();   // leaving
 				}
