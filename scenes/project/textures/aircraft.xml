@@ -1,0 +1,53 @@
+<scene>
+    <!-- Independent sample generator, user-selected samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="1024"/>
+    </sampler>
+
+    <!-- Use a direct illumination integrator -->
+    <integrator type="path_mis"/>
+
+    <!-- Render the scene as viewed by a perspective camera -->
+    <camera type="perspective">
+        <transform name="toWorld">
+            <lookat target="0,0,0" origin="10,0,-10" up="0,1,0"/>
+        </transform>
+
+        <!-- Field of view: 40 degrees -->
+        <float name="fov" value="35"/>
+
+        <!-- 512 x 512 pixels -->
+        <integer name="width" value="800"/>
+        <integer name="height" value="600"/>
+    </camera>
+
+    <emitter type="envmap">
+        <texture type="png_texture" name="albedo">
+            <!-- download from https://hdrihaven.com/hdri/?h=dikhololo_night -->
+            <string name="filename" value="../res/dikhololo_night_4k.hdr"/>
+            <vector name="eulerAngles" value="0,270,0"/>
+            <boolean name="sphericalTexture" value="true"/>
+        </texture>
+    </emitter>
+
+    <shape type="obj">
+        <string name="filename" value="../meshes/aircraft/aircraft_base.obj"/>
+        <bsdf type="diffuse">
+            <texture type="png_texture" name="albedo">
+                <string name="filename" value="../res/aircraft_base.png"/>
+                <boolean name="sphericalTexture" value="false"/>
+            </texture>
+        </bsdf>
+    </shape>
+
+    <shape type="obj">
+        <string name="filename" value="../meshes/aircraft/aircraft_glass.obj"/>
+        <bsdf type="dielectric">
+            <float name="extIOR" value="1"/>
+            <float name="intIOR" value="1.5"/>
+        </bsdf>
+    </shape>
+
+
+
+</scene>

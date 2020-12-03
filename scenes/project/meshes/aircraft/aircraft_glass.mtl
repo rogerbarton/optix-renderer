@@ -1,0 +1,14 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Material.004
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.375745
+illum 9
+map_Bump /home/matthias/Documents/Github/nori/scenes/project/textures/E-45-Aircraft/textures/E-45_glass_nor_.jpg
+map_Kd /home/matthias/Documents/Github/nori/scenes/project/textures/E-45-Aircraft/textures/E-45_glass_nor_.jpg
