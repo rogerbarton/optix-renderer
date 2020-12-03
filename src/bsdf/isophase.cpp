@@ -26,8 +26,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			bRec.wo = Warp::squareToUniformSphere(sample);
 
-			// TODO: do we need cosine term?
-			return 1.f / pdf(bRec) * Frame::cosTheta(bRec.wo);
+			return 1.f / pdf(bRec) * abs(bRec.wi.dot(bRec.wo));
 		}
 
 		std::string toString() const override
@@ -36,7 +35,8 @@ NORI_NAMESPACE_BEGIN
 		}
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Isotropic Phase");
-		virtual bool getImGuiNodes() override {
+		virtual bool getImGuiNodes() override
+		{
 			return PhaseFunction::getImGuiNodes();
 		}
 #endif

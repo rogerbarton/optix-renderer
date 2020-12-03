@@ -28,7 +28,7 @@ NORI_NAMESPACE_BEGIN
 	{
 		switch (obj->getClassType())
 		{
-			case EBSDF:
+			case EPhaseFunction:
 				if (m_phase)
 					throw NoriException("Medium: tried to register multiple PhaseFunction instances!");
 				m_phase = static_cast<PhaseFunction *>(obj);

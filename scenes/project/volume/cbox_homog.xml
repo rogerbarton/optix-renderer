@@ -29,7 +29,7 @@
 
 		<!-- <bsdf type="dielectric"/> -->
 		<medium type="homog">
-			<!-- <phase type="anisophase"/> --> 
+			<phase type="anisophase"/> 
 		</medium>
 	</shape>
 

@@ -89,7 +89,12 @@ public:
             parameterValue = std::exp(std::log(0.05f) * (1 - parameterValue) +
                                       std::log(1.f)   *  parameterValue);
         else if (warpType == HenyeyGreenstein || warpType == Schlick || warpType == AnisoPhase)
-        	parameterValue = 2 * parameterValue -1;
+        {
+        	// map to g
+	        parameterValue = 2 * parameterValue - 1;
+	        if (warpType == Schlick) // map to k
+		        parameterValue = 1.55f * parameterValue - 0.55f * std::pow(parameterValue, 3);
+        }
         return parameterValue;
     }
 

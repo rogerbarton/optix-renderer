@@ -149,14 +149,14 @@ public:
         ImGui::TreeNodeEx("center", ImGuiLeafNodeFlags, "Center");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    transformTouched |= ImGui::DragPoint3f("##value", &m_position, 0.02f);
+	    transformTouched |= ImGui::DragPoint3f("##value", &m_position, 0.01f);
         ImGui::NextColumn();
 
         ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("radius", ImGuiLeafNodeFlags, "Radius");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-	    geometryTouched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	    geometryTouched |= ImGui::DragFloat("##value", &m_radius, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
 
         touched |= geometryTouched | transformTouched;

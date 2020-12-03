@@ -31,7 +31,7 @@ NORI_NAMESPACE_BEGIN
 
 		virtual float pdf(const PhaseQueryRecord &bRec) const = 0;
 
-		virtual EClassType getClassType() const override { return EBSDF; }
+		virtual EClassType getClassType() const override { return EPhaseFunction; }
 
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Phase Function Base");

@@ -85,6 +85,7 @@ add_executable(nori
     src/bsdf/disney.cpp
     src/bsdf/isophase.cpp
     src/bsdf/anisophase.cpp
+    src/bsdf/schlickphase.cpp
 
     src/integrators/photonmapper.cpp
     src/integrators/direct.cpp
@@ -168,6 +169,7 @@ if(NORI_USE_GUI)
       src/bsdf/microfacet.cpp
       src/bsdf/isophase.cpp
       src/bsdf/anisophase.cpp
+      src/bsdf/schlickphase.cpp
       src/utils/object.cpp
       src/utils/proplist.cpp
       src/utils/common.cpp
