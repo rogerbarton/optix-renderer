@@ -19,8 +19,8 @@
 
 	<!-- Ambient Media (default vacuum) -->
 	<medium type="homog">
-		<float name="sigma_a" value="0.05"/>
-		<!-- <float name="sigma_s" value="0."/> -->
+		<color name="sigma_a" value="0.05, 0.05, 0.05"/>
+		<!-- <color name="sigma_s" value="0."/> -->
 		<!-- <phase type="anisophase"/>  -->
 	</medium>
 

@@ -31,7 +31,7 @@ NORI_NAMESPACE_BEGIN
 			return INFINITY;
 		}
 
-		float getTransmittance(const Vector3f &from, const Vector3f &to) const override
+		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override
 		{
 			return 1.f;
 		}

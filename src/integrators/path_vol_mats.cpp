@@ -40,8 +40,8 @@ NORI_NAMESPACE_BEGIN
 
 				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
-				float Tr = medium->getTransmittance(ray.o, p);
-				throughput *= Tr; // TODO: Not sure about this? Do after adding emission Li?
+				Color3f Tr = medium->getTransmittance(ray.o, p);
+				throughput *= Tr;
 
 				// -- Apply captured emission
 				if (!isMediumInteraction && its.shape->isEmitter())
