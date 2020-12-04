@@ -1,0 +1,156 @@
+<!-- Table scene, Copyright (c) 2012 by Olesya Jakob -->
+
+<scene>
+	<!-- Independent sample generator, 512 samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="512"/>
+	</sampler>
+
+	<!-- Use the path tracer with multiple importance sampling -->
+	<integrator type="direct_mis">
+	</integrator>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0, 0, 0" 
+				origin="-40, 80, 40" 
+				up="0, 0, 1"/>
+		</transform>
+
+		<!-- Field of view: 35 degrees -->
+		<float name="fov" value="35"/>
+
+		<!-- 800x600 pixels -->
+		<integer name="width" value="800"/>
+		<integer name="height" value="600"/>
+	</camera>
+
+	<emitter type="spot">
+        <point name="position" value="0, 0, 20"/>
+        <vector name="direction" value="0, 0, -1"/>
+        <color name="power" value="0, 0, 10000"/>
+        <float name="falloffstart" value="100"/>
+        <float name="totalwidth" value="30"/>
+    </emitter>
+
+    <emitter type="spot">
+        <point name="position" value="0,10, 20"/>
+        <vector name="direction" value="0, 0, -1"/>
+        <color name="power" value="10000, 0, 0"/>
+        <float name="falloffstart" value="100"/>
+        <float name="totalwidth" value="30"/>
+    </emitter>
+
+    <emitter type="spot">
+        <point name="position" value="0, 20, 20"/>
+        <vector name="direction" value="0, 0, -1"/>
+        <color name="power" value="0, 10000, 0"/>
+        <float name="falloffstart" value="100"/>
+        <float name="totalwidth" value="30"/>
+    </emitter>
+
+    <emitter type="spot">
+        <point name="position" value="0, 25, 20"/>
+        <vector name="direction" value="1, -1, -1"/>
+        <color name="power" value="100000, 100000, 100000"/>
+        <float name="falloffstart" value="200"/>
+        <float name="totalwidth" value="40"/>
+    </emitter>
+
+    <emitter type="envmap">
+        <texture type="constant_color" name="albedo">
+            <color name="value" value="0.1, 0.1, 0.1"/>
+        </texture>
+    </emitter>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/curvy_bowl.obj"/>
+
+		<bsdf type="diffuse">
+			<!-- <color name="kd" value="0, 0, 0"/> -->
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="3,0,0"/>
+		</transform>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/curvy_bowl.obj"/>
+
+		<bsdf type="microfacet">
+			<color name="kd" value="0, 0, 0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="3,20,0"/>
+		</transform>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/curvy_bowl.obj"/>
+
+		<bsdf type="microfacet">
+			<color name="kd" value="0, 0, 0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="3,-20,0"/>
+		</transform>
+	</shape>
+
+	<!-- Diffuse floor -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/plane.obj"/>
+
+		<bsdf type="diffuse">
+			<texture type="checkerboard_color" name="albedo">
+								<vector name="scale" value="0.1,0.2"/>
+                <color name="value1" value="0.8,0.8,0.8"/>
+                <color name="value2" value="0.2,0.2,0.2"/>
+            </texture>
+		</bsdf>
+
+		<transform name="toWorld">
+			<scale value="0.2,0.35,0.5"/>
+			<translate value="-35,25,0"/>
+		</transform>
+	</shape>
+
+	<!-- Water<->Air interface -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/circle.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+
+		<bsdf type="dielectric">
+			<float name="extIOR" value="1"/>
+			<float name="intIOR" value="1.33"/>
+		</bsdf>
+	</shape>
+
+	<!-- Glass<->Air interface -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/wine_glass.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+
+		<bsdf type="dielectric">
+			<float name="extIOR" value="1"/>
+			<float name="intIOR" value="1.5"/>
+		</bsdf>
+	</shape>
+
+	<!-- Glass<->Water interface -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/table/wine_glass_inner.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+
+		<bsdf type="dielectric">
+			<float name="extIOR" value="1.5"/>
+			<float name="intIOR" value="1.33"/>
+		</bsdf>
+	</shape>
+</scene>

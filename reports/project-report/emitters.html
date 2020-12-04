@@ -73,10 +73,19 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
+            <p>In this extra emitter, the Spotlight, the light can only travel from a single point (like with the
+                pointlight), but not only to a given direction, but rather in a certain cone (like a solid angle around
+                the point). My implementation follows TODO</p>
 
-            <!-- ================================================================= -->
-
-
+            <h4>Validation 1: Multiple Spot Lights</h4>
+            <p>This image shows multiple spotlights, each operating on a color channel. The boundaries of each spotlight
+                is clearly visible. The white spotlight is added such that the background gets more light. All
+                spotlights are set up that the falloff does not yet start (left image) and has already started (right
+                image).</p>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/no-falloff.png" alt="No Falloff" class="img-responsive">
+                <img src="images/emitter/falloff.png" alt="Falloff" class="img-responsive">
+            </div>
         </div>
     </div>
 
