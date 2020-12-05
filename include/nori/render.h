@@ -37,7 +37,7 @@ inline double durationMs(const TimePoint time)
 class RenderThread {
 
 public:
-	RenderThread(ImageBlock &block) : m_block(block), m_startTime(clock_t::now()), m_endTime(m_startTime) {}
+	RenderThread(ImageBlock &block) : m_block(block), m_startTime(clock_t::now()), m_endTime(m_startTime), sceneFilename("") {}
     ~RenderThread();
 
     void loadScene(const std::string & filename);
@@ -49,6 +49,7 @@ public:
     void stopRendering();
 	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 	std::string getRenderTime();
+	std::string getFilename() { return sceneFilename; }
 
 #ifdef NORI_USE_IMGUI
 	/**

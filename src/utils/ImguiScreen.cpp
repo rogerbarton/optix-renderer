@@ -95,6 +95,8 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_b
 
 void ImguiScreen::drop(const std::string &filename)
 {
+	if(filename.empty()) return;
+
 	std::filesystem::path path(filename);
 
 	if (path.extension() == ".xml")
@@ -528,7 +530,7 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if (key == GLFW_KEY_O)
+	if (key == GLFW_KEY_O || key == GLFW_KEY_GRAVE_ACCENT)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
 		uiShowSceneWindow = !uiShowSceneWindow;
@@ -553,6 +555,8 @@ void ImguiScreen::keyPressed(int key, int mods)
 		setZoom(2.f);
 	else if (key == GLFW_KEY_F1)
 		uiShowDemoWindow = !uiShowDemoWindow;
+	else if (key == GLFW_KEY_R)
+		drop(m_renderThread.getFilename());
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
