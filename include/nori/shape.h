@@ -23,6 +23,7 @@
 #include <nori/frame.h>
 #include <nori/bbox.h>
 #include <nori/texture.h>
+#include <nori/medium.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -129,6 +130,8 @@ public:
     const BSDF *getBSDF() const { return m_bsdf; }
     BSDF *getBSDFNonConst() { return m_bsdf; }
 
+    const Medium* getMedium() const { return m_medium; }
+
     /// Return the total number of primitives in this shape
     virtual uint32_t getPrimitiveCount() const { return 1; }
 
@@ -144,17 +147,30 @@ public:
     /// Set the intersection information: hit point, shading frame, UVs, etc.
     virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const = 0;
 
-    /**
-     * \brief Sample a point on the surface (potentially using the point sRec.ref to importance sample)
-     * This method should set sRec.p, sRec.n and sRec.pdf
-     * Probability should be with respect to area
-     * */
-    virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const = 0;
-    /**
-     * \brief Return the probability of sampling a point sRec.p by the sampleSurface() method (sRec.ref should be set before)
-     * sRec.n and sRec.pdf are ignored
-     * */
-    virtual float pdfSurface(const ShapeQueryRecord &sRec) const = 0;
+	/**
+	 * \brief Sample a point on the surface (potentially using the point sRec.ref to importance sample)
+	 * This method should set sRec.p, sRec.n and sRec.pdf
+	 * Probability should be with respect to area
+	 * */
+	virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const = 0;
+	/**
+	 * \brief Return the probability of sampling a point sRec.p by the sampleSurface() method (sRec.ref should be set before)
+	 * sRec.n and sRec.pdf are ignored
+	 * */
+	virtual float pdfSurface(const ShapeQueryRecord &sRec) const = 0;
+
+	/**
+	 * \brief Sample a point inside the volume (potentially using the point sRec.ref to importance sample)
+	 * This method should set sRec.p, sRec.n and sRec.pdf
+	 * Probability should be with respect to volume. Uses the bbox if not overridden.
+	 * */
+	virtual void sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const;
+	/**
+	 * \brief Return the probability of sampling a point inside the shape sRec.p by the sampleSurface() method (sRec.ref should be set before)
+	 * sRec.n and sRec.pdf are ignored.
+	 * Note: Does not check that the point is inside the shape, for efficiency reasons. Uses the bbox if not overridden.
+	 * */
+	virtual float pdfVolume(const ShapeQueryRecord &sRec) const;
 
     /**
      * Apply the normal map to modify the intersecion shading normal
@@ -182,11 +198,15 @@ public:
 	 */
 	mutable bool geometryTouched = true;
     Emitter *m_emitter = nullptr; ///< Associated emitter, if any
-	protected:
+protected:
 	Texture<Normal3f> *m_normalMap = nullptr;
 	BSDF *m_bsdf = nullptr;       ///< BSDF of the surface
     BoundingBox3f m_bbox;         ///< Bounding box of the mesh
-	};
+	Medium * m_medium = nullptr;  ///< Associated medium inside the shape, vacuum if null
+
+	float m_volume = 0.f;
+	virtual void updateVolume();  ///< Recalculate the volume, uses the bbox if not overridden
+};
 
 NORI_NAMESPACE_END
 

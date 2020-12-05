@@ -145,6 +145,9 @@ void RenderThread::restartRender()
 
 void RenderThread::renderThreadMain()
 {
+	m_startTime = clock_t::now();
+	m_endTime = time_point_t::min();
+
 	/* Allocate memory for the entire output image and clear it */
 	const Camera *camera = m_renderScene->getCamera();
 	m_block.lock();
@@ -249,6 +252,7 @@ void RenderThread::renderThreadMain()
 		m_renderScene->getDenoiser()->denoise(&m_block);
 	}
 
+	m_endTime = clock_t::now();
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
 	cout << "Total Samples Placed: " << m_renderScene->getSampler()->getTotalSamples() << std::endl;
 	if (m_previewMode || m_renderStatus == ERenderStatus::Interrupt)
@@ -379,5 +383,14 @@ void RenderThread::drawSceneGui()
 		restartRender();
 }
 #endif
+
+std::string RenderThread::getRenderTime() {
+	if(m_endTime == m_startTime)
+		return "-";
+	else if (m_endTime > m_startTime)
+		return timeString2(m_endTime - m_startTime);
+	else
+		return timeString2(clock_t::now() - m_startTime);
+}
 
 NORI_NAMESPACE_END

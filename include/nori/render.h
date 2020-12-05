@@ -26,10 +26,18 @@
 
 NORI_NAMESPACE_BEGIN
 
+using clock_t = std::chrono::steady_clock;
+using time_point_t = std::chrono::time_point<std::chrono::steady_clock>;
+template<typename TimePoint>
+inline double durationMs(const TimePoint time)
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+}
+
 class RenderThread {
 
 public:
-	RenderThread(ImageBlock &block) : m_block(block) {}
+	RenderThread(ImageBlock &block) : m_block(block), m_startTime(clock_t::now()), m_endTime(m_startTime) {}
     ~RenderThread();
 
     void loadScene(const std::string & filename);
@@ -40,6 +48,7 @@ public:
     bool isBusy();
     void stopRendering();
 	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
+	std::string getRenderTime();
 
 #ifdef NORI_USE_IMGUI
 	/**
@@ -71,6 +80,8 @@ protected:
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
     std::atomic<float>         m_progress     = 1.f;
+	time_point_t m_startTime;
+	time_point_t m_endTime;
 
 	std::string sceneFilename;
 	std::string outputName;

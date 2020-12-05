@@ -85,6 +85,17 @@ float Warp::squareToUniformSpherePdf(const Vector3f &v) {
   return (std::abs(v.squaredNorm() - 1.0f) < Epsilon) ? 0.25f / M_PI : 0.0f;
 }
 
+Vector3f Warp::squareToUniformSphereVolume(const Point3f &sample)
+{
+	const float r     = std::cbrt(sample.z());
+	return r * squareToUniformSphere(Point2f(sample.x(), sample.y()));
+}
+
+float Warp::squareToUniformSphereVolumePdf(const Point3f &sample)
+{
+	return 4.f / 3.f * M_PI;
+}
+
 Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
   Vector3f w = squareToUniformSphere(sample);
   w.z() = abs(w.z()); // z to absolute value
@@ -161,9 +172,27 @@ Vector3f Warp::squareToHenyeyGreenstein(const Point2f &sample, float g)
 	 * phase function integral phi=[pi/2, pi = *partial* cdf =
 	 *   B_HG = (1 - g) / 2g *((1 + g)/sqrt(1 + g^2) - 1)
 	 */
-	// TODO: Use inversion method
+	float cosTheta;
+	if (std::abs(g) < Epsilon)
+		cosTheta = 1 - 2 * sample.x();
+	else
+	{
+		const float factor = (1 - g * g) / (1 - g + 2 * g * sample.x());
+		cosTheta = (1 + g * g - factor * factor) / (2 * g);
+	}
 
-	return 0;
+	// random rotation about wi axis
+	const float phi = 2 * M_PI * sample.y();
+
+	// Direction from spherical coords
+	const float sinTheta = std::sqrt(1 - cosTheta * cosTheta);
+	float sinPhi, cosPhi;
+	sincosf(phi, &sinPhi, &cosPhi);
+
+	return Vector3f(
+			sinTheta * cosPhi,
+			sinTheta * sinPhi,
+			cosTheta);
 }
 
 float Warp::squareToHenyeyGreensteinPdf(const Vector3f &m, float g)
@@ -173,16 +202,33 @@ float Warp::squareToHenyeyGreensteinPdf(const Vector3f &m, float g)
 	return 0.25f / M_PI * (1 - g2) / std::pow(1 + g2 - 2 * g * cosTheta, 1.5f);
 }
 
-Vector3f Warp::squareToSchlick(const Point2f &sample, float g)
+Vector3f Warp::squareToSchlick(const Point2f &sample, float k)
 {
-	// TODO: Use inversion method
+	float cosTheta;
+	if (std::abs(k) < Epsilon)
+		cosTheta = 1;
+	else
+	{
+		cosTheta = 1 / k * (1 - 1 / (2 * k * (sample.x() - 1 + k * k + 1 / (2 * k * (1 - k)))));
+	}
 
-	return 0;
+	// random rotation about wi axis
+	const float phi = 2 * M_PI * sample.y();
+
+	// Direction from spherical coords
+	const float sinTheta = std::sqrt(1 - cosTheta * cosTheta);
+	float sinPhi, cosPhi;
+	sincosf(phi, &sinPhi, &cosPhi);
+
+	return Vector3f(
+			sinTheta * cosPhi,
+			sinTheta * sinPhi,
+			cosTheta);
 }
 
-float Warp::squareToSchlickPdf(const Vector3f &m, float g)
+float Warp::squareToSchlickPdf(const Vector3f &m, float k)
 {
-	const float k = 1.55f * g - 0.55f * std::pow(g, 3);
+	// const float k = 1.55f * g - 0.55f * std::pow(g, 3);
 	const float factor = 1 - k * Frame::cosTheta(m);
 	return 0.25f / M_PI * (1 - k * k) / factor;
 }

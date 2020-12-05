@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene>
+	<integrator type="path_vol_mats"/>
+	<sampler type="independent">
+		<integer name="sampleCount" value="2048"/>
+	</sampler>
+
+	<camera type="perspective">
+		<float name="fov" value="27.7856"/>
+		<transform name="toWorld">
+			<scale value="-1,1,1"/>
+			<lookat target="0, 0.893051, 4.41198" origin="0, 0.919769, 5.41159" up="0, 1, 0"/>
+		</transform>
+
+		<integer name="height" value="600"/>
+		<integer name="width" value="800"/>
+	</camera>
+
+	<!-- Ambient Media (default vacuum) -->
+	<!-- <medium type="homog">
+		<phase type="anisophase"/> 
+	</medium> -->
+
+	<!-- Volumes -->
+	<shape type="sphere">
+		<point name="center" value="0.445800 0.332100 0.376700" />
+		<float name="radius" value="0.3263" />
+
+		<!-- <bsdf type="dielectric"/> -->
+		<medium type="homog">
+			<!-- <phase type="anisophase"/> --> 
+		</medium>
+	</shape>
+
+	<!-- Lights -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/cbox/light.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="15 15 15"/>
+		</emitter>
+	</shape>
+
+
+	<!-- Rest of Scene -->
+	<shape type="sphere">
+		<point name="center" value="-0.421400 0.332100 -0.280000" />
+		<float name="radius" value="0.3263" />
+
+		<bsdf type="mirror"/>
+	</shape>
+
+	<!-- Glass to test caustics -->
+	<shape type="sphere">
+		<point name="center" value="0.32, 0.9, 0.16" />
+		<float name="radius" value="0.25" />
+
+		<!-- Medium inside glass -->
+		<medium type="homog">
+			<!-- <phase type="anisophase"/>  -->
+		</medium>
+
+		<bsdf type="dielectric"/>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cbox/walls.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.725 0.71 0.68"/>
+		</bsdf>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cbox/rightwall.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.161 0.133 0.427"/>
+		</bsdf>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="../meshes/cbox/leftwall.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.630 0.065 0.05"/>
+		</bsdf>
+	</shape>
+</scene>

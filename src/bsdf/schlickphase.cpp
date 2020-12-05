@@ -1,5 +1,5 @@
 //
-// Created by roger on 01/12/2020.
+// Created by roger on 03/12/2020.
 //
 
 #include <nori/phase.h>
@@ -9,40 +9,41 @@
 NORI_NAMESPACE_BEGIN
 
 	/**
-	 * Anisotropic phase function for volumes based on Henyey-Greenstein.
+	 * Anisotropic phase function for volumes based on Schlick, a fast approximation of Henyey-Greenstein.
 	 */
-	struct AnisoPhase : public PhaseFunction
+	struct SchlickPhase : public PhaseFunction
 	{
-		explicit AnisoPhase(const PropertyList &propList)
+		explicit SchlickPhase(const PropertyList &propList)
 		{
 			m_g = propList.getFloat("g", 0);
+			m_k = 1.55f * m_g - 0.55f * std::pow(m_g, 3);
 		}
-		NORI_OBJECT_DEFAULT_CLONE(AnisoPhase)
-		NORI_OBJECT_DEFAULT_UPDATE(AnisoPhase)
+		NORI_OBJECT_DEFAULT_CLONE(SchlickPhase)
+		NORI_OBJECT_DEFAULT_UPDATE(SchlickPhase)
 
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
 		float pdf(const PhaseQueryRecord &bRec) const override
 		{
-			return Warp::squareToHenyeyGreensteinPdf(Frame(bRec.wi).toLocal(bRec.wo), m_g);
+			return Warp::squareToSchlickPdf(Frame(bRec.wi).toLocal(bRec.wo), m_k);
 		}
 
 		/// Sample the BRDF
 		Color3f sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
 		{
-			bRec.wo = Warp::squareToHenyeyGreenstein(sample, m_g);
+			bRec.wo = Warp::squareToSchlick(sample, m_k);
 
 			return 1.f / pdf(bRec) * abs(bRec.wi.dot(bRec.wo));
 		}
 
 		std::string toString() const override
 		{
-			return tfm::format("AnisoPhase[\n"
+			return tfm::format("SchlickPhase[\n"
 			                   "  g = %f,\n"
 			                   "]",
 			                   m_g);
 		}
 #ifdef NORI_USE_IMGUI
-		NORI_OBJECT_IMGUI_NAME("Henyey-Greenstein (Anisotropic)");
+		NORI_OBJECT_IMGUI_NAME("Schlick (Anisotropic)");
 		bool getImGuiNodes() override
 		{
 			touched |= PhaseFunction::getImGuiNodes();
@@ -56,13 +57,27 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			ImGui::PopID();
 
+			// Update and display derived properties
+			if(touched)
+				m_k = 1.55f * m_g - 0.55f * std::pow(m_g, 3);
+
+			ImGui::AlignTextToFramePadding();
+			ImGui::TreeNodeEx("k", ImGuiLeafNodeFlags, "k");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+			ImGui::Text("%f", m_k);
+			ImGui::NextColumn();
+
 			return touched;
 		}
 #endif
 
 	private:
 		float m_g;
+
+		// derived properties
+		float m_k;
 	};
 
-	NORI_REGISTER_CLASS(AnisoPhase, "anisophase");
+	NORI_REGISTER_CLASS(SchlickPhase, "schlick");
 NORI_NAMESPACE_END

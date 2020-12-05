@@ -15,12 +15,12 @@ namespace ImGui
 
         ImGui::PushID(42);
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.5f);
-        ret |= ImGui::ColorPicker3(label, col_val.data(), ImGuiColorEditFlags_DisplayRGB);
+        ret |= ImGui::ColorPicker3(label, col_val.data(), nori::ImGuiClampColorEditFlags);
         ImGui::PopItemWidth();
         ImGui::PopID();
 
         ImGui::PushID(1337);
-        ret |= ImGui::DragFloat("##value", &exponent, 0.1f, Epsilon, SLIDER_MAX_FLOAT, "Exponent: %.4f", ImGuiSliderFlags_AlwaysClamp);
+        ret |= ImGui::DragFloat(label, &exponent, 0.1f, Epsilon, SLIDER_MAX_FLOAT, "Exponent: %.4f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
 
         // puzzle back the color

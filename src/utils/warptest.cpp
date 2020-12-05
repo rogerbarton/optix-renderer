@@ -18,6 +18,7 @@
 
 #include <nori/warp.h>
 #include <nori/bsdf.h>
+#include <nori/phase.h>
 #include <nanogui/screen.h>
 #include <nanogui/glutil.h>
 #include <nanogui/label.h>
@@ -51,6 +52,8 @@ using nori::Warp;
 using nori::PropertyList;
 using nori::BSDF;
 using nori::BSDFQueryRecord;
+using nori::PhaseFunction;
+using nori::PhaseQueryRecord;
 using nori::Color3f;
 
 class WarpTest : public Screen {
@@ -64,7 +67,8 @@ public:
     enum WarpType {
         None = 0,
         Disk,
-        UniformSphere,
+	    UniformSphere,
+	    UniformSphereVol,
         UniformSphereCap,
         UniformHemisphere,
         CosineHemisphere,
@@ -76,7 +80,7 @@ public:
         AnisoPhase
     };
 
-    WarpTest(): Screen(Vector2i(800, 600), "Assignment 2: Sampling and Warping"), m_bRec(Vector3f()) {
+    WarpTest(): Screen(Vector2i(800, 600), "Assignment 2: Sampling and Warping"), m_bRec(Vector3f()), m_pRec(Vector3f()) {
         initializeGUI();
         m_drawHistogram = false;
     }
@@ -86,29 +90,40 @@ public:
             parameterValue = std::exp(std::log(0.05f) * (1 - parameterValue) +
                                       std::log(1.f)   *  parameterValue);
         else if (warpType == HenyeyGreenstein || warpType == Schlick || warpType == AnisoPhase)
-        	parameterValue = 2 * parameterValue -1;
+        {
+        	// map to g
+	        parameterValue = 2 * parameterValue - 1;
+	        if (warpType == Schlick) // map to k
+		        parameterValue = 1.55f * parameterValue - 0.55f * std::pow(parameterValue, 3);
+        }
         return parameterValue;
     }
 
-    std::pair<Point3f, float> warpPoint(WarpType warpType, const Point2f &sample, float parameterValue) {
+    std::pair<Point3f, float> warpPoint(WarpType warpType, const Point3f &sample3, float parameterValue) {
         Point3f result;
+		Point2f sample = Point2f(sample3.x(), sample3.y());
 
         switch (warpType) {
             case None: result << Warp::squareToUniformSquare(sample), 0; break;
             case Disk: result << Warp::squareToUniformDisk(sample), 0; break;
             case UniformSphere: result << Warp::squareToUniformSphere(sample); break;
+            case UniformSphereVol: result << Warp::squareToUniformSphereVolume(sample3); break;
             case UniformSphereCap: result << Warp::squareToUniformSphereCap(sample, parameterValue); break;
             case UniformHemisphere: result << Warp::squareToUniformHemisphere(sample); break;
             case CosineHemisphere: result << Warp::squareToCosineHemisphere(sample); break;
             case Beckmann: result << Warp::squareToBeckmann(sample, parameterValue); break;
             case HenyeyGreenstein: result << Warp::squareToHenyeyGreenstein(sample, parameterValue); break;
             case Schlick: result << Warp::squareToSchlick(sample, parameterValue); break;
-            case MicrofacetBRDF:
+            case MicrofacetBRDF: {
+	            BSDFQueryRecord bRec(m_bRec);
+	            float value = m_brdf->sample(bRec, sample).getLuminance();
+	            return std::make_pair(bRec.wo, value == 0 ? 0.f : m_brdf->eval(bRec)[0]);
+            }
             case IsoPhase:
             case AnisoPhase: {
-                BSDFQueryRecord bRec(m_bRec);
-                float value = m_brdf->sample(bRec, sample).getLuminance();
-                return std::make_pair(bRec.wo, value == 0 ? 0.f : m_brdf->eval(bRec)[0]);
+                PhaseQueryRecord pRec(m_pRec);
+                float value = m_phase->sample(pRec, sample).getLuminance();
+                return std::make_pair(pRec.wo, value == 0 ? 0.f : 1.f);
              }
         }
 
@@ -130,20 +145,20 @@ public:
 
         for (int i=0; i<pointCount; ++i) {
             int y = i / sqrtVal, x = i % sqrtVal;
-            Point2f sample;
+            Point3f sample;
 
             switch (pointType) {
                 case Independent:
-                    sample = Point2f(rng.nextFloat(), rng.nextFloat());
+                    sample = Point3f(rng.nextFloat(), rng.nextFloat(), rng.nextFloat());
                     break;
 
                 case Grid:
-                    sample = Point2f((x + 0.5f) * invSqrtVal, (y + 0.5f) * invSqrtVal);
+                    sample = Point3f((x + 0.5f) * invSqrtVal, (y + 0.5f) * invSqrtVal, rng.nextFloat());
                     break;
 
                 case Stratified:
-                    sample = Point2f((x + rng.nextFloat()) * invSqrtVal,
-                                     (y + rng.nextFloat()) * invSqrtVal);
+                    sample = Point3f((x + rng.nextFloat()) * invSqrtVal,
+                                     (y + rng.nextFloat()) * invSqrtVal, rng.nextFloat());
                     break;
             }
 
@@ -169,18 +184,18 @@ public:
 	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
         else if (warpType == IsoPhase) {
-	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("isophase", PropertyList()));
+	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("isophase", PropertyList()));
 
 	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
-	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+	        m_pRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
         else if (warpType == AnisoPhase) {
 	        PropertyList list;
 	        list.setFloat("g", parameterValue);
-	        m_brdf = std::unique_ptr<BSDF>((BSDF *) NoriObjectFactory::createInstance("anisophase", list));
+	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("anisophase", list));
 
 	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
-	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
+	        m_pRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
 
         /* Generate the point positions */
@@ -234,13 +249,13 @@ public:
             float coarseScale = 1.f / gridRes, fineScale = 1.f / fineGridRes;
             for (int i=0; i<=gridRes; ++i) {
                 for (int j=0; j<fineGridRes; ++j) {
-                    auto pt = warpPoint(warpType, Point2f(j     * fineScale, i * coarseScale), parameterValue);
+                    auto pt = warpPoint(warpType, Point3f(j     * fineScale, i * coarseScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f((j+1) * fineScale, i * coarseScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f((j+1) * fineScale, i * coarseScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f(i*coarseScale, j     * fineScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f(i*coarseScale, j     * fineScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f(i*coarseScale, (j+1) * fineScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f(i*coarseScale, (j+1) * fineScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
                 }
             }
@@ -481,8 +496,10 @@ public:
                            (float) (sinTheta * sinPhi),
                            (float) y);
 
-                if (warpType == UniformSphere)
-                    return Warp::squareToUniformSpherePdf(v);
+	            if (warpType == UniformSphere)
+		            return Warp::squareToUniformSpherePdf(v);
+	            if (warpType == UniformSphereVol)
+		            return Warp::squareToUniformSphereVolumePdf(v);
                 else if (warpType == UniformSphereCap)
                     return Warp::squareToUniformSphereCapPdf(v, parameterValue);
                 else if (warpType == UniformHemisphere)
@@ -495,11 +512,16 @@ public:
 	                return Warp::squareToHenyeyGreensteinPdf(v, parameterValue);
                 else if (warpType == Schlick)
 	                return Warp::squareToSchlickPdf(v, parameterValue);
-                else if (warpType == MicrofacetBRDF || warpType == IsoPhase || warpType == AnisoPhase) {
+                else if (warpType == MicrofacetBRDF) {
                     BSDFQueryRecord bRec(m_bRec);
                     bRec.wo = v;
                     bRec.measure = nori::ESolidAngle;
                     return m_brdf->pdf(bRec);
+                }
+                else if (warpType == IsoPhase || warpType == AnisoPhase) {
+                    PhaseQueryRecord pRec(m_pRec);
+	                pRec.wo = v;
+                    return m_phase->pdf(pRec);
                 } else {
                     throw NoriException("Invalid warp type");
                 }
@@ -588,7 +610,7 @@ public:
         m_pointTypeBox->setCallback([&](int) { refresh(); });
 
         new Label(m_window, "Warping method", "sans-bold");
-        m_warpTypeBox = new ComboBox(m_window, { "None", "Disk", "Sphere", "Spherical cap", "Hemisphere (unif.)",
+        m_warpTypeBox = new ComboBox(m_window, { "None", "Disk", "Sphere", "Sphere Volume", "Spherical cap", "Hemisphere (unif.)",
                 "Hemisphere (cos)", "Beckmann distr.", "Henyey Greenstein", "Schlick", "Microfacet BRDF", "Isotropic Phase", "Anisotropic Phase (Henyey-Greenstein)" });
         m_warpTypeBox->setCallback([&](int) { refresh(); });
 
@@ -798,7 +820,9 @@ private:
     int m_pointCount, m_lineCount;
     bool m_drawHistogram;
     std::unique_ptr<BSDF> m_brdf;
+    std::unique_ptr<PhaseFunction> m_phase;
     BSDFQueryRecord m_bRec;
+    PhaseQueryRecord m_pRec;
     std::pair<bool, std::string> m_testResult;
 };
 

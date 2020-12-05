@@ -54,6 +54,8 @@ add_executable(nori
     include/nori/warp.h
     include/nori/HDRLoader.h
     include/nori/denoiser.h
+    include/nori/medium.h
+    include/nori/phase.h
 
     # Source code files
     src/utils/bitmap.cpp
@@ -83,6 +85,7 @@ add_executable(nori
     src/bsdf/disney.cpp
     src/bsdf/isophase.cpp
     src/bsdf/anisophase.cpp
+    src/bsdf/schlickphase.cpp
 
     src/integrators/photonmapper.cpp
     src/integrators/direct.cpp
@@ -94,6 +97,8 @@ add_executable(nori
     src/integrators/normals.cpp
     src/integrators/av.cpp
     src/integrators/PreviewIntegrator.cpp
+    src/integrators/path_vol_mats.cpp
+    src/integrators/path_vol_mis.cpp
 
     src/shapes/mesh.cpp
     src/shapes/obj.cpp
@@ -109,11 +114,17 @@ add_executable(nori
     src/emitters/arealight.cpp
     src/emitters/pointlight.cpp
     src/emitters/environmentmap.cpp
+    src/emitters/volumelight.cpp
 
     src/denoiser/simple.cpp
 
     src/samplers/adaptive.cpp
     src/samplers/independent.cpp
+
+    src/media/medium.cpp
+    src/media/vacuum.cpp
+    src/media/homogmedium.cpp
+    src/media/heterogmedium.cpp
     )
 
 if(NORI_USE_VOLUMES)
@@ -159,6 +170,7 @@ if(NORI_USE_GUI)
       src/bsdf/microfacet.cpp
       src/bsdf/isophase.cpp
       src/bsdf/anisophase.cpp
+      src/bsdf/schlickphase.cpp
       src/utils/object.cpp
       src/utils/proplist.cpp
       src/utils/common.cpp

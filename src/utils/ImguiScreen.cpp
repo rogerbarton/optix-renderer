@@ -332,6 +332,7 @@ void ImguiScreen::draw()
 			ImGui::Text("Render");
 			ImGui::SameLine();
 			ImGui::ProgressBar(m_renderThread.getProgress());
+			ImGui::Text("Render time: %s", (char*)m_renderThread.getRenderTime().c_str());
 
 			if (ImGui::Button("Stop Render"))
 				m_renderThread.stopRendering();

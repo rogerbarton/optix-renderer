@@ -48,6 +48,11 @@ public:
     /// Probability density of \ref squareToUniformSphere()
     static float squareToUniformSpherePdf(const Vector3f &v);
 
+	/// Uniformly sample a vector inside the unit sphere volume
+	static Vector3f squareToUniformSphereVolume(const Point3f &sample);
+
+	static float squareToUniformSphereVolumePdf(const Point3f &sample);
+
     /**
      * \brief Uniformly sample a vector on a spherical cap around (0, 0, 1)
      *

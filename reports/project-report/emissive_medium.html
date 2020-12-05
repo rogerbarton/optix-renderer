@@ -75,7 +75,21 @@
         <div class="pageContent">
 
             <!-- ================================================================= -->
+            <p>
+                I based this feature on the arealight, where instead of sampling the shape surface we sample its volume.
+                The pdf function is the same except that we query the volume. As we are sampling a point uniformly inside the volume, the pdf=1/volume. 
+                As calculating the volume is non-trivial for arbitrary triangle meshes, I have only implemented this feature for the sphere and box. 
 
+                We also do not have a normal inside the volume and thus assume that the light is emitted with the same strenth in all directions (isotropic in this respect).
+            </p>
+
+            <img src="images/iso-warptest.png" alt="Reference" class="img-responsive">
+            <img src="images/aniso-warptest.png" alt="Reference" class="img-responsive">
+                
+            <div class="twentytwenty-container">
+                <img src="images/ref/ajax-normals.png" alt="Reference" class="img-responsive">
+                <img src="images/mine/ajax-normals.png" alt="Mine" class="img-responsive">
+            </div> <br>
 
         </div>
     </div>

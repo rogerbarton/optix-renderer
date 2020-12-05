@@ -37,6 +37,7 @@ NORI_NAMESPACE_BEGIN
 		delete m_sampler;
 		delete m_camera;
 		delete m_integrator;
+		delete m_previewIntegrator;
 		for (auto s : m_shapes)
 			delete s;
 		for (auto e : m_emitters)
@@ -45,31 +46,31 @@ NORI_NAMESPACE_BEGIN
 
 		// delete m_envmap; // Already deleted as an emitter
 		delete m_denoiser;
-
-		delete m_previewIntegrator;
+		delete m_ambientMedium;
 	}
 
 	NoriObject *Scene::cloneAndInit()
 	{
-		// -- Validate scene before cloning
+		// -- Validate scene before cloning, add defaults
 		if (!m_integrator)
 			throw NoriException("No integrator was specified!");
 		if (!m_camera)
 			throw NoriException("No camera was specified!");
 
+		// Create a default (independent) sampler
 		if (!m_sampler)
-		{
-			// Create a default (independent) sampler
 			m_sampler = static_cast<Sampler *>(
 					NoriObjectFactory::createInstance("independent", PropertyList()));
-		}
 
 		if (!m_previewIntegrator)
-		{
 			m_previewIntegrator = static_cast<Integrator *>(
 					NoriObjectFactory::createInstance("preview", PropertyList()));
-		}
 
+		if(!m_ambientMedium)
+			m_ambientMedium = static_cast<Medium *>(
+					NoriObjectFactory::createInstance("vacuum", PropertyList()));
+
+		// -- Shallow copy
 		Scene *clone = new Scene(*this);
 		clone->m_bvh = new BVH();
 
@@ -79,6 +80,8 @@ NORI_NAMESPACE_BEGIN
 
 		clone->m_sampler = static_cast<Sampler *>(m_sampler->cloneAndInit());
 		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
+
+		clone->m_ambientMedium  = static_cast<Medium *>(m_ambientMedium->cloneAndInit());
 
 		// envmap handled in emitters
 		// if (m_envmap)
@@ -140,6 +143,7 @@ NORI_NAMESPACE_BEGIN
 
 		m_sampler->update(gui->m_sampler);
 		m_camera->update(gui->m_camera);
+		m_ambientMedium->update(gui->m_ambientMedium);
 
 		if (m_envmap)
 			m_envmap->update(gui->m_envmap);
@@ -220,6 +224,12 @@ NORI_NAMESPACE_BEGIN
 				m_denoiser = static_cast<Denoiser *>(obj);
 				break;
 
+			case EMedium:
+				if (m_ambientMedium)
+					throw NoriException("There can only be one ambient medium per scene.");
+				m_ambientMedium = static_cast<Medium *>(obj);
+				break;
+
 			case EVolume:
 				// Skip if volumes are disabled
 #ifdef NORI_USE_VOLUMES
@@ -275,6 +285,7 @@ NORI_NAMESPACE_BEGIN
 				"  %s  }\n"
 				"  envmap = %s,\n"
 				"  denoiser = %s,\n"
+				"  ambient medium = %s,\n"
 				"  volumes {\n"
 				"  %s  }\n"
 				"]",
@@ -285,6 +296,7 @@ NORI_NAMESPACE_BEGIN
 				indent(lights, 2),
 				m_envmap ? indent(m_envmap->toString()) : "nullptr",
 				m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
+				indent(m_ambientMedium->toString()),
 #ifdef NORI_USE_VOLUMES
 				indent(volumes, 2)
 #else
@@ -367,6 +379,24 @@ NORI_NAMESPACE_BEGIN
 				ImGui::TreePop();
 			}
 		}
+
+		if (m_ambientMedium)
+		{
+			bool node_open = ImGui::TreeNode("Ambient Medium");
+			ImGui::NextColumn();
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text(m_ambientMedium->getImGuiName().c_str());
+			ImGui::NextColumn();
+			if (node_open)
+			{
+				touched |= m_ambientMedium->getImGuiNodes();
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::Separator();
+		ImGui::NextColumn();
+		ImGui::NextColumn();
 
 		bool node_open_shapes = ImGui::TreeNode("Shapes");
 		ImGui::NextColumn();

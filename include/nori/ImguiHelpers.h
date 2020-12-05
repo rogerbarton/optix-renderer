@@ -11,8 +11,14 @@
 
 namespace nori
 {
-	const static ImGuiTreeNodeFlags ImGuiLeafNodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-	                           ImGuiTreeNodeFlags_Bullet;
+	const static ImGuiTreeNodeFlags  ImGuiLeafNodeFlags     =
+			                                 ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+			                                 ImGuiTreeNodeFlags_Bullet;
+	const static ImGuiColorEditFlags ImGuiHdrColorEditFlags =
+			                                 ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_HDR |
+			                                 ImGuiColorEditFlags_Float;
+	const static ImGuiColorEditFlags ImGuiClampColorEditFlags    =
+			                                 ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_Float;
 
 #define SLIDER_MAX_INT 1000000
 #define SLIDER_MAX_FLOAT 1000000.f

@@ -1,4 +1,8 @@
-#include <nori/bsdf.h>
+//
+// Created by roger on 01/12/2020.
+//
+
+#include <nori/phase.h>
 #include <nori/frame.h>
 #include <nori/warp.h>
 
@@ -7,28 +11,22 @@ NORI_NAMESPACE_BEGIN
 	/**
 	 * Simple isotropic phase function for volumes. Scatters uniformly in all directions.
 	 */
-	class IsoPhase : public BSDF
+	struct IsoPhase : public PhaseFunction
 	{
-	public:
 		explicit IsoPhase(const PropertyList &propList) {}
 		NORI_OBJECT_DEFAULT_CLONE(IsoPhase)
 		NORI_OBJECT_DEFAULT_UPDATE(IsoPhase)
 
-		Color3f eval(const BSDFQueryRecord &bRec) const override
-		{
-			return Color3f(1.f);
-		}
-
-		float pdf(const BSDFQueryRecord &bRec) const override
+		float pdf(const PhaseQueryRecord &bRec) const override
 		{
 			return 0.25f / M_PI;
 		}
 
-		Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override
+		Color3f sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
 		{
 			bRec.wo = Warp::squareToUniformSphere(sample);
 
-			return eval(bRec) / pdf(bRec) * Frame::cosTheta(bRec.wo);
+			return 1.f / pdf(bRec) * abs(bRec.wi.dot(bRec.wo));
 		}
 
 		std::string toString() const override
@@ -37,6 +35,10 @@ NORI_NAMESPACE_BEGIN
 		}
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Isotropic Phase");
+		virtual bool getImGuiNodes() override
+		{
+			return PhaseFunction::getImGuiNodes();
+		}
 #endif
 	};
 
