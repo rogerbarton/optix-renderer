@@ -104,21 +104,28 @@ public:
 
         its.geoFrame = Frame(n);
 
+
+	    // swap coords so: u = phi, v = theta = 'vertical'
+	    Point2f uv_coords = sphericalCoordinates(-n);
+	    std::swap(uv_coords.x(), uv_coords.y());
+
+	    //Mmap to [0,1]
+	    its.uv.x() = uv_coords.x() / (2.f * M_PI);
+	    its.uv.y() = uv_coords.y() / M_PI;
+
         /**
          * Calculate tangents to be aligned with the uv's so that we can use them for normal maps
-         * tangent   = dp/du
-         * bitangent = dp/dv = normal x tangent
+         * tangent   = dp/du = dp/dphi
+         * bitangent = dp/dv = dp/dtheta = normal x tangent
          * See https://computergraphics.stackexchange.com/questions/5498/compute-sphere-tangent-for-normal-mapping
+         *     note: this uses a different ordering of the axes.
+         *     see wikipedia instead https://en.wikipedia.org/wiki/Spherical_coordinate_system#Integration_and_differentiation_in_spherical_coordinates
+         *     for dp/dphi
          */
-	    const Vector3f t(-Frame::sinPhi(n), 0, Frame::cosPhi(n));
+	    const Vector3f t(Frame::cosPhi(n), -Frame::sinPhi(n), 0);
 	    const Vector3f b = n.cross(t);
         its.shFrame = Frame(t, b, n);
 
-        Point2f uv_coords = sphericalCoordinates(-n);
-
-        // switch coordinates and map to [0,1]
-        its.uv.x() = uv_coords.y() / (2.f * M_PI);
-        its.uv.y() = uv_coords.x() / M_PI;
     }
 
 	virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override
