@@ -9,7 +9,6 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_stdlib.h>
 #include <imgui/filebrowser.h>
-#include <nori/normals.h>
 #include <nori/timer.h>
 
 #include <nori/common.h>
