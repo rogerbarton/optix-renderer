@@ -67,7 +67,8 @@ public:
     enum WarpType {
         None = 0,
         Disk,
-        UniformSphere,
+	    UniformSphere,
+	    UniformSphereVol,
         UniformSphereCap,
         UniformHemisphere,
         CosineHemisphere,
@@ -98,13 +99,15 @@ public:
         return parameterValue;
     }
 
-    std::pair<Point3f, float> warpPoint(WarpType warpType, const Point2f &sample, float parameterValue) {
+    std::pair<Point3f, float> warpPoint(WarpType warpType, const Point3f &sample3, float parameterValue) {
         Point3f result;
+		Point2f sample = Point2f(sample3.x(), sample3.y());
 
         switch (warpType) {
             case None: result << Warp::squareToUniformSquare(sample), 0; break;
             case Disk: result << Warp::squareToUniformDisk(sample), 0; break;
             case UniformSphere: result << Warp::squareToUniformSphere(sample); break;
+            case UniformSphereVol: result << Warp::squareToUniformSphereVolume(sample3); break;
             case UniformSphereCap: result << Warp::squareToUniformSphereCap(sample, parameterValue); break;
             case UniformHemisphere: result << Warp::squareToUniformHemisphere(sample); break;
             case CosineHemisphere: result << Warp::squareToCosineHemisphere(sample); break;
@@ -142,20 +145,20 @@ public:
 
         for (int i=0; i<pointCount; ++i) {
             int y = i / sqrtVal, x = i % sqrtVal;
-            Point2f sample;
+            Point3f sample;
 
             switch (pointType) {
                 case Independent:
-                    sample = Point2f(rng.nextFloat(), rng.nextFloat());
+                    sample = Point3f(rng.nextFloat(), rng.nextFloat(), rng.nextFloat());
                     break;
 
                 case Grid:
-                    sample = Point2f((x + 0.5f) * invSqrtVal, (y + 0.5f) * invSqrtVal);
+                    sample = Point3f((x + 0.5f) * invSqrtVal, (y + 0.5f) * invSqrtVal, rng.nextFloat());
                     break;
 
                 case Stratified:
-                    sample = Point2f((x + rng.nextFloat()) * invSqrtVal,
-                                     (y + rng.nextFloat()) * invSqrtVal);
+                    sample = Point3f((x + rng.nextFloat()) * invSqrtVal,
+                                     (y + rng.nextFloat()) * invSqrtVal, rng.nextFloat());
                     break;
             }
 
@@ -246,13 +249,13 @@ public:
             float coarseScale = 1.f / gridRes, fineScale = 1.f / fineGridRes;
             for (int i=0; i<=gridRes; ++i) {
                 for (int j=0; j<fineGridRes; ++j) {
-                    auto pt = warpPoint(warpType, Point2f(j     * fineScale, i * coarseScale), parameterValue);
+                    auto pt = warpPoint(warpType, Point3f(j     * fineScale, i * coarseScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f((j+1) * fineScale, i * coarseScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f((j+1) * fineScale, i * coarseScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f(i*coarseScale, j     * fineScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f(i*coarseScale, j     * fineScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
-                    pt = warpPoint(warpType, Point2f(i*coarseScale, (j+1) * fineScale), parameterValue);
+                    pt = warpPoint(warpType, Point3f(i*coarseScale, (j+1) * fineScale, 0), parameterValue);
                     positions.col(idx++) = value_scale == 0.f ? pt.first : (pt.first * pt.second * value_scale);
                 }
             }
@@ -493,8 +496,10 @@ public:
                            (float) (sinTheta * sinPhi),
                            (float) y);
 
-                if (warpType == UniformSphere)
-                    return Warp::squareToUniformSpherePdf(v);
+	            if (warpType == UniformSphere)
+		            return Warp::squareToUniformSpherePdf(v);
+	            if (warpType == UniformSphereVol)
+		            return Warp::squareToUniformSphereVolumePdf(v);
                 else if (warpType == UniformSphereCap)
                     return Warp::squareToUniformSphereCapPdf(v, parameterValue);
                 else if (warpType == UniformHemisphere)
@@ -605,7 +610,7 @@ public:
         m_pointTypeBox->setCallback([&](int) { refresh(); });
 
         new Label(m_window, "Warping method", "sans-bold");
-        m_warpTypeBox = new ComboBox(m_window, { "None", "Disk", "Sphere", "Spherical cap", "Hemisphere (unif.)",
+        m_warpTypeBox = new ComboBox(m_window, { "None", "Disk", "Sphere", "Sphere Volume", "Spherical cap", "Hemisphere (unif.)",
                 "Hemisphere (cos)", "Beckmann distr.", "Henyey Greenstein", "Schlick", "Microfacet BRDF", "Isotropic Phase", "Anisotropic Phase (Henyey-Greenstein)" });
         m_warpTypeBox->setCallback([&](int) { refresh(); });
 

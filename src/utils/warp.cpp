@@ -87,13 +87,8 @@ float Warp::squareToUniformSpherePdf(const Vector3f &v) {
 
 Vector3f Warp::squareToUniformSphereVolume(const Point3f &sample)
 {
-	const float r     = sqrt(sample.x());
-	const float theta = 1.f * M_PI * sample.y();
-	const float phi   = 2.f * M_PI * sample.z();
-	return Vector3f(
-			r * sin(theta) * cos(phi),
-			r * sin(theta) * sin(phi),
-			r * cos(theta));
+	const float r     = std::cbrt(sample.z());
+	return r * squareToUniformSphere(Point2f(sample.x(), sample.y()));
 }
 
 float Warp::squareToUniformSphereVolumePdf(const Point3f &sample)
