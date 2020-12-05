@@ -114,6 +114,7 @@ add_executable(nori
     src/emitters/arealight.cpp
     src/emitters/pointlight.cpp
     src/emitters/environmentmap.cpp
+    src/emitters/volumelight.cpp
 
     src/denoiser/simple.cpp
 
