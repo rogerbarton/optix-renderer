@@ -350,8 +350,8 @@ Eigen::MatrixXf computeVarianceFromImage(const ImageBlock &block)
             {
                 for (int l = 0; l < 3; l++)
                 {
-                    int i_ = clamp(i - 1 + k, 0, block.getSize().y());
-                    int j_ = clamp(j - 1 + l, 0, block.getSize().x());
+                    int i_ = clamp(i - 1 + k, 0, block.getSize().y()-1);
+                    int j_ = clamp(j - 1 + l, 0, block.getSize().x()-1);
                     if (i_ != i - 1 + k || j_ != j - 1 + l)
                         continue;
                     mean += std::abs(block(i_ + bs, j_ + bs).divideByFilterWeight().getLuminance());
@@ -366,8 +366,8 @@ Eigen::MatrixXf computeVarianceFromImage(const ImageBlock &block)
             {
                 for (int l = 0; l < 3; l++)
                 {
-                    int i_ = clamp(i - 1 + k, 0, block.getSize().y());
-                    int j_ = clamp(j - 1 + l, 0, block.getSize().x());
+                    int i_ = clamp(i - 1 + k, 0, block.getSize().y()-1);
+                    int j_ = clamp(j - 1 + l, 0, block.getSize().x()-1);
                     if (i_ != i - 1 + k || j_ != j - 1 + l)
                         continue;
                     col += 1.f / sum * std::pow(std::abs(block(i_ + bs, j_ + bs).divideByFilterWeight().getLuminance()) - mean, 2);
