@@ -74,7 +74,7 @@ public:
 			if (sRgb)
 			{
 				for (unsigned int i = 0; i < data.size(); ++i)
-					data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255);
+					data[i] = InverseGammaCorrect(static_cast<float>(tmp[i]) / 255.f);
 			}
 			else
 			{
@@ -139,7 +139,7 @@ public:
 		}
 		Color3f out;
 		unsigned int w = static_cast<unsigned int>((uv[0]) * scaleU * (float)width);
-		unsigned int h = static_cast<unsigned int>((uv[1]) * scaleV * (float)height);
+		unsigned int h = height - static_cast<unsigned int>((uv[1]) * scaleV * (float)height);
 
 		unsigned int index = (h * width + w) % (width * height);
 		out[0] = data[4 * index];

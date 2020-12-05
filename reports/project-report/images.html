@@ -43,7 +43,8 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMatthias">
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
-                        <a class="dropdown-item" href="envmap.html">Envinronment Map Emitter</a>
+                        <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
+<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item active" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -72,7 +73,28 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
+            <h4>HDR or PNG</h4>
+            <p>I included lodepng and a custom HDR loader into nori. This allows us, to load arbitrary images into a
+                texture and use them as either normal maps or textures.</p>
 
+            <p>For the validation render, I have downloaded a 3D-model (<a
+                    href="https://free3d.com/3d-model/e-45-aircraft-71823.html">E 45 Aircraft from free3d.com</a>). The
+                model was a little bit changed, as the cockpit glass had to be an extra object file instead of belonging
+                to the same file. The cockpit glass uses a dielectric BSDF with the parameters taken from PA4 (from the
+                table scene, see glass-air-interface). As an
+                environment map I have used the 4k version from <a
+                    href="https://hdrihaven.com/hdri/?h=dikhololo_night">Dikhololo Night (HDRIHaven)</a>. This rendering
+                proofs multiple things:</p>
+            <ul>
+                <li>My texture loading implementation can load png and HDR files into nori. (the texture for the airplane is a PNG, the environment map is a HDR file)</li>
+                <li>The uv coordinates are set properly and the texture is evaluated with the correct coordinates.</li>
+                <li>I can rotate the environment map with euler angles. (not seen on the render, but visible in the
+                    scene configuration.)</li>
+            </ul>
+            <p>The image is rendered using Path MIS and 512 samples per pixel.</p>
+            <div class="twentytwenty-container">
+                <img src="images/images/aircraft.png" alt="" class="img-responsive">
+            </div>
             <!-- ================================================================= -->
 
 

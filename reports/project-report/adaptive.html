@@ -43,7 +43,8 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMatthias">
                         <a class="dropdown-item active" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
-                        <a class="dropdown-item" href="envmap.html">Envinronment Map Emitter</a>
+                        <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
+<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -79,9 +80,7 @@
     <div class="container contentWrapper">
         <div class="pageContent">
             <h4>General Comment</h4>
-            <p>All images shown below were rendered using the Path MIS integrator. All renderings where
-                done using a GUI-less version of nori, in order to possibly try to rule out some lower speed due to the
-                GUI rendering.</p>
+            <p>The variance computation is based on the work by Pham et al. <a href="#ref-1">[1]</a>.</p>
 
             <h4>30 seconds of Sampling, uniform background</h4>
             <p>If we now use a uniform background, and run both samplers again for one minute, we get the following two
@@ -114,7 +113,9 @@
             </div>
             <!-- ================================================================= -->
 
-
+            <h4 id="references">References</h4>
+            <p id="ref-1">Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for Artifact-Free
+            Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
         </div>
     </div>
 

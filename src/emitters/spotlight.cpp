@@ -12,8 +12,8 @@ public:
         m_position = props.getPoint3("position", Point3f());
         m_direction = props.getVector3("direction", Vector3f()).normalized();
         m_power = props.getColor("power", Color3f());
-        cosFalloffStart = std::cos(degToRad(props.getFloat("falloffstart")));
-        cosTotalWidth = std::cos(degToRad(props.getFloat("totalwidth")));
+        falloffStart = props.getFloat("falloffstart");
+        totalWidthAngle = props.getFloat("totalwidth");
         m_coord = Frame(m_direction.normalized());
     }
 
@@ -34,8 +34,8 @@ public:
 
         m_power = gui->m_power;
         m_direction = gui->m_direction;
-        cosFalloffStart = gui->cosFalloffStart;
-        cosTotalWidth = gui->cosTotalWidth;
+        falloffStart = gui->falloffStart;
+        totalWidthAngle = gui->totalWidthAngle;
         m_coord = gui->m_coord;
 
         Emitter::update(guiObject);
@@ -55,6 +55,8 @@ public:
 
     virtual Color3f eval(const EmitterQueryRecord &lRec) const override
     {
+        float cosFalloffStart = std::cos(degToRad(falloffStart));
+        float cosTotalWidth = std::cos(degToRad(totalWidthAngle));
         Color3f i = m_power / 2. / M_PI / (1.f - .5f * (cosTotalWidth + cosFalloffStart));
         Color3f color = i * falloff(-lRec.wi) / (lRec.ref - m_position).squaredNorm();
         return color;
@@ -76,8 +78,8 @@ public:
             "]",
             m_position.toString(),
             m_power.toString(),
-            cosFalloffStart,
-            cosTotalWidth);
+            falloffStart,
+            totalWidthAngle);
     };
 
 #ifdef NORI_USE_IMGUI
@@ -106,7 +108,7 @@ public:
         ImGui::SetNextItemWidth(-1);
 
         bool dir_touched = ImGui::DragVector3f("##value", &m_direction, 0.1f, -1.f, 1.f, "%.3f",
-                                                ImGuiSliderFlags_AlwaysClamp);
+                                               ImGuiSliderFlags_AlwaysClamp);
         touched |= dir_touched;
         if (dir_touched)
         {
@@ -118,22 +120,22 @@ public:
 
         ImGui::PushID(counter++);
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("cosTotalWidth", ImGuiLeafNodeFlags, "Cos Total Width");
+        ImGui::TreeNodeEx("cosTotalWidth", ImGuiLeafNodeFlags, "Total Width");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
 
-        touched |= ImGui::DragFloat("##value", &cosTotalWidth, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
+        touched |= ImGui::DragFloat("##value", &totalWidthAngle, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
                                     ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
 
         ImGui::PushID(counter++);
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("cosFalloffStart", ImGuiLeafNodeFlags, "Cos Falloff Start");
+        ImGui::TreeNodeEx("cosFalloffStart", ImGuiLeafNodeFlags, "Falloff Start");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
 
-        touched |= ImGui::DragFloat("##value", &cosTotalWidth, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
+        touched |= ImGui::DragFloat("##value", &falloffStart, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
                                     ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
@@ -145,11 +147,14 @@ public:
 private:
     Color3f m_power;
     Vector3f m_direction;
-    float cosTotalWidth, cosFalloffStart;
+    float totalWidthAngle;
+    float falloffStart;
     Frame m_coord;
 
     float falloff(const Vector3f &w) const
     {
+        float cosFalloffStart = std::cos(degToRad(falloffStart));
+        float cosTotalWidth = std::cos(degToRad(totalWidthAngle));
         Vector3f wi = m_coord.toLocal(w);
         wi = wi.normalized();
         float cosTheta = wi.z();
