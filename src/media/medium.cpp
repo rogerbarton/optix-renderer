@@ -22,8 +22,10 @@ NORI_NAMESPACE_BEGIN
 	{
 		const auto *gui = static_cast<const Medium *>(guiObject);
 		m_phase->update(gui->m_phase);
-		if (m_emitter)
-			m_emitter->update(gui->m_emitter);
+
+		// Note: Emitter updated by scene
+		// if (m_emitter)
+		// 	m_emitter->update(gui->m_emitter);
 	}
 
 	Medium::~Medium()
