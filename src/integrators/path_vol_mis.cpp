@@ -51,7 +51,7 @@ public:
             const BSDF *bsdf = shape->getBSDF();
 
             // if shape is emitter, add eval to result
-            if (shape->isEmitter())
+	        if (shape->getEmitter())
             {
                 auto emitter = shape->getEmitter();
                 EmitterQueryRecord eqr(traceRay.o, its.p, its.shFrame.n);
@@ -121,7 +121,7 @@ public:
                 Intersection itsS;
                 if (scene->rayIntersect(shadowray, itsS))
                 {
-                    if (itsS.shape->isEmitter())
+	                if (itsS.shape->getEmitter())
                     {
                         EmitterQueryRecord eqr_mats(its.p, itsS.p, itsS.shFrame.n);
                         pdfmat = bsdf->pdf(bRec_MATS);

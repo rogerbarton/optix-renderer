@@ -39,7 +39,7 @@ public:
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
-    if (shape->isEmitter())
+	  if (shape->getEmitter())
     {
       auto emitter = shape->getEmitter();
       EmitterQueryRecord eqr(ray.o, its.p, its.shFrame.n);
@@ -106,7 +106,7 @@ public:
       // compute sampled ray interaction point
       Intersection secondaryIts;
 
-      if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.shape->isEmitter())
+	    if (scene->rayIntersect(shadowRay, secondaryIts) && secondaryIts.shape->getEmitter())
       {
         EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
         auto ems = secondaryIts.shape->getEmitter();

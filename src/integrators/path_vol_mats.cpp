@@ -44,7 +44,7 @@ NORI_NAMESPACE_BEGIN
 				throughput *= Tr;
 
 				// -- Apply captured emission
-				if (!isMediumInteraction && its.shape->isEmitter())
+				if (!isMediumInteraction && its.shape->getEmitter())
 				{
 					EmitterQueryRecord lRec{ray.o, its.p, its.shFrame.n};
 					Li += throughput * its.shape->getEmitter()->eval(lRec);
