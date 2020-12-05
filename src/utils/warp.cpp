@@ -85,6 +85,22 @@ float Warp::squareToUniformSpherePdf(const Vector3f &v) {
   return (std::abs(v.squaredNorm() - 1.0f) < Epsilon) ? 0.25f / M_PI : 0.0f;
 }
 
+Vector3f Warp::squareToUniformSphereVolume(const Point3f &sample)
+{
+	const float r     = sqrt(sample.x());
+	const float theta = 1.f * M_PI * sample.y();
+	const float phi   = 2.f * M_PI * sample.z();
+	return Vector3f(
+			r * sin(theta) * cos(phi),
+			r * sin(theta) * sin(phi),
+			r * cos(theta));
+}
+
+float Warp::squareToUniformSphereVolumePdf(const Point3f &sample)
+{
+	return 4.f / 3.f * M_PI;
+}
+
 Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
   Vector3f w = squareToUniformSphere(sample);
   w.z() = abs(w.z()); // z to absolute value

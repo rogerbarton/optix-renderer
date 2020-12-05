@@ -61,6 +61,10 @@ void Shape::update(const NoriObject *guiObject)
 	// Note: Emitter updated by scene
 	// if(m_emitter)
 	// 	m_emitter->update(gui->m_emitter);
+
+	// Update volume
+	if(geometryTouched)
+		updateVolume();
 }
 
 Shape::~Shape()
@@ -97,6 +101,23 @@ void Shape::applyNormalMap(Intersection &its) const
 	f.n = n2;
 
 	f = Frame(n2);
+}
+
+void Shape::sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const
+{
+	sRec.p   = m_bbox.getCenter() + m_bbox.getExtents().cwiseProduct(sample);
+	sRec.n   = 0;
+	sRec.pdf = pdfVolume(sRec);
+}
+
+float Shape::pdfVolume(const ShapeQueryRecord &sRec) const
+{
+	return 1 / m_volume;
+}
+
+void Shape::updateVolume()
+{
+	m_volume = m_bbox.getVolume();
 }
 
 void Shape::addChild(NoriObject *obj)

@@ -112,19 +112,33 @@ public:
         its.uv.y() = uv_coords.x() / M_PI;
     }
 
-    virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override
-    {
-        Vector3f q = Warp::squareToUniformSphere(sample);
-        sRec.p = m_position + m_radius * q;
-        sRec.n = q;
-        sRec.pdf = std::pow(1.f / m_radius, 2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f, 0.0f, 1.0f));
-    }
-    virtual float pdfSurface(const ShapeQueryRecord &sRec) const override
-    {
-        return std::pow(1.f / m_radius, 2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f, 0.0f, 1.0f));
-    }
+	virtual void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override
+	{
+		Vector3f q = Warp::squareToUniformSphere(sample);
+		sRec.p = m_position + m_radius * q;
+		sRec.n = q;
+		sRec.pdf = std::pow(1.f / m_radius, 2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f, 0.0f, 1.0f));
+	}
+	virtual float pdfSurface(const ShapeQueryRecord &sRec) const override
+	{
+		return std::pow(1.f / m_radius, 2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f, 0.0f, 1.0f));
+	}
 
-    virtual std::string toString() const override
+	virtual void sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const override
+	{
+		sRec.p   = m_position + m_radius * Warp::squareToUniformSphereVolume(sample);
+		sRec.pdf = pdfVolume(sRec);
+	}
+
+protected:
+	void updateVolume() override
+	{
+		m_volume = 4.f / 3.f * M_PI * std::pow(m_radius, 3);
+	}
+
+public:
+
+	virtual std::string toString() const override
     {
         return tfm::format(
             "Sphere[\n"
