@@ -64,9 +64,8 @@ void Shape::update(const NoriObject *guiObject)
 	if (m_normalMap)
 		m_normalMap->update(gui->m_normalMap);
 
-	// Note: Emitter updated by scene, so emitter can be touched from emitters gui list independently
-	// if (m_emitter)
-	// 	m_emitter->update(gui->m_emitter);
+	if (m_emitter)
+		m_emitter->update(gui->m_emitter);
 
 	// Update volume
 	if(geometryTouched)

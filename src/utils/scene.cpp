@@ -165,7 +165,8 @@ NORI_NAMESPACE_BEGIN
 			m_shapes[i]->update(gui->m_shapes[i]);
 
 		for (int i = 0; i < gui->m_emitters.size(); ++i)
-			m_emitters[i]->update(gui->m_emitters[i]);
+			if (!m_emitters[i]->hasShape())
+				m_emitters[i]->update(gui->m_emitters[i]);
 
 #ifdef NORI_USE_VOLUMES
 		for (int i = 0; i < gui->m_volumes.size(); ++i)
