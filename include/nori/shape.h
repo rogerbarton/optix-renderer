@@ -126,6 +126,10 @@ public:
     /// Return a pointer to an attached area emitter instance (const version)
     const Emitter *getEmitter() const { return m_emitter; }
 
+    /// Get the surface or media emitter
+    Emitter *getEmitter(bool surface) { return surface ? m_emitter : getMediumEmitter(); }
+    const Emitter *getEmitter(bool surface) const { return surface ? m_emitter : getMediumEmitter(); }
+
 	Emitter* getMediumEmitter() { return m_medium ? m_medium->getEmitter() : nullptr; }
 	const Emitter* getMediumEmitter() const { return m_medium ? m_medium->getEmitter() : nullptr; }
 

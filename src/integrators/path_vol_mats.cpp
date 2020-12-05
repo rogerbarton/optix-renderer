@@ -44,10 +44,10 @@ NORI_NAMESPACE_BEGIN
 				throughput *= Tr;
 
 				// -- Apply captured emission
-				if (!isMediumInteraction && its.shape->getEmitter())
+				if (its.shape->getEmitter(isMediumInteraction))
 				{
 					EmitterQueryRecord lRec{ray.o, its.p, its.shFrame.n};
-					Li += throughput * its.shape->getEmitter()->eval(lRec);
+					Li += throughput * its.shape->getEmitter(isMediumInteraction)->eval(lRec);
 				}
 
 				// -- Russian roulette with success probability
