@@ -5,27 +5,59 @@
     <integer name="uniformEvery" value="25"/>
   </sampler>
 
-  <integrator type="path_mis"/>
+  <integrator type="normals"/>
 
   <camera type="perspective">
     <transform name="toWorld">
-      <lookat target="0,0,0" origin="0,25,10" up="0,-1,0"/>
+      <lookat target="0,0,0" origin="7.3689,-6.9258,5.0383" up="0,0,1"/>
     </transform>
 
-    <float name="fov" value="85"/>
+    <float name="fov" value="50"/>
 
     <integer name="width" value="800"/>
     <integer name="height" value="800"/>
   </camera>
 
   <shape type="sphere">
-    <point name="center" value="0,0,0"/>
-    <float name="radius" value="10"/>
+    <!--<string name="filename" value="../meshes/sphere.obj"/>
+    <transform name="toWorld">
+			<scale value="3,3,3"/>
+			<rotate axis="1,0,0" angle="90"/>
+    </transform>-->
+    <vector name="origin" value="0,0,0"/>
+    <float name="radius" value="3"/>
 
     <bsdf type="disney">
-      <color name="baseColor" value="0.2, 0.2, 1"/>
+      <color name="baseColor" value="0.604, 0.485, 0.06"/>
+      <float name="metallic" value="1.0"/>
+      <float name="subsurface" value="0.0"/>
+      <float name="specular" value="0.0"/>
+      <float name="roughness" value="0.3"/>
+      <float name="specularTint" value="0.0"/>
+      <float name="anisotropic" value="1"/>
+      <float name="sheen" value="0.0"/>
+      <float name="sheenTint" value="0.0"/>
+      <float name="clearcoat" value="0"/>
+      <float name="clearcoatGloss" value="1.0"/>
     </bsdf>
   </shape>
 
-  <emitter type="envmap"/>
+  <shape type="obj">
+    <string name="filename" value="../meshes/sphere.obj"/>
+    <transform name="toWorld">
+      <translate value="0,0,12"/>
+    </transform>
+    <bsdf type="diffuse">
+      <color name="baseColor" value="0,0,0"/>
+    </bsdf>
+    <emitter type="area">
+      <color name="radiance" value="100,100,100"/>
+    </emitter>
+  </shape>
+
+  <emitter type="envmap">
+    <texture name="albedo" type="constant_color">
+      <color name="value" value="0.051,0.051,0.051"/>
+    </texture>
+  </emitter>
 </scene>
