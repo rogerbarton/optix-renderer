@@ -448,6 +448,9 @@ NORI_NAMESPACE_BEGIN
 		{
 			for (int i = 0; i < m_emitters.size(); i++)
 			{
+				if(m_emitters[i]->hasShape())
+					continue;
+
 				ImGui::PushID(i);
 
 				// for each shape, add a tree node
