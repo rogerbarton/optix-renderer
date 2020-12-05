@@ -13,11 +13,13 @@ NORI_NAMESPACE_BEGIN
 	public:
 		explicit VolumeEmitter(const PropertyList &props)
 		{
-			// store the radiance
 			m_radiance = props.getColor("radiance");
 		}
 
 		NoriObject *cloneAndInit() override {
+			if (!m_shape || !m_shape->getMedium())
+				throw NoriException("There is no shape or medium attached to this volume light.");
+
 			auto clone = new VolumeEmitter(*this);
 			Emitter::cloneAndInit(clone);
 			return clone;
@@ -43,73 +45,34 @@ NORI_NAMESPACE_BEGIN
 
 		virtual Color3f eval(const EmitterQueryRecord &lRec) const override
 		{
-			// we need a shape for the arealight to work
-			if (!m_shape)
-				throw NoriException("There is no shape attached to this Area light!");
-			// check the normal if we are on the back
-			// we use -lRec.wi because wi goes into the emitter (convention)
-			if (lRec.n.dot(-lRec.wi) < 0.f)
-			{
-				return Color3f(0.f); // we are on the back, return black
-			}
-			else
-			{
-				return m_radiance; // we are on the front, return the radiance
-			}
+			return m_radiance;
 		}
 
 		virtual Color3f sample(EmitterQueryRecord &lRec,
-		                       const Point2f &sample) const override
+		                       const Point2f &sample2) const override
 		{
-			if (!m_shape)
-				throw NoriException("There is no shape attached to this Area light!");
+			static Sampler *const sampler = static_cast<Sampler *>(
+					NoriObjectFactory::createInstance("independent", PropertyList()));
+			Point3f sample = Point3f(sample2.x(), sample2.y(), sampler->next1D());
 
-			// sample the surface using a shapeQueryRecord
-			ShapeQueryRecord sqr(lRec.ref);
-			// TODO: sample volume
-			m_shape->sampleSurface(sqr, sample);
+			// Sample a point on the mesh from the reference point
+			ShapeQueryRecord sRec{lRec.ref};
+			m_shape->sampleVolume(sRec, sample);
 
-			// create an emitter query
-			// we create a new one because we do not want to change the existing one
-			// until we actually should return a color
-			lRec = EmitterQueryRecord(sqr.ref, sqr.p, sqr.n);
-			lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
+			lRec.p = sRec.p;
+			lRec.wi = (lRec.p - lRec.ref).normalized();
+			lRec.n = -lRec.wi;
+			lRec.shadowRay = Ray3f(lRec.ref, lRec.wi, Epsilon, (lRec.ref - lRec.p).norm() - Epsilon);
 
-			// compute the pdf of this query
-			float probs = pdf(lRec);
-			lRec.pdf = probs;
+			lRec.pdf = pdf(lRec);
 
-			// check for it being near zero
-			if (std::abs(probs) < Epsilon)
-			{
-				return Color3f(0.f);
-			}
-
-			// return radiance
-			return eval(lRec) / probs;
+			return lRec.pdf == 0 ? Color3f(0.f) : (eval(lRec) / lRec.pdf).eval();
 		}
 
 		virtual float pdf(const EmitterQueryRecord &lRec) const override
 		{
-			if (!m_shape)
-				throw NoriException("There is no shape attached to this Area light!");
-
-			// if we are on the back, return 0
-			if (lRec.n.dot(-lRec.wi) < 0.f)
-			{
-				return 0.f;
-			}
-			// create a shape query record and get the pdf of the surface
-			// create by reference and sampled point
-			ShapeQueryRecord sqr(lRec.ref, lRec.p);
-			// TODO: use pdf volume
-			float            prob = m_shape->pdfSurface(sqr);
-
-			// transform the probability to solid angle
-			// where the first part is the distance and
-			// the second part is the cosine (computed using the normal)
-			// taken from the slides (converts pdf to solid anggles)
-			return prob * (lRec.p - lRec.ref).squaredNorm() / std::abs(lRec.n.dot(-lRec.wi));
+			ShapeQueryRecord sRec{lRec.ref, lRec.p};
+			return m_shape->pdfVolume(sRec) * (lRec.p - lRec.ref).squaredNorm();
 		}
 
 		virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
@@ -117,6 +80,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			throw NoriException("Not implemented.");
 		}
+
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Volume Light");
 		virtual bool getImGuiNodes() override

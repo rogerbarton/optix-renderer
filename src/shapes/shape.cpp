@@ -34,7 +34,13 @@ void Shape::cloneAndInit(Shape *clone)
 		clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
 	if (m_medium)
+	{
+		if(clone->m_medium->getEmitter())
+			m_medium->getEmitter()->setShape(this);
 		clone->m_medium = static_cast<Medium *>(m_medium->cloneAndInit());
+		if(clone->m_medium->getEmitter())
+			clone->m_medium->getEmitter()->setShape(clone);
+	}
 
 	if (m_normalMap)
 		clone->m_normalMap = static_cast<Texture<Normal3f> *>(m_normalMap->cloneAndInit());
@@ -58,9 +64,8 @@ void Shape::update(const NoriObject *guiObject)
 	if (m_normalMap)
 		m_normalMap->update(gui->m_normalMap);
 
-	// Note: Emitter updated by scene
-	// if(m_emitter)
-	// 	m_emitter->update(gui->m_emitter);
+	if (m_emitter)
+		m_emitter->update(gui->m_emitter);
 
 	// Update volume
 	if(geometryTouched)
@@ -72,7 +77,7 @@ Shape::~Shape()
 	delete m_bsdf;
 	delete m_normalMap;
 	delete m_medium;
-	//delete m_emitter; // Emitter is parent of Shape
+	delete m_emitter;
 }
 
 
@@ -105,8 +110,7 @@ void Shape::applyNormalMap(Intersection &its) const
 
 void Shape::sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const
 {
-	sRec.p   = m_bbox.getCenter() + m_bbox.getExtents().cwiseProduct(sample);
-	sRec.n   = 0;
+	sRec.p   = m_bbox.min + m_bbox.getExtents().cwiseProduct(sample);
 	sRec.pdf = pdfVolume(sRec);
 }
 
@@ -183,6 +187,7 @@ std::string Intersection::toString() const
         indent(geoFrame.toString()),
         shape ? shape->toString() : std::string("null"));
 }
+
 #ifdef NORI_USE_IMGUI
 bool Shape::getImGuiNodes()
 {

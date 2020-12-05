@@ -35,7 +35,7 @@ public:
     auto bsdf = shape->getBSDF();
 
     // if shape is emitter, add eval to result
-    if (shape->isEmitter())
+	  if (shape->getEmitter())
     {
       auto emitter = shape->getEmitter();
       EmitterQueryRecord eqr(ray.o, its.p, its.shFrame.n);
@@ -72,7 +72,7 @@ public:
     }
 
     // test if emitter was hit
-    if (secondaryIts.shape->isEmitter())
+	  if (secondaryIts.shape->getEmitter())
     {
       EmitterQueryRecord secondaryEQR(its.p, secondaryIts.p, secondaryIts.shFrame.n);
 

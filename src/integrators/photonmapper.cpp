@@ -194,7 +194,7 @@ public:
             const BSDF *bsdf = shape->getBSDF();
 
             // if shape is emitter, add eval to result
-            if (shape->isEmitter())
+	        if (shape->getEmitter())
             {
                 auto emitter = shape->getEmitter();
                 EmitterQueryRecord eqr(traceRay.o, its.p, its.shFrame.n);

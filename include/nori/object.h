@@ -64,29 +64,37 @@ public:
         switch (type)
         {
         case EScene:
-            return "scene";
-        case EShape:
-            return "shape";
-        case ETexture:
-            return "texture";
-        case EVolume:
-            return "volume";
-        case EBSDF:
-            return "bsdf";
-        case EEmitter:
-            return "emitter";
-        case ECamera:
-            return "camera";
-        case EIntegrator:
-            return "integrator";
-        case ESampler:
-            return "sampler";
-        case ETest:
-            return "test";
-        case EDenoiser:
-            return "denoiser";
-        case EPixelSampler:
-            return "pixelsampler";
+            return "EScene";
+		case EShape:
+			return "EShape";
+		case ETexture:
+			return "ETexture";
+		case EVolume:
+			return "EVolume";
+		case EBSDF:
+			return "EBSDF";
+		case EPhaseFunction:
+			return "EPhaseFunction";
+		case EEmitter:
+			return "EEmitter";
+		case EMedium:
+			return "EMedium";
+		case ECamera:
+			return "ECamera";
+		case EIntegrator:
+			return "EIntegrator";
+		case ESampler:
+			return "ESampler";
+		case EPixelSampler:
+			return "EPixelSampler";
+		case EDenoiser:
+			return "EDenoiser";
+		case ETest:
+			return "ETest";
+		case EReconstructionFilter:
+			return "EReconstructionFilter";
+		case EClassTypeCount:
+			return "EClassTypeCount";
         default:
             return "<unknown>";
         }

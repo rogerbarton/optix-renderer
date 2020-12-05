@@ -66,7 +66,7 @@ NORI_NAMESPACE_BEGIN
 			m_previewIntegrator = static_cast<Integrator *>(
 					NoriObjectFactory::createInstance("preview", PropertyList()));
 
-		if(!m_ambientMedium)
+		if (!m_ambientMedium)
 			m_ambientMedium = static_cast<Medium *>(
 					NoriObjectFactory::createInstance("vacuum", PropertyList()));
 
@@ -81,7 +81,7 @@ NORI_NAMESPACE_BEGIN
 		clone->m_sampler = static_cast<Sampler *>(m_sampler->cloneAndInit());
 		clone->m_camera  = static_cast<Camera *>(m_camera->cloneAndInit());
 
-		clone->m_ambientMedium  = static_cast<Medium *>(m_ambientMedium->cloneAndInit());
+		clone->m_ambientMedium = static_cast<Medium *>(m_ambientMedium->cloneAndInit());
 
 		// envmap handled in emitters
 		// if (m_envmap)
@@ -91,33 +91,44 @@ NORI_NAMESPACE_BEGIN
 
 		// Workaround for having a pointer cycle
 		// Create map from emitter ids to shape ids
-		std::map<int, int> shapeToEmitter{};
-		for (int           i = 0; i < m_emitters.size(); ++i)
+		struct ShapeToEmitterRecord {
+			int emitterId;
+			int shapeId;
+			bool isMediaEmitter;
+		};
+
+		for (int i = 0; i < m_shapes.size(); ++i)
+			clone->m_shapes[i] = static_cast<Shape *>(m_shapes[i]->cloneAndInit());
+
+		for (int i = 0; i < m_emitters.size(); ++i)
+		{
 			if (!m_emitters[i]->hasShape())
 			{
 				clone->m_emitters[i] = static_cast<Emitter *>(m_emitters[i]->cloneAndInit());
 
 				// Update envmap pointer, don't clone it twice
-				if(m_emitters[i]->isEnvMap())
+				if (m_emitters[i]->isEnvMap())
 					clone->m_envmap = clone->m_emitters[i];
 			}
 			else
 			{
-				int m = 0;
-				while(m_emitters[i] != m_shapes[m]->getEmitter())
-					m++;
-				shapeToEmitter.insert({m, i});
-			}
-
-		for (int i = 0; i < m_shapes.size(); ++i)
-		{
-			clone->m_shapes[i] = static_cast<Shape *>(m_shapes[i]->cloneAndInit());
-
-			// Update shape pointer in emitter (!)
-			if (clone->m_shapes[i]->isEmitter())
-			{
-				clone->m_emitters[shapeToEmitter[i]] = clone->m_shapes[i]->m_emitter;
-				clone->m_emitters[shapeToEmitter[i]]->setShape(clone->m_shapes[i]);
+				// Link already cloned shape emitters
+				int s = 0;
+				for (; s < m_shapes.size(); ++s)
+				{
+					if (m_emitters[i] == m_shapes[s]->getEmitter())
+					{
+						clone->m_emitters[i] = clone->m_shapes[s]->getEmitter();
+						break;
+					}
+					if (m_emitters[i] == m_shapes[s]->getMediumEmitter())
+					{
+						clone->m_emitters[i] = clone->m_shapes[s]->getMediumEmitter();
+						break;
+					}
+				}
+				if (s == m_shapes.size())
+					throw NoriException("Failed to match emitter to shape");
 			}
 		}
 
@@ -154,7 +165,8 @@ NORI_NAMESPACE_BEGIN
 			m_shapes[i]->update(gui->m_shapes[i]);
 
 		for (int i = 0; i < gui->m_emitters.size(); ++i)
-			m_emitters[i]->update(gui->m_emitters[i]);
+			if (!m_emitters[i]->hasShape())
+				m_emitters[i]->update(gui->m_emitters[i]);
 
 #ifdef NORI_USE_VOLUMES
 		for (int i = 0; i < gui->m_volumes.size(); ++i)
@@ -183,18 +195,18 @@ NORI_NAMESPACE_BEGIN
 			{
 				Shape *shape = static_cast<Shape *>(obj);
 				m_shapes.push_back(shape);
-				if (shape->isEmitter())
+				if (shape->getEmitter())
 					m_emitters.push_back(shape->getEmitter());
+				if (shape->getMediumEmitter())
+					m_emitters.push_back(shape->getMedium()->getEmitter());
+				break;
 			}
+			case EEmitter:
+				m_emitters.push_back(static_cast<Emitter *>(obj));
+				if (m_emitters.back()->isEnvMap())
+					m_envmap = static_cast<Emitter *>(obj);
 				break;
 
-			case EEmitter:
-			{
-				m_emitters.push_back(static_cast<Emitter *>(obj));
-	      		if(m_emitters.back()->isEnvMap())
-	      			m_envmap = static_cast<Emitter *>(obj);
-	      		break;
-			}
 			case ESampler:
 				if (m_sampler)
 					throw NoriException("There can only be one sampler per scene!");
@@ -212,12 +224,7 @@ NORI_NAMESPACE_BEGIN
 					throw NoriException("There can only be one integrator per scene!");
 				m_integrator = static_cast<Integrator *>(obj);
 				break;
-         /*
-			case EEnvironmentMap:
-				if (m_envmap)
-					throw NoriException("There can only be one environment map per scene!");
-				m_envmap = static_cast<EnvironmentMap *>(obj);
-				break;*/
+
 			case EDenoiser:
 				if (m_denoiser)
 					throw NoriException("There can only be one denoiser per scene!");
@@ -401,7 +408,7 @@ NORI_NAMESPACE_BEGIN
 		bool node_open_shapes = ImGui::TreeNode("Shapes");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text(m_shapes.size() == 1 ? "%d Shape": "%d Shapes", (int) m_shapes.size());
+		ImGui::Text(m_shapes.size() == 1 ? "%d Shape" : "%d Shapes", (int) m_shapes.size());
 		ImGui::NextColumn();
 		if (node_open_shapes)
 		{
@@ -435,7 +442,7 @@ NORI_NAMESPACE_BEGIN
 		bool node_open_emitters = ImGui::TreeNode("Emitters");
 		ImGui::NextColumn();
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text(m_emitters.size() == 1 ? "%d Emitter": "%d Emitters", (int) m_emitters.size());
+		ImGui::Text(m_emitters.size() == 1 ? "%d Emitter" : "%d Emitters", (int) m_emitters.size());
 		ImGui::NextColumn();
 		if (node_open_emitters)
 		{
