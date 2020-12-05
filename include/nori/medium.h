@@ -16,7 +16,7 @@ NORI_NAMESPACE_BEGIN
 	{
 		Ray3f ray;
 
-		explicit MediumQueryRecord(const Ray3f& ray) : ray(ray) {}
+		explicit MediumQueryRecord(const Ray3f &ray) : ray(ray) {}
 	};
 
 	struct Medium : NoriObject
@@ -30,7 +30,10 @@ NORI_NAMESPACE_BEGIN
 
 		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
 
-		const PhaseFunction* getPhase() const { return m_phase; }
+		const PhaseFunction *getPhase() const { return m_phase; }
+
+		Emitter *getEmitter() { return m_emitter; }
+		const Emitter *getEmitter() const { return m_emitter; }
 
 		NoriObject *cloneAndInit() override = 0;
 
@@ -53,7 +56,8 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 	protected:
-		PhaseFunction *m_phase = nullptr;
+		PhaseFunction *m_phase   = nullptr;
+		Emitter       *m_emitter = nullptr;
 	};
 
 NORI_NAMESPACE_END

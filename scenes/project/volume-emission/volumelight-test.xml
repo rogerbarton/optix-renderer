@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene>
+	<integrator type="path_vol_mats"/>
+	<sampler type="independent">
+		<integer name="sampleCount" value="2048"/>
+	</sampler>
+
+	<camera type="perspective">
+		<float name="fov" value="35"/>
+		<transform name="toWorld">
+			<scale value="-1,1,1"/>
+			<lookat target="0, 0, 0" origin="0, -4, 2" up="0, 0, 1"/>
+		</transform>
+
+		<integer name="height" value="600"/>
+		<integer name="width" value="600"/>
+	</camera>
+
+	<!-- Ambient Media (default vacuum) -->
+	<!-- <medium type="homog">
+		<phase type="anisophase"/> 
+	</medium> -->
+
+	<!-- Volumes -->
+	<shape type="sphere">
+		<point name="center" value="0 0 0.75" />
+		<float name="radius" value="0.5" />
+
+		<!-- <bsdf type="dielectric"/> -->
+		<medium type="homog">
+			<!-- <phase type="anisophase"/> -->
+			
+			<emitter type="volumelight">
+				<color name="radiance" value="1 1 1"/>
+			</emitter>
+		</medium>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="plane.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="1 1 1"/>
+		</bsdf>
+	</shape>
+</scene>

@@ -31,6 +31,9 @@ NORI_NAMESPACE_BEGIN
 		ImGui::NextColumn();
 		ImGui::PopID();
 
+		// Also set shape dirty in case this is called by the scene directly
+		if (m_shape)
+			m_shape->touched |= touched;
 		return touched;
 	}
 #endif

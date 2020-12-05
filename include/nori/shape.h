@@ -117,20 +117,28 @@ public:
 	//// Return an axis-aligned bounding box of the entire mesh
     const BoundingBox3f &getBoundingBox() const { return m_bbox; }
 
-    /// Is this mesh an area emitter?
-    bool isEmitter() const { return m_emitter != nullptr; }
+    /// Does the shape have a surface or volume emitter
+    bool hasAnyEmitter() const { return m_emitter || getMediumEmitter(); }
 
-    /// Return a pointer to an attached area emitter instance
+	/// Return a pointer to an attached area emitter instance
     Emitter *getEmitter() { return m_emitter; }
 
     /// Return a pointer to an attached area emitter instance (const version)
     const Emitter *getEmitter() const { return m_emitter; }
 
-    /// Return a pointer to the BSDF associated with this mesh
-    const BSDF *getBSDF() const { return m_bsdf; }
-    BSDF *getBSDFNonConst() { return m_bsdf; }
+    /// Get the surface or media emitter
+    Emitter *getEmitter(bool surface) { return surface ? m_emitter : getMediumEmitter(); }
+    const Emitter *getEmitter(bool surface) const { return surface ? m_emitter : getMediumEmitter(); }
 
-    const Medium* getMedium() const { return m_medium; }
+	Emitter* getMediumEmitter() { return m_medium ? m_medium->getEmitter() : nullptr; }
+	const Emitter* getMediumEmitter() const { return m_medium ? m_medium->getEmitter() : nullptr; }
+
+	/// Return a pointer to the BSDF associated with this mesh
+    BSDF *getBSDF() { return m_bsdf; }
+    const BSDF *getBSDF() const { return m_bsdf; }
+
+	Medium* getMedium() { return m_medium; }
+	const Medium* getMedium() const { return m_medium; }
 
     /// Return the total number of primitives in this shape
     virtual uint32_t getPrimitiveCount() const { return 1; }
@@ -161,7 +169,7 @@ public:
 
 	/**
 	 * \brief Sample a point inside the volume (potentially using the point sRec.ref to importance sample)
-	 * This method should set sRec.p, sRec.n and sRec.pdf
+	 * This method should set sRec.p and sRec.pdf. sRec.n is unset
 	 * Probability should be with respect to volume. Uses the bbox if not overridden.
 	 * */
 	virtual void sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const;

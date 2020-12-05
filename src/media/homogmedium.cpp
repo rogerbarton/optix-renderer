@@ -15,16 +15,13 @@ NORI_NAMESPACE_BEGIN
 			m_sigma_s_normalized = propList.getColor("sigma_s", 0);
 			m_sigma_a_intensity  = propList.getFloat("sigma_a_intensity", 1.f);
 			m_sigma_s_intensity  = propList.getFloat("sigma_s_intensity", 1.f);
+			m_density            = propList.getFloat("density", 1.f);
 		}
 
 		NoriObject *cloneAndInit() override
 		{
 			// Calculate derived properties for the first time
-			m_sigma_a  = m_sigma_a_normalized * m_sigma_a_intensity;
-			m_sigma_s  = m_sigma_s_normalized * m_sigma_s_intensity;
-			m_sigma_t  = m_sigma_a + m_sigma_s;
-			for (int i = 0; i < 3; ++i)
-				m_albedo(i) = m_sigma_t(i) > Epsilon ? m_sigma_s(i) / m_sigma_t(i) : 0.f;
+			updateDerivedProperties();
 
 			auto clone = new HomogeneousMedium(*this);
 			Medium::cloneAndInit(clone);
@@ -38,12 +35,25 @@ NORI_NAMESPACE_BEGIN
 			gui->touched = false;
 
 			// Only copy relevant properties
-			m_sigma_a = gui->m_sigma_a;
-			m_sigma_s = gui->m_sigma_s;
-			m_sigma_t = gui->m_sigma_t;
-			m_albedo  = gui->m_albedo;
+			m_mu_a      = gui->m_mu_a;
+			m_mu_s      = gui->m_mu_s;
+			m_mu_t      = gui->m_mu_t;
+			m_density   = gui->m_density;
+			m_albedo    = gui->m_albedo;
+			m_albedoInv = gui->m_albedoInv;
 
 			Medium::update(guiObject);
+		}
+
+		void updateDerivedProperties()
+		{
+			m_mu_a     = m_density * m_sigma_a_normalized * m_sigma_a_intensity;
+			m_mu_s     = m_density * m_sigma_s_normalized * m_sigma_s_intensity;
+			m_mu_t     = m_mu_a + m_mu_s;
+			for (int i = 0; i < 3; ++i)
+				m_albedo(i) = m_mu_t(i) > Epsilon ? m_mu_s(i) / m_mu_t(i) : 0.f;
+			m_albedoInv    = 1.f - m_albedo;
+			m_mu_t_invNorm = (1 - m_mu_t).matrix().normalized().array();
 		}
 
 		float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const override
@@ -51,12 +61,12 @@ NORI_NAMESPACE_BEGIN
 			// Sample proportional to transmittance
 			// TODO: check this
 			return sample.x() < Epsilon ? INFINITY :
-			       -std::log(sample.x()) / m_sigma_t.maxCoeff();
+			       -std::log(sample.x()) / m_mu_t.maxCoeff();
 		}
 
 		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override
 		{
-			return (-m_sigma_t * (from - to).norm()).array().exp();
+			return (-m_mu_t * (from - to).norm()).array().exp();
 		}
 
 		std::string toString() const override
@@ -66,8 +76,8 @@ NORI_NAMESPACE_BEGIN
 					"  sigma_a = %f,\n"
 					"  sigma_s = %f,\n"
 					"]",
-					m_sigma_a,
-					m_sigma_s);
+					m_mu_a,
+					m_mu_s);
 		}
 
 #ifdef NORI_USE_IMGUI
@@ -77,7 +87,7 @@ NORI_NAMESPACE_BEGIN
 			touched |= Medium::getImGuiNodes();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_a", ImGuiLeafNodeFlags, "Sigma_a (Absorption)");
+			ImGui::TreeNodeEx("sigma_a", ImGuiLeafNodeFlags, "Absorption (sigma_a)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.75f);
@@ -91,7 +101,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_s", ImGuiLeafNodeFlags, "Sigma_s (Scattering)");
+			ImGui::TreeNodeEx("sigma_s", ImGuiLeafNodeFlags, "Scattering (sigma_s)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
 			ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.75f);
@@ -103,22 +113,21 @@ NORI_NAMESPACE_BEGIN
 			touched |= ImGui::DragFloat("##sigma_s_intensity", &m_sigma_s_intensity, 0.01f, 0.f, SLIDER_MAX_FLOAT);
 			ImGui::NextColumn();
 
+			ImGui::TreeNodeEx("density", ImGuiLeafNodeFlags, "Density");
+			ImGui::NextColumn();
+			touched |= ImGui::DragFloat("##density", &m_density, 0.01f, 0.f, SLIDER_MAX_FLOAT);
+			ImGui::NextColumn();
+
 			// -- Update and display derived properties
 			if (touched)
-			{
-				m_sigma_a = m_sigma_a_normalized * m_sigma_a_intensity;
-				m_sigma_s = m_sigma_s_normalized * m_sigma_s_intensity;
-				m_sigma_t = m_sigma_a + m_sigma_s;
-				for (int i = 0; i < 3; ++i)
-					m_albedo(i) = m_sigma_t(i) > Epsilon ? m_sigma_s(i) / m_sigma_t(i) : 0.f;
-			}
-			const Color3f meanFreePath = m_sigma_t.cwiseInverse();
+				updateDerivedProperties();
+			const Color3f meanFreePath = m_mu_t.cwiseInverse();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("sigma_t", ImGuiLeafNodeFlags, "Sigma_t (Extinction)");
+			ImGui::TreeNodeEx("mu_t", ImGuiLeafNodeFlags, "Extinction (mu_t)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			ImGui::Text("%s", m_sigma_t.toString().c_str());
+			ImGui::Text("%s", m_mu_t.toString().c_str());
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
@@ -129,28 +138,50 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("albedo", ImGuiLeafNodeFlags, "Albedo");
+			ImGui::TreeNodeEx("albedo", ImGuiLeafNodeFlags, "Albedo (Scatter ratio)");
+			ImGui::SameLine();
+			ImGui::HelpMarker("Fraction of photons that scatter (vs are absorbed)");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			ImGui::TextColored(ImVec4(m_albedo.x(), m_albedo.y(), m_albedo.z(), 1.f), "%s", m_albedo.toString().c_str());
+			ImGui::TextColored(ImVec4(m_albedo.x(), m_albedo.y(), m_albedo.z(), 1.f), "%s",
+			                   m_albedo.toString().c_str());
+			ImGui::NextColumn();
+
+			ImGui::AlignTextToFramePadding();
+			ImGui::TreeNodeEx("albedo_inv", ImGuiLeafNodeFlags, "Albedo Inverse (Absorb ratio)");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+			ImGui::TextColored(ImVec4(m_albedoInv.x(), m_albedoInv.y(), m_albedoInv.z(), 1.f), "%s",
+			                   m_albedoInv.toString().c_str());
+			ImGui::NextColumn();
+
+			ImGui::AlignTextToFramePadding();
+			ImGui::TreeNodeEx("m_mu_t_invNorm", ImGuiLeafNodeFlags, "Color (mu_t inverse normalized)");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+			ImGui::TextColored(ImVec4(m_mu_t_invNorm.x(), m_mu_t_invNorm.y(), m_mu_t_invNorm.z(), 1.f), "%s",
+			                   m_mu_t_invNorm.toString().c_str());
 			ImGui::NextColumn();
 
 			return touched;
 		}
 #endif
 
-		Color3f m_sigma_a;
-		Color3f m_sigma_s;
+		Color3f m_mu_a;                 // absorption coefficient (pdf) [m^-1]
+		Color3f m_mu_s;                 // scattering coefficient (pdf) [m^-1]
+		float   m_density;              // rho [m^-3]
 
 		// Gui-only properties
-		Color3f m_sigma_a_normalized;
-		Color3f m_sigma_s_normalized;
-		float   m_sigma_a_intensity;
-		float   m_sigma_s_intensity;
+		Color3f m_sigma_a_normalized;   // cross-sectional absorption area [m^2]
+		Color3f m_sigma_s_normalized;   // cross-sectional scattering area [m^2]
+		float   m_sigma_a_intensity;    // scaling factor
+		float   m_sigma_s_intensity;    // scaling factor
+		Color3f m_mu_t_invNorm;         // 1 - mu_t normalized, apparent color
+		Color3f m_albedo;               // fraction of photons that scattered (vs are absorbed) []
+		Color3f m_albedoInv;            // fraction of photons that are absorbed (vs scattered), 1 - albedo []
 
 		// Derived properties
-		Color3f m_sigma_t;
-		Color3f m_albedo;
+		Color3f m_mu_t;                 // extinction coefficient (pdf) [m^-1]
 	};
 
 	NORI_REGISTER_CLASS(HomogeneousMedium, "homog");

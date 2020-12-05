@@ -100,12 +100,21 @@ public:
     virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override
     {
         its.p = ray(its.t);
-        Vector3f dir = (its.p - m_position).normalized();
+        Vector3f n = (its.p - m_position).normalized();
 
-        its.shFrame = Frame(dir);
-        its.geoFrame = Frame(dir);
+        its.geoFrame = Frame(n);
 
-        Point2f uv_coords = sphericalCoordinates(-dir);
+        /**
+         * Calculate tangents to be aligned with the uv's so that we can use them for normal maps
+         * tangent   = dp/du
+         * bitangent = dp/dv = normal x tangent
+         * See https://computergraphics.stackexchange.com/questions/5498/compute-sphere-tangent-for-normal-mapping
+         */
+	    const Vector3f t(-Frame::sinPhi(n), 0, Frame::cosPhi(n));
+	    const Vector3f b = n.cross(t);
+        its.shFrame = Frame(t, b, n);
+
+        Point2f uv_coords = sphericalCoordinates(-n);
 
         // switch coordinates and map to [0,1]
         its.uv.x() = uv_coords.y() / (2.f * M_PI);
