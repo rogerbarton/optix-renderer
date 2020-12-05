@@ -188,14 +188,16 @@ extern std::vector<std::string> tokenize(const std::string &s, const std::string
 /// Check if a string ends with another string
 extern bool endsWith(const std::string &value, const std::string &ending);
 
+/// Convert a time value in milliseconds into a human-readable string
+extern std::string timeString(double time, bool precise = false);
+
 template<typename TimePoint>
 std::string timeString2(TimePoint time, bool precise = false)
 {
 	return timeString(std::chrono::duration_cast<std::chrono::milliseconds>(time).count(), precise);
 }
 
-/// Convert a time value in milliseconds into a human-readable string
-extern std::string timeString(double time, bool precise = false);
+
 
 /// Convert a memory amount in bytes into a human-readable string
 extern std::string memString(size_t size, bool precise = false);
