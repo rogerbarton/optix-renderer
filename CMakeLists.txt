@@ -232,16 +232,22 @@ if(NORI_USE_OPTIX)
         )
 
     target_sources(nori PRIVATE
-            include/nori/optix/OptixRenderer.h
-            include/nori/optix/OptixRenderer.cpp
-            include/nori/optix/OptixState.h
-            include/nori/optix/OptixSbtTypes.h
-            include/nori/optix/cuda/LaunchParams.h
+        include/nori/optix/OptixRenderer.h
+        include/nori/optix/OptixRenderer.cpp
 
-#            include/nori/optix/cuda/camera.cu
-#            include/nori/optix/cuda/shading.cu
-#            include/nori/optix/cuda/volumeGeometry.cu
-            )
+        include/nori/optix/OptixState.h
+        include/nori/optix/OptixState.cpp
+        include/nori/optix/OptixState.rtc.cpp
+        include/nori/optix/OptixState.as.cpp
+
+        include/nori/optix/OptixSbtTypes.h
+        include/nori/optix/cuda/LaunchParams.h
+
+
+#        include/nori/optix/cuda/camera.cu
+#        include/nori/optix/cuda/shading.cu
+#        include/nori/optix/cuda/volumeGeometry.cu
+        )
 
     message(STATUS "Nori uses OptiX")
   endif()

@@ -10,46 +10,38 @@
 
 NORI_NAMESPACE_BEGIN
 
-    struct OptixRenderer : public NoriObject {
+	/**
+	 * The bridge between nori/gui and optix.
+	 * Does not use optix itself.
+	 * Everything related to optix is inside the OptixState
+	 */
+	struct OptixRenderer : public NoriObject
+	{
+		// -- Interface
+		void renderOptixState(OptixState *state);
 
-        explicit OptixRenderer(const PropertyList& propList) {
-            m_samplesPerLaunch = propList.getFloat("samplesPerLaunch", 16);
-        }
+		// -- Nori Object
+		explicit OptixRenderer(const PropertyList &propList);
+		~OptixRenderer();
 
-        NORI_OBJECT_DEFAULT_CLONE(OptixRenderer);
+		NoriObject *cloneAndInit() override;;
+		void update(const NoriObject *guiObject) override;
 
-        void update(const NoriObject* guiObject) override {
-            const auto* gui = static_cast<const OptixRenderer*>(guiObject);
-            if (!gui->touched)return;
-            gui->touched = false;
-
-            m_samplesPerLaunch = gui->m_samplesPerLaunch;
-        }
-
-        EClassType getClassType() const override { return ERenderer; }
-
-        virtual std::string toString() const override {
-            return tfm::format(
-                    "OptixRenderer[\n"
-                    "  samplesPerLaunch = %i\n"
-                    "]",
-                    m_samplesPerLaunch);
-        }
+		EClassType getClassType() const override { return ERenderer; }
+		std::string toString() const override;
 
 #ifdef NORI_USE_IMGUI
-        NORI_OBJECT_IMGUI_NAME("OptixRenderer");
-        virtual bool getImGuiNodes() override { return false; }
+		NORI_OBJECT_IMGUI_NAME("OptixRenderer");
+		bool getImGuiNodes() override;
 #endif
 
-        OptixState* createOptixState();
+	protected:
+		int m_samplesPerLaunch;
 
-        void renderOptixState(OptixState* state);
+		OptixState *m_optixState;
+	};
 
-    protected:
-        int m_samplesPerLaunch;
-    };
-
-    NORI_REGISTER_CLASS(OptixRenderer, "optix");
+	NORI_REGISTER_CLASS(OptixRenderer, "optix");
 
 NORI_NAMESPACE_END
 
