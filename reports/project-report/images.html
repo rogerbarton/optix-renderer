@@ -44,7 +44,7 @@
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item active" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -74,7 +74,8 @@
     <div class="container contentWrapper">
         <div class="pageContent">
             <h4>HDR or PNG</h4>
-            <p>I included lodepng and a custom HDR loader into nori (taken and modified from <a href="#ref-1">[1]</a>). This allows us, to load arbitrary images into a
+            <p>I included lodepng and a custom HDR loader into nori (taken and modified from <a href="#ref-1">[1]</a>).
+                This allows us, to load arbitrary images into a
                 texture and use them as either normal maps or textures.</p>
 
             <p>For the validation render, I have downloaded a 3D-model (<a
@@ -86,7 +87,8 @@
                     href="https://hdrihaven.com/hdri/?h=dikhololo_night">Dikhololo Night (HDRIHaven)</a>. This rendering
                 proofs multiple things:</p>
             <ul>
-                <li>My texture loading implementation can load png and HDR files into nori. (the texture for the airplane is a PNG, the environment map is a HDR file)</li>
+                <li>My texture loading implementation can load png and HDR files into nori. (the texture for the
+                    airplane is a PNG, the environment map is a HDR file)</li>
                 <li>The uv coordinates are set properly and the texture is evaluated with the correct coordinates.</li>
                 <li>I can rotate the environment map with euler angles. (not seen on the render, but visible in the
                     scene configuration.)</li>
@@ -95,14 +97,34 @@
             <div class="twentytwenty-container">
                 <img src="images/images/aircraft.png" alt="" class="img-responsive">
             </div>
+
+            <p>The texture which is mapped on this plane can be found on the above mentioned download link. The uv
+                coordinates are set from within the obj-file, and parsed by Nori.</p>
+
             <!-- ================================================================= -->
+            <h4>Implementation</h4>
+            <p>As mentioned above, I have added a method to load PNG files or HDR (like EXR) files from disk. The data
+                is parsed and stored inside a specialised texture class. One special trick I implemented is shown in
+                these code lines (source: src/textures/PNGTexture.cpp):</p>
+            <pre><code>Vector3f wi = sphericalDirection(_uv[1] * M_PI, _uv[0] * 2.f * M_PI);<br/>Eigen::Matrix3f rot = Eigen::Quaternionf(</br>  Eigen::Quaternionf::Identity() *<br/>  Eigen::AngleAxisf(eulerAngles.x(), Eigen::Vector3f::UnitZ()) *<br/>  Eigen::AngleAxisf(eulerAngles.y(), Eigen::Vector3f::UnitX())) *<br/>  Eigen::AngleAxisf(eulerAngles.z(), Eigen::Vector3f::UnitZ())<br/>    .toRotationMatrix();
+Point2f uv_coords = sphericalCoordinates(rot * wi);
+uv.x() = uv_coords.y() / (2.f * M_PI);
+uv.y() = uv_coords.x() / M_PI;</code></pre>
+            <p>These lines decompose the UV coordinates given to the eval function of this png texture, and use euler
+                angles with the ZXZ scheme to rotate the coordinates on the sphere. Finally, the rotation is applied and
+                converted back into new uv coordinates. If the texture is not spherical (this means if it is not used as
+                a texture on a sphere, this method is not applied but rather a simple translation in both axis is
+                applied. This ensures the compatibility for spherical and non-spherical textures.</p>
+
             <h4>Implemented in:</h4>
             <ul>
                 <li>include/nori/HDRLoader.h</li>
                 <li>src/textures/PNGTexture.cpp</li>
             </ul>
             <h4>References</h4>
-            <p id="ref-1">[1] <a href="https://www.flipcode.com/archives/HDR_Image_Reader.shtml">https://www.flipcode.com/archives/HDR_Image_Reader.shtml</a></p>
+            <p id="ref-1">[1] <a
+                    href="https://www.flipcode.com/archives/HDR_Image_Reader.shtml">https://www.flipcode.com/archives/HDR_Image_Reader.shtml</a>
+            </p>
         </div>
     </div>
 

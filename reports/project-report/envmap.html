@@ -71,12 +71,6 @@
         <h1>Environment Map Emitter (Matthias, 15pt)</h1>
     </div>
 
-    <!-- TODO:
-        - Block size
-        - explain how it works
-        - explain stencil
-    -->
-
     <div class="container contentWrapper">
         <div class="pageContent">
             <h4>General Comment</h4>
@@ -112,13 +106,22 @@
             </div>
 
             <h4>Constant Color</h4>
-            <p>Finally, the implementation will also support constant colors as an environment map. Some images of this can be found on the <a href="disney.html">Disney BSDF</a> page.</p>
+            <p>Finally, the implementation will also support constant colors as an environment map. Some images of this
+                can be found on the <a href="disney.html">Disney BSDF</a> page.</p>
 
             <!-- ================================================================= -->
-            
+            <h4>Implementation</h4>
+            <p>This implementation builds on the <a href="images.html">Images as Textures</a> part, which allows to load
+                any PNG or HDR file into Nori. After an image is loaded, I compute the luminance of each pixel, in order
+                to allow for importance sampling (for emitter sampling). This is done with the help of the discrete PDF
+                class, already built into nori. Finally, in all integrators is now a check, when a ray does not
+                intersect with the scene. In this case, the ray direction is passed to the environment light and then
+                evaluated and added to the return value of the corresponding pixel sample value.</p>
+
             <h4>Implemented in:</h4>
             <ul>
                 <li>src/emitters/environmentmap.cpp</li>
+                <li>src/integrators/*.cpp</li>
             </ul>
         </div>
     </div>

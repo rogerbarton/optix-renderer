@@ -44,7 +44,7 @@
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item active" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -72,13 +72,16 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
-            <p>This implementation is based on <a
-                    href="#ref-1">[1]</a>.</p>
+            <p>This implementation is based on <a href="#ref-1">[1]</a>.</p>
             <p>To verify the disney BSDF, I render each parameter with different values. The resulting images are
                 compared against the image on <a
                     href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf">these
                     slides (slide 3)</a>. All images are rendered with the Path MIS integartor and 512 samples per
                 pixel.</p>
+            <p>Altough many parameters are shown below, not all are validated here, because the requirement only states
+                that we should include 5 parameters of disney. The parameters are validated in the section below, where
+                I compare to Blender.</p>
+            </p>
 
             <div class="twentytwenty-container">
                 <img src="images/disney/baseline.png" alt="All 0" class="img-responsive">
@@ -148,7 +151,7 @@
                 <img src="images/disney/sheenTint/sheenTint1.png" alt="Sheen Tint 1" class="img-responsive">
             </div>
 
-            <h4>Comparisons to Blender</h4>
+            <h4>Validation by comparison to Blender</h4>
             <p>The following comparisons are all done with Blender 2.82a, using a Principle BSDF material. The scene was
                 exactly copied over to nori. As an integrator I use Path MIS (Nori) and Path Tracing (Blender), both
                 using 128 samples per pixel. This should ensure that the results are comparable.</p>
@@ -166,13 +169,27 @@
             </div>
 
             <!-- ================================================================= -->
+            <h4>implementation</h4>
+            This implementation is done straightforward, using <a href="#ref-1">[1]</a>. This means, that we only have
+            to extend the BSDF base class with the code given. For the input values which can be found on this page, we
+            use however different ones: X and Y are easy, those are simply always the X and Y unit vectors,
+            respectively. This is because the BSDF is always evaluated in local coordinates in Nori. Furthermore, we
+            have L and V, where L is the incident light vector (in our case wi) and L the outgoing light direction (in
+            our case wo). We use a cosine weighted hemisphere to sample the outgoing light direction. This makes
+            calculating the probability very easy and get's rid of most of the terms (for example the otherwise needed
+            change from radians to solid angles). Altough with the sample code from github, all parameters are
+            implemented at once, not all are validated here. This is because it takes much time to render all images
+            with all different values.
+
             <h4>Implemented in:</h4>
             <ul>
                 <li>src/bsdf/disney.cpp</li>
             </ul>
 
             <h4 id="references">References</h4>
-            <p id="ref-1">[1] <a href="https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf">https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf</a></p>
+            <p id="ref-1">[1] <a
+                    href="https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf">https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf</a>
+            </p>
 
         </div>
     </div>

@@ -75,7 +75,7 @@
         <div class="pageContent">
             <p>In this extra emitter, the Spotlight, the light can only travel from a single point (like with the
                 pointlight), but not only to a given direction, but rather in a certain cone (like a solid angle around
-                the point). My implementation follows TODO</p>
+                the point). My implementation follows <a href="#ref-1">[1]</a>.</p>
 
             <h4>Validation 1: Multiple Spot Lights</h4>
             <p>This image shows multiple spotlights, each operating on a color channel. The boundaries of each spotlight
@@ -87,10 +87,24 @@
                 <img src="images/emitter/falloff.png" alt="Falloff" class="img-responsive">
             </div>
 
+            <h4>Implementation</h4>
+            <p>The spotlight is implemented like a pointlight (this means, material sampling should not see any
+                contribution from it because of the infinitesimal small point), but where the direction of the outgoing
+                light is not in all directions, but rather in only a specified solid angle. I choose to implement a
+                direction vector, which goes from the position of the light in the direction the cone should be. The
+                size of the cone is controlled with the total angle of the cone (in degrees). Furthermore, I implemented
+                the falloff value to be a float. This means that after this distance, the light starts to fall off. This
+                is visible in the above pictures.</p>
+
             <h4>Implemented in:</h4>
             <ul>
                 <li>src/emitters/spotlight.cpp</li>
             </ul>
+
+            <h4>References</h4>
+            <p id="ref-1">[1] <a
+                    href="http://www.pbr-book.org/3ed-2018/Light_Sources/Point_Lights.html">http://www.pbr-book.org/3ed-2018/Light_Sources/Point_Lights.html</a>
+            </p>
         </div>
     </div>
 

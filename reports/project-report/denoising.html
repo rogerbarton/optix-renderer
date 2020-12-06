@@ -126,6 +126,15 @@
             <div class="twentytwenty-container">
                 <img src="images/denoiser/variance_difference.png" alt="Before" class="img-responsive">
             </div>
+            <h4>Implementation</h4>
+            <p>For the variance computation, please see <a href="adaptive.html">Adaptive Sampling</a>. Furthermore, I
+                implemented equation 6 and 7 from <a href="#ref-1">[1]</a>. This approach uses two factors in the
+                computation of the new color: firstly the difference in pixels (g), where this is a gaussian kernel
+                operating on the raw pixel distances. Secondly, it uses a kernel operating on the color values (f),
+                which ensures that close by pixels should have close by colors. Both factors can be controlled by the
+                corresponding sigmas (where sigma_d is for the distance and sigma_vr for the color distance). The
+                denoiser is called from within the render thread (after it is done with rendering) and operators on the
+                full image block.</p>
 
             <h4>Implemented in:</h4>
             <ul>
@@ -138,8 +147,7 @@
 
             <h4 id="references">References</h4>
             <p id="ref-1">[1] Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for
-                Artifact-Free
-                Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
+                Artifact-Free Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
         </div>
 
 
