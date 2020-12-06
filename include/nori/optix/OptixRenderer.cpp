@@ -14,6 +14,7 @@
 #include <cuda_runtime_api.h>
 
 #include "sutil/Exception.h"
+#include "OptixSbtTypes.h"
 
 #include <vector>
 #include <iostream>

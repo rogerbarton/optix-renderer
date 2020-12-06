@@ -15,6 +15,9 @@ struct Record {
     T data;
 };
 
-typedef Record<Camera>       RayGenRecord;
+struct Empty{};
+
+//typedef Record<Camera>       RayGenRecord;
+typedef Record<Empty>       RayGenRecord;
 typedef Record<MissData> MissRecord;
 typedef Record<HitGroupData> HitGroupRecord;
