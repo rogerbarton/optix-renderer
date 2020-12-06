@@ -52,7 +52,7 @@ NORI_NAMESPACE_BEGIN
 		                       const Point2f &sample2) const override
 		{
 			static Sampler *const sampler = static_cast<Sampler *>(
-					NoriObjectFactory::createInstance("independent", PropertyList()));
+					NoriObjectFactory::createInstance("independent"));
 			Point3f sample = Point3f(sample2.x(), sample2.y(), sampler->next1D());
 
 			// Sample a point on the mesh from the reference point

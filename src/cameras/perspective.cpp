@@ -62,7 +62,7 @@ NORI_NAMESPACE_BEGIN
 			// If no reconstruction filter was assigned, instantiate a Gaussian filter
 			if (!m_rfilter)
 				m_rfilter = static_cast<ReconstructionFilter *>(
-						NoriObjectFactory::createInstance("gaussian", PropertyList()));
+						NoriObjectFactory::createInstance("gaussian"));
 
 			if (m_fstop == 0.f)
 				m_fstop = m_focalDistance / m_lensRadius;
@@ -148,7 +148,7 @@ NORI_NAMESPACE_BEGIN
 				ray.update();
 
 				static Sampler *const sampler = static_cast<Sampler *>(
-						NoriObjectFactory::createInstance("independent", PropertyList()));
+						NoriObjectFactory::createInstance("independent"));
 
 				// TODO: Also use squareToUniformTriangle for other bokeh effects
 				const Point2f pLens  = m_lensRadius * Warp::squareToUniformDisk(sampler->next2D());

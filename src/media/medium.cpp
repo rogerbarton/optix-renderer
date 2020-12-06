@@ -11,7 +11,7 @@ NORI_NAMESPACE_BEGIN
 	{
 		// Use isotropic phase as default phase function
 		if (!m_phase)
-			m_phase = static_cast<PhaseFunction *>(NoriObjectFactory::createInstance("isophase", PropertyList()));
+			m_phase = static_cast<PhaseFunction *>(NoriObjectFactory::createInstance("isophase"));
 		clone->m_phase = static_cast<PhaseFunction *>(m_phase->cloneAndInit());
 
 		if (m_emitter)

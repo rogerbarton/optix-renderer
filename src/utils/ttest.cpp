@@ -193,7 +193,7 @@ public:
                 throw NoriException("Specified a different number of scenes and reference values!");
 
             Sampler *sampler = static_cast<Sampler *>(
-                NoriObjectFactory::createInstance("independent", PropertyList()));
+                NoriObjectFactory::createInstance("independent"));
 
             int ctr = 0;
             for (auto scene : m_scenes) {

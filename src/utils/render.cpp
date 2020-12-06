@@ -276,7 +276,7 @@ void RenderThread::renderThreadMain()
 	if (m_renderScene->getSampler()->isAdaptive())
 	{
 		BlockGenerator blockGenerator(outputSize, blockSize);
-		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box", PropertyList()));
+		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box"));
 		ImageBlock currVarBlock(Vector2i(blockSize), rf);
 
 		ImageBlock fullVarianceMatrix(camera->getOutputSize(), rf);

@@ -59,16 +59,14 @@ NORI_NAMESPACE_BEGIN
 
 		// Create a default (independent) sampler
 		if (!m_sampler)
-			m_sampler = static_cast<Sampler *>(
-					NoriObjectFactory::createInstance("independent", PropertyList()));
+			m_sampler = static_cast<Sampler *>(NoriObjectFactory::createInstance("independent"));
 
 		if (!m_previewIntegrator)
-			m_previewIntegrator = static_cast<Integrator *>(
-					NoriObjectFactory::createInstance("preview", PropertyList()));
+			m_previewIntegrator = static_cast<Integrator *>(NoriObjectFactory::createInstance("preview"));
 
 		if (!m_ambientMedium)
-			m_ambientMedium = static_cast<Medium *>(
-					NoriObjectFactory::createInstance("vacuum", PropertyList()));
+			m_ambientMedium = static_cast<Medium *>(NoriObjectFactory::createInstance("vacuum"));
+
 
 		// -- Shallow copy
 		Scene *clone = new Scene(*this);

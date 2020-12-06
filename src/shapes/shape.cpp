@@ -29,7 +29,7 @@ void Shape::cloneAndInit(Shape *clone)
 {
 	// If no material or medium was assigned, instantiate a diffuse BRDF
 	if (!m_bsdf && !m_medium)
-		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
+		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse"));
 	if(m_bsdf)
 		clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
