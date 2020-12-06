@@ -23,6 +23,9 @@
 #include <nori/emitter.h>
 #include <nori/denoiser.h>
 #include <nori/volume.h>
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixRenderer.h>
+#endif
 
 NORI_NAMESPACE_BEGIN
 
@@ -191,6 +194,10 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_VOLUMES
 		std::vector<Volume *> m_volumes;
+#endif
+
+#ifdef NORI_USE_OPTIX
+	    OptixRenderer* m_optixRenderer;
 #endif
 
 		/**

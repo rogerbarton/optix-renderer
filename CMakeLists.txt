@@ -225,16 +225,23 @@ if(NORI_USE_OPTIX)
         "-DNORI_NVRTC_OPTIX_DIR=\"${OptiX_INCLUDE_DIR}\""
         "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRECTORY}\"")
 
-    target_sources(nori PRIVATE
-        include/nori/optix/OptixRenderer.h
-        src/optix/OptixRenderer.cpp
-        )
-
     target_link_libraries(nori
         ${CUDA_LIBRARIES}
         ${CUDA_nvrtc_LIBRARY}
         # OptiX is header only
         )
+
+    target_sources(nori PRIVATE
+            include/nori/optix/OptixRenderer.h
+            include/nori/optix/OptixRenderer.cpp
+            include/nori/optix/OptixState.h
+            include/nori/optix/OptixSbtTypes.h
+            include/nori/optix/cuda/LaunchParams.h
+
+#            include/nori/optix/cuda/camera.cu
+#            include/nori/optix/cuda/shading.cu
+#            include/nori/optix/cuda/volumeGeometry.cu
+            )
 
     message(STATUS "Nori uses OptiX")
   endif()

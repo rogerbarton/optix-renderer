@@ -55,6 +55,7 @@ public:
         EDenoiser,
         ETest,
         EReconstructionFilter,
+        ERenderer,
         EClassTypeCount
     };
 
@@ -93,6 +94,8 @@ public:
 			return "ETest";
 		case EReconstructionFilter:
 			return "EReconstructionFilter";
+            case ERenderer:
+                return "ERenderer";
 		case EClassTypeCount:
 			return "EClassTypeCount";
         default:

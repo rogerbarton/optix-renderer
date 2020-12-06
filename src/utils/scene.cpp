@@ -47,6 +47,9 @@ NORI_NAMESPACE_BEGIN
 		// delete m_envmap; // Already deleted as an emitter
 		delete m_denoiser;
 		delete m_ambientMedium;
+#ifdef NORI_USE_OPTIX
+		delete m_optixRenderer;
+#endif
 	}
 
 	NoriObject *Scene::cloneAndInit()
@@ -67,6 +70,10 @@ NORI_NAMESPACE_BEGIN
 		if (!m_ambientMedium)
 			m_ambientMedium = static_cast<Medium *>(NoriObjectFactory::createInstance("vacuum"));
 
+#ifdef NORI_USE_OPTIX
+        if (!m_optixRenderer)
+            m_optixRenderer = static_cast<OptixRenderer *>(NoriObjectFactory::createInstance("optix"));
+#endif
 
 		// -- Shallow copy
 		Scene *clone = new Scene(*this);
@@ -135,7 +142,11 @@ NORI_NAMESPACE_BEGIN
 			clone->m_volumes[i] = static_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
 
-		cout << endl << "Configuration: " << clone->toString() << endl << endl;
+#ifdef NORI_USE_OPTIX
+		clone->m_optixRenderer = static_cast<OptixRenderer*>(m_optixRenderer->cloneAndInit());
+#endif
+
+        cout << endl << "Configuration: " << clone->toString() << endl << endl;
 
 		return clone;
 	}
@@ -181,7 +192,11 @@ NORI_NAMESPACE_BEGIN
 			m_bvh->build();
 		}
 
-		gui->geometryTouched  = false;
+#ifdef NORI_USE_OPTIX
+        m_optixRenderer->update(gui->m_optixRenderer);
+#endif
+
+        gui->geometryTouched  = false;
 		gui->transformTouched = false;
 	}
 
@@ -241,6 +256,14 @@ NORI_NAMESPACE_BEGIN
 				m_volumes.push_back(static_cast<Volume *>(obj));
 #endif
 				break;
+
+#ifdef NORI_USE_OPTIX
+            case ERenderer:
+                if (m_optixRenderer)
+                    throw NoriException("There can only be one renderer per scene.");
+                m_optixRenderer = static_cast<OptixRenderer *>(obj);
+                break;
+#endif
 
 			default:
 				throw NoriException("Scene::addChild(<%s>) is not supported!",
@@ -311,10 +334,25 @@ NORI_NAMESPACE_BEGIN
 	}
 
 #ifdef NORI_USE_IMGUI
-
 	bool Scene::getImGuiNodes()
 	{
 		ImGui::PushID(EScene);
+#ifdef NORI_USE_OPTIX
+        if (m_optixRenderer)
+        {
+            bool node_open = ImGui::TreeNode("Renderer");
+            ImGui::NextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text(m_optixRenderer->getImGuiName().c_str());
+            ImGui::NextColumn();
+            if (node_open)
+            {
+                touched |= m_optixRenderer->getImGuiNodes();
+                ImGui::TreePop();
+            }
+        }
+#endif
+
 		if (m_camera)
 		{
 			bool node_open_camera = ImGui::TreeNode("Camera");
