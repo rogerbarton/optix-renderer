@@ -44,7 +44,7 @@
                         <a class="dropdown-item active" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -70,12 +70,6 @@
     <div class="container headerBar">
         <h1>Adaptive Sampling (Matthias, 10pt)</h1>
     </div>
-
-    <!-- TODO:
-        - Block size
-        - explain how it works
-        - explain stencil
-    -->
 
     <div class="container contentWrapper">
         <div class="pageContent">
@@ -112,10 +106,41 @@
                 <img src="images/adaptive/variance30s_simple.png" alt="Variance" class="img-responsive">
             </div>
             <!-- ================================================================= -->
+            <h4>Implementation</h4>
+            <p>First of all, I have added a function to the commons file, which computes the variance from a given image
+                block. Furthermore, I have changed the render thread class in such a way, that the renderer gets the
+                indices to render from the sampler. For the independent sampler, this is just a vector of all pixel
+                positions. For the adaptive sampling, this is where the magic happens. The function computes the
+                variance of the given image block (nori is set up in such a way, that every image block has it's own
+                sampler). If we are still below in the first k rounds (where k is chosen by the user during runtime), we
+                sample independently and simply return every pixel position once. If we are however further in the
+                rendering, we take the computed variance from the image and feed it (element-wise) into a discrete PDF
+                (already existing in nori). Finally, if our variance is decreasing (this means, that the last render
+                pass did actually have an effect and we should continue our rendering in this block), we return true,
+                which means to rerender this block. The render main thread must then call the compute variance function
+                again and sample these pixels again. In order to do importance sampling, we computed the discrete PDF in
+                the step before. This allows us now to sample pixels based on their variance. This means, that pixels
+                with a high variance have a higher probability to get sampled. This is achieved in the function
+                getSampleIndices in the file src/samplers/adaptive.cpp.</p>
+
+            <h5 id="computation-of-variance">Computation of the Variance</h5>
+            <p>The computation of the variance is achieved by implementing the formula 4, 5 from <a
+                    href="#ref-1">[1]</a>. We compute each pixel variance by the mean of the surrounding block (all in
+                all 9 pixels). After calculating all variance estimates of all pixels of the full block, we normalize
+                the values with equation 5. The returned matrix is a matrix full of floats, where each float stands for
+                the normalized value of the variance.</p>
+
+            <h4>Implemented in:</h4>
+            <ul>
+                <li>include/nori/sampler.h</li>
+                <li>src/utils/render.cpp</li>
+                <li>src/samplers/adaptive.cpp</li>
+                <li>src/samplers/independent.cpp</li>
+            </ul>
 
             <h4 id="references">References</h4>
-            <p id="ref-1">Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for Artifact-Free
-            Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
+            <p id="ref-1">[1] Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for
+                Artifact-Free Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
         </div>
     </div>
 

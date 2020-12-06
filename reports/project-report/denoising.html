@@ -44,7 +44,7 @@
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item active" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -88,8 +88,7 @@
             <h4>Comparison between groundtruth and denoised</h4>
             <div class="twentytwenty-container">
                 <img src="images/denoiser/groundtruth.png" alt="Groundtruth" class="img-responsive">
-                <img src="images/denoiser/denoising-1.png" alt="16 samples per pixel, without denoising"
-                    class="img-responsive">
+                <img src="images/denoiser/denoising-1.png" alt="16 samples per pixel, denoising" class="img-responsive">
             </div>
 
             <h4>Comparison of denoised vs not denoised (16 samples per pixel)</h4>
@@ -109,11 +108,49 @@
                 <img src="images/denoiser/impact_sigma_vr_0.1.png" alt="0.1" class="img-responsive">
                 <img src="images/denoiser/impact_sigma_vr_10.png" alt="10" class="img-responsive">
             </div>
+            <h4>Comparison between variance</h4>
+            <p>These images show the computed variance before and after applying denoising.</p>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/variance_before.png" alt="Before" class="img-responsive">
+                <img src="images/denoiser/variance_after.png" alt="After" class="img-responsive">
+            </div>
+            <p>Because the second image is just a little bit darker, I change the brightness and compared the images
+                again:</p>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/variance_before_bright.png" alt="Before" class="img-responsive">
+                <img src="images/denoiser/variance_after_bright.png" alt="After" class="img-responsive">
+            </div>
+            <p>We can clearly see that the variance is decreasing with the application of the denoising (especially on
+                the black tiles). The last image now shows the difference in the variance (also massively overexposed).
+                Red pixels means less value (here = less variance).</p>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/variance_difference.png" alt="Before" class="img-responsive">
+            </div>
+            <h4>Implementation</h4>
+            <p>For the variance computation, please see <a href="adaptive.html">Adaptive Sampling</a>. Furthermore, I
+                implemented equation 6 and 7 from <a href="#ref-1">[1]</a>. This approach uses two factors in the
+                computation of the new color: firstly the difference in pixels (g), where this is a gaussian kernel
+                operating on the raw pixel distances. Secondly, it uses a kernel operating on the color values (f),
+                which ensures that close by pixels should have close by colors. Both factors can be controlled by the
+                corresponding sigmas (where sigma_d is for the distance and sigma_vr for the color distance). The
+                denoiser is called from within the render thread (after it is done with rendering) and operators on the
+                full image block.</p>
+
+            <h4>Implemented in:</h4>
+            <ul>
+                <li>include/nori/denoiser.h</li>
+                <li>include/nori/common.h</li>
+                <li>src/utils/render.cpp</li>
+                <li>src/utils/common.cpp</li>
+                <li>src/denoiser/simple.cpp</li>
+            </ul>
+
+            <h4 id="references">References</h4>
+            <p id="ref-1">[1] Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for
+                Artifact-Free Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
         </div>
 
-        <h4 id="references">References</h4>
-        <p id="ref-1">Pham, Cuong & Ha, Synh & Jeon, Jae. (2011). A Local Variance-Based Bilateral Filtering for Artifact-Free
-            Detail- and Edge-Preserving Smoothing. 7088. 60-70. 10.1007/978-3-642-25346-1_6.</p>
+
     </div>
 
 

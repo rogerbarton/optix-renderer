@@ -84,7 +84,7 @@ public:
         return tfm::format("SimpleDenoiser[\n"
                            "  sigma_d = %f,\n"
                            "  range = %i,\n"
-                           "  sgima_vr = %f,\n"
+                           "  sigma_vr = %f,\n"
                            "  amount = %d\n"
                            "]",
                            sigma_d, inner_range, sigma_vr, max_amount);

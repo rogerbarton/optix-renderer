@@ -44,7 +44,7 @@
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -75,27 +75,36 @@
         <div class="pageContent">
 
             <!-- ================================================================= -->
-            <p>I first created another base class for phase functions similar to the BSDF. This has only a sample and a pdf function along with a PhaseQueryRecord
-                To test that this worked I implemented the basic isotropic phase function, where the sample and pdf methods are simply the warp::squareToUniformSphere methods from pa2
+            <p>I first created another base class for phase functions similar to the BSDF. This has only a sample and a
+                pdf function along with a PhaseQueryRecord
+                To test that this worked I implemented the basic isotropic phase function, where the sample and pdf
+                methods are simply the warp::squareToUniformSphere methods from pa2
                 with the additional cosine term for sample.
-                
-                I visualized the phase functions in the warptest to see that the behaviour was as expected and ran the chi2 tests, which passed.
 
-                For the Henyey-Greenstein phase function I used the pdf from the slides as well as the inverse cdf to sample from the distribution. I also checked that when
+                I visualized the phase functions in the warptest to see that the behaviour was as expected and ran the
+                chi2 tests, which passed.
+
+                For the Henyey-Greenstein phase function I used the pdf from the slides as well as the inverse cdf to
+                sample from the distribution. I also checked that when
                 g=0 that the warptest showed the same results as the isotropic phase.
 
 
             </p>
 
-            
+
             <img src="images/iso-warptest.png" alt="Reference" class="img-responsive">
             <img src="images/aniso-warptest.png" alt="Reference" class="img-responsive">
-                
+
             <div class="twentytwenty-container">
                 <img src="images/ref/ajax-normals.png" alt="Reference" class="img-responsive">
                 <img src="images/mine/ajax-normals.png" alt="Mine" class="img-responsive">
             </div> <br>
 
+            <h4>Implemented in:</h4>
+            <ul>
+                <li>src/bsdf/anisophase.cpp</li>
+                <li>src/bsdf/schlickphase.cpp</li>
+            </ul>
         </div>
     </div>
 
