@@ -44,7 +44,7 @@
                         <a class="dropdown-item" href="adaptive.html">Adaptive Sampling</a>
                         <a class="dropdown-item" href="disney.html">Disney BSDF</a>
                         <a class="dropdown-item" href="envmap.html">Environment Map Emitter</a>
-<a class="dropdown-item" href="emitters.html">Extra Emitter</a>
+                        <a class="dropdown-item" href="emitters.html">Extra Emitter</a>
                         <a class="dropdown-item" href="images.html">Images as Textures</a>
                         <a class="dropdown-item" href="denoising.html">Simple Denoising</a>
                     </div>
@@ -76,10 +76,8 @@
 
             <p>
                 <!-- TODO: report problems, comments, and time spent...  -->
-                This implementation was based on the <a
-                    href="http://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models.html#TheThinLensModelandDepthofField">pbr
-                    book (Chp 6.2.3)</a>
-                and modifies the ray generation for the camera model to simulate a thin lens and aperture of non-zero
+                This implementation was based on <a href="#ref-1">[1]</a> and modifies the ray generation for the
+                camera model to simulate a thin lens and aperture of non-zero
                 radius.
                 In comparison to the pinhole camera model, we do not always sample the ray from the origin. Instead we
                 pick a random point on the aperture. In the simple case this is
@@ -109,7 +107,10 @@
 
             <!-- ================================================================= -->
 
-
+            <h4>References</h4>
+            <p id="ref-1">[1] <a
+                    href="http://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models.html#TheThinLensModelandDepthofField">pbr
+                    book (Chp 6.2.3)</a>
         </div>
     </div>
 
