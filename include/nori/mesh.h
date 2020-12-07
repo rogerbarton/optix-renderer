@@ -106,6 +106,10 @@ public:
     /// Return a pointer to the triangle vertex index list
     const MatrixXu &getIndices() const { return m_F; }
 
+#ifdef NORI_USE_OPTIX
+	OptixBuildInput getOptixBuildInput() const override;
+#endif
+
     /// Return the name of this mesh
     const std::string &getName() const { return m_name; }
 
