@@ -157,9 +157,22 @@ void RenderThread::renderThreadMain()
 
 	cout << "Rendering .. " << std::flush;
 
-	/* Create a block generator (i.e. a work scheduler) */
 	Vector2i outputSize = camera->getOutputSize();
 
+#ifdef NORI_USE_OPTIX
+	if(!m_previewMode)
+	{
+		uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
+		for (uint32_t k = 0; k < numSamples; ++k)
+		{
+			if (m_renderStatus == ERenderStatus::Interrupt)
+				break;
+			m_renderScene->m_optixRenderer->renderOptixState();
+		}
+	}
+#endif
+
+	/* Create a block generator (i.e. a work scheduler) */
 	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? NORI_BLOCK_SIZE_ADAPTIVE : NORI_BLOCK_SIZE;
 	BlockGenerator blockGenerator(outputSize, blockSize);
 

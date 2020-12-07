@@ -94,9 +94,9 @@ void OptixState::createCompileOptions()
 
 	m_pipeline_compile_options = {};
 	m_pipeline_compile_options.usesMotionBlur        = false;
-	m_pipeline_compile_options.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
-	m_pipeline_compile_options.numPayloadValues      = 3;
-	m_pipeline_compile_options.numAttributeValues    = 6;
+	m_pipeline_compile_options.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_LEVEL_INSTANCING;
+	m_pipeline_compile_options.numPayloadValues      = NUM_PAYLOAD_VALUES;
+	m_pipeline_compile_options.numAttributeValues    = NUM_ATTRIBUTE_VALUES;
 #ifdef NDEBUG
 	m_pipeline_compile_options.exceptionFlags                   = OPTIX_EXCEPTION_FLAG_NONE;
 #else
@@ -259,6 +259,8 @@ void OptixState::createSbt()
 		size_t      sizeof_raygen_record = sizeof(RayGenRecord);
 		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_raygen_record), sizeof_raygen_record));
 
+		// Note: No data to set/copy
+
 		m_sbt.raygenRecord = d_raygen_record;
 	}
 
@@ -293,14 +295,12 @@ void OptixState::createSbt()
 
 		{
 			int sbt_idx = 0;
-			OPTIX_CHECK(
-					optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_RADIANCE], &hitgroup_records[sbt_idx]));
+			OPTIX_CHECK(optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_RADIANCE], &hitgroup_records[sbt_idx]));
 			hitgroup_records[sbt_idx].data.geometry.volume = geometry;
 			hitgroup_records[sbt_idx].data.shading.volume  = material;
 			sbt_idx++;
 
-			OPTIX_CHECK(
-					optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_OCCLUSION], &hitgroup_records[sbt_idx]));
+			OPTIX_CHECK(optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_OCCLUSION], &hitgroup_records[sbt_idx]));
 			hitgroup_records[sbt_idx].data.geometry.volume = geometry;
 			hitgroup_records[sbt_idx].data.shading.volume  = material;
 			sbt_idx++;
@@ -336,8 +336,8 @@ void OptixState::render()
 	                        reinterpret_cast<CUdeviceptr>(m_d_params),
 	                        sizeof(LaunchParams),
 	                        &m_sbt,
-	                        width,
-	                        height,
+	                        m_params->imageWidth,
+	                        m_params->imageHeight,
 	                        1));
 
 	CUDA_CHECK(cudaStreamSynchronize(m_stream));

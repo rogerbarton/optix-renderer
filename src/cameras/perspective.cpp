@@ -108,15 +108,15 @@ NORI_NAMESPACE_BEGIN
 			float recip = 1.0f / (m_farClip - m_nearClip),
 			      cot   = 1.0f / std::tan(degToRad(m_fov / 2.0f));
 
-        Eigen::Matrix4f perspective;
-        perspective <<
-            cot, 0,   0,   0,
-            0, cot,   0,   0,
-            0,   0,   m_farClip * recip, -m_nearClip * m_farClip * recip,
-            0,   0,   1,   0;
+	        Eigen::Matrix4f perspective;
+	        perspective <<
+	            cot, 0,   0,   0,
+	            0, cot,   0,   0,
+	            0,   0,   m_farClip * recip, -m_nearClip * m_farClip * recip,
+	            0,   0,   1,   0;
 
-        /**
-         * Translation and scaling to shift the clip coordinates into the
+	        /**
+	         * Translation and scaling to shift the clip coordinates into the
 			 * range from zero to one. Also takes the aspect ratio into account.
 			 */
 			m_sampleToCamera = Transform(

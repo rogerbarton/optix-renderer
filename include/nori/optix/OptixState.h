@@ -12,7 +12,7 @@
 
 namespace nori
 {
-	struct Shape;
+	class Shape;
 }
 
 struct GasHandle

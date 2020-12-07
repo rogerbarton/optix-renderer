@@ -177,6 +177,9 @@ NORI_NAMESPACE_BEGIN
 		virtual bool getImGuiNodes() override;
 #endif
 
+#ifdef NORI_USE_OPTIX
+		OptixRenderer* m_optixRenderer;
+#endif
 	private:
 		std::vector<Shape *> m_shapes;
 		Integrator           *m_integrator        = nullptr;
@@ -194,10 +197,6 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_VOLUMES
 		std::vector<Volume *> m_volumes;
-#endif
-
-#ifdef NORI_USE_OPTIX
-	    OptixRenderer* m_optixRenderer;
 #endif
 
 		/**

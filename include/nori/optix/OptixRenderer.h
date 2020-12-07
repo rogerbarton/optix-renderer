@@ -18,7 +18,7 @@ NORI_NAMESPACE_BEGIN
 	struct OptixRenderer : public NoriObject
 	{
 		// -- Interface
-		void renderOptixState(OptixState *state);
+		void renderOptixState();
 
 		// -- Nori Object
 		explicit OptixRenderer(const PropertyList &propList);

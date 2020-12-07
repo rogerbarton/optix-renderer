@@ -5,20 +5,23 @@
 #include <nori/optix/OptixRenderer.h>
 
 
-void nori::OptixRenderer::renderOptixState(OptixState *state)
+void nori::OptixRenderer::renderOptixState()
 {
 	m_optixState->render();
 }
+
 nori::OptixRenderer::OptixRenderer(const nori::PropertyList &propList)
 {
-	m_samplesPerLaunch = propList.getFloat("samplesPerLaunch", 16);
+	m_samplesPerLaunch = propList.getInteger("samplesPerLaunch", 16);
 }
+
 nori::NoriObject *nori::OptixRenderer::cloneAndInit()
 {
 	auto clone = new OptixRenderer(*this);
 	clone->m_optixState->create(); // TODO: do this in render if state is not initalized
 	return clone;
 }
+
 void nori::OptixRenderer::update(const nori::NoriObject *guiObject)
 {
 	const auto *gui = static_cast<const OptixRenderer *>(guiObject);
@@ -27,10 +30,12 @@ void nori::OptixRenderer::update(const nori::NoriObject *guiObject)
 
 	m_samplesPerLaunch = gui->m_samplesPerLaunch;
 }
+
 nori::OptixRenderer::~OptixRenderer()
 {
 	delete m_optixState;
 }
+
 std::string nori::OptixRenderer::toString() const
 {
 	return tfm::format(
@@ -39,4 +44,5 @@ std::string nori::OptixRenderer::toString() const
 			"]",
 			m_samplesPerLaunch);
 }
+
 bool nori::OptixRenderer::getImGuiNodes() { return false; }
