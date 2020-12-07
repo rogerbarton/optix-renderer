@@ -7,23 +7,17 @@
 
 #include "OptixState.h"
 #include <nori/object.h>
-#include "sutil/CUDAOutputBuffer.h"
 
 NORI_NAMESPACE_BEGIN
 
 	/**
-	 * The bridge between nori/gui and optix.
+	 * Stores properties related to optix for gui interface
 	 * Does not use optix itself.
-	 * Everything related to optix is inside the OptixState
+	 * Everything related to optix is inside the OptixState!
 	 */
 	struct OptixRenderer : public NoriObject
 	{
-		// -- Interface
-		void renderOptixState(CUDAOutputBuffer<float4>& outputBuffer);
-
-		// -- Nori Object
 		explicit OptixRenderer(const PropertyList &propList);
-		~OptixRenderer();
 
 		NoriObject *cloneAndInit() override;
 		void update(const NoriObject *guiObject) override;
@@ -37,9 +31,8 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 	protected:
-		int m_samplesPerLaunch = 1;
-
-		OptixState *m_optixState = nullptr;
+		bool m_enabled;
+		int m_samplesPerLaunch;
 	};
 
 	NORI_REGISTER_CLASS(OptixRenderer, "optix");

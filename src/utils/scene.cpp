@@ -49,6 +49,7 @@ NORI_NAMESPACE_BEGIN
 		delete m_ambientMedium;
 #ifdef NORI_USE_OPTIX
 		delete m_optixRenderer;
+		delete m_optixState;
 #endif
 	}
 

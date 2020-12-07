@@ -4,45 +4,38 @@
 
 #include <nori/optix/OptixRenderer.h>
 
+NORI_NAMESPACE_BEGIN
 
-void nori::OptixRenderer::renderOptixState(CUDAOutputBuffer<float4>& outputBuffer)
-{
-	m_optixState->render(outputBuffer);
-}
+	OptixRenderer::OptixRenderer(const PropertyList &propList)
+	{
+		m_enabled          = propList.getBoolean("enabled", true);
+		m_samplesPerLaunch = propList.getInteger("samplesPerLaunch", 16);
+	}
 
-nori::OptixRenderer::OptixRenderer(const nori::PropertyList &propList)
-{
-	m_samplesPerLaunch = propList.getInteger("samplesPerLaunch", 16);
-}
+	NoriObject *OptixRenderer::cloneAndInit()
+	{
+		auto clone = new OptixRenderer(*this);
+		return clone;
+	}
 
-nori::NoriObject *nori::OptixRenderer::cloneAndInit()
-{
-	auto clone = new OptixRenderer(*this);
-	clone->m_optixState->create(); // TODO: do this in render if state is not initalized
-	return clone;
-}
+	void OptixRenderer::update(const NoriObject *guiObject)
+	{
+		const auto *gui = static_cast<const OptixRenderer *>(guiObject);
+		if (!gui->touched)return;
+		gui->touched = false;
 
-void nori::OptixRenderer::update(const nori::NoriObject *guiObject)
-{
-	const auto *gui = static_cast<const OptixRenderer *>(guiObject);
-	if (!gui->touched)return;
-	gui->touched = false;
+		m_samplesPerLaunch = gui->m_samplesPerLaunch;
+	}
 
-	m_samplesPerLaunch = gui->m_samplesPerLaunch;
-}
+	std::string OptixRenderer::toString() const
+	{
+		return tfm::format(
+				"OptixRenderer[\n"
+				"  samplesPerLaunch = %i\n"
+				"]",
+				m_samplesPerLaunch);
+	}
 
-nori::OptixRenderer::~OptixRenderer()
-{
-	delete m_optixState;
-}
+	bool OptixRenderer::getImGuiNodes() { return false; }
 
-std::string nori::OptixRenderer::toString() const
-{
-	return tfm::format(
-			"OptixRenderer[\n"
-			"  samplesPerLaunch = %i\n"
-			"]",
-			m_samplesPerLaunch);
-}
-
-bool nori::OptixRenderer::getImGuiNodes() { return false; }
+NORI_NAMESPACE_END

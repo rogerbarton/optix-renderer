@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include <vector>
+#include <mutex>
 
 
 enum class CUDAOutputBufferType
@@ -63,6 +64,9 @@ public:
 	PIXEL_FORMAT *map();
 	void unmap();
 
+	inline void lock() const { m_mutex.lock(); }
+	inline void unlock() const { m_mutex.unlock(); }
+
 	int32_t width() const { return m_width; }
 	int32_t height() const { return m_height; }
 
@@ -87,6 +91,8 @@ private:
 
 	CUstream m_stream     = 0u;
 	int32_t  m_device_idx = 0;
+
+	mutable std::mutex m_mutex;
 };
 
 

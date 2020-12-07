@@ -321,16 +321,21 @@ void OptixState::createSbt()
 	}
 }
 
-void OptixState::render(CUDAOutputBuffer<float4>& outputBuffer)
+bool OptixState::preRender()
 {
 	if (m_ias_handle == 0)
 	{
 		std::cerr << "renderOptixState: state is not initialized.\n";
-		return;
+		return false;
 	}
-	// TODO: map output buffer
+
 	// TODO: update device copies, launch params etc
 
+	return true;
+}
+
+void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer)
+{
 	m_params->d_imageBuffer = outputBuffer.map();
 
 	OPTIX_CHECK(optixLaunch(m_pipeline,

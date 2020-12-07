@@ -342,17 +342,25 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 #ifdef NORI_USE_OPTIX
 void RenderThread::renderThreadOptix()
 {
-	Vector2i imageDim = m_renderScene->getCamera()->getOutputSize();
-	const uint32_t width = imageDim.x();
-	const uint32_t height = imageDim.y();
-	m_optixBlock.resize(width, height);
+	OptixState *const optixState = m_renderScene->getOptixState();
 
-	uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
-	for (uint32_t k = 0; k < numSamples; ++k)
+	Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
+	const uint32_t width    = imageDim.x();
+	const uint32_t height   = imageDim.y();
+
+	m_optixBlock.lock();
+	m_optixBlock.resize(width, height);
+	m_optixBlock.unlock();
+
+	if (!optixState->preRender())
+		return;
+
+	uint32_t      numSamples = m_renderScene->getSampler()->getSampleCount();
+	for (uint32_t k          = 0; k < numSamples; ++k)
 	{
 		if (m_renderStatus == ERenderStatus::Interrupt)
 			break;
-		m_renderScene->m_optixRenderer->renderOptixState(m_optixBlock);
+		optixState->renderSubframe(m_optixBlock);
 	}
 }
 #endif

@@ -55,7 +55,16 @@ struct OptixState
 
 	// -- Interface
 	void create();
-	void render(CUDAOutputBuffer<float4>& outputBuffer);
+	/**
+	 * Call this before rendering. This will update the optix state and make it ready for rendering
+	 * @return True if successful without errors and rendering can proceed
+	 */
+	bool preRender();
+	/**
+	 * Renders one subframe. Assumes that preRender has succeeded
+	 * @param outputBuffer
+	 */
+	void renderSubframe(CUDAOutputBuffer<float4> &outputBuffer);
 	void clear();
 	~OptixState();
 
@@ -71,7 +80,6 @@ private:
 	void createVolumeProgram(std::vector<OptixProgramGroup> program_groups);
 	void createMissProgram(std::vector<OptixProgramGroup> program_groups);
 	void createSbt();
-
 };
 
 #endif
