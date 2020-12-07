@@ -200,44 +200,41 @@ const char *getPtxString(const char *filename, const char **log = NULL)
  */
 void OptixState::createPtxModules()
 {
-	OptixModuleCompileOptions module_compile_options;
-	module_compile_options.optLevel   = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
-	module_compile_options.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_LINEINFO;
-
+	// Note: module_compile_options set in create()
+	// .cu paths relative to current file __FILE__
 	{
-		// Path relative to current file __FILE__
 		const std::string ptx = getPtxString("cuda/geometry.cu");
-		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(context,
-		                                          &module_compile_options,
-		                                          &pipeline_compile_options,
+		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
+		                                          &m_module_compile_options,
+		                                          &m_pipeline_compile_options,
 		                                          ptx.c_str(),
 		                                          ptx.size(),
 		                                          LOG,
 		                                          &LOG_SIZE,
-		                                          &geometry_module));
+		                                          &m_geometry_module));
 	}
 
 	{
 		const std::string ptx = getPtxString("cuda/camera.cu");
-		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(context,
-		                                          &module_compile_options,
-		                                          &pipeline_compile_options,
+		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
+		                                          &m_module_compile_options,
+		                                          &m_pipeline_compile_options,
 		                                          ptx.c_str(),
 		                                          ptx.size(),
 		                                          LOG,
 		                                          &LOG_SIZE,
-		                                          &camera_module));
+		                                          &m_camera_module));
 	}
 
 	{
 		const std::string ptx = getPtxString("cuda/shading.cu");
-		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(context,
-		                                          &module_compile_options,
-		                                          &pipeline_compile_options,
+		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
+		                                          &m_module_compile_options,
+		                                          &m_pipeline_compile_options,
 		                                          ptx.c_str(),
 		                                          ptx.size(),
 		                                          LOG,
 		                                          &LOG_SIZE,
-		                                          &shading_module));
+		                                          &m_shading_module));
 	}
 }

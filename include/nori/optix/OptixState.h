@@ -8,32 +8,48 @@
 #include "cuda/LaunchParams.h"
 #include "cuda/MaterialData.h"
 #include <cuda.h>
+#include <vector>
+
+namespace nori
+{
+	struct Shape;
+}
+
+struct GasHandle
+{
+	OptixTraversableHandle handle   = 0; /// The handle used for optix
+	CUdeviceptr            d_buffer = 0; /// The allocated device buffer
+};
 
 /**
  * Stores all information about optix program.
  */
 struct OptixState
 {
-	OptixDeviceContext context = 0;
-	CUstream           stream  = 0;
+	OptixDeviceContext m_context = 0;
+	CUstream           m_stream  = 0;
 
-	LaunchParams *params   = nullptr;
-	LaunchParams *d_params = nullptr;
+	LaunchParams *m_params   = nullptr;
+	LaunchParams *m_d_params = nullptr;
 
-	OptixTraversableHandle ias_handle          = {};
-	CUdeviceptr            d_ias_output_buffer = {};
+	OptixTraversableHandle m_ias_handle          = {};
+	CUdeviceptr            m_d_ias_output_buffer = {};
+	std::vector<GasHandle> m_gases;
 
-	OptixModule                 geometry_module                   = 0;
-	OptixModule                 camera_module                     = 0;
-	OptixModule                 shading_module                    = 0;
-	OptixProgramGroup           raygen_prog_group                 = 0;
-	OptixProgramGroup           miss_prog_group[RAY_TYPE_COUNT]   = {0, 0};
-	OptixProgramGroup           volume_prog_group[RAY_TYPE_COUNT] = {0, 0};
-	OptixPipeline               pipeline                          = 0;
-	OptixPipelineCompileOptions pipeline_compile_options          = {};
-	OptixShaderBindingTable     sbt                               = {};
+	OptixModule             m_geometry_module                   = 0;
+	OptixModule             m_camera_module                     = 0;
+	OptixModule             m_shading_module                    = 0;
+	OptixProgramGroup       m_raygen_prog_group                 = 0;
+	OptixProgramGroup       m_miss_prog_group[RAY_TYPE_COUNT]   = {0, 0};
+	OptixProgramGroup       m_volume_prog_group[RAY_TYPE_COUNT] = {0, 0};
+	OptixPipeline           m_pipeline                          = 0;
+	OptixShaderBindingTable m_sbt                               = {};
 
-	const int maxTraceDepth = 10;
+	OptixModuleCompileOptions   m_module_compile_options   = {};
+	OptixPipelineCompileOptions m_pipeline_compile_options = {};
+	OptixPipelineLinkOptions    m_pipeline_link_options    = {};
+
+	const int maxTraceDepth = 2;
 
 	// -- Interface
 	void create();
@@ -43,7 +59,8 @@ struct OptixState
 
 private:
 	void createContext();
-	void buildGases();
+	void createCompileOptions();
+	void buildGases(std::vector<nori::Shape *> &shapes);
 	void buildIas();
 	void createPtxModules();
 	void createPipeline();
