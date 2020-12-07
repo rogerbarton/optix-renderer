@@ -54,10 +54,10 @@
   </shape>
 
   <emitter type="spot">
-    <point name="position" value="0,-10,2"/>
-    <vector name="direction" value="0,1,-1"/>
+    <point name="position" value="0,-4,10"/>
+    <vector name="direction" value="0,0,-1"/>
     <color name="power" value="1000,1000,1000"/>
-    <float name="falloffstart" value="1000"/>
+    <float name="falloffstart" value="0"/>
     <float name="totalwidth" value="45"/>
   </emitter>
 
