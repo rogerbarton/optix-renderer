@@ -203,7 +203,7 @@ void OptixState::createPtxModules()
 	// Note: module_compile_options set in create()
 	// .cu paths relative to current file __FILE__
 	{
-		const std::string ptx = getPtxString("cuda/geometry.cu");
+		const std::string ptx = getPtxString("cuda/geometry.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
 		                                          &m_module_compile_options,
 		                                          &m_pipeline_compile_options,
@@ -215,7 +215,7 @@ void OptixState::createPtxModules()
 	}
 
 	{
-		const std::string ptx = getPtxString("cuda/camera.cu");
+		const std::string ptx = getPtxString("cuda/camera.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
 		                                          &m_module_compile_options,
 		                                          &m_pipeline_compile_options,
@@ -227,7 +227,7 @@ void OptixState::createPtxModules()
 	}
 
 	{
-		const std::string ptx = getPtxString("cuda/shading.cu");
+		const std::string ptx = getPtxString("cuda/shading.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
 		                                          &m_module_compile_options,
 		                                          &m_pipeline_compile_options,

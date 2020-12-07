@@ -231,6 +231,12 @@ if(NORI_USE_OPTIX)
         # OptiX is header only
         )
 
+    set(NORI_CU_FILES
+        include/nori/optix/cuda/raygen.cpp
+        include/nori/optix/cuda/shading.cpp
+        include/nori/optix/cuda/geometry.cpp
+        )
+
     target_sources(nori PRIVATE
         include/nori/optix/OptixRenderer.h
         include/nori/optix/OptixRenderer.cpp
@@ -243,11 +249,12 @@ if(NORI_USE_OPTIX)
         include/nori/optix/OptixSbtTypes.h
         include/nori/optix/cuda/LaunchParams.h
 
-
-#        include/nori/optix/cuda/camera.cu
-#        include/nori/optix/cuda/shading.cu
-#        include/nori/optix/cuda/volumeGeometry.cu
+        ${NORI_CU_FILES}
         )
+
+    # Don't compile cu files, nvrtc will be used
+    set_source_files_properties(${NORI_CU_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
+    set_source_files_properties(${NORI_CU_FILES} PROPERTIES LANGUAGE CUDA)
 
     message(STATUS "Nori uses OptiX")
   endif()
@@ -299,7 +306,9 @@ target_link_libraries(nori ${extra_libs})
 
 set_target_properties(nori PROPERTIES
     CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
+    CXX_STANDARD_REQUIRED TRUE
+    CUDA_STANDARD 14
+    CUDA_STANDARD_REQUIRED TRUE
     CXX_EXTENSIONS NO
     )
 

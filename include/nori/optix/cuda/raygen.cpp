@@ -2,6 +2,7 @@
 // Created by roger on 06/12/2020.
 //
 
+#include <cuda_runtime.h>
 #include <optix_device.h>
 #include "LaunchParams.h"
 #include "sutil/helpers.h"
@@ -10,7 +11,6 @@
 extern "C" {
     __constant__ LaunchParams launchParams;
 }
-
 
 extern "C" __global__ void __raygen__perspective()
 {
