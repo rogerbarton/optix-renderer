@@ -114,6 +114,10 @@ public:
         // we don't need the pdf here, because col / pdf * solid_angle = col (for cosine weighted)
         Color3f finalCol = eval(bRec);
 
+        if(pdf(bRec) < Epsilon) {
+            return Color3f(0.f);
+        }
+
         return finalCol;
     }
 

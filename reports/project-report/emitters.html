@@ -87,6 +87,19 @@
                 <img src="images/emitter/falloff.png" alt="Falloff" class="img-responsive">
             </div>
 
+            <h4>Validation 2: Comparison to Blender</h4>
+            <p>Altough the floor is not in the same place, the spotlight's position is the same (and all parameters are
+                the same). We can see that the spotlight has indeed zero size, because we have hard shadows and no
+                penumbra.</p>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/blender_1.png" alt="Blender" class="img-responsive">
+                <img src="images/emitter/nori_1.png" alt="Nori" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/blender_2.png" alt="Blender" class="img-responsive">
+                <img src="images/emitter/nori_2.png" alt="Nori" class="img-responsive">
+            </div>
+
             <h4>Implementation</h4>
             <p>The spotlight is implemented like a pointlight (this means, material sampling should not see any
                 contribution from it because of the infinitesimal small point), but where the direction of the outgoing

@@ -56,7 +56,7 @@ public:
     virtual Color3f eval(const EmitterQueryRecord &lRec) const override
     {
         float cosFalloffStart = std::cos(degToRad(falloffStart));
-        float cosTotalWidth = std::cos(degToRad(totalWidthAngle));
+        float cosTotalWidth = std::cos(degToRad(totalWidthAngle / 2.f));
         Color3f i = m_power / 2. / M_PI / (1.f - .5f * (cosTotalWidth + cosFalloffStart));
         Color3f color = i * falloff(-lRec.wi) / (lRec.ref - m_position).squaredNorm();
         return color;
@@ -107,7 +107,7 @@ public:
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
 
-        bool dir_touched = ImGui::DragVector3f("##value", &m_direction, 0.1f, -1.f, 1.f, "%.3f",
+        bool dir_touched = ImGui::DragVector3f("##value", &m_direction, 0.01f, -1.f, 1.f, "%.3f",
                                                ImGuiSliderFlags_AlwaysClamp);
         touched |= dir_touched;
         if (dir_touched)
@@ -124,7 +124,7 @@ public:
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
 
-        touched |= ImGui::DragFloat("##value", &totalWidthAngle, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
+        touched |= ImGui::DragFloat("##value", &totalWidthAngle, 0.01f, 0, SLIDER_MAX_FLOAT, "%.3f",
                                     ImGuiSliderFlags_AlwaysClamp);
         ImGui::NextColumn();
         ImGui::PopID();
@@ -154,7 +154,7 @@ private:
     float falloff(const Vector3f &w) const
     {
         float cosFalloffStart = std::cos(degToRad(falloffStart));
-        float cosTotalWidth = std::cos(degToRad(totalWidthAngle));
+        float cosTotalWidth = std::cos(degToRad(totalWidthAngle / 2.f));
         Vector3f wi = m_coord.toLocal(w);
         wi = wi.normalized();
         float cosTheta = wi.z();
