@@ -33,7 +33,7 @@ struct OptixState
 	LaunchParams *m_d_params = nullptr;
 
 	OptixTraversableHandle m_ias_handle          = {};
-	CUdeviceptr            m_d_ias_output_buffer = {};
+	CUdeviceptr            m_d_ias_output_buffer = 0;
 	std::vector<GasHandle> m_gases;
 
 	OptixModule             m_geometry_module                   = 0;

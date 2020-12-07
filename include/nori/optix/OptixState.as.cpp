@@ -45,6 +45,7 @@ struct GasBuildInfo
 
 /**
  * Creates a GAS for each nori::Shape.
+ * Sets: m_gases
  */
 void OptixState::buildGases(std::vector<nori::Shape *> &shapes)
 {
@@ -229,7 +230,80 @@ OptixBuildInput nori::Shape::getOptixBuildInput() const
 	return buildInput;
 }
 
+/**
+ * Re/builds the IAS using the already created GASes.
+ * Rebuild will delete the ias and create a new one.
+ * requires: m_gases
+ * sets: m_d_ias_output_buffer, m_ias_handle
+ */
 void OptixState::buildIas()
 {
+	const auto t0 = std::chrono::high_resolution_clock::now();
 
+	const uint32_t             numInstances = m_gases.size();
+	std::vector<OptixInstance> optixInstances(numInstances);
+
+	const float identityTransform[12] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
+	uint32_t    sbtOffset             = 0;
+
+	for (uint32_t i = 0; i < numInstances; ++i)
+	{
+		auto gasHandle      = m_gases[i];
+		auto &optixInstance = optixInstances[i];
+		memset(&optixInstance, 0, sizeof(OptixInstance));
+
+		optixInstance.flags             = OPTIX_INSTANCE_FLAG_NONE;
+		optixInstance.instanceId        = i;
+		optixInstance.sbtOffset         = sbtOffset;
+		optixInstance.visibilityMask    = 1;
+		optixInstance.traversableHandle = gasHandle.handle;
+		memcpy(optixInstance.transform, identityTransform, sizeof(float) * 12);
+
+		// TODO: one sbt record per GAS build input per RAY_TYPE?
+		sbtOffset += RAY_TYPE_COUNT;
+	}
+
+	// Copy the instances to the device
+	const size_t instancesSizeBytes = sizeof(OptixInstance) * numInstances;
+	CUdeviceptr  d_tempInstances;
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_tempInstances), instancesSizeBytes));
+	CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(d_tempInstances), optixInstances.data(), instancesSizeBytes,
+	                      cudaMemcpyHostToDevice));
+
+	OptixBuildInput instanceBuildInput = {};
+	instanceBuildInput.type                       = OPTIX_BUILD_INPUT_TYPE_INSTANCES;
+	instanceBuildInput.instanceArray.instances    = d_tempInstances;
+	instanceBuildInput.instanceArray.numInstances = numInstances;
+
+	OptixAccelBuildOptions accelBuildOptions = {};
+	accelBuildOptions.operation  = OPTIX_BUILD_OPERATION_BUILD;
+	accelBuildOptions.buildFlags = OPTIX_BUILD_FLAG_PREFER_FAST_TRACE;
+
+	// Compute buffer sizes required first, allocate them and then build the AS
+	OptixAccelBufferSizes iasBufferSizes;
+	OPTIX_CHECK(optixAccelComputeMemoryUsage(m_context,
+	                                         &accelBuildOptions,
+	                                         &instanceBuildInput, 1,
+	                                         &iasBufferSizes));
+
+	CUdeviceptr d_tempBuffer;
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_tempBuffer), iasBufferSizes.tempSizeInBytes));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_ias_output_buffer)));
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_ias_output_buffer), iasBufferSizes.outputSizeInBytes));
+
+	OPTIX_CHECK(optixAccelBuild(m_context, nullptr, // device context + cuda stream
+	                            &accelBuildOptions,
+	                            &instanceBuildInput, 1,
+	                            d_tempBuffer, iasBufferSizes.tempSizeInBytes,
+	                            m_d_ias_output_buffer, iasBufferSizes.outputSizeInBytes,
+	                            &m_ias_handle,
+	                            nullptr, 0 // no emitted properties
+	));
+
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_tempInstances)));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_tempBuffer)));
+
+	const auto                    t1       = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> duration = t1 - t0;
+	std::cout << "Built IAS in: " << duration.count() << "s\n";
 }
