@@ -253,7 +253,6 @@ void OptixState::createMissProgram(std::vector<OptixProgramGroup> program_groups
 
 void OptixState::createSbt()
 {
-
 	// Raygen program record
 	{
 		CUdeviceptr d_raygen_record;

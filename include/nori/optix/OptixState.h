@@ -6,7 +6,7 @@
 #ifdef NORI_USE_OPTIX
 
 #include "cuda/LaunchParams.h"
-#include "cuda/MaterialData.h"
+#include "cuda/RayParams.h"
 #include <cuda.h>
 #include <vector>
 

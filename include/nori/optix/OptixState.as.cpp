@@ -255,7 +255,8 @@ void OptixState::buildIas()
 		optixInstance.flags             = OPTIX_INSTANCE_FLAG_NONE;
 		optixInstance.instanceId        = i;
 		optixInstance.sbtOffset         = sbtOffset;
-		optixInstance.visibilityMask    = 1;
+		optixInstance.sbtOffset         = sbtOffset;
+		optixInstance.visibilityMask    = 255;
 		optixInstance.traversableHandle = gasHandle.handle;
 		memcpy(optixInstance.transform, identityTransform, sizeof(float) * 12);
 

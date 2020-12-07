@@ -235,6 +235,12 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda/raygen.cpp
         include/nori/optix/cuda/shading.cpp
         include/nori/optix/cuda/geometry.cpp
+
+        include/nori/optix/cuda/LaunchParams.h
+        include/nori/optix/cuda/RayParams.h
+
+        include/nori/optix/cuda/sutil/helpers.h
+        include/nori/optix/cuda/sutil/vec_math.h
         )
 
     target_sources(nori PRIVATE
@@ -247,7 +253,8 @@ if(NORI_USE_OPTIX)
         include/nori/optix/OptixState.as.cpp
 
         include/nori/optix/OptixSbtTypes.h
-        include/nori/optix/cuda/LaunchParams.h
+
+        include/nori/optix/sutil/Exception.h
 
         ${NORI_CU_FILES}
         )

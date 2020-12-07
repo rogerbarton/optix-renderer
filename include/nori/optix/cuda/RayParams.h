@@ -1,12 +1,13 @@
 //
 // Created by roger on 06/12/2020.
 //
-
 #pragma once
-#ifdef NORI_USE_OPTIX
 
 #include <optix.h>
-#include "sutil/GeometryData.h"
+
+/**
+ * Contains data used for the SBT
+ */
 
 #define NUM_PAYLOAD_VALUES 4
 #define NUM_ATTRIBUTE_VALUES 2
@@ -17,15 +18,12 @@ enum RayType {
 	RAY_TYPE_COUNT
 };
 
-struct RayGenData {
+struct RaygenParams {
 };
 
-struct MissData {
+struct MissParams {
 };
 
-struct HitGroupData {
-	GeometryData geometryData;
+struct HitGroupParams {
 	float3 diffuseColor;
 };
-
-#endif

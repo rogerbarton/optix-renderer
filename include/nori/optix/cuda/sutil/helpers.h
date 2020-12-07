@@ -1,19 +1,16 @@
 #pragma once
-#ifdef NORI_USE_OPTIX
 
+/**
+ * Various helpers for cuda.
+ * Based on OptiX samples and NanoVDB
+ */
+
+#include <cuda_runtime.h>
+#include <optix_device.h>
+#include <vector_functions.h>
+#include <vector_types.h>
+#include <nanovdb/NanoVDB.h>
 #include "vec_math.h"
-
-
-__forceinline__ __device__ void setPayloadResult(float3 p) {
-    optixSetPayload_0(float_as_int(p.x));
-    optixSetPayload_1(float_as_int(p.y));
-    optixSetPayload_2(float_as_int(p.z));
-}
-
-
-__forceinline__ __device__ void setPayloadOcclusion(bool occluded) {
-    optixSetPayload_0(static_cast<unsigned int>( occluded ));
-}
 
 static __forceinline__ __device__ void* unpackPointer(unsigned int i0, unsigned int i1) {
     const unsigned long long uptr = static_cast<unsigned long long>( i0 ) << 32 | i1;
@@ -21,11 +18,30 @@ static __forceinline__ __device__ void* unpackPointer(unsigned int i0, unsigned 
     return ptr;
 }
 
-
 static __forceinline__ __device__ void packPointer(void* ptr, unsigned int& i0, unsigned int& i1) {
     const unsigned long long uptr = reinterpret_cast<unsigned long long>( ptr );
     i0 = uptr >> 32;
     i1 = uptr & 0x00000000ffffffff;
+}
+
+#define float3_as_args(u) \
+    reinterpret_cast<uint32_t&>((u).x), \
+        reinterpret_cast<uint32_t&>((u).y), \
+        reinterpret_cast<uint32_t&>((u).z)
+
+#define array3_as_args(u) \
+    reinterpret_cast<uint32_t&>((u)[0]), \
+        reinterpret_cast<uint32_t&>((u)[1]), \
+        reinterpret_cast<uint32_t&>((u)[2])
+
+__forceinline__ __device__ float3 make_float3(const nanovdb::Vec3f& v)
+{
+	return make_float3(v[0], v[1], v[2]);
+}
+
+__forceinline__ __device__ float3 make_float3(const nanovdb::Vec3R& v)
+{
+	return make_float3(v[0], v[1], v[2]);
 }
 
 // Orthonormal basis
@@ -59,4 +75,3 @@ struct Onb
 
     float3 m_tangent, m_binormal, m_normal;
 };
-#endif

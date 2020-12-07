@@ -1,31 +1,40 @@
 //
 // Created by roger on 06/12/2020.
 //
-
 #pragma once
-#ifdef NORI_USE_OPTIX
 
-#include <optix_types.h>
+#include <optix.h>
+#include <vector_types.h>
+
+#define Epsilon 1e-4f
+
+struct RaygenConstantParams
+{
+	float3 eye;
+	float3 U;
+	float3 V;
+	float3 W;
+};
+
+struct SceneConstantParams
+{
+	float3 bgColor;
+};
 
 /**
  * The Optix params.
  * Note: this must be cuda compatible
  */
-struct LaunchParams {
-    unsigned int subframeIndex;
-    float4* d_accumBuffer;
-    uchar4* d_frameBuffer;
-    unsigned int imageWidth;
-    unsigned int imageHeight;
+struct LaunchParams
+{
+	unsigned int sampleIndex;
+	unsigned int samplesPerLaunch;
+	float4 *d_imageBuffer;
+	unsigned int imageWidth;
+	unsigned int imageHeight;
 
-    unsigned int samplesPerLaunch;
-    float3 eye;
-    float3 U;
-    float3 V;
-    float3 W;
+	RaygenConstantParams camera;
+	SceneConstantParams  scene;
 
-    float3 bgColor;
-
-    OptixTraversableHandle sceneHandle;
+	OptixTraversableHandle sceneHandle;
 };
-#endif
