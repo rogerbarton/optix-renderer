@@ -24,6 +24,10 @@
 #include <nori/block.h>
 #include <atomic>
 
+#ifdef NORI_USE_OPTIX
+#   include <nori/optix/sutil/CUDAOutputBuffer.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 using clock_t = std::chrono::steady_clock;
@@ -43,7 +47,10 @@ public:
     void loadScene(const std::string & filename);
     void restartRender();
 
-	inline void renderThreadMain();
+	void renderThreadMain();
+#ifdef NORI_USE_OPTIX
+	void renderThreadOptix();
+#endif
 
     bool isBusy();
     void stopRendering();
@@ -83,6 +90,10 @@ protected:
     std::atomic<float>         m_progress     = 1.f;
 	time_point_t m_startTime;
 	time_point_t m_endTime;
+#ifdef NORI_USE_OPTIX
+	CUDAOutputBuffer<float4> m_optixBlock = {CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	std::thread m_optixThread;
+#endif
 
 	std::string sceneFilename;
 	std::string outputName;

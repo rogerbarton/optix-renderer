@@ -255,6 +255,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/OptixSbtTypes.h
 
         include/nori/optix/sutil/Exception.h
+        include/nori/optix/sutil/CUDAOutputBuffer.h
 
         ${NORI_CU_FILES}
         )

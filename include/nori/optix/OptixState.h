@@ -10,6 +10,8 @@
 #include <cuda.h>
 #include <vector>
 
+#include "sutil/CUDAOutputBuffer.h"
+
 namespace nori
 {
 	class Shape;
@@ -53,7 +55,7 @@ struct OptixState
 
 	// -- Interface
 	void create();
-	void render();
+	void render(CUDAOutputBuffer<float4>& outputBuffer);
 	void clear();
 	~OptixState();
 

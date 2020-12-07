@@ -5,9 +5,9 @@
 #include <nori/optix/OptixRenderer.h>
 
 
-void nori::OptixRenderer::renderOptixState()
+void nori::OptixRenderer::renderOptixState(CUDAOutputBuffer<float4>& outputBuffer)
 {
-	m_optixState->render();
+	m_optixState->render(outputBuffer);
 }
 
 nori::OptixRenderer::OptixRenderer(const nori::PropertyList &propList)

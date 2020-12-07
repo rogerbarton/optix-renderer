@@ -321,7 +321,7 @@ void OptixState::createSbt()
 	}
 }
 
-void OptixState::render()
+void OptixState::render(CUDAOutputBuffer<float4>& outputBuffer)
 {
 	if (m_ias_handle == 0)
 	{
@@ -330,6 +330,8 @@ void OptixState::render()
 	}
 	// TODO: map output buffer
 	// TODO: update device copies, launch params etc
+
+	m_params->d_imageBuffer = outputBuffer.map();
 
 	OPTIX_CHECK(optixLaunch(m_pipeline,
 	                        m_stream,
@@ -342,7 +344,7 @@ void OptixState::render()
 
 	CUDA_CHECK(cudaStreamSynchronize(m_stream));
 
-	// TODO: unmap output buffer
+	outputBuffer.unmap();
 }
 
 OptixState::~OptixState()

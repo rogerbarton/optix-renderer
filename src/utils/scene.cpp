@@ -194,6 +194,7 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_OPTIX
         m_optixRenderer->update(gui->m_optixRenderer);
+		// m_optixRenderer->updateScene(this);
 #endif
 
         gui->geometryTouched  = false;

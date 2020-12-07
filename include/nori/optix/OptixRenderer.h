@@ -7,6 +7,7 @@
 
 #include "OptixState.h"
 #include <nori/object.h>
+#include "sutil/CUDAOutputBuffer.h"
 
 NORI_NAMESPACE_BEGIN
 
@@ -18,13 +19,13 @@ NORI_NAMESPACE_BEGIN
 	struct OptixRenderer : public NoriObject
 	{
 		// -- Interface
-		void renderOptixState();
+		void renderOptixState(CUDAOutputBuffer<float4>& outputBuffer);
 
 		// -- Nori Object
 		explicit OptixRenderer(const PropertyList &propList);
 		~OptixRenderer();
 
-		NoriObject *cloneAndInit() override;;
+		NoriObject *cloneAndInit() override;
 		void update(const NoriObject *guiObject) override;
 
 		EClassType getClassType() const override { return ERenderer; }
@@ -36,9 +37,9 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 	protected:
-		int m_samplesPerLaunch;
+		int m_samplesPerLaunch = 1;
 
-		OptixState *m_optixState;
+		OptixState *m_optixState = nullptr;
 	};
 
 	NORI_REGISTER_CLASS(OptixRenderer, "optix");

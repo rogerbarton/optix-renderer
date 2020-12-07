@@ -21,11 +21,13 @@
 
 #if defined(_MSC_VER)
 /* Disable some warnings on MSVC++ */
-#pragma warning(disable : 4127 4702 4100 4515 4800 4146 4512)
-#ifndef WIN32_LEAN_AND_MEAN
+#   pragma warning(disable : 4127 4702 4100 4515 4800 4146 4512)
+#   ifndef WIN32_LEAN_AND_MEAN
 #   define WIN32_LEAN_AND_MEAN     /* Don't ever include MFC on Windows */
-#endif
-#define NOMINMAX                /* Don't override min/max */
+#   endif
+#   ifndef NOMINMAX
+#       define NOMINMAX                /* Don't override min/max */
+#   endif
 #endif
 
 /* Include the basics needed by any Nori file */

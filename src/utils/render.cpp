@@ -147,29 +147,20 @@ void RenderThread::renderThreadMain()
 {
 	m_startTime = clock_t::now();
 	m_endTime = time_point_t::min();
+	cout << "Rendering .. " << std::flush;
 
 	/* Allocate memory for the entire output image and clear it */
 	const Camera *camera = m_renderScene->getCamera();
+	const Vector2i outputSize = camera->getOutputSize();
 	m_block.lock();
-	m_block.init(camera->getOutputSize(), camera->getReconstructionFilter());
+	m_block.init(outputSize, camera->getReconstructionFilter());
 	m_block.clear();
 	m_block.unlock();
 
-	cout << "Rendering .. " << std::flush;
-
-	Vector2i outputSize = camera->getOutputSize();
 
 #ifdef NORI_USE_OPTIX
 	if(!m_previewMode)
-	{
-		uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
-		for (uint32_t k = 0; k < numSamples; ++k)
-		{
-			if (m_renderStatus == ERenderStatus::Interrupt)
-				break;
-			m_renderScene->m_optixRenderer->renderOptixState();
-		}
-	}
+		m_optixThread = std::thread([this] { renderThreadOptix(); });
 #endif
 
 	/* Create a block generator (i.e. a work scheduler) */
@@ -187,7 +178,6 @@ void RenderThread::renderThreadMain()
 	tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
 	samplers.resize(numBlocks);
 
-	//numSamples = m_renderScene->getSampler()->isAdaptive() ? 1 : numSamples; // for adaptive, we only use one sample
 	std::cout << std::endl;
 	for (uint32_t k = 0; k < numSamples; ++k)
 	{
@@ -201,8 +191,7 @@ void RenderThread::renderThreadMain()
 
 		auto map = [&](const tbb::blocked_range<int> &range) {
 			// Allocate memory for a small image block to be rendered by the current thread
-			ImageBlock block(Vector2i(blockSize),
-							 camera->getReconstructionFilter());
+			ImageBlock block(Vector2i(blockSize), camera->getReconstructionFilter());
 
 			for (int i = range.begin(); i < range.end(); ++i)
 			{
@@ -221,8 +210,6 @@ void RenderThread::renderThreadMain()
 					sampler->prepare(block);
 					samplers.at(blockId) = std::move(sampler);
 				}
-
-				//samplers.at(blockId)->setSampleRound(k);
 
 				// this gets executed if uniform or adaptive and we need to render
 				if (samplers.at(blockId)->isAdaptive())
@@ -260,10 +247,13 @@ void RenderThread::renderThreadMain()
 		blockGenerator.reset();
 	}
 
+#ifdef NORI_USE_OPTIX
+	if(m_optixThread.joinable())
+		m_optixThread.join();
+#endif
+
 	if (m_renderScene->getDenoiser())
-	{
 		m_renderScene->getDenoiser()->denoise(&m_block);
-	}
 
 	m_endTime = clock_t::now();
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
@@ -292,7 +282,7 @@ void RenderThread::renderThreadMain()
 		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box"));
 		ImageBlock currVarBlock(Vector2i(blockSize), rf);
 
-		ImageBlock fullVarianceMatrix(camera->getOutputSize(), rf);
+		ImageBlock fullVarianceMatrix(outputSize, rf);
 		fullVarianceMatrix.clear();
 		const int blocks = blockGenerator.getBlockCount();
 
@@ -311,9 +301,6 @@ void RenderThread::renderThreadMain()
 		delete rf;
 	}
 	std::cout << "Mean variance of m_block: " << computeVarianceFromImage(m_block).mean() << std::endl;
-
-	//delete m_scene;
-	//m_scene = nullptr;
 
 	m_renderStatus = ERenderStatus::Done;
 }
@@ -351,6 +338,24 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 		block.put(pixelSample, value);
 	}
 }
+
+#ifdef NORI_USE_OPTIX
+void RenderThread::renderThreadOptix()
+{
+	Vector2i imageDim = m_renderScene->getCamera()->getOutputSize();
+	const uint32_t width = imageDim.x();
+	const uint32_t height = imageDim.y();
+	m_optixBlock.resize(width, height);
+
+	uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
+	for (uint32_t k = 0; k < numSamples; ++k)
+	{
+		if (m_renderStatus == ERenderStatus::Interrupt)
+			break;
+		m_renderScene->m_optixRenderer->renderOptixState(m_optixBlock);
+	}
+}
+#endif
 
 #ifdef NORI_USE_IMGUI
 void RenderThread::drawRenderGui()
