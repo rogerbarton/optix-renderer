@@ -64,6 +64,7 @@ NoriObject *loadFromXML(const std::string &filename)
 	    EScene                = NoriObject::EScene,
 	    EShape                = NoriObject::EShape,
 	    ETexture              = NoriObject::ETexture,
+	    EVolume               = NoriObject::EVolume,
 	    EBSDF                 = NoriObject::EBSDF,
 	    EPhaseFunction        = NoriObject::EPhaseFunction,
 	    EEmitter              = NoriObject::EEmitter,
@@ -71,9 +72,11 @@ NoriObject *loadFromXML(const std::string &filename)
 	    ECamera               = NoriObject::ECamera,
 	    EIntegrator           = NoriObject::EIntegrator,
 	    ESampler              = NoriObject::ESampler,
+	    EPixelSampler         = NoriObject::EPixelSampler,
+	    EDenoiser             = NoriObject::EDenoiser,
 	    ETest                 = NoriObject::ETest,
 	    EReconstructionFilter = NoriObject::EReconstructionFilter,
-	    EDenoiser             = NoriObject::EDenoiser,
+	    ERenderer             = NoriObject::ERenderer,
 
         /* Properties */
         EBoolean = NoriObject::EClassTypeCount,
@@ -95,33 +98,36 @@ NoriObject *loadFromXML(const std::string &filename)
 
     /* Create a mapping from tag names to tag IDs */
     std::map<std::string, ETag> tags;
-    tags["scene"] = EScene;
-    tags["shape"] = EShape;
-    tags["texture"] = ETexture;
-    tags["volume"] = EMedium;
-    tags["bsdf"] = EBSDF;
-    tags["emitter"] = EEmitter;
-    tags["camera"] = ECamera;
-    tags["medium"] = EMedium;
-    tags["phase"] = EPhaseFunction;
-    tags["integrator"] = EIntegrator;
-    tags["denoiser"] = EDenoiser;
-    tags["sampler"] = ESampler;
-    tags["rfilter"] = EReconstructionFilter;
-    tags["test"] = ETest;
-    tags["boolean"] = EBoolean;
-    tags["integer"] = EInteger;
-    tags["float"] = EFloat;
-    tags["string"] = EString;
-    tags["point"] = EPoint;
-    tags["vector"] = EVector;
-    tags["color"] = EColor;
-    tags["transform"] = ETransform;
-    tags["translate"] = ETranslate;
-    tags["matrix"] = EMatrix;
-    tags["rotate"] = ERotate;
-    tags["scale"] = EScale;
-    tags["lookat"] = ELookAt;
+	tags["scene"]      = EScene;
+	tags["shape"]      = EShape;
+	tags["texture"]    = ETexture;
+	tags["volume"]     = EVolume;
+	tags["bsdf"]       = EBSDF;
+	tags["phase"]      = EPhaseFunction;
+	tags["emitter"]    = EEmitter;
+	tags["medium"]     = EMedium;
+	tags["camera"]     = ECamera;
+	tags["integrator"] = EIntegrator;
+	tags["sampler"]    = ESampler;
+	tags["pxsampler"]  = EPixelSampler;
+	tags["denoiser"]   = EDenoiser;
+	tags["test"]       = ETest;
+	tags["rfilter"]    = EReconstructionFilter;
+	tags["renderer"]   = ERenderer;
+	// Properties
+	tags["boolean"]    = EBoolean;
+	tags["integer"]    = EInteger;
+	tags["float"]      = EFloat;
+	tags["string"]     = EString;
+	tags["point"]      = EPoint;
+	tags["vector"]     = EVector;
+	tags["color"]      = EColor;
+	tags["transform"]  = ETransform;
+	tags["translate"]  = ETranslate;
+	tags["matrix"]     = EMatrix;
+	tags["rotate"]     = ERotate;
+	tags["scale"]      = EScale;
+	tags["lookat"]     = ELookAt;
 
     /* Helper function to check if attributes are fully specified */
     auto check_attributes = [&](const pugi::xml_node &node, std::set<std::string> attrs) {
