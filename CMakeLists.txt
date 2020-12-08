@@ -38,6 +38,7 @@ add_executable(nori
     include/nori/emitter.h
     include/nori/kdtree.h
     include/nori/mesh.h
+    include/nori/sphere.h
     include/nori/object.h
     include/nori/parser.h
     include/nori/proplist.h
