@@ -29,6 +29,7 @@ add_executable(nori
     include/nori/bsdf.h
     include/nori/bvh.h
     include/nori/camera.h
+    include/nori/perspective.h
     include/nori/color.h
     include/nori/common.h
     include/nori/dpdf.h
@@ -252,7 +253,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/OptixState.cpp
         include/nori/optix/OptixState.rtc.cpp
         include/nori/optix/OptixState.as.cpp
-        include/nori/optix/OptixState.scene.cpp
+        include/nori/optix/OptixState.render.cpp
 
         include/nori/optix/OptixSbtTypes.h
 
