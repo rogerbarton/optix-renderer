@@ -31,6 +31,10 @@ NORI_NAMESPACE_BEGIN
 
 		void sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const override;
 
+#ifdef NORI_USE_OPTIX
+		void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
+#endif
+
 		std::string toString() const override;
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Sphere");

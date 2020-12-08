@@ -53,7 +53,7 @@ bool OptixState::preRender(nori::Scene &scene)
 
 	createPtxModules(scene.m_optixRenderer->m_enableSpecialization);
 	createPipeline();
-	createSbt();
+	allocateSbt();
 
 	// TODO: update sbt
 

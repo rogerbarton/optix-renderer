@@ -241,6 +241,8 @@ if(NORI_USE_OPTIX)
 
         include/nori/optix/cuda/LaunchParams.h
         include/nori/optix/cuda/RayParams.h
+        include/nori/optix/cuda/GeometryData.h
+        include/nori/optix/cuda/MaterialData.h
 
         include/nori/optix/cuda/sutil/helpers.h
         include/nori/optix/cuda/sutil/vec_math.h

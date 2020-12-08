@@ -13,8 +13,13 @@
 #include <cuda_runtime_api.h>
 
 #include "sutil/Exception.h"
-#include "OptixSbtTypes.h"
 #include "OptixState.h"
+#include "OptixSbtTypes.h"
+#include "cuda/GeometryData.h"
+#include "cuda/MaterialData.h"
+
+#include <nori/mesh.h>
+#include <nori/sphere.h>
 
 #include <vector>
 #include <iostream>
@@ -38,7 +43,7 @@ void OptixState::createContext()
 {
 	if (initializedOptix)
 		return;
-	initializedOptix = true;
+	initializedOptix                  = true;
 
 	CUDA_CHECK(cudaFree(nullptr));
 	CUcontext                 cuCtx   = 0;
@@ -174,9 +179,9 @@ void OptixState::createVolumeProgram(std::vector<OptixProgramGroup> program_grou
 		                                         &radiance_prog_group_options,
 		                                         LOG,
 		                                         &LOG_SIZE,
-		                                         &m_volume_prog_group[RAY_TYPE_RADIANCE]));
+		                                         &m_hitgroup_prog_group[RAY_TYPE_RADIANCE]));
 
-		program_groups.push_back(m_volume_prog_group[RAY_TYPE_RADIANCE]);
+		program_groups.push_back(m_hitgroup_prog_group[RAY_TYPE_RADIANCE]);
 	}
 
 	{
@@ -195,9 +200,9 @@ void OptixState::createVolumeProgram(std::vector<OptixProgramGroup> program_grou
 
 		OPTIX_CHECK_LOG2(optixProgramGroupCreate(
 				m_context, &occlusion_prog_group_desc, 1, &occlusion_prog_group_options, LOG, &LOG_SIZE,
-				&m_volume_prog_group[RAY_TYPE_OCCLUSION]));
+				&m_hitgroup_prog_group[RAY_TYPE_OCCLUSION]));
 
-		program_groups.push_back(m_volume_prog_group[RAY_TYPE_OCCLUSION]);
+		program_groups.push_back(m_hitgroup_prog_group[RAY_TYPE_OCCLUSION]);
 	}
 }
 
@@ -248,75 +253,131 @@ void OptixState::createMissProgram(std::vector<OptixProgramGroup> program_groups
 	}
 }
 
-void OptixState::createSbt()
+void OptixState::allocateSbt()
 {
 	// Raygen program record
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.raygenRecord), sizeof(RaygenRecord)));
+
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.missRecordBase), sizeof(MissRecord) * RAY_TYPE_COUNT));
+	m_sbt.missRecordCount         = RAY_TYPE_COUNT;
+	m_sbt.missRecordStrideInBytes = static_cast<uint32_t>(sizeof(MissRecord));
+
+	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.hitgroupRecordBase),
+	                      sizeof(HitGroupRecord) * RAY_TYPE_COUNT * MaterialData::TYPE_COUNT));
+	m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
+	m_sbt.hitgroupRecordCount         = RAY_TYPE_COUNT * MaterialData::TYPE_COUNT;
+}
+
+void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
+{
+	// Create the records on the host and copy to the already allocated device sbt
+	// Empty records still need to be copied for the optix sbt record header
+
+	// -- Raygen = empty record data
 	{
-		CUdeviceptr d_raygen_record;
-		size_t      sizeof_raygen_record = sizeof(RayGenRecord);
-		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_raygen_record), sizeof_raygen_record));
+		RaygenRecord raygenRecord = {};
+		OPTIX_CHECK(optixSbtRecordPackHeader(m_raygen_prog_group, &raygenRecord));
 
-		// Note: No data to set/copy
-
-		m_sbt.raygenRecord = d_raygen_record;
+		CUDA_CHECK(cudaMemcpy(
+				reinterpret_cast<void *>(m_sbt.raygenRecord),
+				&raygenRecord,
+				sizeof(RaygenRecord),
+				cudaMemcpyHostToDevice));
 	}
 
-	// Miss program record
+
+	// -- Miss = empty record data
 	{
-		CUdeviceptr d_miss_record;
-		size_t      sizeof_miss_record = sizeof(MissRecord);
-		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_miss_record), sizeof_miss_record * RAY_TYPE_COUNT));
+		MissRecord missRecords[2];
+		OPTIX_CHECK(optixSbtRecordPackHeader(m_miss_prog_group[0], &missRecords[0]));
+		OPTIX_CHECK(optixSbtRecordPackHeader(m_miss_prog_group[1], &missRecords[1]));
 
-		MissRecord ms_sbt[RAY_TYPE_COUNT];
-		for (int   i                   = 0; i < RAY_TYPE_COUNT; ++i)
-		{
-			optixSbtRecordPackHeader(m_miss_prog_group[i], &ms_sbt[i]);
-			// data for miss program goes in here...
-			//ms_sbt[i].data = {0.f, 0.f, 0.f};
-		}
-
-		CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(d_miss_record),
-		                      ms_sbt,
-		                      sizeof_miss_record * RAY_TYPE_COUNT,
-		                      cudaMemcpyHostToDevice));
-
-		m_sbt.missRecordBase          = d_miss_record;
-		m_sbt.missRecordCount         = RAY_TYPE_COUNT;
-		m_sbt.missRecordStrideInBytes = static_cast<uint32_t>(sizeof_miss_record);
+		CUDA_CHECK(cudaMemcpy(
+				reinterpret_cast<void *>(m_sbt.missRecordBase),
+				missRecords,
+				sizeof(MissRecord) * RAY_TYPE_COUNT,
+				cudaMemcpyHostToDevice));
 	}
+
 
 	// Hitgroup program record
 	{
-		const size_t                count_records = RAY_TYPE_COUNT;
-		std::vector<HitGroupRecord> hitgroup_records(RAY_TYPE_COUNT);
-
+		std::vector<HitGroupRecord> hitgroupRecords;
+		hitgroupRecords.reserve(shapes.size() * RAY_TYPE_COUNT);
+		for (const nori::Shape *shape : shapes)
 		{
-			int sbt_idx = 0;
-			OPTIX_CHECK(optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_RADIANCE], &hitgroup_records[sbt_idx]));
-			hitgroup_records[sbt_idx].data.geometry.volume = geometry;
-			hitgroup_records[sbt_idx].data.shading.volume  = material;
-			sbt_idx++;
-
-			OPTIX_CHECK(optixSbtRecordPackHeader(m_volume_prog_group[RAY_TYPE_OCCLUSION], &hitgroup_records[sbt_idx]));
-			hitgroup_records[sbt_idx].data.geometry.volume = geometry;
-			hitgroup_records[sbt_idx].data.shading.volume  = material;
-			sbt_idx++;
+			shape->getOptixHitgroupRecord(hitgroupRecords);
 		}
 
-		CUdeviceptr d_hitgroup_records;
-		size_t      sizeof_hitgroup_record        = sizeof(HitGroupRecord);
-		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_hitgroup_records), sizeof_hitgroup_record * count_records));
+		CUDA_CHECK(cudaMalloc(
+				reinterpret_cast<void **>( &m_sbt.hitgroupRecordBase ),
+				hitgroupRecords.size() * sizeof(HitGroupRecord)));
 
-		CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(d_hitgroup_records),
-		                      hitgroup_records.data(),
-		                      sizeof_hitgroup_record * count_records,
-		                      cudaMemcpyHostToDevice));
+		CUDA_CHECK(cudaMemcpy(
+				reinterpret_cast<void *>( m_sbt.hitgroupRecordBase ),
+				hitgroupRecords.data(),
+				hitgroupRecords.size() * sizeof(HitGroupRecord),
+				cudaMemcpyHostToDevice));
 
-		m_sbt.hitgroupRecordBase          = d_hitgroup_records;
-		m_sbt.hitgroupRecordCount         = count_records;
-		m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof_hitgroup_record);
 	}
 }
+
+void nori::Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
+{
+	HitGroupRecord rec = {};
+	OPTIX_CHECK(optixSbtRecordPackHeader(m_radiance_hit_group, &rec));
+	rec.data.geometry.type                   = GeometryData::TRIANGLE_MESH;
+	rec.data.geometry.triangleMesh.positions = shape->positions[i];
+	rec.data.geometry.triangleMesh.normals   = shape->normals[i];
+	rec.data.geometry.triangleMesh.texcoords = shape->texcoords[i];
+	rec.data.geometry.triangleMesh.indices   = shape->indices[i];
+
+	const int32_t mat_idx = shape->material_idx[i];
+	if (mat_idx >= 0)
+		rec.data.material.pbr = m_materials[mat_idx];
+	else
+		rec.data.material.pbr = MaterialData::Pbr();
+	hitgroupRecords.push_back(rec);
+
+	OPTIX_CHECK(optixSbtRecordPackHeader(m_hitgroup_prog_group[RAY_TYPE_OCCLUSION], &rec));
+	hitgroupRecords.push_back(rec);
+}
+
+void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
+{
+	HitGroupRecord rec = {};
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
+	rec.data.geometry.type          = GeometryData::SPHERE;
+	rec.data.geometry.sphere.center = m_position;
+	rec.data.geometry.sphere.radius = m_radius;
+
+	const int32_t mat_idx = material_idx[i];
+	switch (mat_idx)
+	{
+		case MaterialData::DIFFUSE:
+			break;
+		case MaterialData::MIRROR:
+			break;
+		case MaterialData::DIELECTRIC:
+			break;
+		case MaterialData::MICROFACET:
+			break;
+		case MaterialData::DISNEY:
+			break;
+		default:
+			throw std::exception("Sphere::getOptixHitgroupRecords: Unkown material index.");
+	}
+
+	if (mat_idx >= 0)
+		rec.data.material.pbr = m_materials[mat_idx];
+	else
+		rec.data.material.pbr = MaterialData::Pbr();
+	hitgroupRecords.push_back(rec);
+
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_OCCLUSION], &rec));
+	hitgroupRecords.push_back(rec);
+}
+
 
 OptixState::~OptixState()
 {

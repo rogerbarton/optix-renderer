@@ -27,6 +27,8 @@
 
 #ifdef NORI_USE_OPTIX
 struct OptixBuildInput;
+#include <nori/optix/OptixSbtTypes.h>
+#include <nori/optix/OptixState.h>
 #endif
 
 NORI_NAMESPACE_BEGIN
@@ -195,6 +197,12 @@ public:
 	 * @return OptixBuildInput required to build the geometry accel structure
 	 */
 	virtual OptixBuildInput getOptixBuildInput() const;
+
+	/**
+	 * Fill the hitgroup record for this shape
+	 * @param hitgroupRecords Append records to this vector, one record per ray type
+	 */
+	virtual void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) = 0;
 #endif
 
     /**

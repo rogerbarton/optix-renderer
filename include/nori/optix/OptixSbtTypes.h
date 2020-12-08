@@ -14,6 +14,6 @@ struct Record
 	T                                          data;
 };
 
-typedef Record<RaygenParams>   RayGenRecord;
+typedef Record<RaygenParams>   RaygenRecord;
 typedef Record<MissParams>     MissRecord;
 typedef Record<HitGroupParams> HitGroupRecord;

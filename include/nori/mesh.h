@@ -108,6 +108,7 @@ public:
 
 #ifdef NORI_USE_OPTIX
 	OptixBuildInput getOptixBuildInput() const override;
+		void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
 #endif
 
     /// Return the name of this mesh
