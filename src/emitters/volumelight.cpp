@@ -90,6 +90,15 @@ NORI_NAMESPACE_BEGIN
 			return touched;
 		}
 #endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixEmitterData(EmitterData &sbtData) override
+		{
+			sbtData.type = EmitterData::VOLUME;
+			// No specific data
+			Emitter::getOptixEmitterData(sbtData);
+		}
+#endif
 	};
 
 	NORI_REGISTER_CLASS(VolumeEmitter, "volumelight")

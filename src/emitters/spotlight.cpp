@@ -3,6 +3,10 @@
 #include <nori/shape.h>
 #include <nori/mesh.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 class SpotLight : public Emitter
 {
@@ -153,6 +157,19 @@ public:
 
         return touched;
     }
+#endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixEmitterData(EmitterData &sbtData) override
+		{
+			sbtData.type                 = EmitterData::SPOT;
+			sbtData.spot.position        = make_float3(m_position);
+			sbtData.spot.direction       = make_float3(m_direction);
+			sbtData.spot.falloffStart    = falloffStart;
+			sbtData.spot.totalWidthAngle = totalWidthAngle;
+
+			Emitter::getOptixEmitterData(sbtData);
+		}
 #endif
 
 	private:

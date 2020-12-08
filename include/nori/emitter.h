@@ -151,9 +151,12 @@ public:
 	bool getImGuiNodes() override;
 #endif
 
-protected:
-	/// Pointer to the shape if the emitter is attached to a shape
-	Shape *m_shape = nullptr;
+#ifdef NORI_USE_OPTIX
+		virtual void getOptixEmitterData(EmitterData &sbtData);
+#endif
+	protected:
+		/// Pointer to the shape if the emitter is attached to a shape
+		Shape *m_shape = nullptr;
 
 		Color3f m_radiance;
 	};

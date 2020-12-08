@@ -1,5 +1,9 @@
 #include <nori/emitter.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 	/**
@@ -100,6 +104,16 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 
 			return touched;
+		}
+#endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixEmitterData(EmitterData &sbtData) override
+		{
+			sbtData.type = EmitterData::POINT;
+			sbtData.point.position = make_float3(m_position);
+
+			Emitter::getOptixEmitterData(sbtData);
 		}
 #endif
 

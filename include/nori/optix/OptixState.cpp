@@ -12,13 +12,15 @@
 #include <nvrtc.h>
 #include <cuda_runtime_api.h>
 
-#include "sutil/Exception.h"
 #include "OptixState.h"
 #include "OptixSbtTypes.h"
 #include "cuda_shared/GeometryData.h"
 
 #include <nori/mesh.h>
 #include <nori/sphere.h>
+
+#include "sutil/Exception.h"
+#include "sutil/host_vec_math.h"
 
 #include <vector>
 #include <iostream>
@@ -298,7 +300,7 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 	{
 		std::vector<HitGroupRecord> hitgroupRecords;
 		hitgroupRecords.reserve(shapes.size() * RAY_TYPE_COUNT);
-		for (const nori::Shape *shape : shapes)
+		for (nori::Shape *shape : shapes)
 		{
 			shape->getOptixHitgroupRecords(*this, hitgroupRecords);
 		}
@@ -342,7 +344,7 @@ void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGro
 	HitGroupRecord rec = {};
 	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
 	rec.data.geometry.type          = GeometryData::SPHERE;
-	rec.data.geometry.sphere.center = make_float3(m_position.x(), m_position.y(), m_position.z());
+	rec.data.geometry.sphere.center = make_float3(m_position);
 	rec.data.geometry.sphere.radius = m_radius;
 
 	Shape::getOptixHitgroupRecords(rec);
@@ -365,6 +367,8 @@ void nori::Shape::getOptixHitgroupRecords(HitGroupRecord& rec)
 	}
 	if (m_medium)
 		m_medium->getOptixMediumData(rec.data.medium);
+	if (m_emitter)
+		m_emitter->getOptixEmitterData(rec.data.emitter);
 }
 
 
