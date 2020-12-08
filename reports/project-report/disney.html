@@ -89,23 +89,36 @@
             </div>
 
             <h4>Impact of Metallic</h4>
+            <p>We see here the impact of the metallic parameter. As expected, the camel looks more like metal if we
+                increase this parameter to approach 1.</p>
             <div class="twentytwenty-container">
                 <img src="images/disney/metallic/metallic0.5.png" alt="Metallic 0.5" class="img-responsive">
                 <img src="images/disney/metallic/metallic1.png" alt="Metallic 1.0" class="img-responsive">
             </div>
 
             <h4>Impact of Roughness</h4>
+            <p>We see at a glance, that roughness indeed works as expected, since the right image shows no reflections.
+            </p>
             <div class="twentytwenty-container">
                 <img src="images/disney/roughness/roughness0.png" alt="Roughness 0" class="img-responsive">
                 <img src="images/disney/roughness/roughness1.png" alt="Rougness 1" class="img-responsive">
             </div>
 
             <h4>Impact of Specular</h4>
+            <p>This comparison shows 4 images which compare different specular values. And indeed as the specular value
+                increases, we see more reflections from the arealight above.</p>
             <div class="twentytwenty-container">
                 <img src="images/disney/specular/specular0.png" alt="Specular 0" class="img-responsive">
                 <img src="images/disney/specular/specular1.png" alt="Specular 1.0" class="img-responsive">
                 <img src="images/disney/specular/specular0.33.png" alt="Specular 0.33" class="img-responsive">
                 <img src="images/disney/specular/specular0.66.png" alt="Specular 0.66" class="img-responsive">
+            </div>
+
+            <h4>Impact of Specular Tint</h4>
+            <p></p>
+            <div class="twentytwenty-container">
+                <img src="images/disney/default.png" alt="Default (Specular 0.5)" class="img-responsive">
+                <img src="images/disney/specularTint/specularTint1.png" alt="Specular Tint 1" class="img-responsive">
             </div>
 
             <h4>Impact of Clearcoat</h4>
@@ -130,25 +143,18 @@
                 <img src="images/disney/subsurface/subsurface1.png" alt="Subsurface 1" class="img-responsive">
             </div>
 
-            <h4>Impact of Specular Tint</h4>
-            <p></p>
+            <h4>Validation</h4>
+            <p>This image shows a comparison between metallic and roughness (starting from the top-left corner), with
+                increasing values in both directions. Horizontally is the metallic, roughness is vertically.</p>
             <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default (Specular 0.5)" class="img-responsive">
-                <img src="images/disney/specularTint/specularTint1.png" alt="Specular Tint 1" class="img-responsive">
+                <img src="images/disney/metallic_roughness.png" alt="" class="img-responsive">
             </div>
-
-            <h4>Impact of Sheen</h4>
-            <p></p>
+            <p>This next comparison shows the same values in comparison, as done on the Blender documentation <a
+                    href="#ref-2">[2]</a>. As we can see, the anisotrpoic effect works at the same spheres and is not
+                visible at the cases where the blender documentation image does also not show the effect.</p>
             <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default" class="img-responsive">
-                <img src="images/disney/sheen/sheen1.png" alt="Sheen 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Sheen Tint</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/sheenTint/sheenTint0.png" alt="Sheen Tint 0" class="img-responsive">
-                <img src="images/disney/sheenTint/sheenTint1.png" alt="Sheen Tint 1" class="img-responsive">
+                <img src="images/disney/aniso_rough.png" alt="Nori" class="img-responsive">
+                <img src="images/disney/blender_aniso_rough.jpg" alt="Blender [2]</a>" class="img-responsive">
             </div>
 
             <h4>Validation by comparison to Blender</h4>
@@ -195,6 +201,9 @@
             <p id="ref-1">[1] <a
                     href="https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf">https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf</a>
             </p>
+            <p id="ref-2">[2] <a
+                    href="https://docs.blender.org/manual/en/latest/render/shader_nodes/shader/principled.html">Principle
+                    BSDF explained on docs.blender.org</a></p>
 
         </div>
     </div>
