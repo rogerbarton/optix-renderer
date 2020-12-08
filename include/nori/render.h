@@ -106,8 +106,10 @@ protected:
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
     std::atomic<float>         m_progress     = 1.f;
-	time_point_t m_startTime;
-	time_point_t m_endTime;
+	std::atomic<uint32_t>      m_currentCpuSample;
+	std::atomic<uint32_t>      m_currentOptixSample;
+	time_point_t               m_startTime;
+	time_point_t               m_endTime;
 #ifdef NORI_USE_OPTIX
 	std::thread m_optixThread;
 #endif
@@ -116,7 +118,7 @@ protected:
 	std::string outputName;
 	std::string outputNameDenoised;
 	std::string outputNameVariance;
-};
+	};
 
 NORI_NAMESPACE_END
 

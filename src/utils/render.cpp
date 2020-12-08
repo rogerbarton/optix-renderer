@@ -176,7 +176,8 @@ void RenderThread::renderThreadMain()
 	m_blockNormal.clear();
 	m_blockNormal.unlock();
 
-
+	m_currentCpuSample = 0;
+	m_currentOptixSample = 0;
 #ifdef NORI_USE_OPTIX
 	if(!m_previewMode)
 		m_optixThread = std::thread([this] { renderThreadOptix(); });
@@ -198,15 +199,16 @@ void RenderThread::renderThreadMain()
 	samplers.resize(numBlocks);
 
 	std::cout << std::endl;
-	for (uint32_t k = 0; k < numSamples; ++k)
+	for (; m_currentCpuSample + m_currentOptixSample < numSamples; ++m_currentCpuSample)
 	{
-		m_progress = k / float(numSamples);
+		const uint32_t currentSample = m_currentCpuSample;
+		m_progress = currentSample / float(numSamples);
 		if (m_renderStatus == ERenderStatus::Interrupt)
 			break;
 
 		tbb::blocked_range<int> range(0, numBlocks);
 
-		m_renderScene->getSampler()->setSampleRound(k);
+		m_renderScene->getSampler()->setSampleRound(currentSample);
 
 		auto map = [&](const tbb::blocked_range<int> &range) {
 			// Allocate memory for a small image block to be rendered by the current thread
@@ -231,7 +233,7 @@ void RenderThread::renderThreadMain()
 
 				// Get block id to continue using the same sampler
 				auto blockId = block.getBlockId();
-				if (k == 0)
+				if (currentSample == 0)
 				{ // Initialize the sampler for the first sample
 					std::unique_ptr<Sampler> sampler(m_renderScene->getSampler()->clone());
 					sampler->prepare(block);
@@ -379,25 +381,37 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 #ifdef NORI_USE_OPTIX
 void RenderThread::renderThreadOptix()
 {
-	OptixState *const optixState = m_renderScene->getOptixState();
-
-	Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
-	const uint32_t width    = imageDim.x();
-	const uint32_t height   = imageDim.y();
-
-	m_optixBlock.lock();
-	m_optixBlock.resize(width, height);
-	m_optixBlock.unlock();
-
-	if (!optixState->preRender())
-		return;
-
-	uint32_t      numSamples = m_renderScene->getSampler()->getSampleCount();
-	for (uint32_t k          = 0; k < numSamples; ++k)
+	try
 	{
-		if (m_renderStatus == ERenderStatus::Interrupt)
-			break;
-		optixState->renderSubframe(m_optixBlock);
+		OptixState *const optixState = m_renderScene->getOptixState();
+
+		Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
+		const uint32_t width    = imageDim.x();
+		const uint32_t height   = imageDim.y();
+
+		m_optixBlock.lock();
+		m_optixBlock.resize(width, height);
+		m_optixBlock.unlock();
+
+		m_renderScene->updateOptix();
+		if (!optixState->preRender(*m_renderScene))
+			return;
+
+		// Render
+		const uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
+		const uint32_t samplesPerLaunch = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+		for (; m_currentOptixSample + m_currentCpuSample < numSamples; m_currentOptixSample += samplesPerLaunch)
+		{
+			if (m_renderStatus == ERenderStatus::Interrupt)
+				break;
+			optixState->renderSubframe(m_optixBlock, m_currentOptixSample);
+		}
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Optix Error: " << e.what() << std::endl;
+		std::cerr << "  Optix disabled.";
+		m_deviceMode = EDeviceMode::Cpu;
 	}
 }
 #endif
