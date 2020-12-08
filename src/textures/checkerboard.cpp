@@ -54,12 +54,19 @@ public:
 	NORI_OBJECT_IMGUI_NAME("Checkerboard");
     virtual bool getImGuiNodes() override { return false; }
 #endif
-protected:
-  T m_value1;
-  T m_value2;
 
-  Point2f m_delta;
-  Vector2f m_scale;
+#ifdef NORI_USE_OPTIX
+	void getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
+	{
+    	throw NoriException("Checkerboard texture not supported with OptiX.");
+    }
+#endif
+protected:
+	T m_value1;
+	T m_value2;
+
+	Point2f m_delta;
+	Vector2f m_scale;
 };
 
 template <>

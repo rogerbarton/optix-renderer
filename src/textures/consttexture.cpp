@@ -18,6 +18,10 @@
 
 #include <nori/texture.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 template <typename T>
@@ -37,6 +41,10 @@ public:
 #ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Constant");
     virtual bool getImGuiNodes() override { return false; }
+#endif
+
+#ifdef NORI_USE_OPTIX
+	void getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue);
 #endif
 protected:
     T m_value;
@@ -100,6 +108,20 @@ bool ConstantTexture<Color3f>::getImGuiNodes()
     ImGui::NextColumn();
     return touched;
 }
+#endif
+
+#ifdef NORI_USE_OPTIX
+	template<>
+	void ConstantTexture<float>::getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
+	{
+		constValue = make_float3(m_value);
+	}
+
+	template<>
+	void ConstantTexture<Color3f>::getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
+	{
+		constValue = make_float3(m_value);
+	}
 #endif
 
 NORI_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float")

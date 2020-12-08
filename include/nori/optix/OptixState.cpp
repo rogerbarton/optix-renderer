@@ -355,18 +355,22 @@ void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGro
 	hitgroupRecords.push_back(rec);
 }
 
-void nori::Shape::getOptixHitgroupRecords(HitGroupRecord& rec)
+void nori::Shape::getOptixHitgroupRecords(HitGroupRecord &rec)
 {
+	// Copy shape specifics to the record
 	rec.data.geometry.volume = m_volume;
-	if (m_bsdf)
-		m_bsdf->getOptixMaterialData(rec.data.bsdf);
 	if (m_normalMap)
 	{
 		float3 constNormalDummy;
 		m_normalMap->getOptixTexture(constNormalDummy, rec.data.bsdf.normalTex);
 	}
+
+	if (m_bsdf)
+		m_bsdf->getOptixMaterialData(rec.data.bsdf);
+
 	if (m_medium)
 		m_medium->getOptixMediumData(rec.data.medium);
+
 	if (m_emitter)
 		m_emitter->getOptixEmitterData(rec.data.emitter);
 }
