@@ -218,4 +218,81 @@ bool Mesh::getImGuiNodes()
 }
 #endif
 
+#ifdef NORI_USE_OPTIX
+	void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
+	{
+		if (d_V == 0)
+		{
+			{
+				size_t bytes = m_V.size() * sizeof(float);
+				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
+				CUDA_CHECK(cudaMemcpy(
+						reinterpret_cast<void *>(d_V),
+						m_V.data(),
+						bytes,
+						cudaMemcpyHostToDevice
+				));
+			}
+
+			{
+				size_t bytes = m_N.size() * sizeof(float);
+				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
+				CUDA_CHECK(cudaMemcpy(
+						reinterpret_cast<void *>(d_N),
+						m_N.data(),
+						bytes,
+						cudaMemcpyHostToDevice
+				));
+			}
+
+			{
+				size_t bytes = m_UV.size() * sizeof(float);
+				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
+				CUDA_CHECK(cudaMemcpy(
+						reinterpret_cast<void *>(d_UV),
+						m_UV.data(),
+						bytes,
+						cudaMemcpyHostToDevice
+				));
+			}
+
+			{
+				size_t bytes = m_F.size() * sizeof(uint32_t);
+				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
+				CUDA_CHECK(cudaMemcpy(
+						reinterpret_cast<void *>(d_F),
+						m_F.data(),
+						bytes,
+						cudaMemcpyHostToDevice
+				));
+			}
+		}
+
+		HitGroupRecord rec = {};
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
+		rec.data.geometry.type                   = GeometryData::TRIANGLE_MESH;
+		rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
+		rec.data.geometry.triangleMesh.normals   = reinterpret_cast<float3 *>(d_N);
+		rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
+		rec.data.geometry.triangleMesh.indices   = reinterpret_cast<uint3 *>(d_F);
+
+		Shape::getOptixHitgroupRecords(rec);
+
+		hitgroupRecords.push_back(rec);
+
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+		hitgroupRecords.push_back(rec);
+	}
+#endif
+
+	Mesh::~Mesh()
+	{
+#ifdef NORI_USE_OPTIX
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_V)));
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_N)));
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_UV)));
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_F)));
+#endif
+	}
+
 NORI_NAMESPACE_END

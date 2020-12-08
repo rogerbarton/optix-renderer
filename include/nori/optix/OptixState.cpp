@@ -321,24 +321,6 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 	}
 }
 
-void nori::Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
-{
-	HitGroupRecord rec = {};
-	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
-	rec.data.geometry.type                   = GeometryData::TRIANGLE_MESH;
-	rec.data.geometry.triangleMesh.positions = shape->positions[i];
-	rec.data.geometry.triangleMesh.normals   = shape->normals[i];
-	rec.data.geometry.triangleMesh.texcoords = shape->texcoords[i];
-	rec.data.geometry.triangleMesh.indices   = shape->indices[i];
-
-	Shape::getOptixHitgroupRecords(rec);
-
-	hitgroupRecords.push_back(rec);
-
-	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
-	hitgroupRecords.push_back(rec);
-}
-
 void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 {
 	HitGroupRecord rec = {};
