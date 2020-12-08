@@ -242,7 +242,8 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda/LaunchParams.h
         include/nori/optix/cuda/RayParams.h
         include/nori/optix/cuda/GeometryData.h
-        include/nori/optix/cuda/MaterialData.h
+        include/nori/optix/cuda/BsdfData.h
+        include/nori/optix/cuda/MediumData.h
 
         include/nori/optix/cuda/sutil/helpers.h
         include/nori/optix/cuda/sutil/vec_math.h
@@ -262,6 +263,7 @@ if(NORI_USE_OPTIX)
 
         include/nori/optix/sutil/Exception.h
         include/nori/optix/sutil/CUDAOutputBuffer.h
+        include/nori/optix/sutil/host_vec_math.h
 
         ${NORI_CU_FILES}
         )

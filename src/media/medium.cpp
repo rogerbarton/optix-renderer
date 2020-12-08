@@ -94,4 +94,11 @@ NORI_NAMESPACE_BEGIN
 	}
 #endif
 
+#ifdef NORI_USE_OPTIX
+	void Medium::getOptixMediumData(MediumData &sbtData)
+	{
+
+	}
+#endif
+
 NORI_NAMESPACE_END

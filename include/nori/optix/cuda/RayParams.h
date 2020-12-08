@@ -5,7 +5,8 @@
 
 #include <optix.h>
 #include "GeometryData.h"
-#include "MaterialData.h"
+#include "BsdfData.h"
+#include "MediumData.h"
 
 /**
  * Contains data used for the SBT
@@ -17,7 +18,7 @@
 enum RayType
 {
 	RAY_TYPE_RADIANCE  = 0,
-	RAY_TYPE_OCCLUSION = 1,
+	RAY_TYPE_SHADOWRAY = 1,
 	RAY_TYPE_COUNT
 };
 
@@ -32,5 +33,6 @@ struct MissParams
 struct HitGroupParams
 {
 	GeometryData geometry;
-	MaterialData material;
+	BsdfData     bsdf;
+	MediumData   medium;
 };

@@ -16,7 +16,6 @@
 #include "OptixState.h"
 #include "OptixSbtTypes.h"
 #include "cuda/GeometryData.h"
-#include "cuda/MaterialData.h"
 
 #include <nori/mesh.h>
 #include <nori/sphere.h>
@@ -200,9 +199,9 @@ void OptixState::createVolumeProgram(std::vector<OptixProgramGroup> program_grou
 
 		OPTIX_CHECK_LOG2(optixProgramGroupCreate(
 				m_context, &occlusion_prog_group_desc, 1, &occlusion_prog_group_options, LOG, &LOG_SIZE,
-				&m_hitgroup_prog_group[RAY_TYPE_OCCLUSION]));
+				&m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY]));
 
-		program_groups.push_back(m_hitgroup_prog_group[RAY_TYPE_OCCLUSION]);
+		program_groups.push_back(m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY]);
 	}
 }
 
@@ -249,7 +248,7 @@ void OptixState::createMissProgram(std::vector<OptixProgramGroup> program_groups
 		                                         &miss_prog_group_options,
 		                                         LOG,
 		                                         &LOG_SIZE,
-		                                         &m_miss_prog_group[RAY_TYPE_OCCLUSION]));
+		                                         &m_miss_prog_group[RAY_TYPE_SHADOWRAY]));
 	}
 }
 
@@ -261,11 +260,6 @@ void OptixState::allocateSbt()
 	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.missRecordBase), sizeof(MissRecord) * RAY_TYPE_COUNT));
 	m_sbt.missRecordCount         = RAY_TYPE_COUNT;
 	m_sbt.missRecordStrideInBytes = static_cast<uint32_t>(sizeof(MissRecord));
-
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.hitgroupRecordBase),
-	                      sizeof(HitGroupRecord) * RAY_TYPE_COUNT * MaterialData::TYPE_COUNT));
-	m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
-	m_sbt.hitgroupRecordCount         = RAY_TYPE_COUNT * MaterialData::TYPE_COUNT;
 }
 
 void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
@@ -306,7 +300,7 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 		hitgroupRecords.reserve(shapes.size() * RAY_TYPE_COUNT);
 		for (const nori::Shape *shape : shapes)
 		{
-			shape->getOptixHitgroupRecord(hitgroupRecords);
+			shape->getOptixHitgroupRecords(*this, hitgroupRecords);
 		}
 
 		CUDA_CHECK(cudaMalloc(
@@ -319,27 +313,27 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 				hitgroupRecords.size() * sizeof(HitGroupRecord),
 				cudaMemcpyHostToDevice));
 
+
+		m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
+		m_sbt.hitgroupRecordCount         = RAY_TYPE_COUNT * BsdfData::TYPE_COUNT;
 	}
 }
 
 void nori::Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 {
 	HitGroupRecord rec = {};
-	OPTIX_CHECK(optixSbtRecordPackHeader(m_radiance_hit_group, &rec));
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
 	rec.data.geometry.type                   = GeometryData::TRIANGLE_MESH;
 	rec.data.geometry.triangleMesh.positions = shape->positions[i];
 	rec.data.geometry.triangleMesh.normals   = shape->normals[i];
 	rec.data.geometry.triangleMesh.texcoords = shape->texcoords[i];
 	rec.data.geometry.triangleMesh.indices   = shape->indices[i];
 
-	const int32_t mat_idx = shape->material_idx[i];
-	if (mat_idx >= 0)
-		rec.data.material.pbr = m_materials[mat_idx];
-	else
-		rec.data.material.pbr = MaterialData::Pbr();
+	Shape::getOptixHitgroupRecords(rec);
+
 	hitgroupRecords.push_back(rec);
 
-	OPTIX_CHECK(optixSbtRecordPackHeader(m_hitgroup_prog_group[RAY_TYPE_OCCLUSION], &rec));
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
 	hitgroupRecords.push_back(rec);
 }
 
@@ -351,31 +345,25 @@ void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGro
 	rec.data.geometry.sphere.center = m_position;
 	rec.data.geometry.sphere.radius = m_radius;
 
-	const int32_t mat_idx = material_idx[i];
-	switch (mat_idx)
+	Shape::getOptixHitgroupRecords(rec);
+
+	hitgroupRecords.push_back(rec);
+
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+	hitgroupRecords.push_back(rec);
+}
+
+void nori::Shape::getOptixHitgroupRecords(HitGroupRecord& rec)
+{
+	if (m_bsdf)
+		m_bsdf->getOptixMaterialData(rec.data.bsdf);
+	if (m_normalMap)
 	{
-		case MaterialData::DIFFUSE:
-			break;
-		case MaterialData::MIRROR:
-			break;
-		case MaterialData::DIELECTRIC:
-			break;
-		case MaterialData::MICROFACET:
-			break;
-		case MaterialData::DISNEY:
-			break;
-		default:
-			throw std::exception("Sphere::getOptixHitgroupRecords: Unkown material index.");
+		float3 constNormalDummy;
+		m_normalMap->getOptixTexture(constNormalDummy, rec.data.bsdf.normalTex);
 	}
-
-	if (mat_idx >= 0)
-		rec.data.material.pbr = m_materials[mat_idx];
-	else
-		rec.data.material.pbr = MaterialData::Pbr();
-	hitgroupRecords.push_back(rec);
-
-	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_OCCLUSION], &rec));
-	hitgroupRecords.push_back(rec);
+	if (m_medium)
+		m_medium->getOptixMediumData(rec.data.medium);
 }
 
 

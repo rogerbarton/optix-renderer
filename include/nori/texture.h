@@ -21,6 +21,11 @@
 
 #include <nori/object.h>
 
+#ifdef NORI_USE_OPTIX
+#include <vector_types.h>
+#include <texture_types.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -60,7 +65,10 @@ public:
 	NORI_OBJECT_IMGUI_NAME("Texture Base");
 	virtual bool getImGuiNodes() override { return false; }
 #endif
-};
+#ifdef NORI_USE_OPTIX
+	virtual void getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue) = 0;
+#endif
+	};
 
 NORI_NAMESPACE_END
 

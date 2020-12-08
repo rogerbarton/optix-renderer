@@ -20,6 +20,9 @@
 #define __NORI_BSDF_H
 
 #include <nori/object.h>
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/cuda/BsdfData.h>
+#endif
 
 NORI_NAMESPACE_BEGIN
 
@@ -112,6 +115,13 @@ public:
      * */
     virtual EClassType getClassType() const override { return EBSDF; }
 
+#ifdef NORI_USE_OPTIX
+	/**
+	 * Set the appropriate MaterialData for the sbt record
+	 */
+	virtual void getOptixMaterialData(BsdfData& sbtData) = 0;
+#endif
+
     /**
      * \brief Return whether or not this BRDF is diffuse. This
      * is primarily used by photon mapping to decide whether
@@ -122,7 +132,7 @@ public:
 	NORI_OBJECT_IMGUI_NAME("BSDF Base");
     virtual bool getImGuiNodes() override { return false; }
 #endif
-};
+	};
 
 NORI_NAMESPACE_END
 

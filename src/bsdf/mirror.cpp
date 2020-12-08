@@ -65,6 +65,14 @@ public:
 		return BSDF::getImGuiNodes();
 	}
 #endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMaterialData(BsdfData& sbtData) override
+		{
+			sbtData.type = BsdfData::MIRROR;
+			// No data to set
+		}
+#endif
 };
 
 NORI_REGISTER_CLASS(Mirror, "mirror");

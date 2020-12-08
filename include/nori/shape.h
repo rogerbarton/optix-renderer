@@ -203,6 +203,7 @@ public:
 	 * @param hitgroupRecords Append records to this vector, one record per ray type
 	 */
 	virtual void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) = 0;
+	virtual void getOptixHitgroupRecords(HitGroupRecord& rec);
 #endif
 
     /**

@@ -8,18 +8,16 @@
 #include <optix_types.h>
 #include <vector_types.h>
 
-struct MaterialData
+struct BsdfData
 {
-	/**
-	 * Note: ids need to match BSDF::getBsdfId()
-	 */
 	enum Type
 	{
-		DIFFUSE    = 0,
-		MIRROR     = 1,
-		DIELECTRIC = 2,
-		MICROFACET = 3,
-		DISNEY     = 4,
+		NONE       = 0,
+		DIFFUSE    = 1,
+		MIRROR     = 2,
+		DIELECTRIC = 3,
+		MICROFACET = 4,
+		DISNEY     = 5,
 		TYPE_COUNT
 	};
 
@@ -63,7 +61,7 @@ struct MaterialData
 		cudaTextureObject_t albedoTex = 0;
 	};
 
-	Type                type;
+	Type                type      = NONE;
 	cudaTextureObject_t normalTex = 0;
 
 	union

@@ -4,6 +4,10 @@
 
 #include <nori/medium.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 	struct HomogeneousMedium : public Medium
@@ -164,6 +168,19 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 
 			return touched;
+		}
+#endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMediumData(MediumData &sbtData) override
+		{
+			sbtData.type          = MediumData::HOMOG;
+			sbtData.homog.mu_a    = make_float3(m_mu_a);
+			sbtData.homog.mu_s    = make_float3(m_mu_s);
+			sbtData.homog.mu_t    = make_float3(m_mu_t);
+			sbtData.homog.density = m_density;
+
+			Medium::getOptixMediumData(sbtData);
 		}
 #endif
 

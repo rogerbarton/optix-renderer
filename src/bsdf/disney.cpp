@@ -263,6 +263,24 @@ public:
         return touched;
     }
 #endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMaterialData(BsdfData &sbtData) override
+		{
+			sbtData.type = BsdfData::DISNEY;
+			albedo->getOptixTexture(sbtData.disney.albedo, sbtData.disney.albedoTex);
+			sbtData.disney.metallic       = metallic;
+			sbtData.disney.subsurface     = subsurface;
+			sbtData.disney.specular       = specular;
+			sbtData.disney.roughness      = roughness;
+			sbtData.disney.specularTint   = specularTint;
+			sbtData.disney.anisotropic    = anisotropic;
+			sbtData.disney.sheen          = sheen;
+			sbtData.disney.sheenTint      = sheenTint;
+			sbtData.disney.clearcoat      = clearcoat;
+			sbtData.disney.clearcoatGloss = clearcoatGloss;
+		}
+#endif
 private:
     static Vector3f mon2lin(Color3f vec)
     {
