@@ -99,6 +99,7 @@ add_executable(nori
     src/integrators/PreviewIntegrator.cpp
     src/integrators/path_vol_mats.cpp
     src/integrators/path_vol_mis.cpp
+    src/integrators/EnvMapTester.cpp
 
     src/shapes/mesh.cpp
     src/shapes/obj.cpp

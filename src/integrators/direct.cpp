@@ -46,8 +46,7 @@ public:
       // secondary ray
       Vector3f wi = its.toLocal(rec.wi);
 
-      // the intersection for the shadow (secondary) ray
-      Intersection light_intersection;
+      // the intersection test for the shadow (secondary) ray
       if (!scene->rayIntersect(rec.shadowRay))
       {
 

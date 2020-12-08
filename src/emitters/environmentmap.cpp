@@ -76,14 +76,14 @@ public:
 	};
 
 	Color3f sample(EmitterQueryRecord &lRec,
-				   const Point2f &sample) const
+				   const Point2f &sample) const override
 	{
 		// sample any point based on the probabilities
 		size_t elem = dpdf.sample(sample.x());
 
 		// convert result (kind of uv coords) into direction
-		float i = int(elem / m_map->getHeight()) / (float)m_map->getHeight();
-		float j = int(elem % m_map->getHeight()) / (float)m_map->getWidth();
+		float i = int(elem / m_map->getWidth()) / (float)m_map->getHeight();
+		float j = int(elem % m_map->getWidth()) / (float)m_map->getWidth();
 
 		Vector3f v;
 		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
@@ -103,12 +103,13 @@ public:
 
 		lRec.pdf = pdf(lRec);
 
-		if(lRec.pdf < Epsilon) return Color3f(0.f);
+		if (lRec.pdf < Epsilon)
+			return Color3f(0.f);
 
 		return eval(lRec) / lRec.pdf;
 	}
 
-	float pdf(const EmitterQueryRecord &lRec) const
+	float pdf(const EmitterQueryRecord &lRec) const override
 	{
 		// adaptive sampling based on the brightness of each pixel
 
@@ -117,18 +118,8 @@ public:
 			return Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f));
 		}
 
-		Vector3f target = lRec.p.normalized();
-		Point2f uv = sphericalCoordinates(target);
-
-		// convert these uv coords into x and y for the probability
-		unsigned int i = uv.y() / (2.f * M_PI) * m_map->getWidth();
-		unsigned int j = uv.x() * INV_PI * m_map->getHeight();
-
-		i = (i + m_map->getHeight()) % m_map->getHeight();
-		j = (j + m_map->getWidth()) % m_map->getWidth();
-
 		// second and third part is the probability of sampling one pixel (in solid angles)
-		return dpdf.at(i * m_map->getWidth() + j) / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
+		return eval(lRec).getLuminance() * dpdf.getNormalization() / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
 	}
 
 	Color3f eval(const EmitterQueryRecord &lRec) const override
@@ -195,12 +186,13 @@ private:
 	void calculateProbs()
 	{
 		dpdf.clear();
+		dpdf.reserve(m_map->getHeight() * m_map->getWidth());
 		for (unsigned int i = 0; i < m_map->getHeight(); i++)
 		{
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
 				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
-				dpdf.append(std::abs(col.getLuminance()) + Epsilon); // add epsilon to add prob to select every pixel once
+				dpdf.append(std::abs(col.getLuminance()) /*+ Epsilon */); // add epsilon to add prob to select every pixel once
 			}
 		}
 
