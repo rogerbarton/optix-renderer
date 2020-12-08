@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../favicon.ico" />
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="images/favicon.ico" />
 
     <title>Computer Graphics - Final Project</title>
 
@@ -115,32 +115,18 @@
             </div>
 
             <h4>Impact of Specular Tint</h4>
-            <p></p>
+            <p>We see here with ease that the specular tint actually changes the specular areas. The tint is clearly
+                visible. All non-specular areas on the head are not affected by this.</p>
             <div class="twentytwenty-container">
                 <img src="images/disney/default.png" alt="Default (Specular 0.5)" class="img-responsive">
                 <img src="images/disney/specularTint/specularTint1.png" alt="Specular Tint 1" class="img-responsive">
             </div>
 
             <h4>Impact of Clearcoat</h4>
-            <p></p>
+            <p>Finally, I show the impact of clearcoat.</p>
             <div class="twentytwenty-container">
                 <img src="images/disney/default.png" alt="Default" class="img-responsive">
                 <img src="images/disney/clearcoat/clearcoat1.png" alt="Clearcoat 1" class="img-responsive">
-            </div>
-
-            <h4>Impact of Clearcoat Gloss</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default (clearcoat gloss 1)" class="img-responsive">
-                <img src="images/disney/clearcoatGloss/clearcoatGloss0.png" alt="Clearcoat Gloss 0"
-                    class="img-responsive">
-            </div>
-
-            <h4>Impact of Subsurface</h4>
-            <p></p>
-            <div class="twentytwenty-container">
-                <img src="images/disney/default.png" alt="Default" class="img-responsive">
-                <img src="images/disney/subsurface/subsurface1.png" alt="Subsurface 1" class="img-responsive">
             </div>
 
             <h4>Validation</h4>
@@ -157,7 +143,7 @@
                 <img src="images/disney/blender_aniso_rough.jpg" alt="Blender [2]</a>" class="img-responsive">
             </div>
 
-            <h4>Validation by comparison to Blender</h4>
+            <h4>Validation by Comparison to Blender</h4>
             <p>The following comparisons are all done with Blender 2.82a, using a Principle BSDF material. The scene was
                 exactly copied over to nori. As an integrator I use Path MIS (Nori) and Path Tracing (Blender), both
                 using 128 samples per pixel. This should ensure that the results are comparable. The scene was
