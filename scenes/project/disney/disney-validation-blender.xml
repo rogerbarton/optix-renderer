@@ -1,0 +1,1863 @@
+<scene>
+	<!-- Independent sample generator, user-selected samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="512"/>
+	</sampler>
+
+	<!-- Use the average visibility integrator -->
+	<integrator type="path_mis" />
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="45,7,-45" origin="45,190,-45" up="0,0,1"/>
+		</transform>
+
+		<!-- Field of view: 30 degrees -->
+		<float name="fov" value="35"/>
+
+		<!-- 768 x 768 pixels -->
+		<integer name="width" value="1024"/>
+		<integer name="height" value="1024"/>
+	</camera>
+
+	<emitter type="envmap">
+		<texture type="constant_color" name="albedo">
+			<color name="value" value="0.5,0.5,0.5"/>
+			<string name="filename" value="../res/photo_studio_01.png"/>
+			<vector name="eulerAngles" value="0,0,0"/>
+			<boolean name="sphericalTexture" value="true"/>
+		</texture>
+	</emitter>
+
+	<shape type="obj">
+		<string name="filename" value="../../pa3/odyssey/cube.obj"/>
+		<transform name="toWorld">
+			<scale value="1, 80, 90"/>
+			<rotate axis="0,0,1" angle="90"/>
+			<translate value="85, 200, -45"/>
+		</transform>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.0, 0.0, 0.0"/>
+		</bsdf>
+		<emitter type="area">
+			<color name="radiance" value="10, 10, 10"/>
+		</emitter>
+	</shape>
+
+	<shape type="sphere">
+		<point name="center" value="0,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,0"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-9"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.1"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-18"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.2"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-27"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.30000000000000004"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-36"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.4"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-45"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.5"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-54"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.6000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-63"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.7000000000000001"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-72"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.8"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-81"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="0.9"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="0,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.0"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="9,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.1"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="18,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.2"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="27,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.30000000000000004"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="36,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.4"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="45,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.5"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="54,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.6000000000000001"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="63,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.7000000000000001"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="72,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.8"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="81,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="0.9"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+	<shape type="sphere">
+		<point name="center" value="90,8,-90"/>
+		<float name="radius" value="4"/>
+
+		<bsdf type="disney">
+			<float name="anisotropic" value="1.0"/>
+			<float name="roughness" value="1.0"/>
+			<texture type="constant_color" name="albedo">
+				<string name="filename" value="../res/wooden_motel.png"/>
+				<vector name="eulerAngles" value="0,0,0"/>
+				<boolean name="sphericalTexture" value="true"/>
+				<color name="value" value="0.5,0.2,0.2"/>
+			</texture>
+		</bsdf>
+	</shape>
+</scene>

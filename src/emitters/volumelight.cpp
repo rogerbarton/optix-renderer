@@ -14,6 +14,7 @@ NORI_NAMESPACE_BEGIN
 		explicit VolumeEmitter(const PropertyList &props)
 		{
 			m_radiance = props.getColor("radiance");
+			lightProb = props.getFloat("lightWeight", 1.f);
 		}
 
 		NoriObject *cloneAndInit() override {

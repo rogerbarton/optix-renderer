@@ -29,6 +29,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			// store the radiance
 			m_radiance = props.getColor("radiance");
+			lightProb = props.getFloat("lightWeight", 1.f);
 		}
 
 		NoriObject *cloneAndInit() override {
