@@ -37,7 +37,7 @@ inline double durationMs(const TimePoint time)
 class RenderThread {
 
 public:
-	RenderThread(ImageBlock &block) : m_block(block), m_startTime(clock_t::now()), m_endTime(m_startTime) {}
+	RenderThread();
     ~RenderThread();
 
     void loadScene(const std::string & filename);
@@ -58,15 +58,36 @@ public:
 	void drawSceneGui();
 #endif
 
-	Scene *m_guiScene       = nullptr;
-	Scene *m_renderScene    = nullptr;
+	Scene       *m_guiScene       = nullptr;
+	Scene       *m_renderScene    = nullptr;
 	/**
 	 * Restart render when a change is detected. Otherwise the apply button can be used.
 	 * m_preview_mode overrides this.
 	 */
-	bool  m_autoUpdate      = true;
-	bool  m_guiSceneTouched = false;
-	bool  m_previewMode     = false;
+	bool        m_autoUpdate      = true;
+	bool        m_guiSceneTouched = false;
+	bool        m_previewMode     = false;
+
+	static constexpr int EDeviceModeSize = 3;
+	const char* m_deviceModeStrings[EDeviceModeSize] = {"CPU", "Optix", "CPU + Optix"};
+	enum class EDeviceMode : int {
+		Cpu   = 0,
+		Optix = 1,
+		Both  = 2,
+	};
+	EDeviceMode m_deviceMode                         = EDeviceMode::Both;
+
+	static constexpr int EBlockTypeSize = 3;
+	const char* m_blockTypeStrings[EBlockTypeSize] = {"Composite", "Albedo", "Normal"};
+	enum class EBlockType : int {
+		Composite = 0,
+		Albedo = 1,
+		Normal = 2
+	};
+
+	EBlockType m_guiActiveBlock = EBlockType::Composite;
+	ImageBlock& getCurrentBlock();                      /// Get the active block
+	ImageBlock& getBlock(EBlockType blockType = EBlockType::Composite);  /// Get a specific block
 protected:
 
 	enum class ERenderStatus : int {
@@ -76,7 +97,10 @@ protected:
 		Done      = 3
 	};
 
-    ImageBlock & m_block;
+    ImageBlock m_block;
+    ImageBlock m_blockNormal;		/// Normals feature buffer
+    ImageBlock m_blockAlbedo;      	/// Albedo feature buffer
+
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
     std::atomic<float>         m_progress     = 1.f;

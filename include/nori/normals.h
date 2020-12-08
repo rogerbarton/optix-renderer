@@ -12,7 +12,7 @@ public:
 	NORI_OBJECT_DEFAULT_CLONE(NormalIntegrator)
 	NORI_OBJECT_DEFAULT_UPDATE(NormalIntegrator)
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f& albedo, Color3f& normal) const override
     {
         /* Find the surface that is visible in the requested direction */
         Intersection its;
@@ -30,6 +30,7 @@ public:
         /* Return the component-wise absolute
            value of the shading normal as a color */
         Normal3f n = its.shFrame.n.cwiseAbs();
+        normal = Color3f(n.x(), n.y(), n.z());
         return Color3f(n.x(), n.y(), n.z());
     }
 

@@ -14,7 +14,7 @@ public:
 	NORI_OBJECT_DEFAULT_CLONE(PreviewIntegrator)
 	NORI_OBJECT_DEFAULT_UPDATE(PreviewIntegrator)
 
-	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const
 	{
 		Intersection its;
 		// if no collision at all, return black

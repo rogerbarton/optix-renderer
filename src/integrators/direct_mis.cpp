@@ -12,7 +12,7 @@ public:
   NORI_OBJECT_DEFAULT_CLONE(DirectMISIntegrator)
   NORI_OBJECT_DEFAULT_UPDATE(DirectMISIntegrator)
 
-  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const
   {
     Intersection its;
     if (!scene->rayIntersect(ray, its))

@@ -13,7 +13,7 @@ public:
   NORI_OBJECT_DEFAULT_CLONE(DirectMATSIntegrator)
   NORI_OBJECT_DEFAULT_UPDATE(DirectMATSIntegrator)
 
-  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+  Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const
   {
     Intersection its;
     Color3f result(0.f); // final color

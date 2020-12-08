@@ -13,7 +13,7 @@ public:
 	NORI_OBJECT_DEFAULT_CLONE(PathMISIntegrator)
 	NORI_OBJECT_DEFAULT_UPDATE(PathMISIntegrator)
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const
+    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const
     {
         Color3f Li = Color3f(0.f); // initial radiance
         Color3f t = Color3f(1.0);  // initial throughput

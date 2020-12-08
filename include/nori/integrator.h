@@ -52,7 +52,7 @@ public:
      * \return
      *    A (usually) unbiased estimate of the radiance in this direction
      */
-    virtual Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const = 0;
+    virtual Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const = 0;
 
     /**
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.) 

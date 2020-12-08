@@ -17,7 +17,7 @@ NORI_NAMESPACE_BEGIN
 		NORI_OBJECT_DEFAULT_CLONE(PathVolMATSIntegrator)
 		NORI_OBJECT_DEFAULT_UPDATE(PathVolMATSIntegrator)
 
-		Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &_ray) const override
+		Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &_ray, Color3f &albedo, Color3f &normal) const override
 		{
 			Color3f Li         = Color3f(0.f);
 			Color3f throughput = Color3f(1.f);

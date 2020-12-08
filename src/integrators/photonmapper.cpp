@@ -153,7 +153,7 @@ public:
         m_photonMap->build();
     }
 
-    virtual Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &_ray) const override
+    virtual Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &_ray, Color3f &albedo, Color3f &normal) const override
     {
         /* How to find photons?
 		 * std::vector<uint32_t> results;
