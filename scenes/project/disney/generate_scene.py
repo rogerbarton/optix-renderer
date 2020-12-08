@@ -41,14 +41,14 @@ def convert_color_string(c):
 
 def gen_sphere(x,y, color, param, value):
     return f"""
-    <mesh type="sphere">
+    <shape type="sphere">
         <point name="center" value="{x},0,{y}"/>
         <float name="radius" value="0.45"/>
 		<bsdf type="disney">
             <color name="baseColor" value="{convert_color_string(color)}"/>
             <float name="{param}" value="{value}"/>
         </bsdf>
-    </mesh>
+    </shape>
     """
 
 with open(out_file, "w") as wr:
@@ -73,8 +73,8 @@ with open(out_file, "w") as wr:
 		<float name="fov" value="40"/>
 
 		<!-- 512 x 512 pixels -->
-		<integer name="width" value="512"/>
-		<integer name="height" value="512"/>
+		<integer name="width" value="1600"/>
+		<integer name="height" value="1600"/>
 	</camera>
 
     <emitter type="envmap">
@@ -82,6 +82,9 @@ with open(out_file, "w") as wr:
 			<string name="filename" value="../res/canyon1.png"/>
             <boolean name="sphericalTexture" value="true"/>
 		</texture>-->
+        <texture type="constant_color" name="albedo">
+            <color name="value" value="0.1,0.1,0.1"/>
+        </texture>
 	</emitter>
     """)
 

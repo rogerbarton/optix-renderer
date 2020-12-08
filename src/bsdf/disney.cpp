@@ -1,6 +1,7 @@
 #include <nori/bsdf.h>
 #include <nori/frame.h>
 #include <nori/warp.h>
+#include <nori/texture.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -18,9 +19,14 @@ NORI_NAMESPACE_BEGIN
 class Disney : public BSDF
 {
 public:
-    explicit Disney(const PropertyList &props)
+    explicit Disney(const PropertyList &props) : albedo(nullptr)
     {
-        baseColor = props.getColor("baseColor", Color3f(0.f));
+        if (props.has("albedo"))
+        {
+            PropertyList l;
+            l.setColor("value", props.getColor("albedo", Color3f(0.5f)));
+            albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        }
 
         // clamp all attributes to [0,1]
         metallic = clamp(props.getFloat("metallic", 0.f), 0.f, 1.f);
@@ -34,8 +40,73 @@ public:
         clearcoat = clamp(props.getFloat("clearcoat", 0.f), 0.f, 1.f);
         clearcoatGloss = clamp(props.getFloat("clearcoatGloss", 1.f), 0.f, 1.f);
     }
-    NORI_OBJECT_DEFAULT_CLONE(Disney)
-    NORI_OBJECT_DEFAULT_UPDATE(Disney)
+    ~Disney() { delete albedo; }
+    NoriObject *cloneAndInit() override
+    {
+        if (!albedo)
+        {
+            PropertyList l;
+            l.setColor("value", Color3f(0.5f));
+            albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        }
+
+        auto clone = new Disney(*this);
+        clone->albedo = static_cast<Texture<Color3f> *>(albedo->cloneAndInit());
+        clone->metallic = metallic;
+        clone->subsurface = subsurface;
+        clone->specular = specular;
+        clone->roughness = roughness;
+        clone->specularTint = specularTint;
+        clone->anisotropic = anisotropic;
+        clone->sheen = sheen;
+        clone->sheenTint = sheenTint;
+        clone->clearcoat = clearcoat;
+        clone->clearcoatGloss = clearcoatGloss;
+        return clone;
+    }
+    void update(const NoriObject *guiObject) override
+    {
+        const auto *gui = static_cast<const Disney *>(guiObject);
+        if (!gui->touched)
+            return;
+        gui->touched = false;
+
+        albedo->update(gui->albedo);
+        metallic = gui->metallic;
+        subsurface = gui->subsurface;
+        specular = gui->specular;
+        roughness = gui->roughness;
+        specularTint = gui->specularTint;
+        anisotropic = gui->anisotropic;
+        sheen = gui->sheen;
+        sheenTint = gui->sheenTint;
+        clearcoat = gui->clearcoat;
+        clearcoatGloss = gui->clearcoatGloss;
+    }
+
+    /// Add texture for the albedo
+    virtual void addChild(NoriObject *obj) override
+    {
+        switch (obj->getClassType())
+        {
+        case ETexture:
+            if (obj->getIdName() == "albedo")
+            {
+                if (albedo)
+                    throw NoriException("There is already an albedo defined!");
+                albedo = static_cast<Texture<Color3f> *>(obj);
+            }
+            else
+            {
+                throw NoriException("The name of this texture does not match any field!");
+            }
+            break;
+
+        default:
+            throw NoriException("Disney::addChild(<%s>) is not supported!",
+                                classTypeName(obj->getClassType()));
+        }
+    }
 
     Color3f eval(const BSDFQueryRecord &bRec) const override
     {
@@ -46,6 +117,8 @@ public:
         Vector3f X = Vector3f(1.f, 0.f, 0.f); // tangent
         Vector3f Y = Vector3f(0.f, 1.f, 0.f); // bitangent
         Vector3f N = Vector3f(0.f, 0.f, 1.f); // normal
+
+        Color3f baseColor = albedo->eval(bRec.uv);
 
         float NdotL = Frame::cosTheta(L);
         float NdotV = Frame::cosTheta(V);
@@ -114,7 +187,8 @@ public:
         // we don't need the pdf here, because col / pdf * solid_angle = col (for cosine weighted)
         Color3f finalCol = eval(bRec);
 
-        if(pdf(bRec) < Epsilon) {
+        if (pdf(bRec) < Epsilon)
+        {
             return Color3f(0.f);
         }
 
@@ -134,7 +208,7 @@ public:
     {
         return tfm::format(
             "Disney[\n"
-            "  baseColor = %s,\n"
+            "  albedo = %s,\n"
             "  metallic = %f,\n"
             "  subsurface = %f,\n"
             "  specular = %f,\n"
@@ -146,7 +220,7 @@ public:
             "  clearcoat = %f,\n"
             "  clearcoatGloss = %f,\n"
             "]",
-            baseColor.toString(), metallic, subsurface,
+            albedo->toString(), metallic, subsurface,
             specular, roughness, specularTint, anisotropic,
             sheen, sheenTint, clearcoat, clearcoatGloss);
     }
@@ -164,15 +238,16 @@ public:
 
         int id = 1;
 
+        bool node_open = ImGui::TreeNode("Albedo");
+        ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
-
-        ImGui::TreeNodeEx("baseColor", ImGuiLeafNodeFlags, "Base Color");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::PushID(id++);
-        touched |= ImGui::ColorPicker("##value", &baseColor);
-        ImGui::PopID();
-        ImGui::NextColumn();
+        ImGui::Text(albedo->getImGuiName().c_str());
+		ImGui::NextColumn();
+		if (node_open)
+		{
+			touched |= albedo->getImGuiNodes();
+			ImGui::TreePop();
+		}
 
         ImGuiValue(metallic, "Metallic");
         ImGuiValue(subsurface, "Subsurface");
@@ -233,7 +308,7 @@ private:
         return 1.f / (M_PI * ax * ay * pow(pow(HdotX / ax, 2.f) + pow(HdotY / ay, 2.f) + NdotH * NdotH, 2.f));
     }
 
-    Color3f baseColor;
+    Texture<Color3f>* albedo;
     float metallic;
     float subsurface;
     float specular;
