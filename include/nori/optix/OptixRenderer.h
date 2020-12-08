@@ -30,9 +30,9 @@ NORI_NAMESPACE_BEGIN
 		bool getImGuiNodes() override;
 #endif
 
-		int m_samplesPerLaunch;
+		int  m_samplesPerLaunch;
+		bool m_enableSpecialization; /// Set specific constants at compile time for better optimization
 	protected:
-		bool m_enabled;
 	};
 
 	NORI_REGISTER_CLASS(OptixRenderer, "optix");

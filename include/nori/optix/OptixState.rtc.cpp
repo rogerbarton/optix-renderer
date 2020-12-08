@@ -198,26 +198,42 @@ const char *getPtxString(const char *filename, const char **log = NULL)
  * Compiles the .cu to .ptx using nvrtc then compiles this to a module using optixModuleCreateFromPTX
  * @param state sets *_module
  */
-void OptixState::createPtxModules()
+void OptixState::createPtxModules(bool specialize)
 {
 	// Note: module_compile_options set in create()
-	// .cu paths relative to current file __FILE__
+	OptixModuleCompileOptions module_compile_options = {m_module_compile_options};
+	if (specialize)
 	{
-		const std::string ptx = getPtxString("cuda/geometry.cpp");
-		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
-		                                          &m_module_compile_options,
-		                                          &m_pipeline_compile_options,
-		                                          ptx.c_str(),
-		                                          ptx.size(),
-		                                          LOG,
-		                                          &LOG_SIZE,
-		                                          &m_geometry_module));
+		/**
+		 * Sets RTC compile-time constants in LaunchParams, currently binds:
+		 * samplesPerLaunch
+		 * integrator
+		 */
+
+		std::vector<OptixModuleCompileBoundValueEntry> boundValues{};
+
+#define BIND_VALUE(paramsVariable) \
+        { \
+            OptixModuleCompileBoundValueEntry boundValue = {}; \
+            boundValue.pipelineParamOffsetInBytes = offsetof(LaunchParams, paramsVariable); \
+            boundValue.sizeInBytes                = sizeof(LaunchParams::paramsVariable); \
+            boundValue.boundValuePtr              = &m_params->paramsVariable; \
+            boundValue.annotation                 = #paramsVariable; \
+            boundValues.push_back(boundValue); \
+        }
+
+		BIND_VALUE(samplesPerLaunch)
+		BIND_VALUE(integrator)
+
+		module_compile_options.boundValues    = boundValues.data();
+		module_compile_options.numBoundValues = boundValues.size();
 	}
 
 	{
+		// .cu paths relative to current file __FILE__
 		const std::string ptx = getPtxString("cuda/camera.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
-		                                          &m_module_compile_options,
+		                                          &module_compile_options,
 		                                          &m_pipeline_compile_options,
 		                                          ptx.c_str(),
 		                                          ptx.size(),
@@ -227,9 +243,21 @@ void OptixState::createPtxModules()
 	}
 
 	{
+		const std::string ptx = getPtxString("cuda/geometry.cpp");
+		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
+		                                          &module_compile_options,
+		                                          &m_pipeline_compile_options,
+		                                          ptx.c_str(),
+		                                          ptx.size(),
+		                                          LOG,
+		                                          &LOG_SIZE,
+		                                          &m_geometry_module));
+	}
+
+	{
 		const std::string ptx = getPtxString("cuda/shading.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
-		                                          &m_module_compile_options,
+		                                          &module_compile_options,
 		                                          &m_pipeline_compile_options,
 		                                          ptx.c_str(),
 		                                          ptx.size(),
