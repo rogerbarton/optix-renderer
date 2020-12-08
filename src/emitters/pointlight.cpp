@@ -27,7 +27,9 @@ NORI_NAMESPACE_BEGIN
 			if (!gui->touched)return;
 			gui->touched = false;
 
+			m_position = gui->m_position;
 			m_power    = gui->m_power;
+			m_radiance = m_power / (4 * M_PI);
 			Emitter::update(guiObject);
 		}
 
@@ -54,7 +56,7 @@ NORI_NAMESPACE_BEGIN
 			// intensity divided by squared distance
 			// since we store power, we need to convert to intensity (solid angles)
 			Color3f Color =
-					        m_power / (4 * M_PI) / (lRec.ref - m_position).squaredNorm();
+					        m_radiance / (lRec.ref - m_position).squaredNorm();
 			return Color3f(Color.x(), Color.y(), Color.z());
 		}
 
@@ -78,11 +80,21 @@ NORI_NAMESPACE_BEGIN
 		{
 			touched |= Emitter::getImGuiNodes();
 
+			ImGui::PushID(EEmitter);
+
+			ImGui::AlignTextToFramePadding();
+			ImGui::TreeNodeEx("position", ImGuiLeafNodeFlags, "Position");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+			touched |= ImGui::DragPoint3f("##position", &m_position, 0.1f);
+			ImGui::NextColumn();
+			ImGui::PopID();
+
 			ImGui::AlignTextToFramePadding();
 			ImGui::TreeNodeEx("power", ImGuiLeafNodeFlags, "Power");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1);
-			touched |= ImGui::DragColor3f("##value", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
+			touched |= ImGui::DragColor3f("##power", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
 			                          ImGuiSliderFlags_AlwaysClamp);
 			ImGui::NextColumn();
 
@@ -91,6 +103,7 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 	protected:
+		Point3f m_position;
 		Color3f m_power;
 	};
 

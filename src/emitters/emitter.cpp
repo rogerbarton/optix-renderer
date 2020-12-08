@@ -12,7 +12,6 @@ NORI_NAMESPACE_BEGIN
 	void Emitter::update(const NoriObject *guiObject)
 	{
 		const auto *gui = static_cast<const Emitter *>(guiObject);
-		m_position = gui->m_position;
 		// Shape already updated by scene
 		// if(m_shape)
 		// 	m_shape->update(gui->m_shape);
@@ -21,15 +20,13 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_IMGUI
 	bool Emitter::getImGuiNodes()
 	{
-		ImGui::PushID(EEmitter);
-
 		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("Position", ImGuiLeafNodeFlags, "Position");
+		ImGui::TreeNodeEx("Radiance", ImGuiLeafNodeFlags, "Radiance");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
+		touched |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
+		                              ImGuiSliderFlags_AlwaysClamp);
 		ImGui::NextColumn();
-		ImGui::PopID();
 
 		// Also set shape dirty in case this is called by the scene directly
 		if (m_shape)

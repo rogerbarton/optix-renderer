@@ -86,20 +86,9 @@ NORI_NAMESPACE_BEGIN
 		virtual bool getImGuiNodes() override
 		{
 			touched |= Emitter::getImGuiNodes();
-
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Radiance", ImGuiLeafNodeFlags, "Radiance");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-
-			touched |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
-			                              ImGuiSliderFlags_AlwaysClamp);
-			ImGui::NextColumn();
 			return touched;
 		}
 #endif
-	protected:
-		Color3f m_radiance;
 	};
 
 	NORI_REGISTER_CLASS(VolumeEmitter, "volumelight")

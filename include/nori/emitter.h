@@ -143,8 +143,6 @@ NORI_NAMESPACE_BEGIN
 
 		virtual bool isEnvMap() const { return false; }
 
-		Point3f getPosition() const { return m_position; }
-
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Emitter Base");
 		bool getImGuiNodes() override;
@@ -154,7 +152,7 @@ NORI_NAMESPACE_BEGIN
 		/// Pointer to the shape if the emitter is attached to a shape
 		Shape *m_shape = nullptr;
 
-		Point3f m_position;
+		Color3f m_radiance;
 	};
 
 NORI_NAMESPACE_END

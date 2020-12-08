@@ -32,11 +32,14 @@ public:
 
         gui->touched = false;
 
-        m_power = gui->m_power;
+	    m_position = gui->m_position;
+	    m_power = gui->m_power;
         m_direction = gui->m_direction;
         falloffStart = gui->falloffStart;
         totalWidthAngle = gui->totalWidthAngle;
         m_coord = gui->m_coord;
+
+        m_radiance = m_power / 2.f / M_PI;
 
         Emitter::update(guiObject);
     }
@@ -57,7 +60,7 @@ public:
     {
         float cosFalloffStart = std::cos(degToRad(falloffStart));
         float cosTotalWidth = std::cos(degToRad(totalWidthAngle / 2.f));
-        Color3f i = m_power / 2. / M_PI / (1.f - .5f * (cosTotalWidth + cosFalloffStart));
+        Color3f i = m_radiance / (1.f - .5f * (cosTotalWidth + cosFalloffStart));
         Color3f color = i * falloff(-lRec.wi) / (lRec.ref - m_position).squaredNorm();
         return color;
     }
@@ -67,7 +70,7 @@ public:
         return 1.f;
     }
 
-    virtual std::string toString() const override
+	virtual std::string toString() const override
     {
         return tfm::format(
             "Spotlight[\n"
@@ -89,6 +92,13 @@ public:
         int counter = 0;
 
         touched |= Emitter::getImGuiNodes();
+
+	    ImGui::AlignTextToFramePadding();
+	    ImGui::TreeNodeEx("position", ImGuiLeafNodeFlags, "Position");
+	    ImGui::NextColumn();
+	    ImGui::SetNextItemWidth(-1);
+	    touched |= ImGui::DragPoint3f("##position", &m_position, 0.1f);
+	    ImGui::NextColumn();
 
         ImGui::PushID(counter++);
         ImGui::AlignTextToFramePadding();
@@ -144,7 +154,8 @@ public:
     }
 #endif
 
-private:
+	private:
+	Point3f m_position;
     Color3f m_power;
     Vector3f m_direction;
     float totalWidthAngle;
@@ -171,7 +182,7 @@ private:
                       (cosFalloffStart - cosTotalWidth);
         return std::pow(delta, 4);
     }
-};
+	};
 
 NORI_REGISTER_CLASS(SpotLight, "spot");
 NORI_NAMESPACE_END
