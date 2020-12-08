@@ -109,6 +109,7 @@ private:
 	ImGui::FileBrowser filebrowserSave = ImGui::FileBrowser(ImGuiFileBrowserFlags_::ImGuiFileBrowserFlags_EnterNewFilename);
 
 	uint32_t m_texture = 0;
+	uint32_t m_textureGpu = 1;
 	float m_scale = 1.f;
 	GLShader *m_shader;
 

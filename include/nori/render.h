@@ -51,6 +51,7 @@ public:
 	void renderThreadMain();
 #ifdef NORI_USE_OPTIX
 	void renderThreadOptix();
+	CUDAOutputBuffer<float4> m_optixBlock = {CUDAOutputBufferType::GL_INTEROP, 1, 1};
 #endif
 
     bool isBusy();
@@ -108,7 +109,6 @@ protected:
 	time_point_t m_startTime;
 	time_point_t m_endTime;
 #ifdef NORI_USE_OPTIX
-	CUDAOutputBuffer<float4> m_optixBlock = {CUDAOutputBufferType::GL_INTEROP, 1, 1};
 	std::thread m_optixThread;
 #endif
 

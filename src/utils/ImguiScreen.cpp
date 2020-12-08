@@ -50,6 +50,10 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glGenTextures(1, &m_textureGpu);
+	glBindTexture(GL_TEXTURE_2D, m_textureGpu);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	// init shader
 	m_shader = new GLShader();
@@ -61,8 +65,11 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 								 "    uv = vec2(position.x, 1-position.y);\n"
 								 "}",
 				   "#version 330\n"
-				   "uniform sampler2D source;\n"
+				   "uniform sampler2D sourceCpu;\n"
+				   "uniform sampler2D sourceGpu;\n"
 				   "uniform float scale;\n"
+				   "uniform float samplesCpu;\n"
+				   "uniform float samplesGpu;\n"
 				   "in vec2 uv;\n"
 				   "out vec4 out_color;\n"
 				   "float toSRGB(float value) {\n"
@@ -71,7 +78,7 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 				   "    return 1.055 * pow(value, 0.41666) - 0.055;\n"
 				   "}\n"
 				   "void main() {\n"
-				   "    vec4 color = texture(source, uv);\n"
+				   "    vec4 color = samplesCpu * texture(sourceCpu, uv) + samplesCpu * texture(sourceGpu, uv);\n"
 				   "    color *= scale / color.w;\n"
 				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
 				   "}");
@@ -241,19 +248,45 @@ void ImguiScreen::render()
 	block.lock();
 	int borderSize = block.getBorderSize();
 	const Vector2i &size = block.getSize();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
-				 0, GL_RGBA, GL_FLOAT, (uint8_t *)block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+	// cpu -> tex0
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
+		             0, GL_RGBA, GL_FLOAT,
+		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	}
+
+	//gpu image -> tex1
+#ifdef NORI_USE_OPTIX
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_textureGpu);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_renderThread.m_optixBlock.getPBO());
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(), 0, GL_RGBA, GL_FLOAT, nullptr );
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	}
+#endif
 
 	block.unlock();
 
 	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
-	m_shader->setUniform("source", 0);
+	m_shader->setUniform("sourceCpu", m_texture);
+	m_shader->setUniform("sourceGpu", m_textureGpu);
+#ifdef NORI_USE_OPTIX
+	m_shader->setUniform("samplesCpu", 0.5f); // TODO: cpu / cpu+gpu
+	m_shader->setUniform("samplesGpu", 0.5f);
+#else
+	m_shader->setUniform("samplesCpu", 1.f);
+	m_shader->setUniform("samplesGpu", 0.f);
+#endif
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
 	glViewport(0, 0, windowWidth, windowHeight); // reset viewport
 }
