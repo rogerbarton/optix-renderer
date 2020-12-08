@@ -15,6 +15,7 @@ public:
         falloffStart = props.getFloat("falloffstart");
         totalWidthAngle = props.getFloat("totalwidth");
         m_coord = Frame(m_direction.normalized());
+        lightProb = props.getFloat("lightWeight", 1.f);
     }
 
     NoriObject *cloneAndInit() override

@@ -9,7 +9,9 @@ NORI_NAMESPACE_BEGIN
 class EnvMap : public Emitter
 {
 public:
-	explicit EnvMap(const PropertyList &props) {}
+	explicit EnvMap(const PropertyList &props) {
+		lightProb = props.getFloat("lightWeight", 1.f);
+	}
 
 	NoriObject *cloneAndInit() override
 	{
@@ -24,6 +26,8 @@ public:
 		auto clone = new EnvMap(*this);
 		clone->m_map = static_cast<Texture<Color3f> *>(m_map->cloneAndInit());
 
+		Emitter::cloneAndInit(clone);
+
 		return clone;
 	}
 
@@ -35,6 +39,8 @@ public:
 		gui->touched = false;
 
 		m_map->update(gui->m_map);
+
+		Emitter::update(gui);
 
 		calculateProbs();
 	}

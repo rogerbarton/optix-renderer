@@ -170,8 +170,8 @@ NORI_NAMESPACE_BEGIN
 
 		// recompute emitterDpdf
 		emitterDpdf.clear();
-		for (int i = 0; i < gui->m_emitters.size(); ++i) {
-			emitterDpdf.append(gui->m_emitters[i]->lightProb);
+		for (int i = 0; i < m_emitters.size(); ++i) {
+			emitterDpdf.append(m_emitters[i]->lightProb);
 		}
 		emitterDpdf.normalize();
 

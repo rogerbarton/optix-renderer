@@ -12,6 +12,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			m_power    = propList.getColor("power"); // we store power, not intensity
 			m_position = propList.getPoint3("position");
+			lightProb = propList.getFloat("lightWeight", 1.f);
 		}
 
 		NoriObject *cloneAndInit() override
