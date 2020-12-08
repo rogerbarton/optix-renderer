@@ -252,6 +252,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/OptixState.cpp
         include/nori/optix/OptixState.rtc.cpp
         include/nori/optix/OptixState.as.cpp
+        include/nori/optix/OptixState.scene.cpp
 
         include/nori/optix/OptixSbtTypes.h
 

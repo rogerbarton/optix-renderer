@@ -23,16 +23,6 @@
 
 void OptixState::create()
 {
-	createContext();
-	createCompileOptions();
-	buildGases();
-	buildIas();
-
-	createPtxModules();
-	createPipeline();
-	createSbt();
-
-	std::cout << "Optix state created.\n";
 }
 
 static void optixLogCallback(unsigned int level, const char *tag, const char *message, void * /*cbdata */)
@@ -46,6 +36,10 @@ static void optixLogCallback(unsigned int level, const char *tag, const char *me
  */
 void OptixState::createContext()
 {
+	if (initializedOptix)
+		return;
+	initializedOptix = true;
+
 	CUDA_CHECK(cudaFree(nullptr));
 	CUcontext                 cuCtx   = 0;
 
@@ -82,6 +76,9 @@ void OptixState::createContext()
  */
 void OptixState::createCompileOptions()
 {
+	if (initializedOptix)
+		return;
+
 	m_module_compile_options = {};
 	m_module_compile_options.maxRegisterCount = OPTIX_COMPILE_DEFAULT_MAX_REGISTER_COUNT;
 #ifdef NDEBUG
@@ -319,37 +316,6 @@ void OptixState::createSbt()
 		m_sbt.hitgroupRecordCount         = count_records;
 		m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof_hitgroup_record);
 	}
-}
-
-bool OptixState::preRender()
-{
-	if (m_ias_handle == 0)
-	{
-		std::cerr << "renderOptixState: state is not initialized.\n";
-		return false;
-	}
-
-	// TODO: update device copies, launch params etc
-
-	return true;
-}
-
-void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer)
-{
-	m_params->d_imageBuffer = outputBuffer.map();
-
-	OPTIX_CHECK(optixLaunch(m_pipeline,
-	                        m_stream,
-	                        reinterpret_cast<CUdeviceptr>(m_d_params),
-	                        sizeof(LaunchParams),
-	                        &m_sbt,
-	                        m_params->imageWidth,
-	                        m_params->imageHeight,
-	                        1));
-
-	CUDA_CHECK(cudaStreamSynchronize(m_stream));
-
-	outputBuffer.unmap();
 }
 
 OptixState::~OptixState()

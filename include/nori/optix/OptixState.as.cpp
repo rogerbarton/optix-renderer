@@ -47,9 +47,12 @@ struct GasBuildInfo
  * Creates a GAS for each nori::Shape.
  * Sets: m_gases
  */
-void OptixState::buildGases(std::vector<nori::Shape *> &shapes)
+void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 {
 	const auto t0 = std::chrono::high_resolution_clock::now();
+	for (auto & gas : m_gases)
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(gas.d_buffer)));
+	m_gases.clear();
 
 	OptixAccelBuildOptions accelBuildOptions = {};
 	accelBuildOptions.operation = OPTIX_BUILD_OPERATION_BUILD;
@@ -239,6 +242,8 @@ OptixBuildInput nori::Shape::getOptixBuildInput() const
 void OptixState::buildIas()
 {
 	const auto t0 = std::chrono::high_resolution_clock::now();
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_ias_output_buffer)));
+	m_d_ias_output_buffer = 0;
 
 	const uint32_t             numInstances = m_gases.size();
 	std::vector<OptixInstance> optixInstances(numInstances);

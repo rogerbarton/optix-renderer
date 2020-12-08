@@ -10,6 +10,8 @@
 #include <cuda.h>
 #include <vector>
 
+#include <nori/scene.h>
+
 #include "sutil/CUDAOutputBuffer.h"
 
 namespace nori
@@ -28,8 +30,9 @@ struct GasHandle
  */
 struct OptixState
 {
-	OptixDeviceContext m_context = 0;
-	CUstream           m_stream  = 0;
+	OptixDeviceContext m_context        = 0;
+	CUstream           m_stream         = 0;
+	bool               initializedOptix = false;
 
 	LaunchParams *m_params   = nullptr;
 	LaunchParams *m_d_params = nullptr;
@@ -59,21 +62,21 @@ struct OptixState
 	 * Call this before rendering. This will update the optix state and make it ready for rendering
 	 * @return True if successful without errors and rendering can proceed
 	 */
-	bool preRender();
+	bool preRender(nori::Scene& scene);
 	/**
 	 * Renders one subframe. Assumes that preRender has succeeded
 	 * @param outputBuffer
 	 */
-	void renderSubframe(CUDAOutputBuffer<float4> &outputBuffer);
+	void renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample);
 	void clear();
 	~OptixState();
 
 private:
 	void createContext();
 	void createCompileOptions();
-	void buildGases(std::vector<nori::Shape *> &shapes);
+	void buildGases(const std::vector<nori::Shape *> &shapes);
 	void buildIas();
-	void createPtxModules();
+	void createPtxModules(bool specialize = true);
 	void createPipeline();
 	void createCameraProgram(std::vector<OptixProgramGroup> program_groups);
 	void createHitProgram(std::vector<OptixProgramGroup> program_groups);

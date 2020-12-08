@@ -30,9 +30,9 @@ NORI_NAMESPACE_BEGIN
 		bool getImGuiNodes() override;
 #endif
 
+		int m_samplesPerLaunch;
 	protected:
 		bool m_enabled;
-		int m_samplesPerLaunch;
 	};
 
 	NORI_REGISTER_CLASS(OptixRenderer, "optix");

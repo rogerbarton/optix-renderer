@@ -14,6 +14,10 @@ struct RaygenConstantParams
 	float3 U;
 	float3 V;
 	float3 W;
+
+	float fov;
+	float focalDistance;
+	float lensRadius;
 };
 
 struct SceneConstantParams
@@ -29,12 +33,14 @@ struct LaunchParams
 {
 	unsigned int sampleIndex;
 	unsigned int samplesPerLaunch;
-	float4 *d_imageBuffer;
+	float4       *d_imageBuffer;
 	unsigned int imageWidth;
 	unsigned int imageHeight;
 
 	RaygenConstantParams camera;
 	SceneConstantParams  scene;
+
+	unsigned int integrator;
 
 	OptixTraversableHandle sceneHandle;
 };
