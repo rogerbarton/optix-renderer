@@ -86,6 +86,40 @@
                 <img src="images/emitter/no-falloff.png" alt="No Falloff" class="img-responsive">
                 <img src="images/emitter/falloff.png" alt="Falloff" class="img-responsive">
             </div>
+            <h4>Validation 2: Using Material Sampling</h4>
+            <p>As the spot light emitter has zero size, the probability of it getting hit by a random ray in the scene
+                is 0. This means, that material sampling does not "see" any contribution from this emitter. The
+                following image shows this. It was rendered using Path MATS integrator. It is clearly visible that the
+                spotlight contribution were not added.</p>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/mats.png" alt="" class="img-responsive">
+            </div>
+
+            <h4>Validation 3: Comparison to Blender</h4>
+            <p>Altough the floor is not in the same place, the spotlight's position is the same (and all parameters are
+                the same). We can see that the spotlight has indeed zero size, because we have hard shadows and no
+                penumbra. As also seen in the <a href="disney.html">Disney BSDF</a> Blender validation images, nori
+                produces slightly darker images. This can also be seen here. The color of the spotligh is clearly
+                darker, while the shape is exactly the same.</p>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/blender_1.png" alt="Blender" class="img-responsive">
+                <img src="images/emitter/nori_1.png" alt="Nori" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/blender_2.png" alt="Blender" class="img-responsive">
+                <img src="images/emitter/nori_2.png" alt="Nori" class="img-responsive">
+            </div>
+            <p>This last comparison shows the difference between the Blender parameter "blend" and my parameter
+                "falloff". My parameter sets the distance, where the falloff starts (here set to 0). This means, that
+                after a certain distance, the light has a falloff (and therefore a softer transition at the edges).
+                Blender does not have this feature, however they have the feature to "blend", which does more or less
+                the same, but a different way. This means, that a comparison is not fully possible. As even mitsuba does
+                not support this feature, and I could not getting the scene to work with the pbrt-v3 renderer, I could
+                not provide a second validation of this feature.</p>
+            <div class="twentytwenty-container">
+                <img src="images/emitter/blender_3.png" alt="Blender" class="img-responsive">
+                <img src="images/emitter/nori_3.png" alt="Nori" class="img-responsive">
+            </div>
 
             <h4>Implementation</h4>
             <p>The spotlight is implemented like a pointlight (this means, material sampling should not see any

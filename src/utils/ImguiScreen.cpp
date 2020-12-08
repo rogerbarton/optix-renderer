@@ -28,7 +28,7 @@ float get_pixel_ratio()
 	return xscale;
 }
 
-ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_block}
+ImguiScreen::ImguiScreen() : m_renderThread{}
 {
 	windowWidth = 1000;
 	windowHeight = 800;
@@ -37,7 +37,7 @@ ImguiScreen::ImguiScreen(ImageBlock &block) : m_block{block}, m_renderThread{m_b
 	initImGui();
 	setCallbacks();
 
-	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
+	m_renderThread.getBlock().setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
@@ -110,9 +110,10 @@ void ImguiScreen::drop(const std::string &filename)
 		openEXR(filename);
 
 		// auto tone map
-		m_block.lock();
-		Bitmap *bm = m_block.toBitmap();
-		m_block.unlock();
+		ImageBlock& compositeBlock = m_renderThread.getBlock();
+		compositeBlock.lock();
+		Bitmap *bm = compositeBlock.toBitmap();
+		compositeBlock.unlock();
 
 		const std::string outfile = std::filesystem::path(path).replace_extension(".png").string();
 		bm->saveToLDR(outfile);
@@ -142,8 +143,7 @@ void ImguiScreen::openXML(const std::string &filename)
 
 ImguiScreen::~ImguiScreen()
 {
-	if (m_shader)
-		delete m_shader;
+	delete m_shader;
 }
 
 void ImguiScreen::openEXR(const std::string &filename)
@@ -159,10 +159,12 @@ void ImguiScreen::openEXR(const std::string &filename)
 
 	Bitmap bitmap(filename);
 
-	m_block.lock();
-	m_block.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
-	m_block.fromBitmap(bitmap);
-	m_block.unlock();
+	ImageBlock& compositeBlock = m_renderThread.getBlock();
+	compositeBlock.lock();
+	compositeBlock.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
+	compositeBlock.fromBitmap(bitmap);
+	compositeBlock.unlock();
+	m_renderThread.m_visibleRenderLayer = ERenderLayer::Composite;
 
 	imageZoom = 1.f;
 	centerImage(true);
@@ -235,17 +237,18 @@ void ImguiScreen::drawAll()
 void ImguiScreen::render()
 {
 	// draws the tonemapped image to screen
-	m_block.lock();
-	int borderSize = m_block.getBorderSize();
-	const Vector2i &size = m_block.getSize();
+	ImageBlock& block = m_renderThread.getCurrentBlock();
+	block.lock();
+	int borderSize = block.getBorderSize();
+	const Vector2i &size = block.getSize();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, m_block.cols());
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
-				 0, GL_RGBA, GL_FLOAT, (uint8_t *)m_block.data() + (borderSize * m_block.cols() + borderSize) * sizeof(Color4f));
+				 0, GL_RGBA, GL_FLOAT, (uint8_t *)block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-	m_block.unlock();
+	block.unlock();
 
 	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
 	m_shader->bind();
@@ -312,14 +315,14 @@ void ImguiScreen::draw()
 		if (extension == ".png")
 		{
 			// write tonemapped png
-			Bitmap *bm = m_block.toBitmap();
+			Bitmap *bm = m_renderThread.getBlock().toBitmap();
 			bm->saveToLDR(filebrowserSave.GetSelected().string());
 			std::cout << "PNG file saved to " << filebrowserSave.GetSelected().string() << std::endl;
 		}
 		else if (extension == ".exr")
 		{
 			// write exr
-			Bitmap *bm = m_block.toBitmap();
+			Bitmap *bm = m_renderThread.getBlock().toBitmap();
 			bm->save(filebrowserSave.GetSelected().string());
 			std::cout << "EXR file saved to " << filebrowserSave.GetSelected().string() << std::endl;
 		}
@@ -597,9 +600,10 @@ void ImguiScreen::setZoom(float value, bool centerOnMouse)
 
 void ImguiScreen::centerImage(bool autoExpandWindow)
 {
-	m_block.lock();
-	const Vector2i bsize = m_block.getSize();
-	m_block.unlock();
+	ImageBlock& compositeBlock = m_renderThread.getBlock();
+	compositeBlock.lock();
+	const Vector2i bsize = compositeBlock.getSize();
+	compositeBlock.unlock();
 
 	if (autoExpandWindow && (windowWidth < bsize.x() || windowHeight < bsize.y()))
 	{

@@ -22,6 +22,7 @@
 #include <nori/common.h>
 #include <thread>
 #include <nori/block.h>
+#include <nori/integrator.h>
 #include <atomic>
 
 #ifdef NORI_USE_OPTIX
@@ -41,7 +42,7 @@ inline double durationMs(const TimePoint time)
 class RenderThread {
 
 public:
-	RenderThread(ImageBlock &block) : m_block(block), m_startTime(clock_t::now()), m_endTime(m_startTime), sceneFilename("") {}
+	RenderThread();
     ~RenderThread();
 
     void loadScene(const std::string & filename);
@@ -66,15 +67,28 @@ public:
 	void drawSceneGui();
 #endif
 
-	Scene *m_guiScene       = nullptr;
-	Scene *m_renderScene    = nullptr;
+	Scene       *m_guiScene       = nullptr;
+	Scene       *m_renderScene    = nullptr;
 	/**
 	 * Restart render when a change is detected. Otherwise the apply button can be used.
 	 * m_preview_mode overrides this.
 	 */
-	bool  m_autoUpdate      = true;
-	bool  m_guiSceneTouched = false;
-	bool  m_previewMode     = false;
+	bool        m_autoUpdate      = true;
+	bool        m_guiSceneTouched = false;
+	bool        m_previewMode     = false;
+
+	static constexpr int EDeviceModeSize = 3;
+	const char* m_deviceModeStrings[EDeviceModeSize] = {"CPU", "Optix", "CPU + Optix"};
+	enum class EDeviceMode : int {
+		Cpu   = 0,
+		Optix = 1,
+		Both  = 2,
+	};
+	EDeviceMode m_deviceMode                         = EDeviceMode::Both;
+
+	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
+	ImageBlock& getCurrentBlock();                      							/// Get the active block
+	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
 protected:
 
 	enum class ERenderStatus : int {
@@ -84,7 +98,10 @@ protected:
 		Done      = 3
 	};
 
-    ImageBlock & m_block;
+    ImageBlock m_block;
+    ImageBlock m_blockNormal;		/// Normals feature buffer
+    ImageBlock m_blockAlbedo;      	/// Albedo feature buffer
+
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
     std::atomic<float>         m_progress     = 1.f;

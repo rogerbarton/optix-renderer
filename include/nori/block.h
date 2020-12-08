@@ -56,7 +56,7 @@ public:
      *     Samples will be convolved with the image reconstruction
      *     filter provided here.
      */
-    ImageBlock(const Vector2i &size, const ReconstructionFilter *filter);
+    ImageBlock(const Vector2i &size, const ReconstructionFilter *filter = nullptr);
     
     /// Release all memory
     ~ImageBlock();

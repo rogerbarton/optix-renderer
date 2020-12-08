@@ -154,22 +154,27 @@
             <h4>Validation by comparison to Blender</h4>
             <p>The following comparisons are all done with Blender 2.82a, using a Principle BSDF material. The scene was
                 exactly copied over to nori. As an integrator I use Path MIS (Nori) and Path Tracing (Blender), both
-                using 128 samples per pixel. This should ensure that the results are comparable.</p>
+                using 128 samples per pixel. This should ensure that the results are comparable. The scene was
+                elluminated using an area light and the environment map.</p>
             <div class="twentytwenty-container">
-                <img src="images/disney/blender/metallic_blender.png" alt="Blender" class="img-responsive">
-                <img src="images/disney/blender/metallic_nori.png" alt="Nori" class="img-responsive">
+                <img src="images/disney/blender/zero_blender.png" alt="Blender" class="img-responsive">
+                <img src="images/disney/blender/zero_nori.png" alt="Nori" class="img-responsive">
             </div>
             <div class="twentytwenty-container">
                 <img src="images/disney/blender/specular_blender.png" alt="Blender" class="img-responsive">
                 <img src="images/disney/blender/specular_nori.png" alt="Nori" class="img-responsive">
             </div>
+            <p>This last image shows a high anisotropic value. The right image (nori) shows strange looking aniso-blurrs
+                (sometimes there is even a kink). This is because we are currently working on fixing the normal maps,
+                which means that the normals are currently not correct for object files. But more generally, the
+                anisotropic effect seems to be fine.</p>
             <div class="twentytwenty-container">
                 <img src="images/disney/blender/aniso_blender.png" alt="Blender" class="img-responsive">
                 <img src="images/disney/blender/aniso_nori.png" alt="Nori" class="img-responsive">
             </div>
 
             <!-- ================================================================= -->
-            <h4>implementation</h4>
+            <h4>Implementation</h4>
             This implementation is done straightforward, using <a href="#ref-1">[1]</a>. This means, that we only have
             to extend the BSDF base class with the code given. For the input values which can be found on this page, we
             use however different ones: X and Y are easy, those are simply always the X and Y unit vectors,

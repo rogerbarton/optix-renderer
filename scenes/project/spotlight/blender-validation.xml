@@ -4,7 +4,7 @@
     <integer name="sampleCount" value="128"/>
   </sampler>
 
-  <integrator type="normals"/>
+  <integrator type="path_mis"/>
 
   <camera type="perspective">
     <transform name="toWorld">
@@ -22,10 +22,10 @@
 
     <bsdf type="disney">
       <color name="baseColor" value="0.071, 0.091, 0.8"/>
-      <float name="metallic" value="0.0"/>
+      <float name="metallic" value="1.0"/>
       <float name="subsurface" value="0.0"/>
       <float name="specular" value="0.0"/>
-      <float name="roughness" value="0.0"/>
+      <float name="roughness" value="0.3"/>
       <float name="specularTint" value="0.0"/>
       <float name="anisotropic" value="0"/>
       <float name="sheen" value="0.0"/>
@@ -35,16 +35,31 @@
     </bsdf>
   </shape>
 
-  <shape type="sphere">
-    <point name="center" value="5,-5,8"/>
-    <float name="radius" value="1"/>
+  <shape type="obj">
+    <string name="filename" value="../meshes/plane_camel.obj"/>
     <bsdf type="diffuse">
-      <color name="albedo" value="0,0,0"/>
+      <!--<color name="baseColor" value="0.8, 0.545, 0.216"/>
+      <float name="metallic" value="0.0"/>
+      <float name="subsurface" value="0.0"/>
+      <float name="specular" value="0.0"/>
+      <float name="roughness" value="1.0"/>
+      <float name="specularTint" value="0.0"/>
+      <float name="anisotropic" value="0"/>
+      <float name="sheen" value="0.0"/>
+      <float name="sheenTint" value="0.0"/>
+      <float name="clearcoat" value="0"/>
+      <float name="clearcoatGloss" value="0.0"/>-->
+      <color name="albedo" value="0.5,1,1"/>
     </bsdf>
-    <emitter type="area">
-      <color name="radiance" value="100,100,100"/>
-    </emitter>
   </shape>
+
+  <emitter type="spot">
+    <point name="position" value="0,-4,10"/>
+    <vector name="direction" value="0,0,-1"/>
+    <color name="power" value="1000,1000,1000"/>
+    <float name="falloffstart" value="0"/>
+    <float name="totalwidth" value="45"/>
+  </emitter>
 
   <emitter type="envmap">
     <texture name="albedo" type="constant_color">

@@ -3,7 +3,7 @@
 <scene>
 	<!-- Independent sample generator, 128 samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="10"/>
+		<integer name="sampleCount" value="128"/>
 	</sampler>
 
 	<!--<integrator type="photonmapper">
@@ -15,7 +15,7 @@
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
 		<transform name="toWorld">
-			<lookat target="0, 0, 0" origin="-100, -80, -40" up="0, 0, -1"/>
+			<lookat target="0, 0, 0" origin="-100, -80, 40" up="0, 0, 1"/>
 		</transform>
 
 		<float name="fov" value="85"/>
@@ -24,21 +24,13 @@
 		<integer name="height" value="800"/>
 	</camera>
 
-	<envmap type="png_env">
-		<texture type="png_texture" name="envmap">
+	<emitter type="envmap">
+		<texture type="png_texture" name="albedo">
 			<string name="filename" value="../res/photo_studio_01.png"/>
-			<vector name="eulerAngles" value="0, 180, 95"/>
+			<vector name="eulerAngles" value="0, 180, 180"/>
 			<boolean name="sphericalTexture" value="true"/>
 		</texture>
-		<boolean name="sphereTexture" value="true"/>
-	</envmap>
-
-	<denoiser type="basic">
-		<integer name="iterations" value="1"/>
-		<float name="sigma_d" value="0.5"/>
-		<float name="sigma_r" value="0.5"/>
-		<integer name="range" value="5"/>
-	</denoiser>
+	</emitter>
 
 	<shape type="sphere">
 		<point name="center" value="-30,-30,0"/>
@@ -46,7 +38,7 @@
 		<bsdf type="diffuse">
 			<texture type="png_texture" name="albedo">
 				<string name="filename" value="../res/wooden_motel.png"/>
-				<vector name="eulerAngles" value="0, 10, 180"/>
+				<vector name="eulerAngles" value="0, 0, 0"/>
 				<boolean name="sphericalTexture" value="true"/>
 			</texture>
 		</bsdf>
@@ -55,13 +47,17 @@
 	<shape type="sphere">
 		<point name="center" value="-30,30,0"/>
 		<float name="radius" value="20"/>
-		<bsdf type="mirror"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.8,0.088,0.157"/>
+		</bsdf>
 	</shape>
 
 	<shape type="sphere">
 		<point name="center" value="30,-30,0"/>
 		<float name="radius" value="20"/>
-		<bsdf type="mirror"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.104,0.272,0.8"/>
+		</bsdf>
 	</shape>
 
 	<shape type="sphere">

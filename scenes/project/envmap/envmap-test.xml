@@ -4,20 +4,20 @@
 <scene>
 	<!-- Independent sample generator, 128 samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="50"/>
+		<integer name="sampleCount" value="1"/>
 	</sampler>
 
 	<!-- Use the path tracer with multiple importance sampling -->
-	<integrator type="path_mis"/>
+	<integrator type="envmaptester"/>
 
 	<!-- Render the scene as viewed by a perspective camera -->
 
 	<camera type="perspective">
 		<transform name="toWorld">
-			<lookat target="-50, 0, 0" origin="0, 0, 0" up="0, 0, -1"/>
+			<lookat target="1, 0, 0" origin="0, 0, 0" up="0, 0, 1"/>
 		</transform>
 
-		<float name="fov" value="85"/>
+		<float name="fov" value="50"/>
 
 		<integer name="width" value="800"/>
 		<integer name="height" value="800"/>
@@ -25,15 +25,15 @@
 
 	<emitter type="envmap">
 		<texture type="png_texture" name="albedo">
-			<string name="filename" value="../res/envmap-test.png"/>
-			<vector name="eulerAngles" value="270,45,-45"/>
+			<string name="filename" value="../res/dikhololo_night_4k.hdr"/>
+			<vector name="eulerAngles" value="0,180,0"/>
 			<boolean name="sphericalTexture" value="true"/>
 		</texture>
 	</emitter>
 	
-	<shape type="sphere">
+	<!--<shape type="sphere">
 		<point name="center" value="0,0,0"/>
 		<float name="radius" value="20"/>
 		<bsdf type="diffuse"></bsdf>
-	</shape>
+	</shape>-->
 </scene>
