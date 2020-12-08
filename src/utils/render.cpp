@@ -38,7 +38,14 @@
 NORI_NAMESPACE_BEGIN
 
 static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,
-						ImageBlock &block);
+						ImageBlock &block, ImageBlock &blockAlbedo, ImageBlock &blockNormals);
+
+RenderThread::RenderThread() : m_startTime(clock_t::now()), m_endTime(m_startTime), sceneFilename(""),
+                               m_block{ImageBlock(Vector2i(720, 720))},
+                               m_blockAlbedo{ImageBlock(Vector2i(720, 720))},
+                               m_blockNormal{ImageBlock(Vector2i(720, 720))}
+{
+}
 
 RenderThread::~RenderThread()
 {
@@ -124,6 +131,10 @@ void RenderThread::loadScene(const std::string &filename)
 
 	m_renderScene->update(m_guiScene);
 
+	// Reset the render layer if it is not supported, assuming preview integrator supports all layers
+	if ((m_visibleRenderLayer & m_renderScene->getIntegrator(false)->getSupportedLayers()) == 0)
+		m_visibleRenderLayer = ERenderLayer::Composite;
+
 	// Start the actual thread
 	m_renderStatus = ERenderStatus::Busy;
 	m_renderThread = std::thread([this] { renderThreadMain(); });
@@ -149,17 +160,24 @@ void RenderThread::renderThreadMain()
 	m_endTime = time_point_t::min();
 
 	/* Allocate memory for the entire output image and clear it */
-	const Camera *camera = m_renderScene->getCamera();
+	const Camera * const camera = m_renderScene->getCamera();
+	const Vector2i outputSize = camera->getOutputSize();
 	m_block.lock();
 	m_block.init(camera->getOutputSize(), camera->getReconstructionFilter());
 	m_block.clear();
 	m_block.unlock();
+	m_blockAlbedo.lock();
+	m_blockAlbedo.init(outputSize, camera->getReconstructionFilter());
+	m_blockAlbedo.clear();
+	m_blockAlbedo.unlock();
+	m_blockNormal.lock();
+	m_blockNormal.init(outputSize, camera->getReconstructionFilter());
+	m_blockNormal.clear();
+	m_blockNormal.unlock();
 
 	cout << "Rendering .. " << std::flush;
 
 	/* Create a block generator (i.e. a work scheduler) */
-	Vector2i outputSize = camera->getOutputSize();
-
 	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? NORI_BLOCK_SIZE_ADAPTIVE : NORI_BLOCK_SIZE;
 	BlockGenerator blockGenerator(outputSize, blockSize);
 
@@ -188,8 +206,9 @@ void RenderThread::renderThreadMain()
 
 		auto map = [&](const tbb::blocked_range<int> &range) {
 			// Allocate memory for a small image block to be rendered by the current thread
-			ImageBlock block(Vector2i(blockSize),
-							 camera->getReconstructionFilter());
+			ImageBlock block(Vector2i(blockSize), camera->getReconstructionFilter());
+			ImageBlock blockAlbedo(Vector2i(blockSize), camera->getReconstructionFilter());
+			ImageBlock blockNormals(Vector2i(blockSize), camera->getReconstructionFilter());
 
 			for (int i = range.begin(); i < range.end(); ++i)
 			{
@@ -199,6 +218,12 @@ void RenderThread::renderThreadMain()
 
 				// Request an image block from the block generator
 				blockGenerator.next(block);
+				blockAlbedo.setOffset(block.getOffset());
+				blockAlbedo.setSize(block.getSize());
+				blockAlbedo.setBlockId(block.getBlockId());
+				blockNormals.setOffset(block.getOffset());
+				blockNormals.setSize(block.getSize());
+				blockNormals.setBlockId(block.getBlockId());
 
 				// Get block id to continue using the same sampler
 				auto blockId = block.getBlockId();
@@ -219,16 +244,20 @@ void RenderThread::renderThreadMain()
 					samplers.at(blockId)->setSampleRound(count); // needed for computeVariance
 					while (samplers.at(blockId)->computeVariance(block))
 					{
-						renderBlock(m_renderScene, integrator, samplers.at(blockId).get(), block);
+						renderBlock(m_renderScene, integrator, samplers.at(blockId).get(), block, blockAlbedo, blockNormals);
 						m_block.put(block); // save to master block / live view of rendering
+						m_blockAlbedo.put(blockAlbedo);
+						m_blockNormal.put(blockNormals);
 						samplers.at(blockId)->setSampleRound(count++);
 					}
 				}
 				else
 				{
 					// for uniform sampling, simply call render on the block
-					renderBlock(m_renderScene, integrator, samplers.at(blockId).get(), block);
+					renderBlock(m_renderScene, integrator, samplers.at(blockId).get(), block, blockAlbedo, blockNormals);
 					m_block.put(block); // save to master block
+					m_blockAlbedo.put(blockAlbedo);
+					m_blockNormal.put(blockNormals);
 				}
 			}
 		};
@@ -306,7 +335,7 @@ void RenderThread::renderThreadMain()
 }
 
 static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,
-						ImageBlock &block)
+                        ImageBlock &block, ImageBlock &blockAlbedo, ImageBlock &blockNormal)
 {
 	const Camera *camera = scene->getCamera();
 
@@ -317,6 +346,8 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 
 	/* Clear the block contents */
 	block.clear();
+	blockAlbedo.clear();
+	blockNormal.clear();
 
 	for (int i = 0; i < sampleIndices.size(); i++)
 	{
@@ -332,10 +363,14 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 		Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
 
 		/* Compute the incident radiance */
-		value *= integrator->Li(scene, sampler, ray);
+		Color3f albedo = 0.f;
+		Color3f normal = 0.f;
+		value *= integrator->Li(scene, sampler, ray, albedo, normal);
 
 		/* Store in the image block */
 		block.put(pixelSample, value);
+		blockAlbedo.put(pixelSample, albedo);
+		blockNormal.put(pixelSample, normal);
 	}
 }
 
@@ -343,6 +378,7 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 void RenderThread::drawRenderGui()
 {
 	m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
+	m_guiSceneTouched |= ImGui::Combo("Device Mode", reinterpret_cast<int *>(&m_deviceMode), m_deviceModeStrings, EDeviceModeSize);
 
 	ImGui::Checkbox("Auto-update", &m_autoUpdate);
 	if (m_guiSceneTouched)
@@ -360,6 +396,8 @@ void RenderThread::drawSceneGui()
 		ImGui::Text("No scene loaded...");
 		return;
 	}
+
+	ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_visibleRenderLayer), ERenderLayer::Strings, ERenderLayer::Size);
 
 	// Start columns
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
@@ -391,6 +429,26 @@ std::string RenderThread::getRenderTime() {
 		return timeString2(m_endTime - m_startTime);
 	else
 		return timeString2(clock_t::now() - m_startTime);
+}
+
+ImageBlock &RenderThread::getCurrentBlock()
+{
+	if (m_visibleRenderLayer == ERenderLayer::Composite)
+		return m_block;
+	if (m_visibleRenderLayer == ERenderLayer::Albedo)
+		return m_blockAlbedo;
+	if (m_visibleRenderLayer == ERenderLayer::Normal)
+		return m_blockNormal;
+}
+
+ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
+{
+	if (renderLayer == ERenderLayer::Composite)
+		return m_block;
+	if (renderLayer == ERenderLayer::Albedo)
+		return m_blockAlbedo;
+	if (renderLayer == ERenderLayer::Normal)
+		return m_blockNormal;
 }
 
 NORI_NAMESPACE_END

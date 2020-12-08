@@ -37,12 +37,12 @@ int main(int argc, char **argv)
     {
 #ifndef DISABLE_NORI_GUI
 
-        ImageBlock block(Vector2i(720, 720), nullptr);
 #ifdef NORI_USE_NANOGUI
+        ImageBlock block(Vector2i(720, 720), nullptr);
         nanogui::init();
         NoriScreen *screen = new NoriScreen(block);
 #else
-        ImguiScreen *screen = new ImguiScreen(block);
+        ImguiScreen *screen = new ImguiScreen();
 #endif /* NORI_USE_NANOGUI */
 
         // if file is passed as argument, handle it

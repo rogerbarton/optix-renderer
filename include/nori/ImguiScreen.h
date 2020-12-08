@@ -46,7 +46,7 @@ inline float get_pixel_ratio();
 class ImguiScreen
 {
 public:
-	ImguiScreen(ImageBlock &block);
+	ImguiScreen();
 	~ImguiScreen();
 
 	void initGlfw(const char *windowTitle, int width, int height);
@@ -99,7 +99,6 @@ private:
 	int windowHeight;
 
 	// -- Render State
-	ImageBlock &m_block;
 	RenderThread m_renderThread;
 
 	float clearColor[3] = {0.2f, 0.2f, 0.2f};
