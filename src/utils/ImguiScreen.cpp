@@ -162,7 +162,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 	compositeBlock.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
 	compositeBlock.fromBitmap(bitmap);
 	compositeBlock.unlock();
-	m_renderThread.m_guiActiveBlock = RenderThread::EBlockType::Composite;
+	m_renderThread.m_visibleRenderLayer = ERenderLayer::Composite;
 
 	imageZoom = 1.f;
 	centerImage(true);

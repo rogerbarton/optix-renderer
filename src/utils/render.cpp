@@ -131,6 +131,10 @@ void RenderThread::loadScene(const std::string &filename)
 
 	m_renderScene->update(m_guiScene);
 
+	// Reset the render layer if it is not supported, assuming preview integrator supports all layers
+	if ((m_visibleRenderLayer & m_renderScene->getIntegrator(false)->getSupportedLayers()) == 0)
+		m_visibleRenderLayer = ERenderLayer::Composite;
+
 	// Start the actual thread
 	m_renderStatus = ERenderStatus::Busy;
 	m_renderThread = std::thread([this] { renderThreadMain(); });
@@ -393,7 +397,7 @@ void RenderThread::drawSceneGui()
 		return;
 	}
 
-	m_guiSceneTouched |= ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_guiActiveBlock), m_blockTypeStrings, EBlockTypeSize);
+	ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_visibleRenderLayer), ERenderLayer::Strings, ERenderLayer::Size);
 
 	// Start columns
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
@@ -429,21 +433,21 @@ std::string RenderThread::getRenderTime() {
 
 ImageBlock &RenderThread::getCurrentBlock()
 {
-	if (m_guiActiveBlock == EBlockType::Composite)
+	if (m_visibleRenderLayer == ERenderLayer::Composite)
 		return m_block;
-	if (m_guiActiveBlock == EBlockType::Albedo)
+	if (m_visibleRenderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
-	if (m_guiActiveBlock == EBlockType::Normal)
+	if (m_visibleRenderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
 }
 
-ImageBlock &RenderThread::getBlock(EBlockType blockType)
+ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
 {
-	if (blockType == EBlockType::Composite)
+	if (renderLayer == ERenderLayer::Composite)
 		return m_block;
-	if (blockType == EBlockType::Albedo)
+	if (renderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
-	if (blockType == EBlockType::Normal)
+	if (renderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
 }
 

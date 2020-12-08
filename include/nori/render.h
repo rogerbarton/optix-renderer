@@ -22,6 +22,7 @@
 #include <nori/common.h>
 #include <thread>
 #include <nori/block.h>
+#include <nori/integrator.h>
 #include <atomic>
 
 NORI_NAMESPACE_BEGIN
@@ -77,17 +78,9 @@ public:
 	};
 	EDeviceMode m_deviceMode                         = EDeviceMode::Both;
 
-	static constexpr int EBlockTypeSize = 3;
-	const char* m_blockTypeStrings[EBlockTypeSize] = {"Composite", "Albedo", "Normal"};
-	enum class EBlockType : int {
-		Composite = 0,
-		Albedo = 1,
-		Normal = 2
-	};
-
-	EBlockType m_guiActiveBlock = EBlockType::Composite;
-	ImageBlock& getCurrentBlock();                      /// Get the active block
-	ImageBlock& getBlock(EBlockType blockType = EBlockType::Composite);  /// Get a specific block
+	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
+	ImageBlock& getCurrentBlock();                      							/// Get the active block
+	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
 protected:
 
 	enum class ERenderStatus : int {

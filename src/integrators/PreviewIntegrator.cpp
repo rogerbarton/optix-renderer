@@ -14,6 +14,12 @@ public:
 	NORI_OBJECT_DEFAULT_CLONE(PreviewIntegrator)
 	NORI_OBJECT_DEFAULT_UPDATE(PreviewIntegrator)
 
+	int getSupportedLayers() const override
+	{
+		// Preview integrator needs to support all layers
+		return ERenderLayer::Composite | ERenderLayer::Albedo | ERenderLayer::Normal;
+	}
+
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray, Color3f &albedo, Color3f &normal) const
 	{
 		Intersection its;
@@ -28,12 +34,15 @@ public:
 			}
 			return Color3f(0.f);
 		}
+		normal = Color3f(its.shFrame.n.x(), its.shFrame.n.y(), its.shFrame.n.z());
 
 		Color3f result; // final Color
 
 		// get colliding object
 		auto shape = its.shape;
 		auto bsdf = shape->getBSDF();
+		// TODO: set albedo if the bsdf has it
+
 		// primary ray, pointing to camera
 		Vector3f wo = its.toLocal((ray.o - its.p).normalized());
 
