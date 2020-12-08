@@ -239,11 +239,11 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda/shading.cpp
         include/nori/optix/cuda/geometry.cpp
 
-        include/nori/optix/cuda/LaunchParams.h
-        include/nori/optix/cuda/RayParams.h
-        include/nori/optix/cuda/GeometryData.h
-        include/nori/optix/cuda/BsdfData.h
-        include/nori/optix/cuda/MediumData.h
+        include/nori/optix/cuda_shared/LaunchParams.h
+        include/nori/optix/cuda_shared/RayParams.h
+        include/nori/optix/cuda_shared/GeometryData.h
+        include/nori/optix/cuda_shared/BsdfData.h
+        include/nori/optix/cuda_shared/MediumData.h
 
         include/nori/optix/cuda/sutil/helpers.h
         include/nori/optix/cuda/sutil/vec_math.h
