@@ -5,7 +5,7 @@
 #pragma once
 
 #include <optix.h>
-#include "cuda/RayParams.h"
+#include "cuda_shared/RayParams.h"
 
 template<typename T>
 struct Record

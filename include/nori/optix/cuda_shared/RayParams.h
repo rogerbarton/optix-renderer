@@ -7,6 +7,7 @@
 #include "GeometryData.h"
 #include "BsdfData.h"
 #include "MediumData.h"
+#include "EmitterData.h"
 
 /**
  * Contains data used for the SBT
@@ -35,4 +36,5 @@ struct HitGroupParams
 	GeometryData geometry;
 	BsdfData     bsdf;
 	MediumData   medium;
+	EmitterData  emitter;
 };

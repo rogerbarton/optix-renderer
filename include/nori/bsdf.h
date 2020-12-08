@@ -21,7 +21,7 @@
 
 #include <nori/object.h>
 #ifdef NORI_USE_OPTIX
-#include <nori/optix/cuda/BsdfData.h>
+#include <nori/optix/cuda_shared/BsdfData.h>
 #endif
 
 NORI_NAMESPACE_BEGIN

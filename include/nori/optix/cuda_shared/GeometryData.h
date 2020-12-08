@@ -14,16 +14,16 @@ struct GeometryData
 {
 	enum Type
 	{
-		TRIANGLE_MESH         = 0,
-		SPHERE                = 1,
+		TRIANGLE_MESH = 0,
+		SPHERE        = 1,
 	};
 
 	struct TriangleMesh
 	{
-		float3  *positions;
-		float3  *normals;
-		float2  *texcoords;
-		int32_t *indices;
+		float3 *positions;
+		float3 *normals;
+		float2 *texcoords;
+		uint3  *indices;
 	};
 
 	struct Sphere
@@ -33,6 +33,7 @@ struct GeometryData
 	};
 
 	Type type;
+	float volume;
 
 	union
 	{

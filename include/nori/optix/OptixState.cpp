@@ -15,7 +15,7 @@
 #include "sutil/Exception.h"
 #include "OptixState.h"
 #include "OptixSbtTypes.h"
-#include "cuda/GeometryData.h"
+#include "cuda_shared/GeometryData.h"
 
 #include <nori/mesh.h>
 #include <nori/sphere.h>
@@ -342,7 +342,7 @@ void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGro
 	HitGroupRecord rec = {};
 	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
 	rec.data.geometry.type          = GeometryData::SPHERE;
-	rec.data.geometry.sphere.center = m_position;
+	rec.data.geometry.sphere.center = make_float3(m_position.x(), m_position.y(), m_position.z());
 	rec.data.geometry.sphere.radius = m_radius;
 
 	Shape::getOptixHitgroupRecords(rec);
@@ -355,6 +355,7 @@ void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGro
 
 void nori::Shape::getOptixHitgroupRecords(HitGroupRecord& rec)
 {
+	rec.data.geometry.volume = m_volume;
 	if (m_bsdf)
 		m_bsdf->getOptixMaterialData(rec.data.bsdf);
 	if (m_normalMap)

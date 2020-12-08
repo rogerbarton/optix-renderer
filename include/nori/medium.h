@@ -9,7 +9,7 @@
 #include <utility>
 
 #ifdef NORI_USE_OPTIX
-#include <nori/optix/cuda/MediumData.h>
+#include <nori/optix/cuda_shared/MediumData.h>
 #endif
 
 

@@ -5,8 +5,8 @@
 #pragma once
 #ifdef NORI_USE_OPTIX
 
-#include "cuda/LaunchParams.h"
-#include "cuda/RayParams.h"
+#include "cuda_shared/LaunchParams.h"
+#include "cuda_shared/RayParams.h"
 #include <cuda.h>
 #include <vector>
 
