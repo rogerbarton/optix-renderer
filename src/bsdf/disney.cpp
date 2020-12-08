@@ -242,12 +242,12 @@ public:
         ImGui::NextColumn();
         ImGui::AlignTextToFramePadding();
         ImGui::Text(albedo->getImGuiName().c_str());
-		ImGui::NextColumn();
-		if (node_open)
-		{
-			touched |= albedo->getImGuiNodes();
-			ImGui::TreePop();
-		}
+        ImGui::NextColumn();
+        if (node_open)
+        {
+            touched |= albedo->getImGuiNodes();
+            ImGui::TreePop();
+        }
 
         ImGuiValue(metallic, "Metallic");
         ImGuiValue(subsurface, "Subsurface");
@@ -308,7 +308,7 @@ private:
         return 1.f / (M_PI * ax * ay * pow(pow(HdotX / ax, 2.f) + pow(HdotY / ay, 2.f) + NdotH * NdotH, 2.f));
     }
 
-    Texture<Color3f>* albedo;
+    Texture<Color3f> *albedo;
     float metallic;
     float subsurface;
     float specular;
