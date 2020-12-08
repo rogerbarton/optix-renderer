@@ -21,9 +21,7 @@ public:
         {
             throw NoriException("This integrator requires an env map.");
         }
-
         EmitterQueryRecord eqr(ray.o); // give origin as reference
-        eqr.p = ray.d;
         eqr.wi = ray.d;
         return Color3f(envmap->pdf(eqr)/100);
     }

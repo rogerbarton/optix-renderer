@@ -94,9 +94,7 @@
             </div>
 
             <h4>Images as Environment Maps</h4>
-            <p>I wrote a custom class, HDRLoader, which can load hdr files from <a
-                    href="https://hdrihaven.com/">HDRIHaven</a> into nori. With this class, we can use any of a huge
-                selection of environment maps from the webpage. The following comparison was rendered using 128 samples
+            <p>The following comparison was rendered using 128 samples
                 using the independent sampler. We see that on the spere is kind of a color according to the envinronment
                 map in this direction. This proofs visually, that the environment map emitter should work as intended.
             </p>
@@ -104,6 +102,16 @@
                 <img src="images/envmap/hdri-mats.png" alt="Path MATS" class="img-responsive">
                 <img src="images/envmap/hdri-mis.png" alt="Path MIS" class="img-responsive">
             </div>
+            <h4>Validation 1: Displaying the Probability for each pixel</h4>
+            <p>To test the correctness of the importance sampling method, I wrote a custom integrator which shows the
+                probability of a pixel getting sampled by the environment map. This probability is based on the
+                luminance of the pixel, hence the resulting image should roughly look like a gray-scale image of the
+                environment map. As we see in this comparison, it does.</p>
+            <div class="twentytwenty-container">
+                <img src="images/envmap/test-color.png" alt="Color" class="img-responsive">
+                <img src="images/envmap/test-pdf.png" alt="PDF" class="img-responsive">
+            </div>
+
             <h4>Validation: Comparison to Blender</h4>
             <p>In this comparison, we see a rendered image, once using Blender and once using Nori. We see the lighting
                 on all spheres match (both images are rendered with 128 samples per pixel, using Path MIS). The only
@@ -130,6 +138,7 @@
             <ul>
                 <li>src/emitters/environmentmap.cpp</li>
                 <li>src/integrators/*.cpp</li>
+                <li>src/integrators/EnvMapTester.cpp</li>
             </ul>
         </div>
     </div>
