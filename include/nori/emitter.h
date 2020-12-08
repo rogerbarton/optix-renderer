@@ -24,51 +24,51 @@
 
 NORI_NAMESPACE_BEGIN
 
-	struct Intersection;
+struct Intersection;
 
 /**
  * \brief Data record for conveniently querying and sampling the
  * direct illumination technique implemented by a emitter
  */
-	struct EmitterQueryRecord
-	{
-		/// Origin point from which we sample the emitter
-		Point3f  ref;
-		/// Sampled point on the emitter
-		Point3f  p;
-		/// Normal at the emitter point
-		Normal3f n;
-		/// Direction between the hit point and the emitter point
-		Vector3f wi;
-		/// Probability
-		float    pdf;
-		/// Shadow ray
-		Ray3f    shadowRay;
+struct EmitterQueryRecord
+{
+	/// Origin point from which we sample the emitter
+	Point3f ref;
+	/// Sampled point on the emitter
+	Point3f p;
+	/// Normal at the emitter point
+	Normal3f n;
+	/// Direction between the hit point and the emitter point
+	Vector3f wi;
+	/// Probability
+	float pdf;
+	/// Shadow ray
+	Ray3f shadowRay;
 
-		/// Create an unitialized query record
-		EmitterQueryRecord() {}
+	/// Create an unitialized query record
+	EmitterQueryRecord() {}
 
-		/// Create a new query record that can be used to sample a emitter
-		EmitterQueryRecord(const Point3f &ref) : ref(ref) {}
+	/// Create a new query record that can be used to sample a emitter
+	EmitterQueryRecord(const Point3f &ref) : ref(ref) {}
 
-		/**
+	/**
 		 * \brief Create a query record that can be used to query the
 		 * sampling density after having intersected an area emitter
 		 */
-		EmitterQueryRecord(const Point3f &ref, const Point3f &p, const Normal3f &n)
-				: ref(ref), p(p), n(n)
-		{
-			wi = (p - ref).normalized();
-		}
-	};
+	EmitterQueryRecord(const Point3f &ref, const Point3f &p, const Normal3f &n)
+		: ref(ref), p(p), n(n)
+	{
+		wi = (p - ref).normalized();
+	}
+};
 
 /**
  * \brief Superclass of all emitters
  */
-	class Emitter : public NoriObject
-	{
-	public:
-		/**
+class Emitter : public NoriObject
+{
+public:
+	/**
 		 * \brief Sample the emitter and return the importance weight (i.e. the
 		 * value of the Emitter divided by the probability density
 		 * of the sample with respect to solid angles).
@@ -79,10 +79,10 @@ NORI_NAMESPACE_BEGIN
 		 * \return The emitter value divided by the probability density of the sample.
 		 *         A zero value means that sampling failed.
 		 */
-		virtual Color3f sample(EmitterQueryRecord &lRec,
-		                       const Point2f &sample) const = 0;
+	virtual Color3f sample(EmitterQueryRecord &lRec,
+						   const Point2f &sample) const = 0;
 
-		/**
+	/**
 		 * \brief Evaluate the emitter
 		 *
 		 * \param lRec
@@ -90,9 +90,9 @@ NORI_NAMESPACE_BEGIN
 		 * \return
 		 *     The emitter value, evaluated for each color channel
 		 */
-		virtual Color3f eval(const EmitterQueryRecord &lRec) const = 0;
+	virtual Color3f eval(const EmitterQueryRecord &lRec) const = 0;
 
-		/**
+	/**
 		 * \brief Compute the probability of sampling \c lRec.p.
 		 *
 		 * This method provides access to the probability density that
@@ -104,58 +104,61 @@ NORI_NAMESPACE_BEGIN
 		 * \return
 		 *     A probability/density value
 		 */
-		virtual float pdf(const EmitterQueryRecord &lRec) const = 0;
+	virtual float pdf(const EmitterQueryRecord &lRec) const = 0;
 
-		/// Sample a photon
-		virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
-		                             const Point2f &sample2) const
-		{
-			throw NoriException("Emitter::samplePhoton(): not implemented!");
-		}
+	/// Sample a photon
+	virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1,
+								 const Point2f &sample2) const
+	{
+		throw NoriException("Emitter::samplePhoton(): not implemented!");
+	}
 
-		virtual NoriObject *cloneAndInit() override = 0;
+	virtual NoriObject *cloneAndInit() override = 0;
 
-		/**
+	/**
 		 * [Overload] Finish initialization for other components
 		 * @param clone The already created clone
 		 */
-		void cloneAndInit(Emitter *clone);
+	void cloneAndInit(Emitter *clone);
 
-		void update(const NoriObject *guiObject) override;
+	void update(const NoriObject *guiObject) override;
 
-		/**
+	/**
 		 * \brief Virtual destructor
 		 * */
-		virtual ~Emitter() {}
+	virtual ~Emitter() {}
 
-		/**
+	/**
 		 * \brief Return the type of object (i.e. Mesh/Emitter/etc.)
 		 * provided by this instance
 		 * */
-		virtual EClassType getClassType() const override { return EEmitter; }
+	virtual EClassType getClassType() const override { return EEmitter; }
 
-		/**
+	/**
 		 * \brief Set the shape if the emitter is attached to a shape
 		 * */
-		void setShape(Shape *shape) { m_shape = shape; }
+	void setShape(Shape *shape) { m_shape = shape; }
 
-		bool hasShape() { return m_shape != nullptr; }
+	bool hasShape() { return m_shape != nullptr; }
 
-		virtual bool isEnvMap() const { return false; }
+	virtual bool isEnvMap() const { return false; }
 
-		Point3f getPosition() const { return m_position; }
+	Point3f getPosition() const { return m_position; }
+
+	// make this public for easy access
+	float lightProb = 1.f;
 
 #ifdef NORI_USE_IMGUI
-		NORI_OBJECT_IMGUI_NAME("Emitter Base");
-		bool getImGuiNodes() override;
+	NORI_OBJECT_IMGUI_NAME("Emitter Base");
+	bool getImGuiNodes() override;
 #endif
 
-	protected:
-		/// Pointer to the shape if the emitter is attached to a shape
-		Shape *m_shape = nullptr;
+protected:
+	/// Pointer to the shape if the emitter is attached to a shape
+	Shape *m_shape = nullptr;
 
-		Point3f m_position;
-	};
+	Point3f m_position;
+};
 
 NORI_NAMESPACE_END
 

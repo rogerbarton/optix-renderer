@@ -23,6 +23,7 @@
 #include <nori/emitter.h>
 #include <nori/denoiser.h>
 #include <nori/volume.h>
+#include <nori/dpdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -75,8 +76,10 @@ NORI_NAMESPACE_BEGIN
 		/// Return a random emitter
 		const Emitter *getRandomEmitter(float rnd) const
 		{
-			auto const &n    = m_emitters.size();
-			size_t     index = std::min(static_cast<size_t>(std::floor(n * rnd)), n - 1);
+			size_t index = emitterDpdf.sample(rnd);
+			//auto const &n    = m_emitters.size();
+			//size_t     index = std::min(static_cast<size_t>(std::floor(n * rnd)), n - 1);
+			//std::cout << index << std::endl;
 			if (index >= m_emitters.size())
 				return nullptr;
 			return m_emitters[index];
@@ -186,6 +189,8 @@ NORI_NAMESPACE_BEGIN
 		Emitter  *m_envmap   = nullptr;
 		Denoiser *m_denoiser = nullptr;
 		Medium * m_ambientMedium = nullptr;
+
+		DiscretePDF emitterDpdf;
 
 		std::vector<Emitter *> m_emitters;
 

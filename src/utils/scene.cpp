@@ -168,6 +168,13 @@ NORI_NAMESPACE_BEGIN
 			if (!m_emitters[i]->hasShape())
 				m_emitters[i]->update(gui->m_emitters[i]);
 
+		// recompute emitterDpdf
+		emitterDpdf.clear();
+		for (int i = 0; i < gui->m_emitters.size(); ++i) {
+			emitterDpdf.append(gui->m_emitters[i]->lightProb);
+		}
+		emitterDpdf.normalize();
+
 #ifdef NORI_USE_VOLUMES
 		for (int i = 0; i < gui->m_volumes.size(); ++i)
 			m_volumes[i]->update(gui->m_volumes[i]);

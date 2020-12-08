@@ -220,7 +220,7 @@ public:
             "  clearcoat = %f,\n"
             "  clearcoatGloss = %f,\n"
             "]",
-            albedo->toString(), metallic, subsurface,
+            indent(albedo->toString()), metallic, subsurface,
             specular, roughness, specularTint, anisotropic,
             sheen, sheenTint, clearcoat, clearcoatGloss);
     }
