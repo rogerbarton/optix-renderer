@@ -18,6 +18,10 @@
 
 #include <nori/sphere.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 Sphere::Sphere(const PropertyList &propList)
@@ -151,6 +155,7 @@ std::string Sphere::toString() const
 			m_emitter ? indent(m_emitter->toString()) : std::string("null"));
 }
 
+#ifdef NORI_USE_IMGUI
 bool Sphere::getImGuiNodes()
 {
 	touched |= Shape::getImGuiNodes();
@@ -173,5 +178,24 @@ bool Sphere::getImGuiNodes()
 	touched |= geometryTouched | transformTouched;
 	return touched;
 }
+#endif
+
+#ifdef NORI_USE_OPTIX
+	void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
+	{
+		HitGroupRecord rec = {};
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
+		rec.data.geometry.type          = GeometryData::SPHERE;
+		rec.data.geometry.sphere.center = make_float3(m_position);
+		rec.data.geometry.sphere.radius = m_radius;
+
+		Shape::getOptixHitgroupRecords(rec);
+
+		hitgroupRecords.push_back(rec);
+
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+		hitgroupRecords.push_back(rec);
+	}
+#endif
 
 NORI_NAMESPACE_END
