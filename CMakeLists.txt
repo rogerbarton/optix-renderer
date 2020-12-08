@@ -245,6 +245,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda_shared/BsdfData.h
         include/nori/optix/cuda_shared/MediumData.h
         include/nori/optix/cuda_shared/EmitterData.h
+        include/nori/optix/cuda_shared/TextureData.h
 
         include/nori/optix/cuda/sutil/helpers.h
         include/nori/optix/cuda/sutil/vec_math.h
