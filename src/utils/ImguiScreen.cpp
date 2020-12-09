@@ -207,6 +207,7 @@ void ImguiScreen::mainloop()
 
 		fpsTimer.reset();
 	}
+	m_renderThread.m_optixBlock->deletePBO();
 	glfwTerminate();
 }
 
