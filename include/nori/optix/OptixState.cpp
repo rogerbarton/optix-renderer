@@ -358,3 +358,28 @@ void OptixState::clearPipeline()
 	OPTIX_CHECK(optixModuleDestroy(m_geometry_module));
 	OPTIX_CHECK(optixModuleDestroy(m_shading_module));
 }
+
+
+void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample)
+{
+	// Update params and copy to device
+	m_params->sampleIndex = currentSample;
+	m_params->d_imageBuffer = outputBuffer.map();
+
+	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(m_params), &m_d_params, sizeof(LaunchParams),
+	                           cudaMemcpyHostToDevice, m_stream));
+
+	OPTIX_CHECK(optixLaunch(m_pipeline,
+	                        m_stream,
+	                        reinterpret_cast<CUdeviceptr>(m_d_params),
+	                        sizeof(LaunchParams),
+	                        &m_sbt,
+	                        m_params->imageWidth,
+	                        m_params->imageHeight,
+	                        1));
+	outputBuffer.unmap();
+
+	CUDA_CHECK(cudaStreamSynchronize(m_stream));
+	CUDA_SYNC_CHECK();
+
+}
