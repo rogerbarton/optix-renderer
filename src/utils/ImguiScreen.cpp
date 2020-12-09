@@ -37,7 +37,7 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	initImGui();
 	setCallbacks();
 
-	m_renderThread.getBlock().setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
+	m_renderThread.initBlocks();
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});

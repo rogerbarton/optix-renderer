@@ -51,7 +51,7 @@ public:
 	void renderThreadMain();
 #ifdef NORI_USE_OPTIX
 	void renderThreadOptix();
-	CUDAOutputBuffer<float4> m_optixBlock = {CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	CUDAOutputBuffer<float4>* m_optixBlock;
 #endif
 
     bool isBusy();
@@ -90,7 +90,8 @@ public:
 	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
 	ImageBlock& getCurrentBlock();                      							/// Get the active block
 	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
-protected:
+		void initBlocks();
+	protected:
 
 	enum class ERenderStatus : int {
 		Idle      = 0,

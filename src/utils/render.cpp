@@ -47,11 +47,23 @@ RenderThread::RenderThread() : m_startTime(clock_t::now()), m_endTime(m_startTim
 {
 }
 
+
+void RenderThread::initBlocks()
+{
+#ifdef NORI_USE_OPTIX
+	m_optixBlock = new CUDAOutputBuffer<float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+#endif
+	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
+}
+
 RenderThread::~RenderThread()
 {
 	stopRendering();
 	delete m_guiScene;
 	delete m_renderScene;
+#ifdef NORI_USE_OPTIX
+	delete m_optixBlock;
+#endif
 }
 
 bool RenderThread::isBusy()
@@ -389,9 +401,9 @@ void RenderThread::renderThreadOptix()
 		const uint32_t width    = imageDim.x();
 		const uint32_t height   = imageDim.y();
 
-		m_optixBlock.lock();
-		m_optixBlock.resize(width, height);
-		m_optixBlock.unlock();
+		m_optixBlock->lock();
+		m_optixBlock->resize(width, height);
+		m_optixBlock->unlock();
 
 		if (!optixState->preRender(*m_renderScene, m_previewMode))
 			return;
@@ -403,7 +415,7 @@ void RenderThread::renderThreadOptix()
 		{
 			if (m_renderStatus == ERenderStatus::Interrupt)
 				break;
-			optixState->renderSubframe(m_optixBlock, m_currentOptixSample);
+			optixState->renderSubframe(*m_optixBlock, m_currentOptixSample);
 		}
 	}
 	catch (std::exception& e)

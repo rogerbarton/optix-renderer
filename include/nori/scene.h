@@ -184,7 +184,7 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_OPTIX
 		OptixState *getOptixState() const { return m_optixState; }
-		OptixRenderer *m_optixRenderer;
+		OptixRenderer *m_optixRenderer = nullptr;
 		OptixState *m_optixState = nullptr;
 #endif
 	private:
