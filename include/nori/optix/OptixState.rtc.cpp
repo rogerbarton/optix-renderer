@@ -226,7 +226,7 @@ void OptixState::createPtxModules(bool specialize)
 		BIND_VALUE(integrator)
 
 		module_compile_options.boundValues    = boundValues.data();
-		module_compile_options.numBoundValues = boundValues.size();
+		module_compile_options.numBoundValues = static_cast<uint32_t>(boundValues.size());
 	}
 
 	{

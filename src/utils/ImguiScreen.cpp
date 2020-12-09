@@ -278,8 +278,8 @@ void ImguiScreen::render()
 	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
-	m_shader->setUniform("sourceCpu", m_texture);
-	m_shader->setUniform("sourceGpu", m_textureGpu);
+	m_shader->setUniform("sourceCpu", static_cast<int>(m_texture));
+	m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
 #ifdef NORI_USE_OPTIX
 	m_shader->setUniform("samplesCpu", 0.5f); // TODO: cpu / cpu+gpu
 	m_shader->setUniform("samplesGpu", 0.5f);
@@ -651,7 +651,7 @@ void ImguiScreen::centerImage(bool autoExpandWindow)
 
 void ImguiScreen::scrollWheel(double xoffset, double yoffset)
 {
-	float scale = 1.f - 0.05f * yoffset;
+	float scale = 1.f - 0.05f * static_cast<float>(yoffset);
 	setZoom(clamp(imageZoom / scale, 1.f / 30.f, 30.f));
 }
 
@@ -671,12 +671,13 @@ void ImguiScreen::initImGui()
 	ImGui::CreateContext();
 	ImGuiIO &imGuiIo = ImGui::GetIO();
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	imGuiIo.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	imGuiIo.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
-	ImGuiStyle &imGuiStyle = ImGui::GetStyle();
+	// ImGuiStyle &imGuiStyle = ImGui::GetStyle();
+	// imGuiStyle.FrameRounding = 3.f;
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);
 	const char *glsl_version = "#version 150";

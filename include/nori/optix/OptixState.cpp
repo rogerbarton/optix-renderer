@@ -312,7 +312,7 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 					reinterpret_cast<void **>( &m_sbt.hitgroupRecordBase ),
 					hitgroupRecords.size() * sizeof(HitGroupRecord)));
 			m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
-			m_sbt.hitgroupRecordCount         = hitgroupRecords.size();
+			m_sbt.hitgroupRecordCount         = static_cast<uint32_t>(hitgroupRecords.size());
 		}
 
 		CUDA_CHECK(cudaMemcpy(

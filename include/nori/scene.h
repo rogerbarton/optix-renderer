@@ -24,6 +24,7 @@
 #include <nori/denoiser.h>
 #include <nori/volume.h>
 #include <nori/dpdf.h>
+
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/OptixRenderer.h>
 #include <nori/optix/OptixState.h>

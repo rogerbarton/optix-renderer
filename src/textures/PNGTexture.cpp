@@ -378,10 +378,17 @@ public:
 
 	~PNGTexture() override {
 #ifdef NORI_USE_OPTIX
-		CUDA_CHECK( cudaDestroyTextureObject( d_sampler ) );
-		d_sampler = 0;
-		CUDA_CHECK( cudaFreeArray( d_data ) );
-		d_data = 0;
+		try
+		{
+			CUDA_CHECK(cudaDestroyTextureObject(d_sampler));
+			d_sampler = 0;
+			CUDA_CHECK(cudaFreeArray(d_data));
+			d_data = nullptr;
+		}
+		catch (const std::exception &e)
+		{
+			cerr << "~PNGTexture error: " << e.what() << endl;
+		}
 #endif
 	}
 

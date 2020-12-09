@@ -192,7 +192,7 @@ void RenderThread::renderThreadMain()
 	Integrator *const integrator = m_renderScene->getIntegrator(m_previewMode);
 	integrator->preprocess(m_renderScene);
 
-	auto numSamples = m_previewMode ? 1 : m_renderScene->getSampler()->getSampleCount();
+	const uint32_t numSamples = m_previewMode ? 1 : m_renderScene->getSampler()->getSampleCount();
 	const auto numBlocks = blockGenerator.getBlockCount();
 
 	tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
@@ -311,17 +311,17 @@ void RenderThread::renderThreadMain()
 	// for now, disable variance writer
 	if (m_renderScene->getSampler()->isAdaptive())
 	{
-		BlockGenerator blockGenerator(outputSize, blockSize);
+		BlockGenerator       blockGen(outputSize, blockSize);
 		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box"));
-		ImageBlock currVarBlock(Vector2i(blockSize), rf);
+		ImageBlock           currVarBlock(Vector2i(blockSize), rf);
 
 		ImageBlock fullVarianceMatrix(outputSize, rf);
 		fullVarianceMatrix.clear();
-		const int blocks = blockGenerator.getBlockCount();
+		const int blocks = blockGen.getBlockCount();
 
 		for (int i = 0; i < blocks; i++)
 		{
-			blockGenerator.next(currVarBlock);
+			blockGen.next(currVarBlock);
 			int id = currVarBlock.getBlockId();
 			currVarBlock.clear();
 			samplers.at(id)->writeVarianceMatrix(currVarBlock);
@@ -474,22 +474,22 @@ std::string RenderThread::getRenderTime() {
 
 ImageBlock &RenderThread::getCurrentBlock()
 {
-	if (m_visibleRenderLayer == ERenderLayer::Composite)
-		return m_block;
 	if (m_visibleRenderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
 	if (m_visibleRenderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
+	else
+		return m_block;
 }
 
 ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
 {
-	if (renderLayer == ERenderLayer::Composite)
-		return m_block;
 	if (renderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
 	if (renderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
+	else
+		return m_block;
 }
 
 NORI_NAMESPACE_END
