@@ -7,6 +7,7 @@
 #include <vector_types.h>
 
 #define Epsilon 1e-4f
+#define Infinity 1e10f
 
 struct RaygenConstantParams
 {

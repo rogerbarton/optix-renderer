@@ -9,12 +9,35 @@
 #include <vector_functions.h>
 #include <vector_types.h>
 
-#include "LaunchParams.h"
-#include "RayParams.h"
+#include "../cuda_shared/LaunchParams.h"
+#include "../cuda_shared/RayParams.h"
 #include "sutil/helpers.h"
+#include "sutil/random.h"
+#include "sutil/warp.h"
+
+#include "RadiancePrd.h"
 
 #include <nanovdb/util/Ray.h>
 
+static __forceinline__ __device__ void sampleRay(
+		unsigned int &seed,
+		float3 &ray_direction,
+		float3 &ray_origin);
+
+static __forceinline__ __device__ void traceRadiance(
+		OptixTraversableHandle handle,
+		float3 ray_origin,
+		float3 ray_direction,
+		float tmin,
+		float tmax,
+		RadiancePrd *prd);
+
+static __forceinline__ __device__ bool traceOcclusion(
+		OptixTraversableHandle handle,
+		float3 ray_origin,
+		float3 ray_direction,
+		float tmin,
+		float tmax);
 
 extern "C" {
 __constant__ LaunchParams launchParams;
@@ -22,62 +45,161 @@ __constant__ LaunchParams launchParams;
 
 extern "C" __global__ void __raygen__perspective()
 {
-	using RealT = float;
-	using Vec3T = nanovdb::Vec3<RealT>;
-	using CoordT = nanovdb::Coord;
-	using RayT = nanovdb::Ray<RealT>;
+	const unsigned int sampleIndex = launchParams.sampleIndex;
+	const uint3        idx         = optixGetLaunchIndex();
+	const unsigned int pixelIdx    = idx.y * launchParams.imageWidth + idx.x;
 
-	const uint3    idx          = optixGetLaunchIndex();
-	const uint3    dim          = optixGetLaunchDimensions();
-	const uint32_t ix           = idx.x;
-	const uint32_t iy           = idx.y;
-	const uint32_t offset       = launchParams.imageWidth * idx.y + idx.x;
-	const auto     &sceneParams = launchParams.scene;
+	unsigned int seed = tea<4>(pixelIdx, sampleIndex);
 
 	float3 color = {0, 0, 0};
 
-	for (int sampleIndex = 0; sampleIndex < launchParams.samplesPerLaunch; ++sampleIndex)
+	for (int i = 0; i < launchParams.samplesPerLaunch; ++i)
 	{
-		uint32_t pixelSeed = render::hash(
-				(sampleIndex + (launchParams.sampleIndex + 1) * launchParams.samplesPerLaunch)) ^
-		                     render::hash(ix, iy);
+		float3 rayDirection;
+		float3 rayOrigin;
+		sampleRay(seed, rayDirection, rayOrigin);
 
-		RayT wRay = render::getRayFromPixelCoord(ix, iy, launchParams.imageWidth, launchParams.imageHeight,
-		                                         launchParams.sampleIndex, launchParams.samplesPerLaunch, pixelSeed,
-		                                         sceneParams);
+		// -- Integrator::Li()
+		RadiancePrd prd{};
+		prd.Li         = make_float3(0.f);
+		prd.throughput = make_float3(1.f);
+		prd.terminated = false;
+		prd.seed       = seed;
 
-		float3 result;
-		optixTrace(
-				launchParams.sceneHandle,
-				make_float3(wRay.eye()),
-				make_float3(wRay.dir()),
-				Epsilon,
-				1e16f,
-				0.0f,
-				OptixVisibilityMask(1),
-				OPTIX_RAY_FLAG_DISABLE_ANYHIT,
-				RAY_TYPE_RADIANCE,
-				RAY_TYPE_COUNT,
-				RAY_TYPE_RADIANCE,
-				float3_as_args(result));
+		for (int depth = 0;; ++depth)
+		{
+			traceRadiance(
+					launchParams.sceneHandle,
+					rayOrigin,
+					rayDirection,
+					Epsilon,
+					Infinity,
+					&prd);
 
-		color += result;
+			if (prd.terminated)
+				break;
+
+			// russian roulette
+			{
+				const float rouletteSuccess = fminf(fmaxf3(prd.throughput), 0.99f);
+
+				if (rnd(prd.seed) > rouletteSuccess || rouletteSuccess < Epsilon)
+					break;
+				// Adjust throughput in case of survival
+				prd.throughput /= rouletteSuccess;
+			}
+
+			rayDirection = prd.direction;
+			rayOrigin    = prd.origin;
+		}
+
+		seed = prd.seed;
+
+		// Store Li
+		color += prd.Li;
 	}
 
-	color /= (float) launchParams.samplesPerLaunch;
+	// Normalize and update image
+	color /= static_cast<float>(launchParams.samplesPerLaunch);
 
 	if (launchParams.sampleIndex > 1)
 	{
-		float3 prevPixel = make_float3(launchParams.d_imageBuffer[offset]);
+		float3 prevPixel = make_float3(launchParams.d_imageBuffer[pixelIdx]);
 
-		color = prevPixel + (color - prevPixel) * (1.0f / launchParams.sampleIndex);
+		const float a = 1.0f / static_cast<float>(launchParams.sampleIndex + 1);
+		color = lerp(prevPixel, color, a);
 	}
 
-	launchParams.d_imageBuffer[offset] = make_float4(color, 1.f);
+	launchParams.d_imageBuffer[pixelIdx] = make_float4(color, 1.f);
 }
 
-__forceinline__ float3 Li()
+static __forceinline__ __device__ void sampleRay(
+		unsigned int &seed,
+		float3 &ray_direction,
+		float3 &ray_origin)
 {
+	const unsigned int w   = launchParams.imageWidth;
+	const unsigned int h   = launchParams.imageHeight;
+	const float3       eye = launchParams.camera.eye;
+	const float3       U   = launchParams.camera.U;
+	const float3       V   = launchParams.camera.V;
+	const float3       W   = launchParams.camera.W;
+	const uint3        idx = optixGetLaunchIndex();
 
+	const float2 subpixel_jitter = make_float2(rnd(seed), rnd(seed));
+
+	// Local ray
+	float3 o = {0, 0, 0};
+	float3 d = 2.0f * make_float3(
+			(static_cast<float>( idx.x ) + subpixel_jitter.x) / static_cast<float>( w ),
+			(static_cast<float>( idx.y ) + subpixel_jitter.y) / static_cast<float>( h ),
+			0.5f
+	) - 1.0f;
+
+	if (launchParams.camera.lensRadius > Epsilon)
+	{
+		const float2 pLens  = launchParams.camera.lensRadius *
+		                      squareToUniformDisk(make_float2(rnd(seed), rnd(seed)));
+		const float  ft     = launchParams.camera.focalDistance / d.z;
+		const float3 pFocus = o + d * ft;
+
+		o = make_float3(pLens.x, pLens.y, 0.f);
+		// direction connecting aperture and focal plane points
+		d = normalize(pFocus - o);
+	}
+
+	// Transform camera to world
+	ray_direction = normalize(d.x * U + d.y * V + d.z * W);
+	ray_origin    = eye + o.x * U + o.y * V + o.z * W;
 }
+
+static __forceinline__ __device__ void traceRadiance(
+		OptixTraversableHandle handle,
+		float3 ray_origin,
+		float3 ray_direction,
+		float tmin,
+		float tmax,
+		RadiancePrd *prd)
+{
+	unsigned int u0, u1;
+	packPointer(prd, u0, u1);
+	optixTrace(
+			handle,
+			ray_origin,
+			ray_direction,
+			tmin,
+			tmax,
+			0.0f,                        // rayTime
+			OptixVisibilityMask(1),
+			OPTIX_RAY_FLAG_NONE,
+			RAY_TYPE_RADIANCE,          // SBT offset
+			RAY_TYPE_COUNT,             // SBT stride
+			RAY_TYPE_RADIANCE,       // missSBTIndex
+			u0, u1);
+}
+
+static __forceinline__ __device__ bool traceOcclusion(
+		OptixTraversableHandle handle,
+		float3 ray_origin,
+		float3 ray_direction,
+		float tmin,
+		float tmax)
+{
+	unsigned int occluded = 0u;
+	optixTrace(
+			handle,
+			ray_origin,
+			ray_direction,
+			tmin,
+			tmax,
+			0.0f,                        // rayTime
+			OptixVisibilityMask(1),
+			OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT,
+			RAY_TYPE_SHADOWRAY,         // SBT offset
+			RAY_TYPE_COUNT,             // SBT stride
+			RAY_TYPE_SHADOWRAY,      // missSBTIndex
+			occluded);
+	return occluded;
+}
+
 #pragma clang diagnostic pop
