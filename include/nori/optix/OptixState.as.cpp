@@ -164,25 +164,9 @@ void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 /**
  * GasInfo for a triangle mesh
  */
-OptixBuildInput nori::Mesh::getOptixBuildInput() const
+OptixBuildInput nori::Mesh::getOptixBuildInput()
 {
-	// Copy mesh data to device
-	// TODO: delete this, store this in mesh?
-	CUdeviceptr d_V;
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_V ), sizeof(OptixAabb)));
-	CUDA_CHECK(cudaMemcpy(
-			reinterpret_cast<void *>( d_V ),
-			m_V.data(), m_V.size() * sizeof(float),
-			cudaMemcpyHostToDevice
-	));
-
-	CUdeviceptr d_F;
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_F ), sizeof(OptixAabb)));
-	CUDA_CHECK(cudaMemcpy(
-			reinterpret_cast<void *>( d_F ),
-			m_F.data(), m_F.size() * sizeof(float),
-			cudaMemcpyHostToDevice
-	));
+	copyMeshDataToDevice();
 
 	OptixBuildInput buildInputs = {};
 
@@ -207,7 +191,7 @@ OptixBuildInput nori::Mesh::getOptixBuildInput() const
 /**
  * Default is to use bbox with custom intersection
  */
-OptixBuildInput nori::Shape::getOptixBuildInput() const
+OptixBuildInput nori::Shape::getOptixBuildInput()
 {
 	// AABB build input
 	OptixAabb aabb = {m_bbox.min.x(), m_bbox.min.y(), m_bbox.min.z(),

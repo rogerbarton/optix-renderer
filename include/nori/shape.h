@@ -196,7 +196,7 @@ public:
 	 * Defined in OptixState.as.cpp
 	 * @return OptixBuildInput required to build the geometry accel structure
 	 */
-	virtual OptixBuildInput getOptixBuildInput() const;
+	virtual OptixBuildInput getOptixBuildInput();
 
 	/**
 	 * Fill the hitgroup record for this shape

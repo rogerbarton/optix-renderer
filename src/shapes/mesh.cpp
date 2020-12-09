@@ -221,52 +221,7 @@ bool Mesh::getImGuiNodes()
 #ifdef NORI_USE_OPTIX
 	void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 	{
-		if (d_V == 0)
-		{
-			{
-				size_t bytes = m_V.size() * sizeof(float);
-				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
-				CUDA_CHECK(cudaMemcpy(
-						reinterpret_cast<void *>(d_V),
-						m_V.data(),
-						bytes,
-						cudaMemcpyHostToDevice
-				));
-			}
-
-			{
-				size_t bytes = m_N.size() * sizeof(float);
-				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
-				CUDA_CHECK(cudaMemcpy(
-						reinterpret_cast<void *>(d_N),
-						m_N.data(),
-						bytes,
-						cudaMemcpyHostToDevice
-				));
-			}
-
-			{
-				size_t bytes = m_UV.size() * sizeof(float);
-				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
-				CUDA_CHECK(cudaMemcpy(
-						reinterpret_cast<void *>(d_UV),
-						m_UV.data(),
-						bytes,
-						cudaMemcpyHostToDevice
-				));
-			}
-
-			{
-				size_t bytes = m_F.size() * sizeof(uint32_t);
-				CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
-				CUDA_CHECK(cudaMemcpy(
-						reinterpret_cast<void *>(d_F),
-						m_F.data(),
-						bytes,
-						cudaMemcpyHostToDevice
-				));
-			}
-		}
+		copyMeshDataToDevice();
 
 		HitGroupRecord rec = {};
 		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
@@ -282,6 +237,55 @@ bool Mesh::getImGuiNodes()
 
 		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
 		hitgroupRecords.push_back(rec);
+	}
+
+	void Mesh::copyMeshDataToDevice()
+	{
+		if (d_V != 0) return;
+
+		{
+			size_t bytes = m_V.size() * sizeof(float);
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
+			CUDA_CHECK(cudaMemcpy(
+					reinterpret_cast<void *>(d_V),
+					m_V.data(),
+					bytes,
+					cudaMemcpyHostToDevice
+			));
+		}
+
+		{
+			size_t bytes = m_N.size() * sizeof(float);
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
+			CUDA_CHECK(cudaMemcpy(
+					reinterpret_cast<void *>(d_N),
+					m_N.data(),
+					bytes,
+					cudaMemcpyHostToDevice
+			));
+		}
+
+		{
+			size_t bytes = m_UV.size() * sizeof(float);
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
+			CUDA_CHECK(cudaMemcpy(
+					reinterpret_cast<void *>(d_UV),
+					m_UV.data(),
+					bytes,
+					cudaMemcpyHostToDevice
+			));
+		}
+
+		{
+			size_t bytes = m_F.size() * sizeof(uint32_t);
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
+			CUDA_CHECK(cudaMemcpy(
+					reinterpret_cast<void *>(d_F),
+					m_F.data(),
+					bytes,
+					cudaMemcpyHostToDevice
+			));
+		}
 	}
 #endif
 

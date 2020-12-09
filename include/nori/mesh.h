@@ -108,8 +108,9 @@ public:
     const MatrixXu &getIndices() const { return m_F; }
 
 #ifdef NORI_USE_OPTIX
-	OptixBuildInput getOptixBuildInput() const override;
+	OptixBuildInput getOptixBuildInput() override;
 	void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
+	void copyMeshDataToDevice();
 #endif
 
     /// Return the name of this mesh
