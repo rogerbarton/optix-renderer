@@ -553,6 +553,11 @@ __forceinline__ __device__ float dot(const float3& a, const float3& b)
   return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+__forceinline__ __device__ float normSqr(float3 a)
+{
+	return dot(a, a);
+}
+
 /** cross product */
 __forceinline__ __device__ float3 cross(const float3& a, const float3& b)
 {

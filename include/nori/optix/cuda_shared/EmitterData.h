@@ -29,7 +29,7 @@ struct EmitterData
 	{
 		float3 position;
 		float3 direction;
-		float  totalWidthAngle;
+		float  totalWidthAngle; /// TODO Note: angles in radians
 		float  falloffStart;
 	};
 
@@ -39,6 +39,7 @@ struct EmitterData
 
 	struct Volume
 	{
+		float3 invVolume; // TODO: set this, so we can use pdf directly
 	};
 
 	Type   type = NONE;
