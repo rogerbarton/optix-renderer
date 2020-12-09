@@ -78,7 +78,7 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 				   "    return 1.055 * pow(value, 0.41666) - 0.055;\n"
 				   "}\n"
 				   "void main() {\n"
-				   "    vec4 color = samplesCpu * texture(sourceCpu, uv) + samplesCpu * texture(sourceGpu, uv);\n"
+				   "    vec4 color = samplesCpu * texture(sourceCpu, uv) + samplesGpu * texture(sourceGpu, uv);\n"
 				   "    color *= scale / color.w;\n"
 				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
 				   "}");
