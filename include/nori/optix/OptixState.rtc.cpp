@@ -8,7 +8,7 @@
  * Compiles .ptx files to optix modules with optixModuleCreateFromPTX
  */
 
-#include <nori/optix/OptixRenderer.h>
+#include <nori/optix/OptixState.h>
 
 #include <optix.h>
 #include <optix_stubs.h>

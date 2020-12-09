@@ -5,7 +5,6 @@
 #pragma once
 #ifdef NORI_USE_OPTIX
 
-#include "OptixState.h"
 #include <nori/object.h>
 
 NORI_NAMESPACE_BEGIN

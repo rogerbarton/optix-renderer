@@ -240,7 +240,7 @@ bool Shape::getImGuiNodes()
 #endif
 
 #ifdef NORI_USE_OPTIX
-	void nori::Shape::getOptixHitgroupRecords(HitGroupRecord &rec)
+	void nori::Shape::getOptixHitgroupRecordsShape(HitGroupRecord &rec)
 	{
 		// Copy shape specifics to the record
 		rec.data.geometry.volume = m_volume;

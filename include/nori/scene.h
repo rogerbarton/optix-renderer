@@ -26,6 +26,7 @@
 #include <nori/dpdf.h>
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/OptixRenderer.h>
+#include <nori/optix/OptixState.h>
 #endif
 
 NORI_NAMESPACE_BEGIN

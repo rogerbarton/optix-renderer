@@ -18,8 +18,6 @@
 #include <cuda_runtime_api.h>
 
 #include "sutil/Exception.h"
-#include "OptixSbtTypes.h"
-#include "OptixState.h"
 
 #include <nori/shape.h>
 #include <nori/mesh.h>
@@ -259,7 +257,6 @@ void OptixState::buildIas()
 
 		optixInstance.flags             = OPTIX_INSTANCE_FLAG_NONE;
 		optixInstance.instanceId        = i;
-		optixInstance.sbtOffset         = sbtOffset;
 		optixInstance.sbtOffset         = sbtOffset;
 		optixInstance.visibilityMask    = 255;
 		optixInstance.traversableHandle = gasHandle.handle;

@@ -189,7 +189,7 @@ bool Sphere::getImGuiNodes()
 		rec.data.geometry.sphere.center = make_float3(m_position);
 		rec.data.geometry.sphere.radius = m_radius;
 
-		Shape::getOptixHitgroupRecords(rec);
+		Shape::getOptixHitgroupRecordsShape(rec);
 
 		hitgroupRecords.push_back(rec);
 

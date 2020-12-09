@@ -23,7 +23,6 @@ NORI_NAMESPACE_BEGIN
 		const auto *gui = static_cast<const OptixRenderer *>(guiObject);
 		if (!gui->touched)return;
 		gui->touched = false;
-		touchedOptix = true;
 
 		m_samplesPerLaunch     = gui->m_samplesPerLaunch;
 		m_enableSpecialization = gui->m_enableSpecialization;

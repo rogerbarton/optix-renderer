@@ -276,7 +276,7 @@ bool Mesh::getImGuiNodes()
 		rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
 		rec.data.geometry.triangleMesh.indices   = reinterpret_cast<uint3 *>(d_F);
 
-		Shape::getOptixHitgroupRecords(rec);
+		Shape::getOptixHitgroupRecordsShape(rec);
 
 		hitgroupRecords.push_back(rec);
 
