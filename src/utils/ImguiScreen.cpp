@@ -284,13 +284,11 @@ void ImguiScreen::render()
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("sourceCpu", static_cast<int>(m_texture));
 	m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
-#ifdef NORI_USE_OPTIX
-	m_shader->setUniform("samplesCpu", 0.5f); // TODO: cpu / cpu+gpu
-	m_shader->setUniform("samplesGpu", 0.5f);
-#else
-	m_shader->setUniform("samplesCpu", 1.f);
-	m_shader->setUniform("samplesGpu", 0.f);
-#endif
+
+	float samplesCpu, samplesGpu;
+	m_renderThread.getDeviceSampleWeights(samplesCpu, samplesGpu);
+	m_shader->setUniform("samplesCpu", samplesCpu);
+	m_shader->setUniform("samplesGpu", samplesGpu);
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
 	GL_CHECK(glViewport(0, 0, windowWidth, windowHeight)); // reset viewport
 	GL_CHECK_ERRORS();

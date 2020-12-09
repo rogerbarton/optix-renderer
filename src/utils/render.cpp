@@ -518,4 +518,27 @@ ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
 		return m_block;
 }
 
+void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
+{
+	if (m_deviceMode == RenderThread::EDeviceMode::Cpu)
+	{
+		samplesCpu = 1.f;
+		samplesGpu = 0.f;
+	}
+	else if (m_deviceMode == RenderThread::EDeviceMode::Optix)
+	{
+		samplesCpu = 0.f;
+		samplesGpu = 1.f;
+	}
+	else
+	{
+		const uint32_t cpu =  m_currentCpuSample;
+		const uint32_t gpu =  m_currentOptixSample;
+		const float sum = static_cast<float>(cpu + gpu);
+
+		samplesCpu = sum == 0 ? 1.f : cpu / sum;
+		samplesGpu = sum == 0 ? 0.f : gpu / sum;
+	}
+}
+
 NORI_NAMESPACE_END

@@ -91,6 +91,12 @@ public:
 	ImageBlock& getCurrentBlock();                      							/// Get the active block
 	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
 	void initBlocks();
+
+	/**
+	 * Returns the samples done by both devices normalized by the total samples.
+	 */
+	void getDeviceSampleWeights(float &samplesCpu, float &samplesGpu);
+
 	protected:
 	void startRenderThread();
 
