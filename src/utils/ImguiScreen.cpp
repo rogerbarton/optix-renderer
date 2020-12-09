@@ -46,14 +46,14 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	filebrowser.SetTitle("Save as");
 	filebrowserSave.SetPwd(std::filesystem::relative("../scenes/project"));
 
-	glGenTextures(1, &m_texture);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glGenTextures(1, &m_textureGpu);
-	glBindTexture(GL_TEXTURE_2D, m_textureGpu);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	GL_CHECK(glGenTextures(1, &m_texture));
+	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GL_CHECK(glGenTextures(1, &m_textureGpu));
+	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 
 	// init shader
 	m_shader = new GLShader();
@@ -187,7 +187,7 @@ void ImguiScreen::windowResized(int width, int height)
 	this->windowHeight /= 2.0;
 #endif
 
-	glViewport(0, 0, width, height);
+	GL_CHECK(glViewport(0, 0, width, height));
 }
 
 void ImguiScreen::mainloop()
@@ -212,9 +212,8 @@ void ImguiScreen::mainloop()
 
 void ImguiScreen::drawAll()
 {
-	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-			GL_STENCIL_BUFFER_BIT);
+	GL_CHECK(glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f));
+	GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
 	// draw scene here
 	render();
@@ -251,35 +250,36 @@ void ImguiScreen::render()
 
 	// cpu -> tex0
 	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_texture);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
+		GL_CHECK(glActiveTexture(GL_TEXTURE0));
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
 		             0, GL_RGBA, GL_FLOAT,
-		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f)));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 	}
 
 	//gpu image -> tex1
 #ifdef NORI_USE_OPTIX
 	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_textureGpu);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_renderThread.m_optixBlock.getPBO());
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(), 0, GL_RGBA, GL_FLOAT, nullptr );
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		GL_CHECK(glActiveTexture(GL_TEXTURE1));
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		GL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_renderThread.m_optixBlock->getPBO()));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
+		GL_CHECK(glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(), 0, GL_RGBA, GL_FLOAT, nullptr ));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 	}
 #endif
 
 	block.unlock();
 
-	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
+	GL_CHECK(glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom));
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("sourceCpu", static_cast<int>(m_texture));
-	m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
+	// m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
+	m_shader->setUniform("sourceGpu", static_cast<int>(m_texture));// TODO: DEBUGGGGGG
 #ifdef NORI_USE_OPTIX
 	m_shader->setUniform("samplesCpu", 0.5f); // TODO: cpu / cpu+gpu
 	m_shader->setUniform("samplesGpu", 0.5f);
@@ -288,7 +288,7 @@ void ImguiScreen::render()
 	m_shader->setUniform("samplesGpu", 0.f);
 #endif
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
-	glViewport(0, 0, windowWidth, windowHeight); // reset viewport
+	GL_CHECK(glViewport(0, 0, windowWidth, windowHeight)); // reset viewport
 }
 
 void ImguiScreen::draw()
