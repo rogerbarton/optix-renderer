@@ -10,7 +10,10 @@
 #include <cuda.h>
 #include <vector>
 
-#include <nori/scene.h>
+namespace nori
+{
+	class Scene;
+}
 
 #include "sutil/CUDAOutputBuffer.h"
 
