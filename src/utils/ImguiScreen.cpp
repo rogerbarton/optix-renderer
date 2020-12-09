@@ -258,28 +258,32 @@ void ImguiScreen::render()
 		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f)));
 		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 	}
+	block.unlock();
 
 	//gpu image -> tex1
+	m_renderThread.m_optixBlock->lock();
 #ifdef NORI_USE_OPTIX
 	{
+		const float width  = m_renderThread.m_optixBlock->width();
+		const float height = m_renderThread.m_optixBlock->height();
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
-		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
 		GL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_renderThread.m_optixBlock->getPBO()));
 		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
-		GL_CHECK(glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(), 0, GL_RGBA, GL_FLOAT, nullptr ));
-		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
+		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr));
+		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
+		GL_CHECK( glBindBuffer( GL_PIXEL_UNPACK_BUFFER, 0 ) );
 	}
 #endif
-
-	block.unlock();
+	m_renderThread.m_optixBlock->unlock();
+	// GL_CHECK(glActiveTexture(GL_TEXTURE0));
 
 	GL_CHECK(glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom));
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
 	m_shader->setUniform("sourceCpu", static_cast<int>(m_texture));
-	// m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
-	m_shader->setUniform("sourceGpu", static_cast<int>(m_texture));// TODO: DEBUGGGGGG
+	m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
 #ifdef NORI_USE_OPTIX
 	m_shader->setUniform("samplesCpu", 0.5f); // TODO: cpu / cpu+gpu
 	m_shader->setUniform("samplesGpu", 0.5f);
@@ -289,6 +293,8 @@ void ImguiScreen::render()
 #endif
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
 	GL_CHECK(glViewport(0, 0, windowWidth, windowHeight)); // reset viewport
+	GL_CHECK_ERRORS();
+
 }
 
 void ImguiScreen::draw()
