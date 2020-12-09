@@ -38,7 +38,7 @@ struct OptixState
 	bool               initializedOptix = false;
 	bool               initializedState = false;
 
-	LaunchParams *m_params   = nullptr;
+	LaunchParams m_params   = {};
 	LaunchParams *m_d_params = nullptr;
 
 	OptixTraversableHandle m_ias_handle          = {};

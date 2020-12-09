@@ -53,7 +53,7 @@ void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(gas.d_buffer)));
 		m_gases.clear();
 	}
-	m_gases.reserve(shapes.size());
+	m_gases.resize(shapes.size());
 
 	OptixAccelBuildOptions accelBuildOptions = {};
 	accelBuildOptions.operation = OPTIX_BUILD_OPERATION_BUILD;

@@ -18,29 +18,29 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	// Camera
 	{
 		const auto camera = static_cast<const nori::PerspectiveCamera *>(scene.getCamera());
-		m_params->imageWidth  = camera->getOutputSize().x();
-		m_params->imageHeight = camera->getOutputSize().y();
+		m_params.imageWidth  = camera->getOutputSize().x();
+		m_params.imageHeight = camera->getOutputSize().y();
 
 		Eigen::Matrix4f cameraToWorld = camera->getTransform();
 		// W = z = fwd
-		m_params->camera.U   = make_float3(cameraToWorld(0, 0), cameraToWorld(0, 1), cameraToWorld(0, 2));
-		m_params->camera.V   = make_float3(cameraToWorld(1, 0), cameraToWorld(1, 1), cameraToWorld(1, 2));
-		m_params->camera.W   = make_float3(cameraToWorld(2, 0), cameraToWorld(2, 1), cameraToWorld(2, 2));
-		m_params->camera.eye = make_float3(cameraToWorld(0, 3), cameraToWorld(1, 3), cameraToWorld(2, 3));
+		m_params.camera.U   = make_float3(cameraToWorld(0, 0), cameraToWorld(0, 1), cameraToWorld(0, 2));
+		m_params.camera.V   = make_float3(cameraToWorld(1, 0), cameraToWorld(1, 1), cameraToWorld(1, 2));
+		m_params.camera.W   = make_float3(cameraToWorld(2, 0), cameraToWorld(2, 1), cameraToWorld(2, 2));
+		m_params.camera.eye = make_float3(cameraToWorld(0, 3), cameraToWorld(1, 3), cameraToWorld(2, 3));
 
-		m_params->camera.fov           = camera->getFov();
-		m_params->camera.focalDistance = camera->getFocalDistance();
-		m_params->camera.lensRadius    = camera->getLensRadius();
+		m_params.camera.fov           = camera->getFov();
+		m_params.camera.focalDistance = camera->getFocalDistance();
+		m_params.camera.lensRadius    = camera->getLensRadius();
 	}
 
 	// OptixRenderer
 	{
-		m_params->samplesPerLaunch = scene.m_optixRenderer->m_samplesPerLaunch;
+		m_params.samplesPerLaunch = scene.m_optixRenderer->m_samplesPerLaunch;
 	}
 
 	// Integrator
 	{
-		m_params->integrator = scene.getIntegrator(usePreview)->getOptixIntegratorType();
+		m_params.integrator = scene.getIntegrator(usePreview)->getOptixIntegratorType();
 	}
 
 	// -- Create optix scene
@@ -64,7 +64,7 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	}
 	updateSbt(scene.getShapes());
 
-	m_params->sceneHandle = m_ias_handle;
+	m_params.sceneHandle = m_ias_handle;
 
 	std::cout << "Optix state created.\n";
 	initializedState = true;
@@ -80,10 +80,10 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 // 		if (m_camera->touchedOptix)
 // 		{
 // 			m_camera->touchedOptix = false;
-// 			m_optixState->m_params->camera.eye = m_camera.eye;
-// 			m_optixState->m_params->camera.U = m_camera.U;
-// 			m_optixState->m_params->camera.V = m_camera.V;
-// 			m_optixState->m_params->camera.W = m_camera.W;
+// 			m_optixState->m_params.camera.eye = m_camera.eye;
+// 			m_optixState->m_params.camera.U = m_camera.U;
+// 			m_optixState->m_params.camera.V = m_camera.V;
+// 			m_optixState->m_params.camera.W = m_camera.W;
 // 		}
 //
 // 		for (int i = 0; i < m_shapes.size(); ++i)

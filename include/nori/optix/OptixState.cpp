@@ -363,10 +363,10 @@ void OptixState::clearPipeline()
 void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample)
 {
 	// Update params and copy to device
-	m_params->sampleIndex = currentSample;
-	m_params->d_imageBuffer = outputBuffer.map();
+	m_params.sampleIndex = currentSample;
+	m_params.d_imageBuffer = outputBuffer.map();
 
-	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(m_params), &m_d_params, sizeof(LaunchParams),
+	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(&m_params), &m_d_params, sizeof(LaunchParams),
 	                           cudaMemcpyHostToDevice, m_stream));
 
 	OPTIX_CHECK(optixLaunch(m_pipeline,
@@ -374,8 +374,8 @@ void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t
 	                        reinterpret_cast<CUdeviceptr>(m_d_params),
 	                        sizeof(LaunchParams),
 	                        &m_sbt,
-	                        m_params->imageWidth,
-	                        m_params->imageHeight,
+	                        m_params.imageWidth,
+	                        m_params.imageHeight,
 	                        1));
 	outputBuffer.unmap();
 

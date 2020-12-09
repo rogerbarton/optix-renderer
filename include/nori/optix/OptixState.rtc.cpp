@@ -217,7 +217,7 @@ void OptixState::createPtxModules(bool specialize)
             OptixModuleCompileBoundValueEntry boundValue = {}; \
             boundValue.pipelineParamOffsetInBytes = offsetof(LaunchParams, paramsVariable); \
             boundValue.sizeInBytes                = sizeof(LaunchParams::paramsVariable); \
-            boundValue.boundValuePtr              = &m_params->paramsVariable; \
+            boundValue.boundValuePtr              = &m_params.paramsVariable; \
             boundValue.annotation                 = #paramsVariable; \
             boundValues.push_back(boundValue); \
         }
