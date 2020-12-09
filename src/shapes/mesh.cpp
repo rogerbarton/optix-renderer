@@ -236,12 +236,12 @@ bool Mesh::getImGuiNodes()
 		buildInputs.triangleArray.vertexBuffers       = &d_V;
 		buildInputs.triangleArray.numVertices         = static_cast<uint32_t>(m_V.cols());
 		buildInputs.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
-		buildInputs.triangleArray.vertexStrideInBytes = static_cast<uint32_t>(m_V.stride() ? m_V.stride() : sizeof(float3));
+		buildInputs.triangleArray.vertexStrideInBytes = 0;
 
 		buildInputs.triangleArray.indexBuffer        = d_F;
 		buildInputs.triangleArray.numIndexTriplets   = static_cast<uint32_t>(m_F.cols());
 		buildInputs.triangleArray.indexFormat        = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-		buildInputs.triangleArray.indexStrideInBytes = static_cast<uint32_t>(m_F.stride() ? m_F.stride() : sizeof(uint32_t) * 3);
+		buildInputs.triangleArray.indexStrideInBytes = 0;
 
 		return buildInputs;
 	}

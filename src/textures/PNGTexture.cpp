@@ -409,8 +409,8 @@ private:
 	float offsetV;
 
 #ifdef NORI_USE_OPTIX
-	cudaArray_t d_data;
-	cudaTextureObject_t d_sampler;
+	cudaArray_t d_data = 0;
+	cudaTextureObject_t d_sampler = 0;
 #endif
 
 	float InverseGammaCorrect(float value)

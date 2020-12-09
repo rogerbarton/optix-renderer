@@ -132,10 +132,10 @@ protected:
     MatrixXu m_F;       ///< Faces
 
 #ifdef NORI_USE_OPTIX
-	CUdeviceptr d_V;
-	CUdeviceptr d_N;
-	CUdeviceptr d_UV;
-	CUdeviceptr d_F;
+	CUdeviceptr d_V = 0;
+	CUdeviceptr d_N = 0;
+	CUdeviceptr d_UV = 0;
+	CUdeviceptr d_F = 0;
 #endif
 
     DiscretePDF m_pdf;

@@ -289,10 +289,11 @@ void ImguiScreen::render()
 	m_renderThread.getDeviceSampleWeights(samplesCpu, samplesGpu);
 	m_shader->setUniform("samplesCpu", samplesCpu);
 	m_shader->setUniform("samplesGpu", samplesGpu);
+
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
 	GL_CHECK(glViewport(0, 0, windowWidth, windowHeight)); // reset viewport
-	GL_CHECK_ERRORS();
 
+	GL_CHECK_ERRORS();
 }
 
 void ImguiScreen::draw()
