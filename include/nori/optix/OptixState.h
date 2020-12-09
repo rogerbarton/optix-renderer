@@ -33,6 +33,7 @@ struct OptixState
 	OptixDeviceContext m_context        = 0;
 	CUstream           m_stream         = 0;
 	bool               initializedOptix = false;
+	bool               initializedState = false;
 
 	LaunchParams *m_params   = nullptr;
 	LaunchParams *m_d_params = nullptr;
@@ -69,6 +70,7 @@ struct OptixState
 	 */
 	void renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample);
 	void clear();
+	void clearPipeline();
 	~OptixState();
 
 private:
@@ -82,7 +84,6 @@ private:
 	void createHitProgram(std::vector<OptixProgramGroup> program_groups);
 	void createVolumeProgram(std::vector<OptixProgramGroup> program_groups);
 	void createMissProgram(std::vector<OptixProgramGroup> program_groups);
-	void allocateSbt();
 	void updateSbt(const std::vector<nori::Shape *> &shapes);
 };
 

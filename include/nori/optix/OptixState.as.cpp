@@ -48,9 +48,13 @@ struct GasBuildInfo
 void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 {
 	const auto t0 = std::chrono::high_resolution_clock::now();
-	for (auto & gas : m_gases)
-		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(gas.d_buffer)));
-	m_gases.clear();
+	if (initializedState)
+	{
+		for (auto &gas : m_gases)
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(gas.d_buffer)));
+		m_gases.clear();
+	}
+	m_gases.reserve(shapes.size());
 
 	OptixAccelBuildOptions accelBuildOptions = {};
 	accelBuildOptions.operation = OPTIX_BUILD_OPERATION_BUILD;

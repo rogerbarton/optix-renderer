@@ -15,7 +15,6 @@
 bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 {
 	// -- Iterate over all scene objects and copy them to the optix scene representation
-	// TODO: update launch params etc
 	// Camera
 	{
 		const auto camera = static_cast<const nori::PerspectiveCamera *>(scene.getCamera());
@@ -47,35 +46,35 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	// -- Create optix scene
 	createContext();
 	createCompileOptions();
-	buildGases(scene.getShapes());
-	buildIas();
 
-	createPtxModules(scene.m_optixRenderer->m_enableSpecialization);
-	createPipeline();
-	allocateSbt();
+	bool rebuildGases = true;
+	bool rebuildIas   = true;
+	if (rebuildGases)
+		buildGases(scene.getShapes());
+	if (rebuildIas)
+		buildIas();
 
-	// TODO: update sbt
+	bool recompile = true;
+	if (recompile)
+	{
+		if (!initializedState)
+			clearPipeline();
+		createPtxModules(scene.m_optixRenderer->m_enableSpecialization);
+		createPipeline();
+	}
+	updateSbt(scene.getShapes());
 
 	m_params->sceneHandle = m_ias_handle;
 
-	// TODO: update device copies
-
-
-	if (m_ias_handle == 0)
-	{
-		std::cerr << "Optix state is not initialized.\n";
-		return false;
-	}
 	std::cout << "Optix state created.\n";
+	initializedState = true;
 	return true;
 }
 
 void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample)
 {
+	// Update params and copy to device
 	m_params->sampleIndex = currentSample;
-
-	// TODO: Copy params to device
-
 	m_params->d_imageBuffer = outputBuffer.map();
 
 	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(m_params), &m_d_params, sizeof(LaunchParams),

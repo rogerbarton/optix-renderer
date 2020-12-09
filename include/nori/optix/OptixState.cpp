@@ -254,16 +254,6 @@ void OptixState::createMissProgram(std::vector<OptixProgramGroup> program_groups
 	}
 }
 
-void OptixState::allocateSbt()
-{
-	// Raygen program record
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.raygenRecord), sizeof(RaygenRecord)));
-
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.missRecordBase), sizeof(MissRecord) * RAY_TYPE_COUNT));
-	m_sbt.missRecordCount         = RAY_TYPE_COUNT;
-	m_sbt.missRecordStrideInBytes = static_cast<uint32_t>(sizeof(MissRecord));
-}
-
 void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 {
 	// Create the records on the host and copy to the already allocated device sbt
@@ -273,6 +263,9 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 	{
 		RaygenRecord raygenRecord = {};
 		OPTIX_CHECK(optixSbtRecordPackHeader(m_raygen_prog_group, &raygenRecord));
+
+		if (!initializedState)
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.raygenRecord), sizeof(RaygenRecord)));
 
 		CUDA_CHECK(cudaMemcpy(
 				reinterpret_cast<void *>(m_sbt.raygenRecord),
@@ -287,6 +280,14 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 		MissRecord missRecords[2];
 		OPTIX_CHECK(optixSbtRecordPackHeader(m_miss_prog_group[0], &missRecords[0]));
 		OPTIX_CHECK(optixSbtRecordPackHeader(m_miss_prog_group[1], &missRecords[1]));
+
+		if (!initializedState)
+		{
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_sbt.missRecordBase),
+			                      sizeof(MissRecord) * RAY_TYPE_COUNT));
+			m_sbt.missRecordCount         = RAY_TYPE_COUNT;
+			m_sbt.missRecordStrideInBytes = static_cast<uint32_t>(sizeof(MissRecord));
+		}
 
 		CUDA_CHECK(cudaMemcpy(
 				reinterpret_cast<void *>(m_sbt.missRecordBase),
@@ -305,19 +306,20 @@ void OptixState::updateSbt(const std::vector<nori::Shape *> &shapes)
 			shape->getOptixHitgroupRecords(*this, hitgroupRecords);
 		}
 
-		CUDA_CHECK(cudaMalloc(
-				reinterpret_cast<void **>( &m_sbt.hitgroupRecordBase ),
-				hitgroupRecords.size() * sizeof(HitGroupRecord)));
+		if (!initializedState)
+		{
+			CUDA_CHECK(cudaMalloc(
+					reinterpret_cast<void **>( &m_sbt.hitgroupRecordBase ),
+					hitgroupRecords.size() * sizeof(HitGroupRecord)));
+			m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
+			m_sbt.hitgroupRecordCount         = hitgroupRecords.size();
+		}
 
 		CUDA_CHECK(cudaMemcpy(
 				reinterpret_cast<void *>( m_sbt.hitgroupRecordBase ),
 				hitgroupRecords.data(),
 				hitgroupRecords.size() * sizeof(HitGroupRecord),
 				cudaMemcpyHostToDevice));
-
-
-		m_sbt.hitgroupRecordStrideInBytes = static_cast<uint32_t>(sizeof(HitGroupRecord));
-		m_sbt.hitgroupRecordCount         = RAY_TYPE_COUNT * BsdfData::TYPE_COUNT;
 	}
 }
 
@@ -328,5 +330,31 @@ OptixState::~OptixState()
 
 void OptixState::clear()
 {
-	throw std::exception("TODO: delete optixState.");
+	clearPipeline();
+
+	OPTIX_CHECK(optixDeviceContextDestroy(m_context));
+
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_sbt.raygenRecord )));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_sbt.missRecordBase )));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_sbt.hitgroupRecordBase )));
+
+	for (auto &gas : m_gases)
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(gas.d_buffer)));
+	m_gases.clear();
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_d_ias_output_buffer)));
+
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_d_params )));
+
+}
+void OptixState::clearPipeline()
+{
+	OPTIX_CHECK(optixPipelineDestroy(m_pipeline));
+	OPTIX_CHECK(optixProgramGroupDestroy(m_raygen_prog_group));
+	OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_RADIANCE]));
+	OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_SHADOWRAY]));
+	OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_RADIANCE]));
+	OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY]));
+	OPTIX_CHECK(optixModuleDestroy(m_camera_module));
+	OPTIX_CHECK(optixModuleDestroy(m_geometry_module));
+	OPTIX_CHECK(optixModuleDestroy(m_shading_module));
 }
