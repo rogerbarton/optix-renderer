@@ -252,6 +252,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda/sutil/vec_math.h
         include/nori/optix/cuda/sutil/random.h
         include/nori/optix/cuda/sutil/warp.h
+        include/nori/optix/cuda/sutil/shader_helpers.h
         )
 
     target_sources(nori PRIVATE
