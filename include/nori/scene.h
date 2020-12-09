@@ -183,9 +183,13 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 #ifdef NORI_USE_OPTIX
-		OptixState *getOptixState() const { return m_optixState; }
 		OptixRenderer *m_optixRenderer = nullptr;
 		OptixState *m_optixState = nullptr;
+		OptixState *getOptixState() {
+			if (m_optixState == nullptr)
+				m_optixState = new OptixState{};
+			return  m_optixState;
+		}
 #endif
 	private:
 		std::vector<Shape *> m_shapes;

@@ -184,7 +184,15 @@ void CUDAOutputBuffer<PIXEL_FORMAT>::resize(int32_t width, int32_t height)
 	if (m_type == CUDAOutputBufferType::GL_INTEROP || m_type == CUDAOutputBufferType::CUDA_P2P)
 	{
 		// GL buffer gets resized below
-		GL_CHECK(glGenBuffers(1, &m_pbo));
+		if(m_pbo == 0u)
+			GL_CHECK(glGenBuffers(1, &m_pbo));
+		else
+		{
+			// Alternative: delete (sets pbo=0) and generate pbo id again,
+			// not required see https://community.khronos.org/t/how-to-correctly-resize-vbo/70791
+			// GL_CHECK(glDeleteBuffers(1, &m_pbo));
+			// GL_CHECK(glGenBuffers(1, &m_pbo));
+		}
 		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_pbo));
 		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(PIXEL_FORMAT) * m_width * m_height, nullptr, GL_STREAM_DRAW));
 		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0u));

@@ -90,8 +90,9 @@ public:
 	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
 	ImageBlock& getCurrentBlock();                      							/// Get the active block
 	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
-		void initBlocks();
+	void initBlocks();
 	protected:
+	void startRenderThread();
 
 	enum class ERenderStatus : int {
 		Idle      = 0,

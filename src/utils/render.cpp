@@ -147,9 +147,7 @@ void RenderThread::loadScene(const std::string &filename)
 	if ((m_visibleRenderLayer & m_renderScene->getIntegrator(false)->getSupportedLayers()) == 0)
 		m_visibleRenderLayer = ERenderLayer::Composite;
 
-	// Start the actual thread
-	m_renderStatus = ERenderStatus::Busy;
-	m_renderThread = std::thread([this] { renderThreadMain(); });
+	startRenderThread();
 }
 
 void RenderThread::restartRender()
@@ -162,6 +160,26 @@ void RenderThread::restartRender()
 
 	m_renderScene->update(m_guiScene);
 
+	startRenderThread();
+}
+
+void RenderThread::startRenderThread()
+{
+	// Resize block on main thread
+	const Vector2i outputSize = m_renderScene->getCamera()->getOutputSize();
+	m_optixBlock->lock();
+	try
+	{
+		m_optixBlock->resize(outputSize.x(), outputSize.y());
+		m_optixBlock->unlock();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Failed resizing CUDAOutputBuffer\n";
+		m_optixBlock->unlock();
+	}
+
+	// Start the actual thread
 	m_renderStatus = ERenderStatus::Busy;
 	m_renderThread = std::thread([this] { renderThreadMain(); });
 }
@@ -400,10 +418,6 @@ void RenderThread::renderThreadOptix()
 		Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
 		const uint32_t width    = imageDim.x();
 		const uint32_t height   = imageDim.y();
-
-		m_optixBlock->lock();
-		m_optixBlock->resize(width, height);
-		m_optixBlock->unlock();
 
 		if (!optixState->preRender(*m_renderScene, m_previewMode))
 			return;

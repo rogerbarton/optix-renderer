@@ -269,11 +269,11 @@ void ImguiScreen::render()
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
 		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
-		GL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_renderThread.m_optixBlock->getPBO()));
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_renderThread.m_optixBlock->getPBO()));
 		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr));
 		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
-		GL_CHECK( glBindBuffer( GL_PIXEL_UNPACK_BUFFER, 0 ) );
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
 #endif
 	m_renderThread.m_optixBlock->unlock();
