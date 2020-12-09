@@ -11,13 +11,12 @@
 
 #include "../cuda_shared/LaunchParams.h"
 #include "../cuda_shared/RayParams.h"
-#include "sutil/helpers.h"
-#include "sutil/random.h"
-#include "sutil/warp.h"
 
 #include "RadiancePrd.h"
 
-#include <nanovdb/util/Ray.h>
+#include "sutil/helpers.h"
+#include "sutil/random.h"
+#include "sutil/warp.h"
 
 static __forceinline__ __device__ void sampleRay(
 		unsigned int &seed,
@@ -32,7 +31,7 @@ static __forceinline__ __device__ void traceRadiance(
 		float tmax,
 		RadiancePrd *prd);
 
-static __forceinline__ __device__ bool traceOcclusion(
+static __forceinline__ __device__ bool traceShadowray(
 		OptixTraversableHandle handle,
 		float3 ray_origin,
 		float3 ray_direction,
@@ -178,7 +177,7 @@ static __forceinline__ __device__ void traceRadiance(
 			u0, u1);
 }
 
-static __forceinline__ __device__ bool traceOcclusion(
+static __forceinline__ __device__ bool traceShadowray(
 		OptixTraversableHandle handle,
 		float3 ray_origin,
 		float3 ray_direction,

@@ -239,6 +239,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda/shading.cpp
         include/nori/optix/cuda/geometry.cpp
         include/nori/optix/cuda/RadiancePrd.h
+        include/nori/optix/cuda/ShadowrayPrd.h
 
         include/nori/optix/cuda_shared/LaunchParams.h
         include/nori/optix/cuda_shared/RayParams.h
