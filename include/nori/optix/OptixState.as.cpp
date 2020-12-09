@@ -10,7 +10,6 @@
 #include <nori/optix/OptixState.h>
 
 #include <optix.h>
-#include <optix_function_table_definition.h>
 #include <optix_stubs.h>
 
 #include <cuda.h>
@@ -173,7 +172,7 @@ void OptixState::buildIas()
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_ias_output_buffer)));
 	m_d_ias_output_buffer = 0;
 
-	const uint32_t             numInstances = m_gases.size();
+	const uint32_t             numInstances = static_cast<uint32_t>(m_gases.size());
 	std::vector<OptixInstance> optixInstances(numInstances);
 
 	const float identityTransform[12] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};

@@ -198,4 +198,5 @@ bool Sphere::getImGuiNodes()
 	}
 #endif
 
+	NORI_REGISTER_CLASS(Sphere, "sphere");
 NORI_NAMESPACE_END

@@ -34,8 +34,6 @@ NORI_NAMESPACE_BEGIN
 	protected:
 	};
 
-	NORI_REGISTER_CLASS(OptixRenderer, "optix");
-
 NORI_NAMESPACE_END
 
 #endif

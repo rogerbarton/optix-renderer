@@ -47,6 +47,4 @@ NORI_NAMESPACE_BEGIN
 		Point3f m_position;
 		float   m_radius;
 	};
-
-	NORI_REGISTER_CLASS(Sphere, "sphere");
 NORI_NAMESPACE_END

@@ -255,4 +255,5 @@ bool nori::PerspectiveCamera::getImGuiNodes() {
 }
 #endif
 
+NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
 NORI_NAMESPACE_END

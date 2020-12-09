@@ -60,4 +60,5 @@ NORI_NAMESPACE_BEGIN
 		return touched;
 	}
 
+	NORI_REGISTER_CLASS(OptixRenderer, "optix");
 NORI_NAMESPACE_END

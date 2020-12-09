@@ -75,7 +75,5 @@ NORI_NAMESPACE_BEGIN
 
 		float m_lensRadius;     // aka aperture, derived from fstop
 	};
-
-	NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
 NORI_NAMESPACE_END
 
