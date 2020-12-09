@@ -162,64 +162,6 @@ void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 }
 
 /**
- * GasInfo for a triangle mesh
- */
-OptixBuildInput nori::Mesh::getOptixBuildInput()
-{
-	copyMeshDataToDevice();
-
-	OptixBuildInput buildInputs = {};
-
-	buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-	const uint32_t flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
-	buildInputs.triangleArray.flags         = flags;
-	buildInputs.triangleArray.numSbtRecords = 1;
-
-	buildInputs.triangleArray.vertexBuffers       = &d_V;
-	buildInputs.triangleArray.numVertices         = m_V.cols();
-	buildInputs.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
-	buildInputs.triangleArray.vertexStrideInBytes = m_V.stride() ? m_V.stride() : sizeof(float3);
-
-	buildInputs.triangleArray.indexBuffer        = d_F;
-	buildInputs.triangleArray.numIndexTriplets   = m_F.cols();
-	buildInputs.triangleArray.indexFormat        = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-	buildInputs.triangleArray.indexStrideInBytes = m_F.stride() ? m_F.stride() : sizeof(uint32_t) * 3;
-
-	return buildInputs;
-}
-
-/**
- * Default is to use bbox with custom intersection
- */
-OptixBuildInput nori::Shape::getOptixBuildInput()
-{
-	// AABB build input
-	OptixAabb aabb = {m_bbox.min.x(), m_bbox.min.y(), m_bbox.min.z(),
-	                  m_bbox.max.x(), m_bbox.max.y(), m_bbox.max.z()};
-
-	// TODO: delete this
-	CUdeviceptr d_aabb_buffer;
-	CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_aabb_buffer ), sizeof(OptixAabb)));
-	CUDA_CHECK(cudaMemcpy(
-			reinterpret_cast<void *>( d_aabb_buffer ),
-			&aabb,
-			sizeof(OptixAabb),
-			cudaMemcpyHostToDevice
-	));
-
-	uint32_t aabb_input_flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
-
-	OptixBuildInput buildInput = {};
-	buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
-	buildInput.customPrimitiveArray.aabbBuffers   = &d_aabb_buffer;
-	buildInput.customPrimitiveArray.numPrimitives = 1;
-	buildInput.customPrimitiveArray.flags         = aabb_input_flags;
-	buildInput.customPrimitiveArray.numSbtRecords = 1;
-
-	return buildInput;
-}
-
-/**
  * Re/builds the IAS using the already created GASes.
  * Rebuild will delete the ias and create a new one.
  * requires: m_gases

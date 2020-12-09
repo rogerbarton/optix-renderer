@@ -240,7 +240,38 @@ bool Shape::getImGuiNodes()
 #endif
 
 #ifdef NORI_USE_OPTIX
-	void nori::Shape::getOptixHitgroupRecordsShape(HitGroupRecord &rec)
+	/**
+	 * Default is to use bbox with custom intersection
+	 */
+	OptixBuildInput Shape::getOptixBuildInput()
+	{
+		// AABB build input
+		OptixAabb aabb = {m_bbox.min.x(), m_bbox.min.y(), m_bbox.min.z(),
+		                  m_bbox.max.x(), m_bbox.max.y(), m_bbox.max.z()};
+
+		// TODO: delete this
+		CUdeviceptr d_aabb_buffer;
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_aabb_buffer ), sizeof(OptixAabb)));
+		CUDA_CHECK(cudaMemcpy(
+				reinterpret_cast<void *>( d_aabb_buffer ),
+				&aabb,
+				sizeof(OptixAabb),
+				cudaMemcpyHostToDevice
+		));
+
+		uint32_t aabb_input_flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
+
+		OptixBuildInput buildInput = {};
+		buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
+		buildInput.customPrimitiveArray.aabbBuffers   = &d_aabb_buffer;
+		buildInput.customPrimitiveArray.numPrimitives = 1;
+		buildInput.customPrimitiveArray.flags         = aabb_input_flags;
+		buildInput.customPrimitiveArray.numSbtRecords = 1;
+
+		return buildInput;
+	}
+
+	void Shape::getOptixHitgroupRecordsShape(HitGroupRecord &rec)
 	{
 		// Copy shape specifics to the record
 		rec.data.geometry.volume = m_volume;

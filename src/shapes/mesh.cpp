@@ -219,6 +219,33 @@ bool Mesh::getImGuiNodes()
 #endif
 
 #ifdef NORI_USE_OPTIX
+	/**
+	 * GasInfo for a triangle mesh
+	 */
+	OptixBuildInput Mesh::getOptixBuildInput()
+	{
+		copyMeshDataToDevice();
+
+		OptixBuildInput buildInputs = {};
+
+		buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+		const uint32_t flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
+		buildInputs.triangleArray.flags         = flags;
+		buildInputs.triangleArray.numSbtRecords = 1;
+
+		buildInputs.triangleArray.vertexBuffers       = &d_V;
+		buildInputs.triangleArray.numVertices         = m_V.cols();
+		buildInputs.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
+		buildInputs.triangleArray.vertexStrideInBytes = m_V.stride() ? m_V.stride() : sizeof(float3);
+
+		buildInputs.triangleArray.indexBuffer        = d_F;
+		buildInputs.triangleArray.numIndexTriplets   = m_F.cols();
+		buildInputs.triangleArray.indexFormat        = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+		buildInputs.triangleArray.indexStrideInBytes = m_F.stride() ? m_F.stride() : sizeof(uint32_t) * 3;
+
+		return buildInputs;
+	}
+
 	void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 	{
 		copyMeshDataToDevice();
