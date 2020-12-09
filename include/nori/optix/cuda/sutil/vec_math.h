@@ -61,6 +61,16 @@ __forceinline__ __device__ unsigned long long min(unsigned long long a, unsigned
     return a < b ? a : b;
 }
 
+__forceinline__ __device__ float fmaxf3(float3 a)
+{
+	return fmaxf(fmaxf(a.x, a.y), a.z);
+}
+
+__forceinline__ __device__ float fminf3(float3 a)
+{
+	return fminf(fminf(a.x, a.y), a.z);
+}
+
 
 /** lerp */
 __forceinline__ __device__ float lerp(const float a, const float b, const float t)
