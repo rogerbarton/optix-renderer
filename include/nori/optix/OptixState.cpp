@@ -348,22 +348,42 @@ void OptixState::clear()
 }
 void OptixState::clearPipeline()
 {
-	OPTIX_CHECK(optixPipelineDestroy(m_pipeline));
-	OPTIX_CHECK(optixProgramGroupDestroy(m_raygen_prog_group));
-	OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_RADIANCE]));
-	OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_SHADOWRAY]));
-	OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_RADIANCE]));
-	OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY]));
-	OPTIX_CHECK(optixModuleDestroy(m_camera_module));
-	OPTIX_CHECK(optixModuleDestroy(m_geometry_module));
-	OPTIX_CHECK(optixModuleDestroy(m_shading_module));
+	if (m_pipeline)
+		OPTIX_CHECK(optixPipelineDestroy(m_pipeline));
+	if (m_raygen_prog_group)
+		OPTIX_CHECK(optixProgramGroupDestroy(m_raygen_prog_group));
+	if (m_miss_prog_group[RAY_TYPE_RADIANCE])
+		OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_RADIANCE]));
+	if (m_miss_prog_group[RAY_TYPE_SHADOWRAY])
+		OPTIX_CHECK(optixProgramGroupDestroy(m_miss_prog_group[RAY_TYPE_SHADOWRAY]));
+	if (m_hitgroup_prog_group[RAY_TYPE_RADIANCE])
+		OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_RADIANCE]));
+	if (m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY])
+		OPTIX_CHECK(optixProgramGroupDestroy(m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY]));
+	if (m_camera_module)
+		OPTIX_CHECK(optixModuleDestroy(m_camera_module));
+	if (m_geometry_module)
+		OPTIX_CHECK(optixModuleDestroy(m_geometry_module));
+	if (m_shading_module)
+		OPTIX_CHECK(optixModuleDestroy(m_shading_module));
+
+	m_raygen_prog_group = 0;
+	m_pipeline          = 0;
+	m_raygen_prog_group = 0;
+	m_miss_prog_group[RAY_TYPE_RADIANCE]      = 0;
+	m_miss_prog_group[RAY_TYPE_SHADOWRAY]     = 0;
+	m_hitgroup_prog_group[RAY_TYPE_RADIANCE]  = 0;
+	m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY] = 0;
+	m_camera_module   = 0;
+	m_geometry_module = 0;
+	m_shading_module  = 0;
 }
 
 
 void OptixState::renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample)
 {
 	// Update params and copy to device
-	m_params.sampleIndex = currentSample;
+	m_params.sampleIndex   = currentSample;
 	m_params.d_imageBuffer = outputBuffer.map();
 
 	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(&m_params), &m_d_params, sizeof(LaunchParams),
