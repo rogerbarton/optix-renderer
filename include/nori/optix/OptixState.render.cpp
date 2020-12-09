@@ -12,7 +12,7 @@
 #include <nori/bsdf.h>
 
 
-bool OptixState::preRender(nori::Scene &scene)
+bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 {
 	// -- Iterate over all scene objects and copy them to the optix scene representation
 	// TODO: update launch params etc
@@ -41,8 +41,7 @@ bool OptixState::preRender(nori::Scene &scene)
 
 	// Integrator
 	{
-		m_params->integrator = 0;
-		// m_params->integrator = scene.getIntegrator(false)->getId();
+		m_params->integrator = scene.getIntegrator(usePreview)->getOptixIntegratorType();
 	}
 
 	// -- Create optix scene

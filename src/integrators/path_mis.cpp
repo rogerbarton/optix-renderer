@@ -156,7 +156,10 @@ public:
 	NORI_OBJECT_IMGUI_NAME("Path MIS");
     virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
-protected:
+
+#ifdef NORI_USE_OPTIX
+	IntegratorType getOptixIntegratorType() const override { return INTEGRATOR_TYPE_PATH_MIS; }
+#endif
 };
 
 NORI_REGISTER_CLASS(PathMISIntegrator, "path_mis");

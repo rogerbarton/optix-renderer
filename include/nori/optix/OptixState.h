@@ -62,7 +62,7 @@ struct OptixState
 	 * Call this before rendering. This will update the optix state and make it ready for rendering
 	 * @return True if successful without errors and rendering can proceed
 	 */
-	bool preRender(nori::Scene& scene);
+	bool preRender(nori::Scene &scene, bool usePreview);
 	/**
 	 * Renders one subframe. Assumes that preRender has succeeded
 	 * @param outputBuffer

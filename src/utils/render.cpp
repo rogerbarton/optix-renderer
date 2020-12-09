@@ -393,7 +393,7 @@ void RenderThread::renderThreadOptix()
 		m_optixBlock.resize(width, height);
 		m_optixBlock.unlock();
 
-		if (!optixState->preRender(*m_renderScene))
+		if (!optixState->preRender(*m_renderScene, m_previewMode))
 			return;
 
 		// Render

@@ -25,6 +25,14 @@ struct SceneConstantParams
 	float3 bgColor;
 };
 
+enum IntegratorType : int
+{
+	INTEGRATOR_TYPE_PATH_MATS = 0,
+	INTEGRATOR_TYPE_PATH_MIS  = 1,
+	INTEGRATOR_TYPE_DIRECT    = 2,
+	INTEGRATOR_TYPE_SIZE
+};
+
 /**
  * The Optix params.
  * Note: this must be cuda compatible
@@ -40,7 +48,7 @@ struct LaunchParams
 	RaygenConstantParams camera;
 	SceneConstantParams  scene;
 
-	unsigned int integrator;
+	IntegratorType integrator;
 
 	OptixTraversableHandle sceneHandle;
 };
