@@ -60,12 +60,12 @@ NORI_NAMESPACE_BEGIN
 			m_mu_t_invNorm = (1 - m_mu_t).matrix().normalized().array();
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
 		{
-			// Sample proportional to transmittance
-			// TODO: check this
-			return m_mu_t.maxCoeff() < Epsilon ? INFINITY :
-			       -std::log(sample.x()) / m_mu_t.maxCoeff();
+			// Sample proportional to transmittance, sample a random channel uniformly
+			int channel = (int)(3 * sample.y());
+			return m_mu_t(channel) < Epsilon ? INFINITY :
+			       -std::log(sample.x()) / m_mu_t(channel);
 		}
 
 		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override

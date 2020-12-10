@@ -30,7 +30,7 @@ NORI_NAMESPACE_BEGIN
 		 * Note: intersections with the scene and medium boundary should be handled separately
 		 * @return the time until the next interaction
 		 */
-		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const = 0;
+		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const = 0;
 
 		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
 

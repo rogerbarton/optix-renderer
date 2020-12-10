@@ -26,7 +26,7 @@ NORI_NAMESPACE_BEGIN
 			Medium::update(guiObject);
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point1f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
 		{
 			return INFINITY;
 		}
