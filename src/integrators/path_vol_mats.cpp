@@ -30,8 +30,14 @@ NORI_NAMESPACE_BEGIN
 			while (true)
 			{
 				Intersection its;
-				if (!scene->rayIntersect(ray, its))
+				if (!scene->rayIntersect(ray, its)) {
+					if(scene->getEnvMap()) {
+						EmitterQueryRecord eqr(ray.d);
+						Li += throughput * scene->getEnvMap()->eval(eqr);
+					}
 					break; // miss scene
+
+				}
 
 				// -- Find next interaction point
 				MediumQueryRecord mRec(ray);
