@@ -31,7 +31,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			bRec.wo = Warp::squareToHenyeyGreenstein(sample, m_g);
 
-			return 1.f / pdf(bRec) * abs(bRec.wi.dot(bRec.wo));
+			return 1.f;
 		}
 
 		std::string toString() const override
