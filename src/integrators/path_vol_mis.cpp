@@ -108,14 +108,13 @@ NORI_NAMESPACE_BEGIN
 
 						const Color3f bsdfSample = bsdf->sample(bRec, sampler->next2D());
 						// Note w_i . n is the cosTheta term included in the sample function
-						wo      = its.toWorld(bRec.wo);
+						wo = its.toWorld(bRec.wo);
 
+						// -- Emitter sampling
 						pdf_mat         = bsdf->pdf(bRec);
 						pdf_mat_measure = bRec.measure;
 
-						// -- Emitter sampling
-						// skip delta bsdf's
-						if (bRec.measure == ESolidAngle)
+						if (bRec.measure == ESolidAngle) // skip delta bsdf's
 						{
 							// sample random emitter and calculate its pdf for the weight
 							const auto emitter        = scene->getRandomEmitter(sampler->next1D());
@@ -124,12 +123,19 @@ NORI_NAMESPACE_BEGIN
 							const Color3f      Le     = emitter->sample(lRec, sampler->next2D()) * lights.size();
 							const float        pdf_em = lRec.pdf / lights.size();
 
-							// Check if we are in a shadow
-							Ray3f  shadowRay     = lRec.shadowRay;
-							const Medium *shadowMedium = medium;
-							Color3f shadowTr      = 1.f;
-							bool   occluded      = false;
-							// while no bsdf surface is hit, trace ray and accumulate the media transmittance
+							// shadowRay data
+							Ray3f        shadowRay = lRec.shadowRay;
+							Color3f      shadowTr  = 1.f;
+							bool         occluded  = false;
+							const Medium *shadowMedium;
+							if (ray.d.dot(shadowRay.d) > 0) // change in shape, else reflected
+								shadowMedium = shadowRay.d.dot(its.geoFrame.n) < 0.f && its.shape->getMedium() ?
+								               its.shape->getMedium() :     // entering
+								               scene->getAmbientMedium();   // leaving
+							else
+								shadowMedium = medium;
+
+							// Propagate shadowray through media until we hit a surface with a bsdf
 							while (true)
 							{
 								Intersection shadowIts;
@@ -140,17 +146,14 @@ NORI_NAMESPACE_BEGIN
 									occluded = true;
 									break;
 								}
-								if (shadowIts.shape->getMedium())
-								{
-									// TODO: accumulate Tr and update medium
-									shadowTr *= medium->getTransmittance(shadowRay.o, shadowIts.p);
-								}
-								shadowMedium = shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
-								               shadowIts.shape->getMedium() :     // entering
-								               scene->getAmbientMedium();   // leaving
+								shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p);
+								shadowMedium =
+										shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
+										shadowIts.shape->getMedium() :     // entering
+										scene->getAmbientMedium();   // leaving
 
 								shadowRay.o = shadowIts.p; // Note: no normal maps applied to keep ray.d constant
-								shadowRay.maxt -= its.t;
+								shadowRay.maxt -= shadowIts.t;
 							}
 
 							if (!occluded)
@@ -166,7 +169,7 @@ NORI_NAMESPACE_BEGIN
 									Li += w_em * shadowTr * throughput *
 									      abs(lRec.wi.dot(its.shFrame.n)) * bsdf->eval(bRecEm) * Le;
 							}
-						}
+						} // End Emitter Sampling
 
 					}
 
