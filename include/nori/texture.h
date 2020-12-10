@@ -21,6 +21,11 @@
 
 #include <nori/object.h>
 
+#ifdef NORI_USE_OPTIX
+#include <vector_types.h>
+#include <texture_types.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -56,11 +61,20 @@ public:
 	virtual unsigned int getHeight() {
 		return 1;
 	}
-#ifdef NORI_USE_IMGUI
+
+	#ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Texture Base");
 	virtual bool getImGuiNodes() override { return false; }
 #endif
-};
+
+#ifdef NORI_USE_OPTIX
+	/**
+	 * @param constValue Set this for constant textures
+	 * @param texValue Set this for image textures after copying to the device
+	 */
+	virtual void getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue) = 0;
+#endif
+	};
 
 NORI_NAMESPACE_END
 

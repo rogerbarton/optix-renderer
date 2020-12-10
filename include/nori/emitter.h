@@ -143,8 +143,6 @@ public:
 
 	virtual bool isEnvMap() const { return false; }
 
-	Point3f getPosition() const { return m_position; }
-
 	// make this public for easy access
 	float lightProb = 1.f;
 
@@ -153,12 +151,15 @@ public:
 	bool getImGuiNodes() override;
 #endif
 
-protected:
-	/// Pointer to the shape if the emitter is attached to a shape
-	Shape *m_shape = nullptr;
+#ifdef NORI_USE_OPTIX
+		virtual void getOptixEmitterData(EmitterData &sbtData);
+#endif
+	protected:
+		/// Pointer to the shape if the emitter is attached to a shape
+		Shape *m_shape = nullptr;
 
-	Point3f m_position;
-};
+		Color3f m_radiance;
+	};
 
 NORI_NAMESPACE_END
 

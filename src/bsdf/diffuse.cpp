@@ -144,7 +144,7 @@ public:
         return true;
     }
 
-    /// Return a human-readable summary
+	/// Return a human-readable summary
     virtual std::string toString() const override
     {
         return tfm::format(
@@ -172,6 +172,14 @@ public:
 		}
 		return touched;
 	}
+#endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMaterialData(BsdfData& sbtData) override
+		{
+			sbtData.type = BsdfData::DIFFUSE;
+			m_albedo->getOptixTexture(sbtData.diffuse.albedo, sbtData.diffuse.albedoTex);
+		}
 #endif
 
 private:

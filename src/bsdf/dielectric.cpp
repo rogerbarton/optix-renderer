@@ -136,6 +136,15 @@ public:
 		return touched;
 	}
 #endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMaterialData(BsdfData& sbtData) override
+		{
+			sbtData.type              = BsdfData::DIELECTRIC;
+			sbtData.dielectric.intIOR = m_intIOR;
+			sbtData.dielectric.extIOR = m_extIOR;
+		}
+#endif
 private:
     float m_intIOR, m_extIOR;
 };

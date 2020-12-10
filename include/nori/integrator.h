@@ -20,6 +20,9 @@
 #define __NORI_INTEGRATOR_H
 
 #include <nori/object.h>
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/cuda_shared/LaunchParams.h>
+#endif
 
 NORI_NAMESPACE_BEGIN
 
@@ -78,6 +81,13 @@ public:
 #ifdef NORI_USE_IMGUI
 	NORI_OBJECT_IMGUI_NAME("Integrator Base");
 	virtual bool getImGuiNodes() override { return false; }
+#endif
+
+#ifdef NORI_USE_OPTIX
+	/**
+	 * @return The equivalent optix integrator to use, default is the direct.
+	 */
+	virtual IntegratorType getOptixIntegratorType() const { return INTEGRATOR_TYPE_DIRECT; }
 #endif
 };
 

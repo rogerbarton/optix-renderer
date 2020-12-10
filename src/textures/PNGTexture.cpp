@@ -11,6 +11,10 @@
 #include <imgui/imgui_internal.h>
 #endif
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/Exception.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 class PNGTexture : public Texture<Color3f>
@@ -320,6 +324,74 @@ public:
 	}
 #endif
 
+#ifdef NORI_USE_OPTIX
+		void getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
+		{
+			if (d_sampler != 0)
+			{
+				texValue = d_sampler;
+				return;
+			}
+
+			// -- Create image and copy to device
+			cudaChannelFormatDesc channel_desc = cudaCreateChannelDesc<float4>();
+			int32_t               pitch        = width * sizeof(float4);
+
+			CUDA_CHECK(cudaMallocArray(
+					&d_data,
+					&channel_desc,
+					width,
+					height));
+
+			CUDA_CHECK(cudaMemcpy2DToArray(
+					d_data,
+					0,     // X offset
+					0,     // Y offset
+					data.data(),
+					pitch,
+					pitch,
+					height,
+					cudaMemcpyHostToDevice));
+
+			// -- Create texture sampler for the image
+			cudaResourceDesc resDesc = {};
+			resDesc.resType         = cudaResourceTypeArray;
+			resDesc.res.array.array = d_data;
+
+			cudaTextureDesc texDesc = {};
+			texDesc.addressMode[0] = cudaAddressModeWrap;
+			texDesc.addressMode[1] = cudaAddressModeWrap;
+			texDesc.filterMode          = cudaFilterModeLinear;
+			texDesc.readMode            = cudaReadModeNormalizedFloat;
+			texDesc.normalizedCoords    = 1;
+			texDesc.maxAnisotropy       = 1;
+			texDesc.maxMipmapLevelClamp = 99;
+			texDesc.minMipmapLevelClamp = 0;
+			texDesc.mipmapFilterMode    = cudaFilterModePoint;
+			texDesc.borderColor[0] = 1.0f;
+			texDesc.sRGB = 0; // srgb conversion done during loadFromFile
+
+			// Create texture object
+			CUDA_CHECK(cudaCreateTextureObject(&d_sampler, &resDesc, &texDesc, nullptr));
+		}
+#endif
+
+	~PNGTexture() override {
+#ifdef NORI_USE_OPTIX
+		try
+		{
+			CUDA_CHECK(cudaDestroyTextureObject(d_sampler));
+			d_sampler = 0;
+			CUDA_CHECK(cudaFreeArray(d_data));
+			d_data = nullptr;
+		}
+		catch (const std::exception &e)
+		{
+			cerr << "~PNGTexture error: " << e.what() << endl;
+		}
+#endif
+	}
+
 private:
 	std::filesystem::path filename;
 	bool sRgb;
@@ -335,6 +407,11 @@ private:
 	bool sphericalTexture;
 	float offsetU;
 	float offsetV;
+
+#ifdef NORI_USE_OPTIX
+	cudaArray_t d_data = 0;
+	cudaTextureObject_t d_sampler = 0;
+#endif
 
 	float InverseGammaCorrect(float value)
 	{

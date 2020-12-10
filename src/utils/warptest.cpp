@@ -184,7 +184,7 @@ public:
 	        m_bRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();
         }
         else if (warpType == IsoPhase) {
-	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("isophase", PropertyList()));
+	        m_phase = std::unique_ptr<PhaseFunction>((PhaseFunction *) NoriObjectFactory::createInstance("isophase"));
 
 	        float bsdfAngle = M_PI * (m_angleSlider->value() - 0.5f);
 	        m_pRec.wi = Vector3f(std::sin(bsdfAngle), 0, std::max(std::cos(bsdfAngle), 1e-4f)).normalized();

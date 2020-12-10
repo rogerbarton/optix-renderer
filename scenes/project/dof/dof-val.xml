@@ -1,0 +1,72 @@
+<!-- Table scene, Copyright (c) 2012 by Olesya Jakob -->
+
+<scene>
+	<!-- Independent sample generator, 512 samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="256"/>
+	</sampler>
+
+	<integrator type="path_mis"/>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0, 0, .5" origin="0, -18, 2" up="0, 0, 1"/>
+		</transform>
+
+		<float name="fov" value="35"/>
+
+		<float name="fstop"    value="1"/>
+		<float name="focalDistance" value="18"/>
+
+		<integer name="width"  value="800"/>
+		<integer name="height" value="400"/>
+	</camera>
+
+	<!-- Two light sources  -->
+	<shape type="obj">
+		<string name="filename" value="center-lights.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="5,5,5"/>
+		</emitter>
+
+		<!-- <transform name="toWorld">
+			<scale value="0.06,0.06,-1"/>
+			<translate value="10,0,25"/>
+		</transform> -->
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="light-array.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="5,5,5"/>
+		</emitter>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="cube-array.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.22, 0.22, 0.22"/>
+		</bsdf>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="floor.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.8,0.8,0.8"/>
+		</bsdf>
+	</shape>
+
+	<shape type="obj">
+		<string name="filename" value="center-cube.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.8,0.8,0.8"/>
+		</bsdf>
+	</shape>
+	
+</scene>

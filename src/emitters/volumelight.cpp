@@ -53,7 +53,7 @@ NORI_NAMESPACE_BEGIN
 		                       const Point2f &sample2) const override
 		{
 			static Sampler *const sampler = static_cast<Sampler *>(
-					NoriObjectFactory::createInstance("independent", PropertyList()));
+					NoriObjectFactory::createInstance("independent"));
 			Point3f sample = Point3f(sample2.x(), sample2.y(), sampler->next1D());
 
 			// Sample a point on the mesh from the reference point
@@ -87,20 +87,18 @@ NORI_NAMESPACE_BEGIN
 		virtual bool getImGuiNodes() override
 		{
 			touched |= Emitter::getImGuiNodes();
-
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Radiance", ImGuiLeafNodeFlags, "Radiance");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-
-			touched |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
-			                              ImGuiSliderFlags_AlwaysClamp);
-			ImGui::NextColumn();
 			return touched;
 		}
 #endif
-	protected:
-		Color3f m_radiance;
+
+#ifdef NORI_USE_OPTIX
+		void getOptixEmitterData(EmitterData &sbtData) override
+		{
+			sbtData.type = EmitterData::VOLUME;
+			// No specific data
+			Emitter::getOptixEmitterData(sbtData);
+		}
+#endif
 	};
 
 	NORI_REGISTER_CLASS(VolumeEmitter, "volumelight")

@@ -13,6 +13,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#ifndef GL_CHECK
+#    define GL_CHECK( call )   do { call; } while(0)
+#    define GL_CHECK_ERRORS( ) do { ;     } while(0)
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 float get_pixel_ratio()
@@ -37,7 +42,7 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	initImGui();
 	setCallbacks();
 
-	m_renderThread.getBlock().setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
+	m_renderThread.initBlocks();
 
 	filebrowser.SetTitle("Open File");
 	filebrowser.SetTypeFilters({".xml", ".exr"});
@@ -46,10 +51,14 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	filebrowser.SetTitle("Save as");
 	filebrowserSave.SetPwd(std::filesystem::relative("../scenes/project"));
 
-	glGenTextures(1, &m_texture);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	GL_CHECK(glGenTextures(1, &m_texture));
+	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GL_CHECK(glGenTextures(1, &m_textureGpu));
+	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 
 	// init shader
 	m_shader = new GLShader();
@@ -61,8 +70,11 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 								 "    uv = vec2(position.x, 1-position.y);\n"
 								 "}",
 				   "#version 330\n"
-				   "uniform sampler2D source;\n"
+				   "uniform sampler2D sourceCpu;\n"
+				   "uniform sampler2D sourceGpu;\n"
 				   "uniform float scale;\n"
+				   "uniform float samplesCpu;\n"
+				   "uniform float samplesGpu;\n"
 				   "in vec2 uv;\n"
 				   "out vec4 out_color;\n"
 				   "float toSRGB(float value) {\n"
@@ -71,7 +83,7 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 				   "    return 1.055 * pow(value, 0.41666) - 0.055;\n"
 				   "}\n"
 				   "void main() {\n"
-				   "    vec4 color = texture(source, uv);\n"
+				   "    vec4 color = samplesCpu * texture(sourceCpu, uv) + samplesGpu * texture(sourceGpu, uv);\n"
 				   "    color *= scale / color.w;\n"
 				   "    out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1);\n"
 				   "}");
@@ -95,6 +107,8 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 
 void ImguiScreen::drop(const std::string &filename)
 {
+	if(filename.empty()) return;
+
 	std::filesystem::path path(filename);
 
 	if (path.extension() == ".xml")
@@ -178,7 +192,7 @@ void ImguiScreen::windowResized(int width, int height)
 	this->windowHeight /= 2.0;
 #endif
 
-	glViewport(0, 0, width, height);
+	GL_CHECK(glViewport(0, 0, width, height));
 }
 
 void ImguiScreen::mainloop()
@@ -198,14 +212,16 @@ void ImguiScreen::mainloop()
 
 		fpsTimer.reset();
 	}
+#ifdef NORI_USE_OPTIX
+	m_renderThread.m_optixBlock->deletePBO();
+#endif
 	glfwTerminate();
 }
 
 void ImguiScreen::drawAll()
 {
-	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-			GL_STENCIL_BUFFER_BIT);
+	GL_CHECK(glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f));
+	GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
 	// draw scene here
 	render();
@@ -239,21 +255,53 @@ void ImguiScreen::render()
 	block.lock();
 	int borderSize = block.getBorderSize();
 	const Vector2i &size = block.getSize();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols());
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
-				 0, GL_RGBA, GL_FLOAT, (uint8_t *)block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
+	// cpu -> tex0
+	{
+		GL_CHECK(glActiveTexture(GL_TEXTURE0));
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
+		             0, GL_RGBA, GL_FLOAT,
+		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f)));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
+	}
 	block.unlock();
 
-	glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom);
+	//gpu image -> tex1
+#ifdef NORI_USE_OPTIX
+	m_renderThread.m_optixBlock->lock();
+	{
+		const float width  = m_renderThread.m_optixBlock->width();
+		const float height = m_renderThread.m_optixBlock->height();
+		GL_CHECK(glActiveTexture(GL_TEXTURE1));
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
+		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_renderThread.m_optixBlock->getPBO()));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
+		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr));
+		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	}
+	m_renderThread.m_optixBlock->unlock();
+	// GL_CHECK(glActiveTexture(GL_TEXTURE0));
+#endif
+
+	GL_CHECK(glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom));
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
-	m_shader->setUniform("source", 0);
+	m_shader->setUniform("sourceCpu", 0);
+	m_shader->setUniform("sourceGpu", 1);
+
+	float samplesCpu, samplesGpu;
+	m_renderThread.getDeviceSampleWeights(samplesCpu, samplesGpu);
+	m_shader->setUniform("samplesCpu", samplesCpu);
+	m_shader->setUniform("samplesGpu", samplesGpu);
+
 	m_shader->drawIndexed(GL_TRIANGLES, 0, 2);
-	glViewport(0, 0, windowWidth, windowHeight); // reset viewport
+	GL_CHECK(glViewport(0, 0, windowWidth, windowHeight)); // reset viewport
+
+	GL_CHECK_ERRORS();
 }
 
 void ImguiScreen::draw()
@@ -531,7 +579,7 @@ void ImguiScreen::initGlfw(const char *windowTitle, int width, int height)
 
 void ImguiScreen::keyPressed(int key, int mods)
 {
-	if (key == GLFW_KEY_O)
+	if (key == GLFW_KEY_O || key == GLFW_KEY_GRAVE_ACCENT)
 		filebrowser.Open();
 	else if (key == GLFW_KEY_D)
 		uiShowSceneWindow = !uiShowSceneWindow;
@@ -556,6 +604,8 @@ void ImguiScreen::keyPressed(int key, int mods)
 		setZoom(2.f);
 	else if (key == GLFW_KEY_F1)
 		uiShowDemoWindow = !uiShowDemoWindow;
+	else if (key == GLFW_KEY_R)
+		drop(m_renderThread.getFilename());
 }
 
 void ImguiScreen::keyReleased(int key, int mods)
@@ -614,7 +664,7 @@ void ImguiScreen::centerImage(bool autoExpandWindow)
 
 void ImguiScreen::scrollWheel(double xoffset, double yoffset)
 {
-	float scale = 1.f - 0.05f * yoffset;
+	float scale = 1.f - 0.05f * static_cast<float>(yoffset);
 	setZoom(clamp(imageZoom / scale, 1.f / 30.f, 30.f));
 }
 
@@ -634,12 +684,13 @@ void ImguiScreen::initImGui()
 	ImGui::CreateContext();
 	ImGuiIO &imGuiIo = ImGui::GetIO();
 
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	imGuiIo.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	imGuiIo.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
-	ImGuiStyle &imGuiStyle = ImGui::GetStyle();
+	// ImGuiStyle &imGuiStyle = ImGui::GetStyle();
+	// imGuiStyle.FrameRounding = 3.f;
 
 	ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true);
 	const char *glsl_version = "#version 150";

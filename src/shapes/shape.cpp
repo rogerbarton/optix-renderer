@@ -29,7 +29,7 @@ void Shape::cloneAndInit(Shape *clone)
 {
 	// If no material or medium was assigned, instantiate a diffuse BRDF
 	if (!m_bsdf && !m_medium)
-		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse", PropertyList()));
+		m_bsdf = static_cast<BSDF *>(NoriObjectFactory::createInstance("diffuse"));
 	if(m_bsdf)
 		clone->m_bsdf = static_cast<BSDF *>(m_bsdf->cloneAndInit());
 
@@ -87,25 +87,7 @@ void Shape::applyNormalMap(Intersection &its) const
 
 	// note: normal map already normalized
 	const Normal3f nmap = m_normalMap->eval(its.uv);
-
-	// For validation, use global normals first and then check that they match when using the existing shading frame
-	// Used for normals-identity-global
-	// its.shFrame = Frame(Normal3f(n.x(), n.y(), n.z()));
-
-	// its.shFrame = Frame(its.shFrame.toWorld(n));
-
-	auto& f = its.shFrame;
-	Vector3f s2 = f.toWorld(f.s);
-	Vector3f t2 = f.toWorld(f.t);
-	Eigen::Matrix3f tbn;
-	tbn << f.s, f.t, f.n;
-	Vector3f n2 = (tbn * nmap).normalized();
-
-	f.s = s2;
-	f.t = t2;
-	f.n = n2;
-
-	f = Frame(n2);
+	its.shFrame = Frame(its.toWorld(nmap));
 }
 
 void Shape::sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const
@@ -255,6 +237,59 @@ bool Shape::getImGuiNodes()
     ImGui::PopID();
     return touched;
 }
+#endif
+
+#ifdef NORI_USE_OPTIX
+	/**
+	 * Default is to use bbox with custom intersection
+	 */
+	OptixBuildInput Shape::getOptixBuildInput()
+	{
+		// AABB build input
+		OptixAabb aabb = {m_bbox.min.x(), m_bbox.min.y(), m_bbox.min.z(),
+		                  m_bbox.max.x(), m_bbox.max.y(), m_bbox.max.z()};
+
+		// TODO: delete this
+		CUdeviceptr d_aabb_buffer;
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_aabb_buffer ), sizeof(OptixAabb)));
+		CUDA_CHECK(cudaMemcpy(
+				reinterpret_cast<void *>( d_aabb_buffer ),
+				&aabb,
+				sizeof(OptixAabb),
+				cudaMemcpyHostToDevice
+		));
+
+		uint32_t aabb_input_flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
+
+		OptixBuildInput buildInput = {};
+		buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
+		buildInput.customPrimitiveArray.aabbBuffers   = &d_aabb_buffer;
+		buildInput.customPrimitiveArray.numPrimitives = 1;
+		buildInput.customPrimitiveArray.flags         = aabb_input_flags;
+		buildInput.customPrimitiveArray.numSbtRecords = 1;
+
+		return buildInput;
+	}
+
+	void Shape::getOptixHitgroupRecordsShape(HitGroupRecord &rec)
+	{
+		// Copy shape specifics to the record
+		rec.data.geometry.volume = m_volume;
+		if (m_normalMap)
+		{
+			float3 constNormalDummy;
+			m_normalMap->getOptixTexture(constNormalDummy, rec.data.bsdf.normalTex);
+		}
+
+		if (m_bsdf)
+			m_bsdf->getOptixMaterialData(rec.data.bsdf);
+
+		if (m_medium)
+			m_medium->getOptixMediumData(rec.data.medium);
+
+		if (m_emitter)
+			m_emitter->getOptixEmitterData(rec.data.emitter);
+	}
 #endif
 
 NORI_NAMESPACE_END

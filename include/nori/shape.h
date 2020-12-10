@@ -25,6 +25,12 @@
 #include <nori/texture.h>
 #include <nori/medium.h>
 
+#ifdef NORI_USE_OPTIX
+struct OptixBuildInput;
+#include <nori/optix/OptixSbtTypes.h>
+#include <nori/optix/OptixState.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -185,6 +191,21 @@ public:
      */
 	void applyNormalMap(Intersection &its) const;
 
+#ifdef NORI_USE_OPTIX
+	/**
+	 * Defined in OptixState.as.cpp
+	 * @return OptixBuildInput required to build the geometry accel structure
+	 */
+	virtual OptixBuildInput getOptixBuildInput();
+
+	/**
+	 * Fill the hitgroup record for this shape
+	 * @param hitgroupRecords Append records to this vector, one record per ray type
+	 */
+	virtual void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) = 0;
+	void getOptixHitgroupRecordsShape(HitGroupRecord& rec);
+#endif
+
     /**
      * \brief Return the type of object (i.e. Mesh/BSDF/etc.)
      * provided by this instance
@@ -196,7 +217,7 @@ public:
 	virtual bool getImGuiNodes() override;
 #endif
 
-	/**
+		/**
 	 * Has the shape only been moved/transformed. Only IAS needs to be reconstructed
 	 */
 	mutable bool transformTouched = true;

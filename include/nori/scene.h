@@ -25,6 +25,11 @@
 #include <nori/volume.h>
 #include <nori/dpdf.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixRenderer.h>
+#include <nori/optix/OptixState.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 	/**
@@ -177,6 +182,15 @@ NORI_NAMESPACE_BEGIN
 		virtual bool getImGuiNodes() override;
 #endif
 
+#ifdef NORI_USE_OPTIX
+		OptixRenderer *m_optixRenderer = nullptr;
+		OptixState *m_optixState = nullptr;
+		OptixState *getOptixState() {
+			if (m_optixState == nullptr)
+				m_optixState = new OptixState{};
+			return  m_optixState;
+		}
+#endif
 	private:
 		std::vector<Shape *> m_shapes;
 		Integrator           *m_integrator        = nullptr;

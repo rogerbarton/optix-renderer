@@ -20,6 +20,7 @@
 #define __NORI_CAMERA_H
 
 #include <nori/object.h>
+#include <Eigen/src/Core/Matrix.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -61,6 +62,8 @@ public:
 
     /// Return the size of the output image in pixels
     const Vector2i &getOutputSize() const { return m_outputSize; }
+
+    virtual Eigen::Matrix4f getTransform() const = 0;
 
     /// Return the camera's reconstruction filter in image space
     const ReconstructionFilter *getReconstructionFilter() const { return m_rfilter; }

@@ -6,8 +6,12 @@
 
 #include <nori/object.h>
 #include <nori/phase.h>
-
 #include <utility>
+
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/cuda_shared/MediumData.h>
+#endif
+
 
 NORI_NAMESPACE_BEGIN
 
@@ -53,6 +57,10 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_IMGUI
 		NORI_OBJECT_IMGUI_NAME("Medium Base");
 		virtual bool getImGuiNodes() override;
+#endif
+
+#ifdef NORI_USE_OPTIX
+	virtual void getOptixMediumData(MediumData &sbtData);
 #endif
 
 	protected:

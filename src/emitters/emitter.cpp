@@ -1,5 +1,9 @@
 #include <nori/emitter.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 	void Emitter::cloneAndInit(Emitter *clone)
@@ -13,7 +17,6 @@ NORI_NAMESPACE_BEGIN
 	void Emitter::update(const NoriObject *guiObject)
 	{
 		const auto *gui = static_cast<const Emitter *>(guiObject);
-		m_position = gui->m_position;
 		lightProb = gui->lightProb;
 		// Shape already updated by scene
 		// if(m_shape)
@@ -23,15 +26,13 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_IMGUI
 	bool Emitter::getImGuiNodes()
 	{
-		ImGui::PushID(EEmitter);
-
 		ImGui::AlignTextToFramePadding();
-		ImGui::TreeNodeEx("Position", ImGuiLeafNodeFlags, "Position");
+		ImGui::TreeNodeEx("Radiance", ImGuiLeafNodeFlags, "Radiance");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragPoint3f("##value", &m_position, 0.1f);
+		touched |= ImGui::DragColor3f("##value", &m_radiance, 0.1f, 0, SLIDER_MAX_FLOAT, "%.3f",
+		                              ImGuiSliderFlags_AlwaysClamp);
 		ImGui::NextColumn();
-		ImGui::PopID();
 
 		ImGui::PushID(1);
 		ImGui::AlignTextToFramePadding();
@@ -46,6 +47,13 @@ NORI_NAMESPACE_BEGIN
 		if (m_shape)
 			m_shape->touched |= touched;
 		return touched;
+	}
+#endif
+
+#ifdef NORI_USE_OPTIX
+	void Emitter::getOptixEmitterData(EmitterData &sbtData)
+	{
+		sbtData.radiance = make_float3(m_radiance);
 	}
 #endif
 

@@ -30,6 +30,12 @@ NORI_NAMESPACE_BEGIN
 		bool getImGuiNodes() override;
 #endif
 
+#ifdef NORI_USE_OPTIX
+		void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override {
+			throw NoriException("not implemented volume");
+		}
+#endif
+
 		std::filesystem::path                    filename;
 		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
 		nanovdb::NanoGrid<float>                 *densityGrid = nullptr;

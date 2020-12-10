@@ -1,7 +1,7 @@
 <scene>
 	<!-- Independent sample generator, user-selected samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="32"/>
+		<integer name="sampleCount" value="1"/>
 	</sampler>
 
 	<!-- Use the normal integrator -->
@@ -24,12 +24,17 @@
 	<shape type="obj">
 		<string name="filename" value="../meshes/plane.obj"/>
 		
-		<texture type="png_texture" name="normal">
-			<string name="filename" value="../res/normal-identity.png"/>
-		</texture>
-
 		<transform name="toWorld">
 			<scale value="5,5,5"/>
+		</transform>
+	</shape>
+
+	
+	<shape type="obj">
+		<string name="filename" value="../meshes/sphere.obj"/>
+		
+		<transform name="toWorld">
+			<translate value="2,1,0"/>
 		</transform>
 	</shape>
 	

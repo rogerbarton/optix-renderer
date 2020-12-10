@@ -25,6 +25,10 @@
 #include <nori/integrator.h>
 #include <atomic>
 
+#ifdef NORI_USE_OPTIX
+#   include <nori/optix/sutil/CUDAOutputBuffer.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 using clock_t = std::chrono::steady_clock;
@@ -44,12 +48,17 @@ public:
     void loadScene(const std::string & filename);
     void restartRender();
 
-	inline void renderThreadMain();
+	void renderThreadMain();
+#ifdef NORI_USE_OPTIX
+	void renderThreadOptix();
+	CUDAOutputBuffer<float4>* m_optixBlock;
+#endif
 
     bool isBusy();
     void stopRendering();
 	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
 	std::string getRenderTime();
+	std::string getFilename() { return sceneFilename; }
 
 #ifdef NORI_USE_IMGUI
 	/**
@@ -81,7 +90,15 @@ public:
 	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
 	ImageBlock& getCurrentBlock();                      							/// Get the active block
 	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
-protected:
+	void initBlocks();
+
+	/**
+	 * Returns the samples done by both devices normalized by the total samples.
+	 */
+	void getDeviceSampleWeights(float &samplesCpu, float &samplesGpu);
+
+	protected:
+	void startRenderThread();
 
 	enum class ERenderStatus : int {
 		Idle      = 0,
@@ -97,14 +114,19 @@ protected:
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
     std::atomic<float>         m_progress     = 1.f;
-	time_point_t m_startTime;
-	time_point_t m_endTime;
+	std::atomic<uint32_t>      m_currentCpuSample;
+	std::atomic<uint32_t>      m_currentOptixSample;
+	time_point_t               m_startTime;
+	time_point_t               m_endTime;
+#ifdef NORI_USE_OPTIX
+	std::thread m_optixThread;
+#endif
 
 	std::string sceneFilename;
 	std::string outputName;
 	std::string outputNameDenoised;
 	std::string outputNameVariance;
-};
+	};
 
 NORI_NAMESPACE_END
 

@@ -36,6 +36,7 @@ class Mesh : public Shape
 {
 public:
 	Mesh() : m_pdf() {}
+	virtual ~Mesh();
     /// Initialize internal data structures (called once by the XML parser)
     virtual void update(const NoriObject *guiObject) override;
 
@@ -106,6 +107,12 @@ public:
     /// Return a pointer to the triangle vertex index list
     const MatrixXu &getIndices() const { return m_F; }
 
+#ifdef NORI_USE_OPTIX
+	OptixBuildInput getOptixBuildInput() override;
+	void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
+	void copyMeshDataToDevice();
+#endif
+
     /// Return the name of this mesh
     const std::string &getName() const { return m_name; }
 
@@ -123,6 +130,13 @@ protected:
     MatrixXf m_N;       ///< Vertex normals
     MatrixXf m_UV;      ///< Vertex texture coordinates
     MatrixXu m_F;       ///< Faces
+
+#ifdef NORI_USE_OPTIX
+	CUdeviceptr d_V = 0;
+	CUdeviceptr d_N = 0;
+	CUdeviceptr d_UV = 0;
+	CUdeviceptr d_F = 0;
+#endif
 
     DiscretePDF m_pdf;
 };

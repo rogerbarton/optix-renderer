@@ -4,7 +4,7 @@
     <integer name="sampleCount" value="128"/>
   </sampler>
 
-  <integrator type="path_mis"/>
+  <integrator type="normals"/>
 
   <camera type="perspective">
     <transform name="toWorld">

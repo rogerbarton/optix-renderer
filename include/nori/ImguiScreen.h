@@ -9,7 +9,6 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_stdlib.h>
 #include <imgui/filebrowser.h>
-#include <nori/normals.h>
 #include <nori/timer.h>
 
 #include <nori/common.h>
@@ -110,6 +109,7 @@ private:
 	ImGui::FileBrowser filebrowserSave = ImGui::FileBrowser(ImGuiFileBrowserFlags_::ImGuiFileBrowserFlags_EnterNewFilename);
 
 	uint32_t m_texture = 0;
+	uint32_t m_textureGpu = 1;
 	float m_scale = 1.f;
 	GLShader *m_shader;
 

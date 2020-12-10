@@ -65,7 +65,7 @@ public:
 
         /* Create a sample generator for the preprocess step */
         Sampler *sampler = static_cast<Sampler *>(
-            NoriObjectFactory::createInstance("independent", PropertyList()));
+            NoriObjectFactory::createInstance("independent"));
 
         /* Allocate memory for the photon map */
         m_photonMap = std::unique_ptr<PhotonMap>(new PhotonMap());

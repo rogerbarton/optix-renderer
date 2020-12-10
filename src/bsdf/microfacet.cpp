@@ -20,6 +20,10 @@
 #include <nori/frame.h>
 #include <nori/warp.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 class Microfacet : public BSDF
@@ -198,6 +202,18 @@ public:
 
 		return touched;
 	}
+#endif
+
+#ifdef NORI_USE_OPTIX
+		void getOptixMaterialData(BsdfData& sbtData) override
+		{
+			sbtData.type                = BsdfData::MICROFACET;
+			sbtData.microfacet.m_alpha  = m_alpha;
+			sbtData.microfacet.m_intIOR = m_intIOR;
+			sbtData.microfacet.m_extIOR = m_intIOR;
+			sbtData.microfacet.m_ks     = m_ks;
+			sbtData.microfacet.m_kd     = make_float3(m_kd);
+		}
 #endif
 
 private:

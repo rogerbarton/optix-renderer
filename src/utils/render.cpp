@@ -47,11 +47,23 @@ RenderThread::RenderThread() : m_startTime(clock_t::now()), m_endTime(m_startTim
 {
 }
 
+
+void RenderThread::initBlocks()
+{
+#ifdef NORI_USE_OPTIX
+	m_optixBlock = new CUDAOutputBuffer<float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+#endif
+	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
+}
+
 RenderThread::~RenderThread()
 {
 	stopRendering();
 	delete m_guiScene;
 	delete m_renderScene;
+#ifdef NORI_USE_OPTIX
+	delete m_optixBlock;
+#endif
 }
 
 bool RenderThread::isBusy()
@@ -135,9 +147,7 @@ void RenderThread::loadScene(const std::string &filename)
 	if ((m_visibleRenderLayer & m_renderScene->getIntegrator(false)->getSupportedLayers()) == 0)
 		m_visibleRenderLayer = ERenderLayer::Composite;
 
-	// Start the actual thread
-	m_renderStatus = ERenderStatus::Busy;
-	m_renderThread = std::thread([this] { renderThreadMain(); });
+	startRenderThread();
 }
 
 void RenderThread::restartRender()
@@ -150,6 +160,28 @@ void RenderThread::restartRender()
 
 	m_renderScene->update(m_guiScene);
 
+	startRenderThread();
+}
+
+void RenderThread::startRenderThread()
+{
+	// Resize block on main thread
+	const Vector2i outputSize = m_renderScene->getCamera()->getOutputSize();
+#ifdef NORI_USE_OPTIX
+	m_optixBlock->lock();
+	try
+	{
+		m_optixBlock->resize(outputSize.x(), outputSize.y());
+		m_optixBlock->unlock();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Failed resizing CUDAOutputBuffer\n";
+		m_optixBlock->unlock();
+	}
+#endif
+
+	// Start the actual thread
 	m_renderStatus = ERenderStatus::Busy;
 	m_renderThread = std::thread([this] { renderThreadMain(); });
 }
@@ -158,12 +190,13 @@ void RenderThread::renderThreadMain()
 {
 	m_startTime = clock_t::now();
 	m_endTime = time_point_t::min();
+	cout << "Rendering .. " << std::flush;
 
 	/* Allocate memory for the entire output image and clear it */
 	const Camera * const camera = m_renderScene->getCamera();
 	const Vector2i outputSize = camera->getOutputSize();
 	m_block.lock();
-	m_block.init(camera->getOutputSize(), camera->getReconstructionFilter());
+	m_block.init(outputSize, camera->getReconstructionFilter());
 	m_block.clear();
 	m_block.unlock();
 	m_blockAlbedo.lock();
@@ -175,7 +208,12 @@ void RenderThread::renderThreadMain()
 	m_blockNormal.clear();
 	m_blockNormal.unlock();
 
-	cout << "Rendering .. " << std::flush;
+	m_currentCpuSample = 0;
+	m_currentOptixSample = 0;
+#ifdef NORI_USE_OPTIX
+	if(!m_previewMode)
+		m_optixThread = std::thread([this] { renderThreadOptix(); });
+#endif
 
 	/* Create a block generator (i.e. a work scheduler) */
 	const int blockSize = m_renderScene->getSampler()->isAdaptive() ? NORI_BLOCK_SIZE_ADAPTIVE : NORI_BLOCK_SIZE;
@@ -186,23 +224,23 @@ void RenderThread::renderThreadMain()
 	Integrator *const integrator = m_renderScene->getIntegrator(m_previewMode);
 	integrator->preprocess(m_renderScene);
 
-	auto numSamples = m_previewMode ? 1 : m_renderScene->getSampler()->getSampleCount();
+	const uint32_t numSamples = m_previewMode ? 1 : m_renderScene->getSampler()->getSampleCount();
 	const auto numBlocks = blockGenerator.getBlockCount();
 
 	tbb::concurrent_vector<std::unique_ptr<Sampler>> samplers;
 	samplers.resize(numBlocks);
 
-	//numSamples = m_renderScene->getSampler()->isAdaptive() ? 1 : numSamples; // for adaptive, we only use one sample
 	std::cout << std::endl;
-	for (uint32_t k = 0; k < numSamples; ++k)
+	for (; m_currentCpuSample + m_currentOptixSample < numSamples; ++m_currentCpuSample)
 	{
-		m_progress = k / float(numSamples);
+		const uint32_t currentSample = m_currentCpuSample;
+		m_progress = currentSample / float(numSamples);
 		if (m_renderStatus == ERenderStatus::Interrupt)
 			break;
 
 		tbb::blocked_range<int> range(0, numBlocks);
 
-		m_renderScene->getSampler()->setSampleRound(k);
+		m_renderScene->getSampler()->setSampleRound(currentSample);
 
 		auto map = [&](const tbb::blocked_range<int> &range) {
 			// Allocate memory for a small image block to be rendered by the current thread
@@ -227,14 +265,12 @@ void RenderThread::renderThreadMain()
 
 				// Get block id to continue using the same sampler
 				auto blockId = block.getBlockId();
-				if (k == 0)
+				if (currentSample == 0)
 				{ // Initialize the sampler for the first sample
 					std::unique_ptr<Sampler> sampler(m_renderScene->getSampler()->clone());
 					sampler->prepare(block);
 					samplers.at(blockId) = std::move(sampler);
 				}
-
-				//samplers.at(blockId)->setSampleRound(k);
 
 				// this gets executed if uniform or adaptive and we need to render
 				if (samplers.at(blockId)->isAdaptive())
@@ -276,10 +312,13 @@ void RenderThread::renderThreadMain()
 		blockGenerator.reset();
 	}
 
+#ifdef NORI_USE_OPTIX
+	if(m_optixThread.joinable())
+		m_optixThread.join();
+#endif
+
 	if (m_renderScene->getDenoiser())
-	{
 		m_renderScene->getDenoiser()->denoise(&m_block);
-	}
 
 	m_endTime = clock_t::now();
 	cout << "done. (took " << timer.elapsedString() << ")" << endl;
@@ -304,17 +343,17 @@ void RenderThread::renderThreadMain()
 	// for now, disable variance writer
 	if (m_renderScene->getSampler()->isAdaptive())
 	{
-		BlockGenerator blockGenerator(outputSize, blockSize);
-		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box", PropertyList()));
-		ImageBlock currVarBlock(Vector2i(blockSize), rf);
+		BlockGenerator       blockGen(outputSize, blockSize);
+		ReconstructionFilter *rf = static_cast<ReconstructionFilter *>(NoriObjectFactory::createInstance("box"));
+		ImageBlock           currVarBlock(Vector2i(blockSize), rf);
 
-		ImageBlock fullVarianceMatrix(camera->getOutputSize(), rf);
+		ImageBlock fullVarianceMatrix(outputSize, rf);
 		fullVarianceMatrix.clear();
-		const int blocks = blockGenerator.getBlockCount();
+		const int blocks = blockGen.getBlockCount();
 
 		for (int i = 0; i < blocks; i++)
 		{
-			blockGenerator.next(currVarBlock);
+			blockGen.next(currVarBlock);
 			int id = currVarBlock.getBlockId();
 			currVarBlock.clear();
 			samplers.at(id)->writeVarianceMatrix(currVarBlock);
@@ -327,9 +366,6 @@ void RenderThread::renderThreadMain()
 		delete rf;
 	}
 	std::cout << "Mean variance of m_block: " << computeVarianceFromImage(m_block).mean() << std::endl;
-
-	//delete m_scene;
-	//m_scene = nullptr;
 
 	m_renderStatus = ERenderStatus::Done;
 }
@@ -373,6 +409,39 @@ static void renderBlock(const Scene *const scene, Integrator *const integrator, 
 		blockNormal.put(pixelSample, normal);
 	}
 }
+
+#ifdef NORI_USE_OPTIX
+void RenderThread::renderThreadOptix()
+{
+	try
+	{
+		OptixState *const optixState = m_renderScene->getOptixState();
+
+		Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
+		const uint32_t width    = imageDim.x();
+		const uint32_t height   = imageDim.y();
+
+		if (!optixState->preRender(*m_renderScene, m_previewMode))
+			return;
+
+		// Render
+		const uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
+		const uint32_t samplesPerLaunch = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+		for (; m_currentOptixSample + m_currentCpuSample < numSamples; m_currentOptixSample += samplesPerLaunch)
+		{
+			if (m_renderStatus == ERenderStatus::Interrupt)
+				break;
+			optixState->renderSubframe(*m_optixBlock, m_currentOptixSample);
+		}
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Optix Error: " << e.what() << std::endl;
+		std::cerr << "  Optix disabled.";
+		m_deviceMode = EDeviceMode::Cpu;
+	}
+}
+#endif
 
 #ifdef NORI_USE_IMGUI
 void RenderThread::drawRenderGui()
@@ -433,22 +502,45 @@ std::string RenderThread::getRenderTime() {
 
 ImageBlock &RenderThread::getCurrentBlock()
 {
-	if (m_visibleRenderLayer == ERenderLayer::Composite)
-		return m_block;
 	if (m_visibleRenderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
 	if (m_visibleRenderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
+	else
+		return m_block;
 }
 
 ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
 {
-	if (renderLayer == ERenderLayer::Composite)
-		return m_block;
 	if (renderLayer == ERenderLayer::Albedo)
 		return m_blockAlbedo;
 	if (renderLayer == ERenderLayer::Normal)
 		return m_blockNormal;
+	else
+		return m_block;
+}
+
+void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
+{
+	if (m_deviceMode == RenderThread::EDeviceMode::Cpu)
+	{
+		samplesCpu = 1.f;
+		samplesGpu = 0.f;
+	}
+	else if (m_deviceMode == RenderThread::EDeviceMode::Optix)
+	{
+		samplesCpu = 0.f;
+		samplesGpu = 1.f;
+	}
+	else
+	{
+		const uint32_t cpu =  m_currentCpuSample;
+		const uint32_t gpu =  m_currentOptixSample;
+		const float sum = static_cast<float>(cpu + gpu);
+
+		samplesCpu = sum == 0 ? 1.f : cpu / sum;
+		samplesGpu = sum == 0 ? 0.f : gpu / sum;
+	}
 }
 
 NORI_NAMESPACE_END

@@ -125,7 +125,10 @@ NORI_NAMESPACE_BEGIN
 		NORI_OBJECT_IMGUI_NAME("Path MATS w/ Volumes");
 		virtual bool getImGuiNodes() override { return Integrator::getImGuiNodes(); }
 #endif
-	protected:
+
+#ifdef NORI_USE_OPTIX
+		IntegratorType getOptixIntegratorType() const override { return INTEGRATOR_TYPE_PATH_MATS; }
+#endif
 	};
 
 	NORI_REGISTER_CLASS(PathVolMATSIntegrator, "path_vol_mats");

@@ -29,6 +29,7 @@ add_executable(nori
     include/nori/bsdf.h
     include/nori/bvh.h
     include/nori/camera.h
+    include/nori/perspective.h
     include/nori/color.h
     include/nori/common.h
     include/nori/dpdf.h
@@ -37,6 +38,7 @@ add_executable(nori
     include/nori/emitter.h
     include/nori/kdtree.h
     include/nori/mesh.h
+    include/nori/sphere.h
     include/nori/object.h
     include/nori/parser.h
     include/nori/proplist.h
@@ -226,16 +228,58 @@ if(NORI_USE_OPTIX)
         "-DNORI_NVRTC_OPTIX_DIR=\"${OptiX_INCLUDE_DIR}\""
         "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRECTORY}\"")
 
-    target_sources(nori PRIVATE
-        include/nori/optix/OptixRenderer.h
-        src/optix/OptixRenderer.cpp
-        )
-
     target_link_libraries(nori
         ${CUDA_LIBRARIES}
         ${CUDA_nvrtc_LIBRARY}
         # OptiX is header only
         )
+
+    set(NORI_CU_FILES
+        include/nori/optix/cuda/raygen.cpp
+        include/nori/optix/cuda/shading.cpp
+        include/nori/optix/cuda/geometry.cpp
+        include/nori/optix/cuda/RadiancePrd.h
+        include/nori/optix/cuda/ShadowrayPrd.h
+
+        include/nori/optix/cuda/shaders/bsdf.h
+        include/nori/optix/cuda/shaders/emitter.h
+
+        include/nori/optix/cuda_shared/LaunchParams.h
+        include/nori/optix/cuda_shared/RayParams.h
+        include/nori/optix/cuda_shared/GeometryData.h
+        include/nori/optix/cuda_shared/BsdfData.h
+        include/nori/optix/cuda_shared/MediumData.h
+        include/nori/optix/cuda_shared/EmitterData.h
+
+        include/nori/optix/cuda/sutil/helpers.h
+        include/nori/optix/cuda/sutil/vec_math.h
+        include/nori/optix/cuda/sutil/random.h
+        include/nori/optix/cuda/sutil/warp.h
+        include/nori/optix/cuda/sutil/shader_helpers.h
+        )
+
+    target_sources(nori PRIVATE
+        include/nori/optix/OptixRenderer.h
+        include/nori/optix/OptixRenderer.cpp
+
+        include/nori/optix/OptixState.h
+        include/nori/optix/OptixState.cpp
+        include/nori/optix/OptixState.rtc.cpp
+        include/nori/optix/OptixState.as.cpp
+        include/nori/optix/OptixState.render.cpp
+
+        include/nori/optix/OptixSbtTypes.h
+
+        include/nori/optix/sutil/Exception.h
+        include/nori/optix/sutil/CUDAOutputBuffer.h
+        include/nori/optix/sutil/host_vec_math.h
+
+        ${NORI_CU_FILES}
+        )
+
+    # Don't compile cu files, nvrtc will be used
+    set_source_files_properties(${NORI_CU_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
+    set_source_files_properties(${NORI_CU_FILES} PROPERTIES LANGUAGE CUDA)
 
     message(STATUS "Nori uses OptiX")
   endif()
@@ -287,7 +331,9 @@ target_link_libraries(nori ${extra_libs})
 
 set_target_properties(nori PROPERTIES
     CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
+    CXX_STANDARD_REQUIRED TRUE
+    CUDA_STANDARD 14
+    CUDA_STANDARD_REQUIRED TRUE
     CXX_EXTENSIONS NO
     )
 

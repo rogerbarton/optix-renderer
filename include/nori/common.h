@@ -21,9 +21,13 @@
 
 #if defined(_MSC_VER)
 /* Disable some warnings on MSVC++ */
-#pragma warning(disable : 4127 4702 4100 4515 4800 4146 4512)
-#define WIN32_LEAN_AND_MEAN     /* Don't ever include MFC on Windows */
-#define NOMINMAX                /* Don't override min/max */
+#   pragma warning(disable : 4127 4702 4100 4515 4800 4146 4512)
+#   ifndef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN     /* Don't ever include MFC on Windows */
+#   endif
+#   ifndef NOMINMAX
+#       define NOMINMAX                /* Don't override min/max */
+#   endif
 #endif
 
 /* Include the basics needed by any Nori file */
@@ -197,8 +201,6 @@ std::string timeString2(TimePoint time, bool precise = false)
 	return timeString(std::chrono::duration_cast<std::chrono::milliseconds>(time).count(), precise);
 }
 
-
-
 /// Convert a memory amount in bytes into a human-readable string
 extern std::string memString(size_t size, bool precise = false);
 
@@ -255,7 +257,7 @@ inline int mod(int a, int b) {
 /// Compute a direction for the given coordinates in spherical coordinates
 extern Vector3f sphericalDirection(float theta, float phi);
 
-/// Compute a direction for the given coordinates in spherical coordinates
+/// Compute a direction for the given coordinates in spherical coordinates, (theta, phi)
 extern Point2f sphericalCoordinates(const Vector3f &dir);
 
 /**

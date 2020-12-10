@@ -55,6 +55,7 @@ public:
         EDenoiser,
         ETest,
         EReconstructionFilter,
+        ERenderer,
         EClassTypeCount
     };
 
@@ -93,6 +94,8 @@ public:
 			return "ETest";
 		case EReconstructionFilter:
 			return "EReconstructionFilter";
+            case ERenderer:
+                return "ERenderer";
 		case EClassTypeCount:
 			return "EClassTypeCount";
         default:
@@ -236,7 +239,7 @@ public:
      *     of the class.
      */
     static NoriObject *createInstance(const std::string &name,
-                                      const PropertyList &propList)
+                                      const PropertyList &propList = PropertyList())
     {
         if (!m_constructors || m_constructors->find(name) == m_constructors->end())
             throw NoriException("A constructor for class \"%s\" could not be found!", name);
