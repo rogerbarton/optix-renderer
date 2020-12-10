@@ -180,10 +180,12 @@ public:
 	    }
 
 		//tangents
+		m_T.resize(3, (normals.empty() || texcoords.empty()) ? 0 : vertices.size());
+		m_BT.resize(3, (normals.empty() || texcoords.empty()) ? 0 : vertices.size());
+
+		m_T.setZero();
+		m_BT.setZero();
 		if(!normals.empty() && !texcoords.empty()){
-			m_T.resize(3, vertices.size());
-			m_BT.resize(3, vertices.size());
-			
 			uint32_t triaCount = indices.size() / 3;
 			
 			for (uint32_t i = 0; i < triaCount; ++i) {

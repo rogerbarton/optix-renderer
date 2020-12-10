@@ -159,7 +159,6 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its
     {
         if (m_UV.size() > 0)
         {
-
             Normal3f normal = Normal3f((bary.x() * m_N.col(idx0) + bary.y() * m_N.col(idx1) + bary.z() * m_N.col(idx2)).normalized());
             Vector3f aTangent = Vector3f((bary.x() * m_T.col(idx0) + bary.y() * m_T.col(idx1) + bary.z() * m_T.col(idx2)).normalized());
             Vector3f aBitangent = Vector3f((bary.x() * m_BT.col(idx0) + bary.y() * m_BT.col(idx1) + bary.z() * m_BT.col(idx2)).normalized());
@@ -179,10 +178,14 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its
             its.shFrame = Frame(aTangent, aBitangent, normal);
         }
         else
+        {
             its.shFrame = Frame(Normal3f((bary.x() * m_N.col(idx0) + bary.y() * m_N.col(idx1) + bary.z() * m_N.col(idx2)).normalized()));
+        }
     }
     else
+    {
         its.shFrame = its.geoFrame;
+    }
 }
 
 BoundingBox3f Mesh::getBoundingBox(uint32_t index) const

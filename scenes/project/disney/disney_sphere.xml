@@ -21,17 +21,6 @@
     <integer name="height" value="800"/>
   </camera>
 
-  <denoiser type="basic">
-    <!-- distance in pixels -->
-		<float name="sigma_d" value="10"/>
-
-    <!-- distance in intensity -->
-		<float name="sigma_r" value="10"/>
-
-    <!-- patch size to look at -->
-    <integer name="range" value="5"/>
-	</denoiser>
-
   <shape type="sphere">
     <point name="center" value="10,-30,0"/>
     <float name="radius" value="10"/>

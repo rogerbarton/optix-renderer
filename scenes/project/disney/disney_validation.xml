@@ -4,7 +4,7 @@
     <integer name="sampleCount" value="128"/>
   </sampler>
 
-  <integrator type="normals"/>
+  <integrator type="direct_mis"/>
 
   <camera type="perspective">
     <transform name="toWorld">
@@ -20,6 +20,10 @@
   <shape type="obj">
     <string name="filename" value="../meshes/camel_export_blender.obj"/>
 
+    <!--<texture type="png_texture" name="normal">
+      <string name="filename" value="../res/normal-test.png"/>
+    </texture>
+  -->
     <bsdf type="disney">
       <color name="baseColor" value="0.071, 0.091, 0.8"/>
       <float name="metallic" value="0.0"/>
