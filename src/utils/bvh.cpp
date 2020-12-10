@@ -451,9 +451,9 @@ bool BVH::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) con
             continue;
         }
     }
-
-    if (foundIntersection) {
-        its.shape->setHitInformation(f, ray, its);
+    if (foundIntersection) {   
+        // Apply setHitInformation to return value
+        foundIntersection &= its.shape->setHitInformation(f, ray, its);
         its.shape->applyNormalMap(its);
     }
 

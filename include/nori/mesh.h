@@ -35,8 +35,8 @@ NORI_NAMESPACE_BEGIN
 class Mesh : public Shape
 {
 public:
-	Mesh() : m_pdf() {}
-	virtual ~Mesh();
+    Mesh() : m_pdf() {}
+    virtual ~Mesh();
     /// Initialize internal data structures (called once by the XML parser)
     virtual void update(const NoriObject *guiObject) override;
 
@@ -77,7 +77,8 @@ public:
     virtual bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override;
 
     /// Set intersection information: hit point, shading frame, UVs
-    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
+    /// returns true if it worked
+    virtual bool setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
 
     /// Return the total number of vertices in this shape
     uint32_t getVertexCount() const { return (uint32_t)m_V.cols(); }
@@ -108,9 +109,9 @@ public:
     const MatrixXu &getIndices() const { return m_F; }
 
 #ifdef NORI_USE_OPTIX
-	OptixBuildInput getOptixBuildInput() override;
-	void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
-	void copyMeshDataToDevice();
+    OptixBuildInput getOptixBuildInput() override;
+    void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
+    void copyMeshDataToDevice();
 #endif
 
     /// Return the name of this mesh
@@ -120,8 +121,8 @@ public:
     virtual std::string toString() const override;
 
 #ifdef NORI_USE_IMGUI
-	NORI_OBJECT_IMGUI_NAME("Mesh Base");
-	bool getImGuiNodes() override;
+    NORI_OBJECT_IMGUI_NAME("Mesh Base");
+    bool getImGuiNodes() override;
 #endif
 
 protected:
@@ -130,12 +131,14 @@ protected:
     MatrixXf m_N;       ///< Vertex normals
     MatrixXf m_UV;      ///< Vertex texture coordinates
     MatrixXu m_F;       ///< Faces
+    MatrixXf m_T;       ///< tangents
+    MatrixXf m_BT;      ///< Bitangents
 
 #ifdef NORI_USE_OPTIX
-	CUdeviceptr d_V = 0;
-	CUdeviceptr d_N = 0;
-	CUdeviceptr d_UV = 0;
-	CUdeviceptr d_F = 0;
+    CUdeviceptr d_V = 0;
+    CUdeviceptr d_N = 0;
+    CUdeviceptr d_UV = 0;
+    CUdeviceptr d_F = 0;
 #endif
 
     DiscretePDF m_pdf;

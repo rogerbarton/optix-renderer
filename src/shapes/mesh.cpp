@@ -131,7 +131,7 @@ bool Mesh::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, fl
     return t >= ray.mint && t <= ray.maxt;
 }
 
-void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+bool Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
 {
     /* Find the barycentric coordinates */
     Vector3f bary;
@@ -157,22 +157,34 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its
 
     if (m_N.size() > 0)
     {
-        /* Compute the shading frame. Note that for simplicity,
-           the current implementation doesn't attempt to provide
-           tangents that are continuous across the surface. That
-           means that this code will need to be modified to be able
-           use anisotropic BRDFs, which need tangent continuity */
+        if (m_UV.size() > 0)
+        {
 
-        its.shFrame = Frame(
-            (bary.x() * m_N.col(idx0) +
-             bary.y() * m_N.col(idx1) +
-             bary.z() * m_N.col(idx2))
-                .normalized());
+            Normal3f normal = Normal3f((bary.x() * m_N.col(idx0) + bary.y() * m_N.col(idx1) + bary.z() * m_N.col(idx2)).normalized());
+            Vector3f aTangent = Vector3f((bary.x() * m_T.col(idx0) + bary.y() * m_T.col(idx1) + bary.z() * m_T.col(idx2)).normalized());
+            Vector3f aBitangent = Vector3f((bary.x() * m_BT.col(idx0) + bary.y() * m_BT.col(idx1) + bary.z() * m_BT.col(idx2)).normalized());
+
+            if (m_normalMap)
+            {
+                Eigen::Matrix3f TBN;
+                TBN << aTangent, aBitangent, normal;
+
+                // these two lines are already done when loading the normal map
+                //Normal3f tn = Normal3f(m_normalMap->eval(its.uv) * 2.f);
+                //normal = TBN * Normal3f(tn[0] - 1.f, tn[1] - 1.f, tn[2] - 1.f);
+                normal = TBN * m_normalMap->eval(its.uv);
+                normal = normal.normalized();
+            }
+
+            its.shFrame = Frame(aTangent, aBitangent, normal);
+        }
+        else
+            its.shFrame = Frame(Normal3f((bary.x() * m_N.col(idx0) + bary.y() * m_N.col(idx1) + bary.z() * m_N.col(idx2)).normalized()));
     }
     else
-    {
         its.shFrame = its.geoFrame;
-    }
+
+    return true;
 }
 
 BoundingBox3f Mesh::getBoundingBox(uint32_t index) const
@@ -219,118 +231,114 @@ bool Mesh::getImGuiNodes()
 #endif
 
 #ifdef NORI_USE_OPTIX
-	/**
+/**
 	 * GasInfo for a triangle mesh
 	 */
-	OptixBuildInput Mesh::getOptixBuildInput()
-	{
-		copyMeshDataToDevice();
+OptixBuildInput Mesh::getOptixBuildInput()
+{
+    copyMeshDataToDevice();
 
-		OptixBuildInput buildInputs = {};
+    OptixBuildInput buildInputs = {};
 
-		buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-		const uint32_t flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
-		buildInputs.triangleArray.flags         = flags;
-		buildInputs.triangleArray.numSbtRecords = 1;
+    buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+    const uint32_t flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
+    buildInputs.triangleArray.flags = flags;
+    buildInputs.triangleArray.numSbtRecords = 1;
 
-		buildInputs.triangleArray.vertexBuffers       = &d_V;
-		buildInputs.triangleArray.numVertices         = static_cast<uint32_t>(m_V.cols());
-		buildInputs.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
-		buildInputs.triangleArray.vertexStrideInBytes = 0;
+    buildInputs.triangleArray.vertexBuffers = &d_V;
+    buildInputs.triangleArray.numVertices = static_cast<uint32_t>(m_V.cols());
+    buildInputs.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
+    buildInputs.triangleArray.vertexStrideInBytes = 0;
 
-		buildInputs.triangleArray.indexBuffer        = d_F;
-		buildInputs.triangleArray.numIndexTriplets   = static_cast<uint32_t>(m_F.cols());
-		buildInputs.triangleArray.indexFormat        = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-		buildInputs.triangleArray.indexStrideInBytes = 0;
+    buildInputs.triangleArray.indexBuffer = d_F;
+    buildInputs.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_F.cols());
+    buildInputs.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+    buildInputs.triangleArray.indexStrideInBytes = 0;
 
-		return buildInputs;
-	}
+    return buildInputs;
+}
 
-	void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
-	{
-		copyMeshDataToDevice();
+void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
+{
+    copyMeshDataToDevice();
 
-		HitGroupRecord rec = {};
-		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
-		rec.data.geometry.type                   = GeometryData::TRIANGLE_MESH;
-		rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
-		rec.data.geometry.triangleMesh.normals   = reinterpret_cast<float3 *>(d_N);
-		rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
-		rec.data.geometry.triangleMesh.indices   = reinterpret_cast<uint3 *>(d_F);
+    HitGroupRecord rec = {};
+    OPTIX_CHECK(optixSbtRecordPackHeader(state.void applyNormalMap(Intersection &its) const;ANGLE_MESH;
+    rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
+    rec.data.geometry.triangleMesh.normals = reinterpret_cast<float3 *>(d_N);
+    rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
+    rec.data.geometry.triangleMesh.indices = reinterpret_cast<uint3 *>(d_F);
 
-		Shape::getOptixHitgroupRecordsShape(rec);
+    Shape::getOptixHitgroupRecordsShape(rec);
 
-		hitgroupRecords.push_back(rec);
+    hitgroupRecords.push_back(rec);
 
-		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
-		hitgroupRecords.push_back(rec);
-	}
+    OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+    hitgroupRecords.push_back(rec);
+}
 
-	void Mesh::copyMeshDataToDevice()
-	{
-		if (d_V != 0) return;
+void Mesh::copyMeshDataToDevice()
+{
+    if (d_V != 0)
+        return;
 
-		{
-			size_t bytes = m_V.size() * sizeof(float);
-			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
-			CUDA_CHECK(cudaMemcpy(
-					reinterpret_cast<void *>(d_V),
-					m_V.data(),
-					bytes,
-					cudaMemcpyHostToDevice
-			));
-		}
+    {
+        size_t bytes = m_V.size() * sizeof(float);
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
+        CUDA_CHECK(cudaMemcpy(
+            reinterpret_cast<void *>(d_V),
+            m_V.data(),
+            bytes,
+            cudaMemcpyHostToDevice));
+    }
 
-		{
-			size_t bytes = m_N.size() * sizeof(float);
-			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
-			CUDA_CHECK(cudaMemcpy(
-					reinterpret_cast<void *>(d_N),
-					m_N.data(),
-					bytes,
-					cudaMemcpyHostToDevice
-			));
-		}
+    {
+        size_t bytes = m_N.size() * sizeof(float);
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
+        CUDA_CHECK(cudaMemcpy(
+            reinterpret_cast<void *>(d_N),
+            m_N.data(),
+            bytes,
+            cudaMemcpyHostToDevice));
+    }
 
-		{
-			size_t bytes = m_UV.size() * sizeof(float);
-			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
-			CUDA_CHECK(cudaMemcpy(
-					reinterpret_cast<void *>(d_UV),
-					m_UV.data(),
-					bytes,
-					cudaMemcpyHostToDevice
-			));
-		}
+    {
+        size_t bytes = m_UV.size() * sizeof(float);
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
+        CUDA_CHECK(cudaMemcpy(
+            reinterpret_cast<void *>(d_UV),
+            m_UV.data(),
+            bytes,
+            cudaMemcpyHostToDevice));
+    }
 
-		{
-			size_t bytes = m_F.size() * sizeof(uint32_t);
-			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
-			CUDA_CHECK(cudaMemcpy(
-					reinterpret_cast<void *>(d_F),
-					m_F.data(),
-					bytes,
-					cudaMemcpyHostToDevice
-			));
-		}
-	}
+    {
+        size_t bytes = m_F.size() * sizeof(uint32_t);
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
+        CUDA_CHECK(cudaMemcpy(
+            reinterpret_cast<void *>(d_F),
+            m_F.data(),
+            bytes,
+            cudaMemcpyHostToDevice));
+    }
+}
 #endif
 
-	Mesh::~Mesh()
-	{
+Mesh::~Mesh()
+{
 #ifdef NORI_USE_OPTIX
-		try
-		{
-			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_V)));
-			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_N)));
-			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_UV)));
-			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_F)));
-		}
-		catch (const std::exception &e)
-		{
-			cerr << "~Mesh error: " << e.what() << endl;
-		}
+    try
+    {
+        CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_V)));
+        CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_N)));
+        CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_UV)));
+        CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_F)));
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "~Mesh error: " << e.what() << endl;
+    }
 #endif
-	}
+}
 
 NORI_NAMESPACE_END

@@ -85,9 +85,11 @@ void Shape::applyNormalMap(Intersection &its) const
 {
 	if (!m_normalMap) return;
 
+	// This is not needed anymore!
+
 	// note: normal map already normalized
-	const Normal3f nmap = m_normalMap->eval(its.uv);
-	its.shFrame = Frame(its.toWorld(nmap));
+	/*const Normal3f nmap = m_normalMap->eval(its.uv);
+	its.shFrame = Frame(its.toWorld(nmap));*/
 }
 
 void Shape::sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const

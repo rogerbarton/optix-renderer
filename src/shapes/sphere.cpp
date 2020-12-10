@@ -90,43 +90,19 @@ bool Sphere::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, 
 	return false;
 }
 
-void Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+bool Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
 {
 	its.p = ray(its.t);
 	Vector3f n = (its.p - m_position).normalized();
 
 	its.geoFrame = Frame(n);
 
-
-	// swap coords so: u = phi, v = theta = 'vertical'
-
-	/*
-	Point2f uv_coords = sphericalCoordinates(-n);
-	std::swap(uv_coords.x(), uv_coords.y());
-
-	//Mmap to [0,1]
-	its.uv.x()       = uv_coords.x() / (2.f * M_PI);
-	its.uv.y()       = uv_coords.y() / M_PI;
-
-	*/
-	/**
-	 * Calculate tangents to be aligned with the uv's so that we can use them for normal maps
-	 * tangent   = dp/du = dp/dphi
-	 * bitangent = dp/dv = dp/dtheta = normal x tangent
-	 * See https://computergraphics.stackexchange.com/questions/5498/compute-sphere-tangent-for-normal-mapping
-	 *     note: this uses a different ordering of the axes.
-	 *     see wikipedia instead https://en.wikipedia.org/wiki/Spherical_coordinate_system#Integration_and_differentiation_in_spherical_coordinates
-	 *     for dp/dphi
-	 */
-	//const Vector3f t(Frame::cosPhi(n), -Frame::sinPhi(n), 0);
-
 	Vector3f t = (Vector3f(0,0,1).cross(its.p - m_position)).normalized();
 
 	const Vector3f b = n.cross(t);
 	its.shFrame = Frame(t, b, n);
 
-	// QUICK FIX FOR NOW
-	//its.shFrame = Frame(n);
+	return true;
 }
 
 void Sphere::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const

@@ -24,7 +24,7 @@ NORI_NAMESPACE_BEGIN
 		virtual Point3f getCentroid(uint32_t index) const override { return m_position; }
 
 		bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override;
-		void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
+		bool setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
 
 		void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override;
 		float pdfSurface(const ShapeQueryRecord &sRec) const override;

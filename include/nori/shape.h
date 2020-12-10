@@ -159,7 +159,7 @@ public:
     virtual bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const = 0;
 
     /// Set the intersection information: hit point, shading frame, UVs, etc.
-    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const = 0;
+    virtual bool setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const = 0;
 
 	/**
 	 * \brief Sample a point on the surface (potentially using the point sRec.ref to importance sample)

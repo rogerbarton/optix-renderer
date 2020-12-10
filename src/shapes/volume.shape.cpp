@@ -43,9 +43,9 @@ NORI_NAMESPACE_BEGIN
 	{
 		return false;
 	}
-	void Volume::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+	bool Volume::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
 	{
-
+		return false;
 	}
 	void Volume::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
 	{
