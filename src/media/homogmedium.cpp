@@ -64,7 +64,7 @@ NORI_NAMESPACE_BEGIN
 		{
 			// Sample proportional to transmittance
 			// TODO: check this
-			return sample.x() < Epsilon ? INFINITY :
+			return m_mu_t.maxCoeff() < Epsilon ? INFINITY :
 			       -std::log(sample.x()) / m_mu_t.maxCoeff();
 		}
 
