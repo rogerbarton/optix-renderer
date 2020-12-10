@@ -68,6 +68,7 @@ NORI_NAMESPACE_BEGIN
 				}
 
 				// -- Russian roulette with success probability
+				if (bounces >= 3 && (isMediumInteraction || its.shape->getBSDF()))
 				{
 					const float rouletteSuccess = std::min(throughput.maxCoeff(), 0.99f);
 
