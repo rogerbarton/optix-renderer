@@ -25,21 +25,17 @@ NORI_NAMESPACE_BEGIN
 			// Start in ambient scene medium for now
 			const Medium *medium = scene->getAmbientMedium();
 			Ray3f        ray     = _ray;
+			const auto   &lights = scene->getLights();
+
+			float    pdf_mat         = 1.f; // pdf from last intersection, camera is like delta bsdf
+			EMeasure pdf_mat_measure = EDiscrete;
 
 			int bounces = 0;
 			while (true)
 			{
 				Intersection its;
 				if (!scene->rayIntersect(ray, its))
-				{
-					if (scene->getEnvMap())
-					{
-						EmitterQueryRecord eqr(ray.d);
-						Li += throughput * scene->getEnvMap()->eval(eqr);
-					}
 					break; // miss scene
-
-				}
 
 				// -- Find next interaction point
 				MediumQueryRecord mRec(ray);
@@ -57,7 +53,12 @@ NORI_NAMESPACE_BEGIN
 					if (medium->getEmitter())
 					{
 						EmitterQueryRecord lRec{ray.o, its.p, 0.f};
-						Li += throughput * medium->getEmitter()->eval(lRec);
+
+						const float pdf_mat_em = medium->getEmitter()->pdf(lRec) / lights.size();
+						// TODO: use pdf_medium
+						const float w_mat      = pdf_mat > Epsilon ? pdf_mat / (pdf_mat + pdf_mat_em) : 0.f;
+
+						Li += w_mat * throughput * medium->getEmitter()->eval(lRec);
 					}
 				}
 				else
@@ -65,11 +66,17 @@ NORI_NAMESPACE_BEGIN
 					if (its.shape->getEmitter())
 					{
 						EmitterQueryRecord lRec{ray.o, its.p, its.shFrame.n};
-						Li += throughput * its.shape->getEmitter()->eval(lRec);
+
+						const float pdf_mat_em = its.shape->getEmitter()->pdf(lRec) / lights.size();
+						const float w_mat      = pdf_mat_measure == EDiscrete ? 1.f :
+						                         pdf_mat > Epsilon ? pdf_mat / (pdf_mat + pdf_mat_em) : 0.f;
+
+						Li += w_mat * throughput * its.shape->getEmitter()->eval(lRec);
 					}
 				}
 
 				// -- Russian roulette with success probability
+				if (bounces >= 3 && (isMediumInteraction || its.shape->getBSDF()))
 				{
 					const float rouletteSuccess = std::min(throughput.maxCoeff(), 0.99f);
 
@@ -85,9 +92,9 @@ NORI_NAMESPACE_BEGIN
 				{
 					// Next interaction is in medium => Sample phase
 					PhaseQueryRecord pRec(its.toLocal(-ray.d));
-					// TODO: how to adjust throughput?
-					throughput *= medium->getPhase()->sample(pRec, sampler->next2D());
-					wo = its.toWorld(pRec.wo);
+					medium->getPhase()->sample(pRec, sampler->next2D());
+					pdf_mat = medium->getPhase()->pdf(pRec);
+					wo      = its.toWorld(pRec.wo);
 				}
 				else
 				{
@@ -99,9 +106,68 @@ NORI_NAMESPACE_BEGIN
 						BSDFQueryRecord bRec{its.toLocal(-ray.d)};
 						bRec.uv = its.uv;
 
-						throughput *= bsdf->sample(bRec, sampler->next2D());
+						const Color3f bsdfSample = bsdf->sample(bRec, sampler->next2D());
 						// Note w_i . n is the cosTheta term included in the sample function
 						wo      = its.toWorld(bRec.wo);
+
+						pdf_mat         = bsdf->pdf(bRec);
+						pdf_mat_measure = bRec.measure;
+
+						// -- Emitter sampling
+						// skip delta bsdf's
+						if (bRec.measure == ESolidAngle)
+						{
+							// sample random emitter and calculate its pdf for the weight
+							const auto emitter        = scene->getRandomEmitter(sampler->next1D());
+
+							EmitterQueryRecord lRec{its.p};
+							const Color3f      Le     = emitter->sample(lRec, sampler->next2D()) * lights.size();
+							const float        pdf_em = lRec.pdf / lights.size();
+
+							// Check if we are in a shadow
+							Ray3f  shadowRay     = lRec.shadowRay;
+							const Medium *shadowMedium = medium;
+							Color3f shadowTr      = 1.f;
+							bool   occluded      = false;
+							// while no bsdf surface is hit, trace ray and accumulate the media transmittance
+							while (true)
+							{
+								Intersection shadowIts;
+								if (!scene->rayIntersect(shadowRay, shadowIts))
+									break;
+								if (shadowIts.shape->getBSDF())
+								{
+									occluded = true;
+									break;
+								}
+								if (shadowIts.shape->getMedium())
+								{
+									// TODO: accumulate Tr and update medium
+									shadowTr *= medium->getTransmittance(shadowRay.o, shadowIts.p);
+								}
+								shadowMedium = shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
+								               shadowIts.shape->getMedium() :     // entering
+								               scene->getAmbientMedium();   // leaving
+
+								shadowRay.o = shadowIts.p; // Note: no normal maps applied to keep ray.d constant
+								shadowRay.maxt -= its.t;
+							}
+
+							if (!occluded)
+							{
+								// Use same measure as the other bRec we sampled (its the same bsdf)
+								BSDFQueryRecord bRecEm{its.toLocal(-ray.d), its.toLocal(shadowRay.d), bRec.measure};
+								bRecEm.uv = its.uv;
+
+								const float pdf_em_mat = bsdf->pdf(bRecEm);
+								const float w_em       = pdf_em > Epsilon ? pdf_em / (pdf_em + pdf_em_mat) : 0.f;
+
+								if (w_em > Epsilon)
+									Li += w_em * shadowTr * throughput *
+									      abs(lRec.wi.dot(its.shFrame.n)) * bsdf->eval(bRecEm) * Le;
+							}
+						}
+
 					}
 
 					// Update current medium, if entering or leaving shape (note: overlaps unhandled)

@@ -29,7 +29,8 @@
 
 		<!-- <bsdf type="dielectric"/> -->
 		<medium type="homog">
-			<phase type="anisophase"/> 
+			<color name="sigma_a" value="2, 2, 2"/>
+			<!-- <phase type="anisophase"/>  -->
 		</medium>
 	</shape>
 
