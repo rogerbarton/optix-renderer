@@ -44,9 +44,10 @@ public:
         totalWidthAngle = gui->totalWidthAngle;
         m_coord = gui->m_coord;
 
-        m_radiance = m_power / 2.f / M_PI;
-
         Emitter::update(guiObject);
+
+        // compute radiance after update
+        m_radiance = m_power / 2.f / M_PI;
     }
 
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const override
