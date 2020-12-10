@@ -13,6 +13,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#ifndef GL_CHECK
+#    define GL_CHECK( call )   do { call; } while(0)
+#    define GL_CHECK_ERRORS( ) do { ;     } while(0)
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 float get_pixel_ratio()
@@ -207,7 +212,9 @@ void ImguiScreen::mainloop()
 
 		fpsTimer.reset();
 	}
+#ifdef NORI_USE_OPTIX
 	m_renderThread.m_optixBlock->deletePBO();
+#endif
 	glfwTerminate();
 }
 
@@ -262,8 +269,8 @@ void ImguiScreen::render()
 	block.unlock();
 
 	//gpu image -> tex1
-	m_renderThread.m_optixBlock->lock();
 #ifdef NORI_USE_OPTIX
+	m_renderThread.m_optixBlock->lock();
 	{
 		const float width  = m_renderThread.m_optixBlock->width();
 		const float height = m_renderThread.m_optixBlock->height();
@@ -276,15 +283,15 @@ void ImguiScreen::render()
 		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
-#endif
 	m_renderThread.m_optixBlock->unlock();
 	// GL_CHECK(glActiveTexture(GL_TEXTURE0));
+#endif
 
 	GL_CHECK(glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom));
 	m_shader->bind();
 	m_shader->setUniform("scale", m_scale);
-	m_shader->setUniform("sourceCpu", static_cast<int>(m_texture));
-	m_shader->setUniform("sourceGpu", static_cast<int>(m_textureGpu));
+	m_shader->setUniform("sourceCpu", 0);
+	m_shader->setUniform("sourceGpu", 1);
 
 	float samplesCpu, samplesGpu;
 	m_renderThread.getDeviceSampleWeights(samplesCpu, samplesGpu);

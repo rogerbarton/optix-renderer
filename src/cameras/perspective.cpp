@@ -2,7 +2,7 @@
 
 NORI_NAMESPACE_BEGIN
 
-nori::PerspectiveCamera::PerspectiveCamera(const nori::PropertyList &propList) {
+PerspectiveCamera::PerspectiveCamera(const PropertyList &propList) {
 	/* Width and height in pixels. Default: 720p */
 	m_outputSize.x() = propList.getInteger("width", 1280);
 	m_outputSize.y() = propList.getInteger("height", 720);
@@ -25,7 +25,7 @@ nori::PerspectiveCamera::PerspectiveCamera(const nori::PropertyList &propList) {
 
 	m_rfilter = nullptr;
 }
-nori::NoriObject *nori::PerspectiveCamera::cloneAndInit() {
+NoriObject *PerspectiveCamera::cloneAndInit() {
 	// If no reconstruction filter was assigned, instantiate a Gaussian filter
 	if (!m_rfilter)
 		m_rfilter = static_cast<ReconstructionFilter *>(
@@ -40,7 +40,7 @@ nori::NoriObject *nori::PerspectiveCamera::cloneAndInit() {
 	clone->m_rfilter = static_cast<ReconstructionFilter *>(m_rfilter->cloneAndInit());
 	return clone;
 }
-void nori::PerspectiveCamera::update(const nori::NoriObject *guiObject) {
+void PerspectiveCamera::update(const NoriObject *guiObject) {
 	const auto *gui = static_cast<const PerspectiveCamera *>(guiObject);
 	if (!gui->touched) return;
 
@@ -89,8 +89,8 @@ void nori::PerspectiveCamera::update(const nori::NoriObject *guiObject) {
 			Eigen::DiagonalMatrix<float, 3>(Vector3f(0.5f, -0.5f * aspect, 1.0f)) *
 			Eigen::Translation<float, 3>(1.0f, -1.0f / aspect, 0.0f) * perspective).inverse();
 }
-nori::Color3f nori::PerspectiveCamera::sampleRay(nori::Ray3f &ray, const nori::Point2f &samplePosition,
-                                                 const nori::Point2f &apertureSample) const {
+Color3f PerspectiveCamera::sampleRay(Ray3f &ray, const Point2f &samplePosition,
+                                                 const Point2f &apertureSample) const {
 	/* Compute the corresponding position on the
 	   near plane (in local camera space) */
 	const Point3f nearP = m_sampleToCamera * Point3f(
@@ -134,7 +134,7 @@ nori::Color3f nori::PerspectiveCamera::sampleRay(nori::Ray3f &ray, const nori::P
 
 	return Color3f(1.0f);
 }
-void nori::PerspectiveCamera::addChild(nori::NoriObject *obj) {
+void PerspectiveCamera::addChild(NoriObject *obj) {
 	switch (obj->getClassType())
 	{
 		case EReconstructionFilter:
@@ -148,7 +148,7 @@ void nori::PerspectiveCamera::addChild(nori::NoriObject *obj) {
 			                    classTypeName(obj->getClassType()));
 	}
 }
-std::string nori::PerspectiveCamera::toString() const {
+std::string PerspectiveCamera::toString() const {
 	return tfm::format(
 			"PerspectiveCamera[\n"
 			"  cameraToWorld = %s,\n"
@@ -167,7 +167,7 @@ std::string nori::PerspectiveCamera::toString() const {
 }
 #ifdef NORI_USE_IMGUI
 
-bool nori::PerspectiveCamera::getImGuiNodes() {
+bool PerspectiveCamera::getImGuiNodes() {
 	touched |= Camera::getImGuiNodes();
 
 	ImGui::AlignTextToFramePadding();
@@ -233,6 +233,7 @@ bool nori::PerspectiveCamera::getImGuiNodes() {
 	touched |= ImGui::DragFloat("##value", &m_fstop, 0.001f, 0, SLIDER_MAX_FLOAT,
 	                            "%.3f", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::NextColumn();
+	ImGui::PopID();
 
 	if (touched)
 		m_lensRadius = m_focalDistance / m_fstop;

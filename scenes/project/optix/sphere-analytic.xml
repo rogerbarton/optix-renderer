@@ -30,6 +30,17 @@
 		</bsdf>
 	</shape>
 
+	<shape type="sphere">
+		<point name="center" value="0,0,2"/>
+		<float name="radius" value="1"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="1,1,1"/>
+		</bsdf>
+		<emitter type="area">
+			<color name="radiance" value="0,4,0"/>
+		</emitter>
+	</shape>
+
 	<!-- Ground plane -->
 	<shape type="obj">
 		<string name="filename" value="../meshes/plane.obj"/>

@@ -167,6 +167,7 @@ void RenderThread::startRenderThread()
 {
 	// Resize block on main thread
 	const Vector2i outputSize = m_renderScene->getCamera()->getOutputSize();
+#ifdef NORI_USE_OPTIX
 	m_optixBlock->lock();
 	try
 	{
@@ -178,6 +179,7 @@ void RenderThread::startRenderThread()
 		std::cerr << "Failed resizing CUDAOutputBuffer\n";
 		m_optixBlock->unlock();
 	}
+#endif
 
 	// Start the actual thread
 	m_renderStatus = ERenderStatus::Busy;
