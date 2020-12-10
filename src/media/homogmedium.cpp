@@ -101,7 +101,7 @@ NORI_NAMESPACE_BEGIN
 			ImGui::TreeNodeEx("sigma_a_intensity", ImGuiLeafNodeFlags, "Intensity");
 			ImGui::Text("");
 			ImGui::NextColumn();
-			touched |= ImGui::DragFloat("##sigma_a_intensity", &m_sigma_a_intensity, 0.01f, 0.f, SLIDER_MAX_FLOAT);
+			touched |= ImGui::DragFloat("##sigma_a_intensity", &m_sigma_a_intensity, 0.001f, 0.f, SLIDER_MAX_FLOAT);
 			ImGui::NextColumn();
 
 			ImGui::AlignTextToFramePadding();
@@ -114,12 +114,12 @@ NORI_NAMESPACE_BEGIN
 			ImGui::NextColumn();
 			ImGui::TreeNodeEx("sigma_s_intensity", ImGuiLeafNodeFlags, "Intensity");
 			ImGui::NextColumn();
-			touched |= ImGui::DragFloat("##sigma_s_intensity", &m_sigma_s_intensity, 0.01f, 0.f, SLIDER_MAX_FLOAT);
+			touched |= ImGui::DragFloat("##sigma_s_intensity", &m_sigma_s_intensity, 0.001f, 0.f, SLIDER_MAX_FLOAT);
 			ImGui::NextColumn();
 
 			ImGui::TreeNodeEx("density", ImGuiLeafNodeFlags, "Density");
 			ImGui::NextColumn();
-			touched |= ImGui::DragFloat("##density", &m_density, 0.01f, 0.f, SLIDER_MAX_FLOAT);
+			touched |= ImGui::DragFloat("##density", &m_density, 0.001f, 0.f, SLIDER_MAX_FLOAT);
 			ImGui::NextColumn();
 
 			// -- Update and display derived properties
