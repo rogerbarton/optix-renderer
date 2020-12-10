@@ -23,19 +23,25 @@ NORI_NAMESPACE_BEGIN
 		{
 			auto clone = new PointLight(*this);
 			Emitter::cloneAndInit(clone);
+
+			clone->m_position = m_position;
+			clone->m_power = m_power;
+
 			return clone;
 		}
 
 		void update(const NoriObject *guiObject) override
 		{
 			const auto *gui = static_cast<const PointLight *>(guiObject);
-			if (!gui->touched)return;
+			if (!gui->touched) return;
 			gui->touched = false;
 
 			m_position = gui->m_position;
 			m_power    = gui->m_power;
-			m_radiance = m_power / (4 * M_PI);
+			
 			Emitter::update(guiObject);
+			// overwrite radiance by our own
+			m_radiance = m_power / (4 * M_PI);
 		}
 
 		Color3f sample(EmitterQueryRecord &lRec,
