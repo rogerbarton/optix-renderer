@@ -90,7 +90,7 @@ bool Sphere::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, 
 	return false;
 }
 
-bool Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+void Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
 {
 	its.p = ray(its.t);
 	Vector3f n = (its.p - m_position).normalized();
@@ -101,8 +101,6 @@ bool Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &i
 
 	const Vector3f b = n.cross(t);
 	its.shFrame = Frame(t, b, n);
-
-	return true;
 }
 
 void Sphere::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const

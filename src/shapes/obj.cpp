@@ -180,52 +180,52 @@ public:
 	    }
 
 		//tangents
-			if(!normals.empty() && !texcoords.empty()){
-				m_T.resize(3, vertices.size());
-				m_BT.resize(3, vertices.size());
-				
-				uint32_t triaCount = indices.size() / 3;
-				
-				for (uint32_t i = 0; i < triaCount; ++i) {
-
-					uint32_t i1 = indices[3 * i];
-					uint32_t i2 = indices[3 * i + 1];
-					uint32_t i3 = indices[3 * i + 2];
+		if(!normals.empty() && !texcoords.empty()){
+			m_T.resize(3, vertices.size());
+			m_BT.resize(3, vertices.size());
 			
-					const Vector3f& v0 = m_V.col(i1);
-					const Vector3f& v1 = m_V.col(i2);
-					const Vector3f& v2 = m_V.col(i3);
+			uint32_t triaCount = indices.size() / 3;
+			
+			for (uint32_t i = 0; i < triaCount; ++i) {
 
-					const Point2f& uv0 = m_UV.col(i1);
-					const Point2f& uv1 = m_UV.col(i2);
-					const Point2f& uv2 = m_UV.col(i3);
-					
-					const Vector3f Edge1 = v1 - v0;
-					const Vector3f Edge2 = v2 - v0;
+				uint32_t i1 = indices[3 * i];
+				uint32_t i2 = indices[3 * i + 1];
+				uint32_t i3 = indices[3 * i + 2];
+		
+				const Vector3f& v0 = m_V.col(i1);
+				const Vector3f& v1 = m_V.col(i2);
+				const Vector3f& v2 = m_V.col(i3);
 
-					float DeltaU1 = uv1[0] - uv0[0];
-					float DeltaV1 = uv1[1] - uv0[1];
-					float DeltaU2 = uv2[0] - uv0[0];
-					float DeltaV2 = uv2[1] - uv0[1];
+				const Point2f& uv0 = m_UV.col(i1);
+				const Point2f& uv1 = m_UV.col(i2);
+				const Point2f& uv2 = m_UV.col(i3);
+				
+				const Vector3f Edge1 = v1 - v0;
+				const Vector3f Edge2 = v2 - v0;
 
-					float frac = DeltaU1 * DeltaV2 - DeltaU2 * DeltaV1;
-					float f = 1.f / (frac == 0.f ? Epsilon : frac); //fixes an edge case
+				float DeltaU1 = uv1[0] - uv0[0];
+				float DeltaV1 = uv1[1] - uv0[1];
+				float DeltaU2 = uv2[0] - uv0[0];
+				float DeltaV2 = uv2[1] - uv0[1];
 
-					Vector3f Tangent(
-						f * (DeltaV2 * Edge1.x() - DeltaV1 * Edge2.x()),
-						f * (DeltaV2 * Edge1.y() - DeltaV1 * Edge2.y()),
-						f * (DeltaV2 * Edge1.z() - DeltaV1 * Edge2.z())
-					);
-							
-					m_T.col(i1) += trafo * Tangent;
-					m_T.col(i2) += trafo * Tangent;
-					m_T.col(i3) += trafo * Tangent;
+				float frac = DeltaU1 * DeltaV2 - DeltaU2 * DeltaV1;
+				float f = 1.f / (frac == 0.f ? Epsilon : frac); //fixes an edge case
 
-					m_BT.col(i1) += trafo * Vector3f(Vector3f(m_N.col(i1)).cross(Tangent));
-					m_BT.col(i2) += trafo * Vector3f(Vector3f(m_N.col(i2)).cross(Tangent));
-					m_BT.col(i3) += trafo * Vector3f(Vector3f(m_N.col(i3)).cross(Tangent));
-				}
-			} 
+				Vector3f Tangent(
+					f * (DeltaV2 * Edge1.x() - DeltaV1 * Edge2.x()),
+					f * (DeltaV2 * Edge1.y() - DeltaV1 * Edge2.y()),
+					f * (DeltaV2 * Edge1.z() - DeltaV1 * Edge2.z())
+				);
+						
+				m_T.col(i1) += trafo * Tangent;
+				m_T.col(i2) += trafo * Tangent;
+				m_T.col(i3) += trafo * Tangent;
+
+				m_BT.col(i1) += trafo * Vector3f(Vector3f(m_N.col(i1)).cross(Tangent));
+				m_BT.col(i2) += trafo * Vector3f(Vector3f(m_N.col(i2)).cross(Tangent));
+				m_BT.col(i3) += trafo * Vector3f(Vector3f(m_N.col(i3)).cross(Tangent));
+			}
+		} 
 
 	    m_name = filename.string();
 	    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", N=" << m_N.cols() << ", UV=" << m_UV.cols() << ", took "

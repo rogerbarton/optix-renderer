@@ -131,7 +131,7 @@ bool Mesh::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, fl
     return t >= ray.mint && t <= ray.maxt;
 }
 
-bool Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
+void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
 {
     /* Find the barycentric coordinates */
     Vector3f bary;
@@ -183,8 +183,6 @@ bool Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its
     }
     else
         its.shFrame = its.geoFrame;
-
-    return true;
 }
 
 BoundingBox3f Mesh::getBoundingBox(uint32_t index) const

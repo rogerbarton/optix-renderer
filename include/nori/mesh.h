@@ -78,7 +78,7 @@ public:
 
     /// Set intersection information: hit point, shading frame, UVs
     /// returns true if it worked
-    virtual bool setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
+    virtual void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
 
     /// Return the total number of vertices in this shape
     uint32_t getVertexCount() const { return (uint32_t)m_V.cols(); }
