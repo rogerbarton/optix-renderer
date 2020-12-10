@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="path_vol_mats"/>
+	<integrator type="path_vol_mis"/>
 	<sampler type="independent">
 		<integer name="sampleCount" value="2048"/>
 	</sampler>
