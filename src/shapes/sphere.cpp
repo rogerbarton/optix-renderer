@@ -119,6 +119,8 @@ void Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &i
 	const Vector3f b = n.cross(t);
 	its.shFrame = Frame(t, b, n);
 
+	// QUICK FIX FOR NOW
+	its.shFrame = Frame(n);
 }
 
 void Sphere::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
