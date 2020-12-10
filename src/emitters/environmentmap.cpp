@@ -11,6 +11,7 @@ class EnvMap : public Emitter
 public:
 	explicit EnvMap(const PropertyList &props) {
 		lightProb = props.getFloat("lightWeight", 1.f);
+		m_radiance = props.getColor("radiance", 1.f);
 	}
 
 	NoriObject *cloneAndInit() override
@@ -141,7 +142,7 @@ public:
 		uv.x() = uv_coords.y() / (2.f * M_PI);
 		uv.y() = uv_coords.x() / M_PI;
 
-		return m_map->eval(uv);
+		return m_map->eval(uv) * m_radiance;
 	}
 
 	Color3f samplePhoton(Ray3f &ray, const Point2f &sample1, const Point2f &sample2) const override

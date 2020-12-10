@@ -12,12 +12,14 @@ NORI_NAMESPACE_BEGIN
 		// if(m_shape)
 		// 	clone->m_shape = static_cast<Shape *>(m_shape->cloneAndInit());
 		clone->lightProb = lightProb;
+		clone->m_radiance = m_radiance;
 	}
 
 	void Emitter::update(const NoriObject *guiObject)
 	{
 		const auto *gui = static_cast<const Emitter *>(guiObject);
 		lightProb = gui->lightProb;
+		m_radiance = gui->m_radiance;
 		// Shape already updated by scene
 		// if(m_shape)
 		// 	m_shape->update(gui->m_shape);
