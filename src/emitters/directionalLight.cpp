@@ -31,8 +31,6 @@ public:
         m_direction = props.getVector3("direction", Vector3f(0, 0, 1)).normalized();
         m_radiance = props.getColor("radiance", Color3f(0.f));
         m_angle = props.getFloat("angle", 1.f);
-        m_position = props.getPoint3("position", Point3f(0.f));
-        m_radius = props.getFloat("radius", 1.f);
         m_coord = Frame(m_direction);
     }
 
@@ -42,10 +40,8 @@ public:
 
         Emitter::cloneAndInit(clone);
 
-        clone->m_position = m_position;
         clone->m_angle = m_angle;
         clone->m_direction = m_direction;
-        clone->m_radius = m_radius;
         return clone;
     }
 
@@ -56,11 +52,9 @@ public:
             return;
         gui->touched = false;
 
-        m_position = gui->m_position;
         m_angle = gui->m_angle;
         m_direction = gui->m_direction;
         m_coord = gui->m_coord;
-        m_radius = gui->m_radius;
 
         Emitter::update(guiObject);
     }
@@ -71,13 +65,11 @@ public:
             "DirectionalLight[\n"
             "  direction = %s,\n"
             "  radiance = %s,\n"
-            "  angle = %f,\n"
-            "  position = %s,\n"
-            "  radius = %f\n"
+            "  angle = %f\n"
             "]",
             m_direction.toString(),
             m_radiance.toString(),
-            m_angle, m_position.toString(), m_radius);
+            m_angle);
     }
 
     /**
@@ -93,19 +85,10 @@ public:
      */
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const override
     {
-
-        // create shadow ray
-        // distant point
-        // instead of hardcoded it would be better more robust to have it as the
-        // bounding sphere radius time 2 ?
-
         Vector3f offsetZ = Warp::squareToUniformSphereCap(sample, cos(degToRad(m_angle)));
         lRec.wi = -m_coord.toWorld(offsetZ).normalized();
-
-        lRec.p = m_position + lRec.wi * m_radius; // directional light = one point
-
-        const float maxt = (m_position - lRec.ref).norm() - Epsilon;
-        lRec.shadowRay = Ray3f(lRec.p, (lRec.ref - lRec.p).normalized(), Epsilon, maxt);
+        lRec.p = lRec.wi / Epsilon;
+        lRec.shadowRay = Ray3f(lRec.p, (lRec.ref - lRec.p).normalized(), Epsilon, 1.f / Epsilon);
 
         // calculate the pdf
         lRec.pdf = pdf(lRec);
@@ -129,11 +112,7 @@ public:
      */
     virtual Color3f eval(const EmitterQueryRecord &lRec) const override
     {
-        // TODO CHECK THIS
-        float cosTotalWidth = std::cos(degToRad(m_angle));
-        Color3f i = m_radiance / (1.f - .5f * (cosTotalWidth));
-        Color3f color = i / (lRec.ref - m_position).squaredNorm();
-        return color;
+        return m_radiance;
     }
 
     /**
@@ -150,10 +129,9 @@ public:
      */
     virtual float pdf(const EmitterQueryRecord &lRec) const override
     {
-        // TODO CHECK THSI
         Vector3f localVector = m_coord.toLocal(-lRec.wi);
         float prob = Warp::squareToUniformSphereCapPdf(localVector, cos(degToRad(m_angle)));
-        return prob * (lRec.p - lRec.ref).squaredNorm();
+        return prob;
     }
 
     ~DirectionalLight(){};
@@ -166,15 +144,6 @@ public:
         touched |= Emitter::getImGuiNodes();
         int counter = 0;
         ImGui::PushID(EEmitter);
-
-        ImGui::PushID(counter++);
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("position", ImGuiLeafNodeFlags, "Position");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragPoint3f("##position", &m_position, 0.1f);
-        ImGui::NextColumn();
-        ImGui::PopID();
 
         ImGui::PushID(counter++);
         ImGui::AlignTextToFramePadding();
@@ -196,16 +165,7 @@ public:
         ImGui::TreeNodeEx("angle", ImGuiLeafNodeFlags, "Angle");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragFloat("##angle", &m_angle, 0.01f, 0.f, 360.f);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        ImGui::PushID(counter++);
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("radius", ImGuiLeafNodeFlags, "Radius");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragFloat("##radius", &m_radius, 0.001f, 0.f, SLIDER_MAX_FLOAT);
+        touched |= ImGui::DragFloat("##angle", &m_angle, 0.001f, 0.f, 360.f);
         ImGui::NextColumn();
         ImGui::PopID();
 
@@ -218,7 +178,6 @@ public:
     void getOptixEmitterData(EmitterData &sbtData) override
     {
         sbtData.type = EmitterData::DIRECTIONAL;
-        sbtData.directional.position = make_float3(m_position);
         sbtData.directional.angle = m_angle;
         sbtData.directional.direction = make_float3(m_direction);
 
@@ -227,11 +186,8 @@ public:
 #endif
 
 protected:
-    Color3f m_power;      // power of the light source in Watts
     Vector3f m_direction; // direction of the light
     float m_angle;        // world radius (bounding box radius)
-    Point3f m_position;
-    float m_radius; // offset of the hit point
     Frame m_coord;
 };
 
