@@ -264,7 +264,8 @@ void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord
     copyMeshDataToDevice();
 
     HitGroupRecord rec = {};
-    OPTIX_CHECK(optixSbtRecordPackHeader(state.void applyNormalMap(Intersection &its) const;ANGLE_MESH;
+    // TODO: THIS DOES NOT WORK ANYMORE.
+    //OPTIX_CHECK(optixSbtRecordPackHeader(state.void applyNormalMap(Intersection &its) const;ANGLE_MESH;
     rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
     rec.data.geometry.triangleMesh.normals = reinterpret_cast<float3 *>(d_N);
     rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);

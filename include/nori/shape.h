@@ -186,11 +186,6 @@ public:
 	 * */
 	virtual float pdfVolume(const ShapeQueryRecord &sRec) const;
 
-    /**
-     * Apply the normal map to modify the intersecion shading normal
-     */
-	void applyNormalMap(Intersection &its) const;
-
 #ifdef NORI_USE_OPTIX
 	/**
 	 * Defined in OptixState.as.cpp
