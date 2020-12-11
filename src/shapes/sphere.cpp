@@ -95,6 +95,14 @@ void Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &i
 	its.p = ray(its.t);
 	Vector3f n = (its.p - m_position).normalized();
 
+	// swap coords so: u = phi, v = theta = 'vertical'
+	Point2f uv_coords = sphericalCoordinates(-n);
+	std::swap(uv_coords.x(), uv_coords.y());
+
+	// Map to [0,1]
+	its.uv.x()       = uv_coords.x() / (2.f * M_PI);
+	its.uv.y()       = uv_coords.y() / M_PI;
+
 	its.geoFrame = Frame(n);
 
 	Vector3f t = (Vector3f(0,0,1).cross(its.p - m_position)).normalized();
