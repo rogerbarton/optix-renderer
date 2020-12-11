@@ -58,6 +58,6 @@ extern "C" __global__ void __intersection__nanovdb_fogvolume()
 	if (hit[2] != -1)
 	{
 		float voxelUniformSize = float(grid->voxelSize()[0]);
-		optixReportIntersection(hit[0] * voxelUniformSize, 0, int(hit[1] * voxelUniformSize));
+		optixReportIntersection(hit[0] * voxelUniformSize, GeometryData::Type::VOLUME_NVDB);
 	}
 }
