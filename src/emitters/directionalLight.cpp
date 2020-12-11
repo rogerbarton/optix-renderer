@@ -29,12 +29,10 @@ public:
     {
         // could use lookat
         m_direction = props.getVector3("direction", Vector3f(0, 0, 1)).normalized();
-        m_power = props.getColor("power", Color3f(0.f));
+        m_radiance = props.getColor("radiance", Color3f(0.f));
         m_angle = props.getFloat("angle", 1.f);
         m_position = props.getPoint3("position", Point3f(0.f));
-        m_radiance = Color3f(0.f);
         m_radius = props.getFloat("radius", 1.f);
-
         m_coord = Frame(m_direction);
     }
 
@@ -45,10 +43,8 @@ public:
         Emitter::cloneAndInit(clone);
 
         clone->m_position = m_position;
-        clone->m_power = m_power;
         clone->m_angle = m_angle;
         clone->m_direction = m_direction;
-        clone->m_radiance = m_radiance;
         clone->m_radius = m_radius;
         return clone;
     }
@@ -61,15 +57,12 @@ public:
         gui->touched = false;
 
         m_position = gui->m_position;
-        m_power = gui->m_power;
         m_angle = gui->m_angle;
         m_direction = gui->m_direction;
         m_coord = gui->m_coord;
         m_radius = gui->m_radius;
 
         Emitter::update(guiObject);
-
-        m_radiance = m_power / 4.f * INV_PI;
     }
 
     virtual std::string toString() const override
@@ -77,13 +70,13 @@ public:
         return tfm::format(
             "DirectionalLight[\n"
             "  direction = %s,\n"
-            "  power = %s,\n"
+            "  radiance = %s,\n"
             "  angle = %f,\n"
             "  position = %s,\n"
             "  radius = %f\n"
             "]",
             m_direction.toString(),
-            m_power.toString(),
+            m_radiance.toString(),
             m_angle, m_position.toString(), m_radius);
     }
 
@@ -200,20 +193,10 @@ public:
 
         ImGui::PushID(counter++);
         ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("power", ImGuiLeafNodeFlags, "Power");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragColor3f("##power", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
-                                      ImGuiSliderFlags_AlwaysClamp);
-        ImGui::NextColumn();
-        ImGui::PopID();
-
-        ImGui::PushID(counter++);
-        ImGui::AlignTextToFramePadding();
         ImGui::TreeNodeEx("angle", ImGuiLeafNodeFlags, "Angle");
         ImGui::NextColumn();
         ImGui::SetNextItemWidth(-1);
-        touched |= ImGui::DragFloat("##angle", &m_angle, 0.1f, 0.f, 360.f);
+        touched |= ImGui::DragFloat("##angle", &m_angle, 0.01f, 0.f, 360.f);
         ImGui::NextColumn();
         ImGui::PopID();
 
