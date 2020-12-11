@@ -18,9 +18,6 @@
 #define M_1_PIf     0.318309886183790671538f
 #endif
 
-
-#if !defined(__CUDACC__)
-
 __forceinline__ __device__ int max(int a, int b)
 {
     return a > b ? a : b;
@@ -90,8 +87,6 @@ __forceinline__ __device__ IntegerType roundUp(IntegerType x, IntegerType y)
 {
     return ( ( x + y - 1 ) / y ) * y;
 }
-
-#endif
 
 /** clamp */
 __forceinline__ __device__ float clamp(const float f, const float a, const float b)

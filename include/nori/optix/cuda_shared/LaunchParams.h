@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include <optix.h>
+#include <optix_types.h>
 #include <vector_types.h>
 
 struct RaygenConstantParams

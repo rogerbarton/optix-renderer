@@ -12,6 +12,7 @@
 #include "RadiancePrd.h"
 
 #include "sutil/helpers.h"
+#include "sutil/vec_math.h"
 #include "sutil/random.h"
 #include "sutil/warp.h"
 

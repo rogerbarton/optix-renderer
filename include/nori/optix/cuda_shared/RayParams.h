@@ -13,8 +13,10 @@
  * Contains data used for the SBT
  */
 
-#define NUM_PAYLOAD_VALUES 4
-#define NUM_ATTRIBUTE_VALUES 2
+// Payload passed from hit programs to back to the optixTrace caller
+#define NUM_PAYLOAD_VALUES 2
+// Attributes passed from intersect programs to hit programs
+#define NUM_ATTRIBUTE_VALUES 1
 
 enum RayType
 {

@@ -47,7 +47,6 @@ static __forceinline__ __device__ float3 evalBsdf(
 		// TODO
 	}
 
-	wo = wi;
 	return ERROR_COLOR;
 }
 

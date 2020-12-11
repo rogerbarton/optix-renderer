@@ -9,6 +9,7 @@
 #include <optix_device.h>
 #include <vector_functions.h>
 #include <vector_types.h>
+#include "stdint.h"
 #include <nanovdb/NanoVDB.h>
 #include "vec_math.h"
 
