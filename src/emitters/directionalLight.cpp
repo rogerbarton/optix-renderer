@@ -87,8 +87,7 @@ public:
     {
         Vector3f offsetZ = Warp::squareToUniformSphereCap(sample, cos(degToRad(m_angle)));
         lRec.wi = -m_coord.toWorld(offsetZ).normalized();
-        lRec.p = lRec.wi / Epsilon;
-        lRec.shadowRay = Ray3f(lRec.p, (lRec.ref - lRec.p).normalized(), Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
+        lRec.shadowRay = Ray3f(lRec.ref, lRec.wi); // Epsilon, INFINITY are added by default
 
         // calculate the pdf
         lRec.pdf = pdf(lRec);
