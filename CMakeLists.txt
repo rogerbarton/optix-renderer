@@ -239,7 +239,8 @@ if(NORI_USE_OPTIX)
     set(NORI_CU_FILES
         include/nori/optix/cuda/raygen.cpp
         include/nori/optix/cuda/shading.cpp
-        include/nori/optix/cuda/geometry.cpp
+        include/nori/optix/cuda/geometry.sphere.cpp
+        include/nori/optix/cuda/geometry.nvdb.cpp
         include/nori/optix/cuda/RadiancePrd.h
         include/nori/optix/cuda/ShadowrayPrd.h
 
