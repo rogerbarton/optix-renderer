@@ -57,7 +57,7 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	bool recompile = true;
 	if (recompile)
 	{
-		if (!initializedState)
+		if (initializedState)
 			clearPipeline();
 		createPtxModules(scene.m_optixRenderer->m_enableSpecialization);
 		createPipeline();

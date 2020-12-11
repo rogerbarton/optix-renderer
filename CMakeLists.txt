@@ -227,7 +227,8 @@ if(NORI_USE_OPTIX)
     target_compile_definitions(nori PRIVATE
         "-DNORI_USE_OPTIX"
         "-DNORI_NVRTC_OPTIX_DIR=\"${OptiX_INCLUDE_DIR}\""
-        "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRECTORY}\"")
+        "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRS}\""
+        "-DNORI_NVRTC_NANOVDB_DIR=\"${CMAKE_SOURCE_DIR}/ext/nanovdb\"")
 
     target_link_libraries(nori
         ${CUDA_LIBRARIES}
