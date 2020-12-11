@@ -16,6 +16,8 @@ struct GeometryData
 	{
 		TRIANGLE_MESH = 0,
 		SPHERE        = 1,
+		VOLUME_NVDB   = 2,
+		TYPE_SIZE
 	};
 
 	struct TriangleMesh
@@ -32,6 +34,11 @@ struct GeometryData
 		float  radius;
 	};
 
+	struct VolumeNvdb
+	{
+		const void* grid;
+	};
+
 	Type type;
 	float volume;
 
@@ -39,5 +46,6 @@ struct GeometryData
 	{
 		TriangleMesh triangleMesh;
 		Sphere       sphere;
+		VolumeNvdb   volumeNvdb;
 	};
 };
