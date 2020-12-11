@@ -20,6 +20,10 @@
 #include <nori/emitter.h>
 #include <nori/warp.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 class DirectionalLight : public Emitter

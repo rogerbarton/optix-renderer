@@ -109,7 +109,7 @@ public:
     const MatrixXu &getIndices() const { return m_F; }
 
 #ifdef NORI_USE_OPTIX
-    OptixBuildInput getOptixBuildInput() override;
+    OptixBuildInput getOptixBuildInput(unsigned int *&flagsArray) override;
     void getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords) override;
     void copyMeshDataToDevice();
 #endif

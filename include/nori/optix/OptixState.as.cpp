@@ -67,10 +67,14 @@ void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 	// Accumulate build inputs from nori shapes and calculate the totalBufferSizes
 	std::vector<GasBuildInfo> gasInfos{};
 	gasInfos.reserve(shapes.size());
+
+	// Stores the pointers of all 'new' allocated flag arrays
+	std::vector<uint32_t*> buildInputFlags{shapes.size(), nullptr};
+
 	for (int i = 0; i < shapes.size(); ++i)
 	{
 		// Get shape specific build input
-		OptixBuildInput buildInput = shapes[i]->getOptixBuildInput();
+		OptixBuildInput buildInput = shapes[i]->getOptixBuildInput(buildInputFlags[i]);
 
 		OptixAccelBufferSizes gasBufferSizes;
 		OPTIX_CHECK(optixAccelComputeMemoryUsage(m_context,
@@ -154,6 +158,10 @@ void OptixState::buildGases(const std::vector<nori::Shape *> &shapes)
 		                              &gasHandle.handle
 		));
 	}
+
+	// Be sure to delete the 'new' allocated arrays
+	for(uint32_t* flagArray : buildInputFlags)
+		delete flagArray;
 
 	const auto                    t1       = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> duration = t1 - t0;

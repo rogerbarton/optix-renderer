@@ -78,6 +78,17 @@ Shape::~Shape()
 	delete m_normalMap;
 	delete m_medium;
 	delete m_emitter;
+
+#ifdef NORI_USE_OPTIX
+		try
+		{
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_bbox)));
+		}
+		catch (const std::exception &e)
+		{
+			cerr << "~Shape error: " << e.what() << endl;
+		}
+#endif
 }
 
 void Shape::sampleVolume(ShapeQueryRecord &sRec, const Point3f &sample) const
@@ -233,30 +244,30 @@ bool Shape::getImGuiNodes()
 	/**
 	 * Default is to use bbox with custom intersection
 	 */
-	OptixBuildInput Shape::getOptixBuildInput()
+	OptixBuildInput Shape::getOptixBuildInput(uint32_t *&flagsArray)
 	{
 		// AABB build input
 		OptixAabb aabb = {m_bbox.min.x(), m_bbox.min.y(), m_bbox.min.z(),
 		                  m_bbox.max.x(), m_bbox.max.y(), m_bbox.max.z()};
 
-		// TODO: delete this
-		CUdeviceptr d_aabb_buffer;
-		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>( &d_aabb_buffer ), sizeof(OptixAabb)));
-		CUDA_CHECK(cudaMemcpy(
-				reinterpret_cast<void *>( d_aabb_buffer ),
-				&aabb,
-				sizeof(OptixAabb),
-				cudaMemcpyHostToDevice
-		));
-
-		uint32_t aabb_input_flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
+		CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_bbox)));
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_bbox), sizeof(OptixAabb)));
+		CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(d_bbox), &aabb, sizeof(OptixAabb), cudaMemcpyHostToDevice));
 
 		OptixBuildInput buildInput = {};
 		buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
-		buildInput.customPrimitiveArray.aabbBuffers   = &d_aabb_buffer;
+		buildInput.customPrimitiveArray.aabbBuffers   = &d_bbox;
 		buildInput.customPrimitiveArray.numPrimitives = 1;
-		buildInput.customPrimitiveArray.flags         = aabb_input_flags;
+		flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT};
+		buildInput.customPrimitiveArray.flags         = flagsArray;
 		buildInput.customPrimitiveArray.numSbtRecords = 1;
+
+		/**
+		 * See comment: https://github.com/blender/blender/blob/master/intern/cycles/device/device_optix.cpp#L1490
+		 * "The SBT does not store per primitive data since Cycles already allocates separate
+         * buffers for that purpose. OptiX does not allow this to be zero though, so just pass in
+         * one and rely on that having the same meaning in this case."
+		 */
 
 		return buildInput;
 	}

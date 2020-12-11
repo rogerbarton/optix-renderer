@@ -9,3 +9,4 @@ Makefile
 .idea/
 .vscode/
 cmake-build*/
+scenes/project/final-render/
