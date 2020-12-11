@@ -4,7 +4,7 @@
     <integer name="sampleCount" value="128"/>
   </sampler>
 
-  <integrator type="path_mis"/>
+  <integrator type="direct_ems"/>
 
   <camera type="perspective">
     <transform name="toWorld">
@@ -53,13 +53,11 @@
     </bsdf>
   </shape>
 
-  <emitter type="spot">
-    <point name="position" value="0,-4,10"/>
-    <vector name="direction" value="0,0,-1"/>
-    <color name="power" value="1000,1000,1000"/>
-    <float name="falloffstart" value="0"/>
-    <float name="totalwidth" value="45"/>
-  </emitter>
+  <emitter type="directional">
+		<color name="radiance" value="100,100,100"/>
+		<vector name="direction" value="0,0,-1"/>
+		<float name="angle" value="2"/>
+	</emitter>
 
   <emitter type="envmap">
     <texture name="albedo" type="constant_color">
