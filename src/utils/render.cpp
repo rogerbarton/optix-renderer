@@ -76,6 +76,7 @@ bool RenderThread::isBusy()
 	if (m_renderStatus == ERenderStatus::Done)
 	{
 		m_renderThread.join();
+		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 	}
 	return m_renderStatus != ERenderStatus::Idle;
@@ -88,6 +89,7 @@ void RenderThread::stopRendering()
 		cout << "Requesting interruption of the current rendering" << endl;
 		m_renderStatus = ERenderStatus::Interrupt;
 		m_renderThread.join();
+		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 		cout << "Rendering successfully aborted" << endl;
 	}
@@ -118,6 +120,7 @@ void RenderThread::loadScene(const std::string &filename)
 	if (isBusy())
 	{
 		m_renderThread.join();
+		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 	}
 
@@ -177,6 +180,7 @@ void RenderThread::startRenderThread()
 	try
 	{
 		m_optixBlock->resize(outputSize.x(), outputSize.y());
+		m_d_optixBlock = m_optixBlock->map();
 		m_optixBlock->unlock();
 	}
 	catch (std::exception& e)
@@ -216,8 +220,7 @@ void RenderThread::renderThreadMain()
 	m_currentCpuSample = 0;
 	m_currentOptixSample = 0;
 #ifdef NORI_USE_OPTIX
-	if(!m_previewMode)
-		m_optixThread = std::thread([this] { renderThreadOptix(); });
+	m_optixThread = std::thread([this] { renderThreadOptix(); });
 #endif
 
 	/* Create a block generator (i.e. a work scheduler) */
@@ -436,7 +439,7 @@ void RenderThread::renderThreadOptix()
 		{
 			if (m_renderStatus == ERenderStatus::Interrupt)
 				break;
-			optixState->renderSubframe(*m_optixBlock, m_currentOptixSample);
+			optixState->renderSubframe(m_d_optixBlock, m_currentOptixSample);
 		}
 	}
 	catch (std::exception& e)
@@ -546,6 +549,19 @@ void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
 		samplesCpu = sum == 0 ? 1.f : cpu / sum;
 		samplesGpu = sum == 0 ? 0.f : gpu / sum;
 	}
+}
+
+void RenderThread::completeRender()
+{
+#ifdef NORI_USE_OPTIX
+	if (m_d_optixBlock)
+	{
+		m_optixBlock->lock();
+		m_optixBlock->unmap();
+		m_d_optixBlock = 0;
+		m_optixBlock->unlock();
+	}
+#endif
 }
 
 NORI_NAMESPACE_END

@@ -73,9 +73,9 @@ struct OptixState
 	bool preRender(nori::Scene &scene, bool usePreview);
 	/**
 	 * Renders one subframe. Assumes that preRender has succeeded
-	 * @param outputBuffer
+	 * @param outputBuffer mapped device pointer, use CUDAOutputBuffer::map() on the opengl thread
 	 */
-	void renderSubframe(CUDAOutputBuffer<float4> &outputBuffer, uint32_t currentSample);
+	void renderSubframe(float4* outputBuffer, uint32_t currentSample);
 	void clear();
 	void clearPipeline();
 	~OptixState();

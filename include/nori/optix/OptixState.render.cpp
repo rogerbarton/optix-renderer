@@ -2,6 +2,8 @@
 // Created by roger on 07/12/2020.
 //
 
+#include <nori/optix/OptixState.h>
+
 #include <nori/scene.h>
 #include <nori/integrator.h>
 #include <nori/sampler.h>
@@ -65,7 +67,13 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	updateSbt(scene.getShapes());
 
 	m_params.sceneHandle = m_ias_handle;
+	
+	if (!initializedState)
+	{
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_params), sizeof(LaunchParams)));
+	}
 
+	CUDA_SYNC_CHECK();
 	std::cout << "Optix state created.\n";
 	initializedState = true;
 	return true;

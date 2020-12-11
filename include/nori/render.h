@@ -52,6 +52,7 @@ public:
 #ifdef NORI_USE_OPTIX
 	void renderThreadOptix();
 	CUDAOutputBuffer<float4>* m_optixBlock;
+	float4* m_d_optixBlock;
 #endif
 
     bool isBusy();
@@ -126,6 +127,7 @@ public:
 	std::string outputName;
 	std::string outputNameDenoised;
 	std::string outputNameVariance;
+		void completeRender();
 	};
 
 NORI_NAMESPACE_END
