@@ -12,6 +12,9 @@
 #include <nanovdb/NanoVDB.h>
 #include "vec_math.h"
 
+#define EPSILON 1e-4f
+#define INFINITY 1e10f
+
 static __forceinline__ __device__ void *unpackPointer(unsigned int i0, unsigned int i1)
 {
 	const unsigned long long uptr = static_cast<unsigned long long>( i0 ) << 32 | i1;

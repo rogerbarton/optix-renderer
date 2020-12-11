@@ -71,8 +71,8 @@ extern "C" __global__ void __raygen__perspective()
 					launchParams.sceneHandle,
 					rayOrigin,
 					rayDirection,
-					Epsilon,
-					Infinity,
+					EPSILON,
+					INFINITY,
 					&prd);
 
 			if (prd.terminated)
@@ -82,7 +82,7 @@ extern "C" __global__ void __raygen__perspective()
 			{
 				const float rouletteSuccess = fminf(fmaxf3(prd.throughput), 0.99f);
 
-				if (rnd(prd.seed) > rouletteSuccess || rouletteSuccess < Epsilon)
+				if (rnd(prd.seed) > rouletteSuccess || rouletteSuccess < EPSILON)
 					break;
 				// Adjust throughput in case of survival
 				prd.throughput /= rouletteSuccess;
@@ -135,7 +135,7 @@ static __forceinline__ __device__ void sampleRay(
 			0.5f
 	) - 1.0f;
 
-	if (launchParams.camera.lensRadius > Epsilon)
+	if (launchParams.camera.lensRadius > EPSILON)
 	{
 		const float2 pLens  = launchParams.camera.lensRadius *
 		                      squareToUniformDisk(make_float2(rnd(seed), rnd(seed)));
