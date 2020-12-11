@@ -57,7 +57,7 @@ extern "C" __global__ void __closesthit__radiance()
 	const float3             p         = rayOrigin + optixGetRayTime() * rayDir;;
 	const uint32_t vertIdxOffset = primIdx * 3;
 
-	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry);
+	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry, p);
 
 	if (sbtData->emitter.type != EmitterData::NONE)
 	{

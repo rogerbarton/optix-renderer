@@ -46,9 +46,10 @@ struct LocalGeometry
 };
 
 
-__host__ __device__ __forceinline__ LocalGeometry getLocalGeometry(const GeometryData &geometryData)
+__host__ __device__ __forceinline__ LocalGeometry
+getLocalGeometry(const GeometryData &geometryData, const float3 &its_p)
 {
-	LocalGeometry lgeom;
+	LocalGeometry lgeom{};
 	switch (geometryData.type)
 	{
 		case GeometryData::TRIANGLE_MESH:
@@ -123,6 +124,19 @@ __host__ __device__ __forceinline__ LocalGeometry getLocalGeometry(const Geometr
 		}
 		case GeometryData::SPHERE:
 		{
+			lgeom.p = make_float3(0);
+			lgeom.n = normalize(its_p - geometryData.sphere.center);
+			lgeom.ng = lgeom.n; // No transformations on spheres currently
+
+			lgeom.uv = make_float2(
+					-atan2f(lgeom.n.y, lgeom.n.x) / M_PIf / 2,
+					acosf(lgeom.n.z)) / M_PIf;
+
+			lgeom.dpdu = cross(make_float3(0, 0, 1), -lgeom.n);
+			lgeom.dpdv = cross(lgeom.n, lgeom.dpdu);
+
+			// Note: dndu and dndv not set
+
 			break;
 		}
 		default:
