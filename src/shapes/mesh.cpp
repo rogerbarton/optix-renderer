@@ -270,19 +270,19 @@ void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord
 {
     // copyMeshDataToDevice(); Already copied in getOptixBuildInput
 
-    HitGroupRecord rec = {};
-    OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
-    rec.data.geometry.triangleMesh.V         = reinterpret_cast<float3 *>(d_V);
-    rec.data.geometry.triangleMesh.N       = reinterpret_cast<float3 *>(d_N);
-    rec.data.geometry.triangleMesh.UV = reinterpret_cast<float2 *>(d_UV);
-    rec.data.geometry.triangleMesh.F  = reinterpret_cast<uint3 *>(d_F);
+	HitGroupRecord rec = {};
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_mesh_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+	rec.data.geometry.triangleMesh.V  = reinterpret_cast<float3 *>(d_V);
+	rec.data.geometry.triangleMesh.N  = reinterpret_cast<float3 *>(d_N);
+	rec.data.geometry.triangleMesh.UV = reinterpret_cast<float2 *>(d_UV);
+	rec.data.geometry.triangleMesh.F  = reinterpret_cast<uint3 *>(d_F);
 
     Shape::getOptixHitgroupRecordsShape(rec);
 
     hitgroupRecords.push_back(rec);
 
     // reuse rec
-    OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+    OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_mesh_prog_group[RAY_TYPE_SHADOWRAY], &rec));
     hitgroupRecords.push_back(rec);
 }
 

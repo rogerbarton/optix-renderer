@@ -229,6 +229,7 @@ void OptixState::createPtxModules(bool specialize)
 		module_compile_options.numBoundValues = static_cast<uint32_t>(boundValues.size());
 	}
 
+	std::cout << "-- nvrtc building raygen.cpp" << std::endl;
 	{
 		// .cu paths relative to current file __FILE__
 		const std::string ptx = getPtxString("cuda/raygen.cpp");
@@ -239,12 +240,12 @@ void OptixState::createPtxModules(bool specialize)
 		                                          ptx.size(),
 		                                          LOG,
 		                                          &LOG_SIZE,
-		                                          &m_camera_module));
+		                                          &m_raygen_module));
 	}
-	std::cout << "-- raygen.cpp done" << std::endl;
 
+	std::cout << "-- nvrtc building geometry.sphere.cpp" << std::endl;
 	{
-		const std::string ptx = getPtxString("cuda/geometry.cpp");
+		const std::string ptx = getPtxString("cuda/geometry.sphere.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
 		                                          &module_compile_options,
 		                                          &m_pipeline_compile_options,
@@ -252,10 +253,23 @@ void OptixState::createPtxModules(bool specialize)
 		                                          ptx.size(),
 		                                          LOG,
 		                                          &LOG_SIZE,
-		                                          &m_geometry_module));
+		                                          &m_geometry_sphere_module));
 	}
-	std::cout << "-- geometry.cpp done" << std::endl;
 
+	std::cout << "-- nvrtc building geometry.nvdb.cpp" << std::endl;
+	{
+		const std::string ptx = getPtxString("cuda/geometry.nvdb.cpp");
+		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
+		                                          &module_compile_options,
+		                                          &m_pipeline_compile_options,
+		                                          ptx.c_str(),
+		                                          ptx.size(),
+		                                          LOG,
+		                                          &LOG_SIZE,
+		                                          &m_geometry_nvdb_module));
+	}
+
+	std::cout << "-- nvrtc building shading.cpp" << std::endl;
 	{
 		const std::string ptx = getPtxString("cuda/shading.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
@@ -267,5 +281,6 @@ void OptixState::createPtxModules(bool specialize)
 		                                          &LOG_SIZE,
 		                                          &m_shading_module));
 	}
-	std::cout << "-- shading done" << std::endl;
+
+	std::cout << "-- nvrtc done." << std::endl;
 }

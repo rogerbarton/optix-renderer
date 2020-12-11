@@ -38,21 +38,25 @@ struct OptixState
 	bool               initializedOptix = false;
 	bool               initializedState = false;
 
-	LaunchParams m_params   = {};
+	LaunchParams m_params    = {};
 	LaunchParams *m_d_params = nullptr;
 
 	OptixTraversableHandle m_ias_handle          = {};
 	CUdeviceptr            m_d_ias_output_buffer = 0;
 	std::vector<GasHandle> m_gases;
 
-	OptixModule             m_geometry_module                     = 0;
-	OptixModule             m_camera_module                       = 0;
-	OptixModule             m_shading_module                      = 0;
-	OptixProgramGroup       m_raygen_prog_group                   = 0;
-	OptixProgramGroup       m_miss_prog_group[RAY_TYPE_COUNT]     = {0, 0};
-	OptixProgramGroup       m_hitgroup_prog_group[RAY_TYPE_COUNT] = {0, 0};
-	OptixPipeline           m_pipeline                            = 0;
-	OptixShaderBindingTable m_sbt                                 = {};
+	OptixModule m_raygen_module          = 0;
+	OptixModule m_geometry_sphere_module = 0;
+	OptixModule m_geometry_nvdb_module   = 0;
+	OptixModule m_shading_module         = 0;
+
+	OptixProgramGroup       m_raygen_prog_group                          = 0;
+	OptixProgramGroup       m_miss_prog_group[RAY_TYPE_COUNT]            = {0, 0};
+	OptixProgramGroup       m_hitgroup_mesh_prog_group[RAY_TYPE_COUNT]   = {0, 0};
+	OptixProgramGroup       m_hitgroup_sphere_prog_group[RAY_TYPE_COUNT] = {0, 0};
+	OptixProgramGroup       m_hitgroup_nvdb_prog_group[RAY_TYPE_COUNT]   = {0, 0};
+	OptixPipeline           m_pipeline                                   = 0;
+	OptixShaderBindingTable m_sbt                                        = {};
 
 	OptixModuleCompileOptions   m_module_compile_options   = {};
 	OptixPipelineCompileOptions m_pipeline_compile_options = {};
@@ -83,10 +87,11 @@ private:
 	void buildIas();
 	void createPtxModules(bool specialize = true);
 	void createPipeline();
-	void createCameraProgram(std::vector<OptixProgramGroup> program_groups);
-	void createHitProgram(std::vector<OptixProgramGroup> program_groups);
-	void createVolumeProgram(std::vector<OptixProgramGroup> program_groups);
-	void createMissProgram(std::vector<OptixProgramGroup> program_groups);
+	void createRaygenProgram(std::vector<OptixProgramGroup>& program_groups);
+	void createHitMeshProgram(std::vector<OptixProgramGroup>& program_groups);
+	void createHitSphereProgram(std::vector<OptixProgramGroup>& program_groups);
+	void createHitVolumeProgram(std::vector<OptixProgramGroup>& program_groups);
+	void createMissProgram(std::vector<OptixProgramGroup>& program_groups);
 	void updateSbt(const std::vector<nori::Shape *> &shapes);
 };
 

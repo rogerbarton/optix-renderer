@@ -176,7 +176,7 @@ bool Sphere::getImGuiNodes()
 	void nori::Sphere::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 	{
 		HitGroupRecord rec = {};
-		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_RADIANCE], &rec));
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_sphere_prog_group[RAY_TYPE_RADIANCE], &rec));
 		rec.data.geometry.type          = GeometryData::SPHERE;
 		rec.data.geometry.sphere.center = make_float3(m_position);
 		rec.data.geometry.sphere.radius = m_radius;
@@ -185,7 +185,7 @@ bool Sphere::getImGuiNodes()
 
 		hitgroupRecords.push_back(rec);
 
-		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+		OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_sphere_prog_group[RAY_TYPE_SHADOWRAY], &rec));
 		hitgroupRecords.push_back(rec);
 	}
 #endif
