@@ -126,6 +126,16 @@
             <div class="twentytwenty-container">
                 <img src="images/denoiser/variance_difference.png" alt="Before" class="img-responsive">
             </div>
+
+            <h4>Validation: Comparison to Python</h4>
+            <p>As a validation, I compare my result with the one from Python, using scikit-image library with the
+                denoise_bilateral function. The comparison is shown below. We can see that the python implementaion
+                shows less noise, but I think it is more blurry. Taking all factors into account, I would say my
+                implmentation works and is usable.</p>
+            <div class="twentytwenty-container">
+                <img src="images/denoiser/nori.png" alt="Nori" class="img-responsive">
+                <img src="images/denoiser/python.png" alt="Python" class="img-responsive">
+            </div>
             <h4>Implementation</h4>
             <p>For the variance computation, please see <a href="adaptive.html">Adaptive Sampling</a>. Furthermore, I
                 implemented equation 6 and 7 from <a href="#ref-1">[1]</a>. This approach uses two factors in the

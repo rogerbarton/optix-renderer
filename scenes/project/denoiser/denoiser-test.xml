@@ -28,7 +28,7 @@
 	
 	<denoiser type="simple">
 		<float name="sigma_d" value="6.0"/>
-		<float name="k" value="1.5"/>
+		<float name="sigma_vr" value="1.5"/>
 		<integer name="range" value="7"/>
 	</denoiser>
 
