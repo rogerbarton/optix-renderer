@@ -22,10 +22,10 @@ struct GeometryData
 
 	struct TriangleMesh
 	{
-		float3 *positions;
-		float3 *normals;
-		float2 *texcoords;
-		uint3  *indices;
+		float3 *V;
+		float3 *N;
+		float2 *UV;
+		uint3  *F;
 	};
 
 	struct Sphere

@@ -266,10 +266,10 @@ void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord
 
     HitGroupRecord rec = {};
     OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
-    rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
-    rec.data.geometry.triangleMesh.normals = reinterpret_cast<float3 *>(d_N);
-    rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
-    rec.data.geometry.triangleMesh.indices = reinterpret_cast<uint3 *>(d_F);
+    rec.data.geometry.triangleMesh.V         = reinterpret_cast<float3 *>(d_V);
+    rec.data.geometry.triangleMesh.N       = reinterpret_cast<float3 *>(d_N);
+    rec.data.geometry.triangleMesh.UV = reinterpret_cast<float2 *>(d_UV);
+    rec.data.geometry.triangleMesh.F  = reinterpret_cast<uint3 *>(d_F);
 
     Shape::getOptixHitgroupRecordsShape(rec);
 

@@ -13,6 +13,7 @@
 #include "sutil/helpers.h"
 #include "sutil/random.h"
 #include "sutil/exception.h"
+#include "sutil/LocalGeometry.h"
 
 #include "shaders/bsdf.h"
 #include "shaders/emitter.h"
@@ -56,21 +57,20 @@ extern "C" __global__ void __closesthit__radiance()
 	const float3             p         = rayOrigin + optixGetRayTime() * rayDir;;
 	const uint32_t vertIdxOffset = primIdx * 3;
 
-	float3 normal =;
-	float2 uv     =;
+	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry);
 
 	if (sbtData->emitter.type != EmitterData::NONE)
 	{
-		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, p, normal);
+		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, p, lgeom.n);
 	}
 
 	if (sbtData->bsdf.type != BsdfData::NONE)
 	{
-		Frame  shFrame(normal);
+		Frame  shFrame(lgeom.n);
 		float3 wi      = shFrame.toLocal(-rayDir);
 		float3 wo;
 		float  pdf; // unused in mats
-		prd->throughput *= sampleBsdf(sbtData->bsdf, uv, wi, wo, pdf, prd->seed);
+		prd->throughput *= sampleBsdf(sbtData->bsdf, lgeom.uv, wi, wo, pdf, prd->seed);
 		prd->direction = shFrame.toWorld(wo);
 	}
 
