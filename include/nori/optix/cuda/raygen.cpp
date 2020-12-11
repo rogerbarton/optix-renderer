@@ -1,9 +1,6 @@
 //
 // Created by roger on 06/12/2020.
 //
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "bugprone-reserved-identifier"
-
 #include <cuda_runtime.h>
 #include <optix_device.h>
 #include <vector_functions.h>
@@ -200,5 +197,3 @@ static __forceinline__ __device__ bool traceShadowray(
 			occluded);
 	return occluded;
 }
-
-#pragma clang diagnostic pop

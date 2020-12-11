@@ -1,8 +1,6 @@
 //
 // Created by roger on 09/12/2020.
 //
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "bugprone-reserved-identifier"
 
 #include <cuda_runtime.h>
 #include <optix.h>
@@ -78,5 +76,3 @@ extern "C" __global__ void __closesthit__radiance()
 
 	prd->origin = p;
 }
-
-#pragma clang diagnostic pop
