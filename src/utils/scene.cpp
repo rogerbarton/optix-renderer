@@ -25,6 +25,10 @@
 #include <nori/volume.h>
 #include <nori/bsdf.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixState.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 	Scene::Scene(const PropertyList &)
@@ -518,6 +522,15 @@ NORI_NAMESPACE_BEGIN
 		ImGui::PopID();
 
 		return touched;
+	}
+#endif
+
+#ifdef NORI_USE_OPTIX
+	OptixState *Scene::getOptixState()
+	{
+		if (m_optixState == nullptr)
+			m_optixState = new OptixState{};
+		return  m_optixState;
 	}
 #endif
 

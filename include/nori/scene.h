@@ -27,7 +27,7 @@
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/OptixRenderer.h>
-#include <nori/optix/OptixState.h>
+struct OptixState;
 #endif
 
 NORI_NAMESPACE_BEGIN
@@ -185,11 +185,7 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_OPTIX
 		OptixRenderer *m_optixRenderer = nullptr;
 		OptixState *m_optixState = nullptr;
-		OptixState *getOptixState() {
-			if (m_optixState == nullptr)
-				m_optixState = new OptixState{};
-			return  m_optixState;
-		}
+		OptixState *getOptixState();
 #endif
 	private:
 		std::vector<Shape *> m_shapes;

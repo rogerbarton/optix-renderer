@@ -25,13 +25,13 @@ extern "C" {
 __constant__ LaunchParams launchParams;
 }
 
-extern "C" __global__ void __miss__occlusion()
+extern "C" __global__ void __miss__shadowray()
 {
 	// no-op
 	// ShadowrayPrd::setPrd(false);
 }
 
-extern "C" __global__ void __closesthit__occlusion()
+extern "C" __global__ void __closesthit__shadowray()
 {
 	ShadowrayPrd::setPrd(true);
 }

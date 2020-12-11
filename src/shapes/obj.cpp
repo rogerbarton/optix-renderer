@@ -186,7 +186,7 @@ public:
 		m_T.setZero();
 		m_BT.setZero();
 		if(!normals.empty() && !texcoords.empty()){
-			uint32_t triaCount = indices.size() / 3;
+			uint32_t triaCount = static_cast<uint32_t>(indices.size() / 3);
 			
 			for (uint32_t i = 0; i < triaCount; ++i) {
 

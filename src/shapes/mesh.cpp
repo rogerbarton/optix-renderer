@@ -23,6 +23,12 @@
 #include <nori/warp.h>
 #include <Eigen/Geometry>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixState.h>
+#include <nori/optix/OptixSbtTypes.h>
+#include <nori/optix/sutil/Exception.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 void Mesh::update(const NoriObject *guiObject)

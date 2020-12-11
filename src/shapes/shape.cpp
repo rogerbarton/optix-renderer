@@ -20,8 +20,11 @@
 #include <nori/bsdf.h>
 #include <nori/emitter.h>
 #include <Eigen/Dense>
-//#include <nori/warp.h>
-//#include <Eigen/Geometry>
+
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixSbtTypes.h>
+#include <nori/optix/sutil/Exception.h>
+#endif
 
 NORI_NAMESPACE_BEGIN
 

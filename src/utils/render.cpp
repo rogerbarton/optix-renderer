@@ -35,6 +35,11 @@
 #include <filesystem/resolver.h>
 #include <fstream>
 
+
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/OptixState.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 static void renderBlock(const Scene *const scene, Integrator *const integrator, Sampler *const sampler,

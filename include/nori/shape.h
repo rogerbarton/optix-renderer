@@ -27,8 +27,8 @@
 
 #ifdef NORI_USE_OPTIX
 struct OptixBuildInput;
+struct OptixState;
 #include <nori/optix/OptixSbtTypes.h>
-#include <nori/optix/OptixState.h>
 #endif
 
 NORI_NAMESPACE_BEGIN

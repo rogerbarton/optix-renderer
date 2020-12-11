@@ -22,6 +22,10 @@
 #include <nori/object.h>
 #include <nori/shape.h>
 
+#ifdef NORI_USE_OPTIX
+struct EmitterData;
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 struct Intersection;

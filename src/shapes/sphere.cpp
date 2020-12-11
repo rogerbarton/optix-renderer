@@ -20,6 +20,8 @@
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/sutil/host_vec_math.h>
+#include <nori/optix/OptixState.h>
+#include <nori/optix/OptixSbtTypes.h>
 #endif
 
 NORI_NAMESPACE_BEGIN

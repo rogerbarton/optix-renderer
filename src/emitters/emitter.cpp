@@ -1,6 +1,7 @@
 #include <nori/emitter.h>
 
 #ifdef NORI_USE_OPTIX
+#include <nori/optix/cuda_shared/EmitterData.h>
 #include <nori/optix/sutil/host_vec_math.h>
 #endif
 
