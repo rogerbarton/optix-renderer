@@ -1,9 +1,6 @@
 //
 // Created by roger on 06/12/2020.
 //
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "bugprone-reserved-identifier"
-
 #include <cuda_runtime.h>
 #include <optix_device.h>
 #include <vector_functions.h>
@@ -15,6 +12,7 @@
 #include "RadiancePrd.h"
 
 #include "sutil/helpers.h"
+#include "sutil/vec_math.h"
 #include "sutil/random.h"
 #include "sutil/warp.h"
 
@@ -71,8 +69,8 @@ extern "C" __global__ void __raygen__perspective()
 					launchParams.sceneHandle,
 					rayOrigin,
 					rayDirection,
-					Epsilon,
-					Infinity,
+					EPSILON,
+					INFINITY,
 					&prd);
 
 			if (prd.terminated)
@@ -82,7 +80,7 @@ extern "C" __global__ void __raygen__perspective()
 			{
 				const float rouletteSuccess = fminf(fmaxf3(prd.throughput), 0.99f);
 
-				if (rnd(prd.seed) > rouletteSuccess || rouletteSuccess < Epsilon)
+				if (rnd(prd.seed) > rouletteSuccess || rouletteSuccess < EPSILON)
 					break;
 				// Adjust throughput in case of survival
 				prd.throughput /= rouletteSuccess;
@@ -135,7 +133,7 @@ static __forceinline__ __device__ void sampleRay(
 			0.5f
 	) - 1.0f;
 
-	if (launchParams.camera.lensRadius > Epsilon)
+	if (launchParams.camera.lensRadius > EPSILON)
 	{
 		const float2 pLens  = launchParams.camera.lensRadius *
 		                      squareToUniformDisk(make_float2(rnd(seed), rnd(seed)));
@@ -200,5 +198,3 @@ static __forceinline__ __device__ bool traceShadowray(
 			occluded);
 	return occluded;
 }
-
-#pragma clang diagnostic pop

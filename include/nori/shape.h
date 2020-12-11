@@ -191,7 +191,7 @@ public:
 	 * Defined in OptixState.as.cpp
 	 * @return OptixBuildInput required to build the geometry accel structure
 	 */
-	virtual OptixBuildInput getOptixBuildInput();
+	virtual OptixBuildInput getOptixBuildInput(uint32_t *&flagsArray);
 
 	/**
 	 * Fill the hitgroup record for this shape
@@ -230,6 +230,10 @@ protected:
 
 	float m_volume = 0.f;
 	virtual void updateVolume();  ///< Recalculate the volume, uses the bbox if not overridden
+
+#ifdef NORI_USE_OPTIX
+	CUdeviceptr d_bbox = 0;
+#endif
 };
 
 NORI_NAMESPACE_END

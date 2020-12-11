@@ -234,16 +234,17 @@ bool Mesh::getImGuiNodes()
 #ifdef NORI_USE_OPTIX
 /**
 	 * GasInfo for a triangle mesh
+	 * Note: the caller must delete the flags when finished
 	 */
-OptixBuildInput Mesh::getOptixBuildInput()
+	OptixBuildInput Mesh::getOptixBuildInput(uint32_t *&flagsArray)
 {
     copyMeshDataToDevice();
 
     OptixBuildInput buildInputs = {};
 
     buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-    const uint32_t flags[1] = {OPTIX_GEOMETRY_FLAG_NONE};
-    buildInputs.triangleArray.flags = flags;
+    flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT};
+    buildInputs.triangleArray.flags = flagsArray;
     buildInputs.triangleArray.numSbtRecords = 1;
 
     buildInputs.triangleArray.vertexBuffers = &d_V;
@@ -261,31 +262,33 @@ OptixBuildInput Mesh::getOptixBuildInput()
 
 void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord> &hitgroupRecords)
 {
-    copyMeshDataToDevice();
+    // copyMeshDataToDevice(); Already copied in getOptixBuildInput
 
     HitGroupRecord rec = {};
-    // TODO: THIS DOES NOT WORK ANYMORE.
-    //OPTIX_CHECK(optixSbtRecordPackHeader(state.void applyNormalMap(Intersection &its) const;ANGLE_MESH;
-    rec.data.geometry.triangleMesh.positions = reinterpret_cast<float3 *>(d_V);
-    rec.data.geometry.triangleMesh.normals = reinterpret_cast<float3 *>(d_N);
-    rec.data.geometry.triangleMesh.texcoords = reinterpret_cast<float2 *>(d_UV);
-    rec.data.geometry.triangleMesh.indices = reinterpret_cast<uint3 *>(d_F);
+    OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+    rec.data.geometry.triangleMesh.V         = reinterpret_cast<float3 *>(d_V);
+    rec.data.geometry.triangleMesh.N       = reinterpret_cast<float3 *>(d_N);
+    rec.data.geometry.triangleMesh.UV = reinterpret_cast<float2 *>(d_UV);
+    rec.data.geometry.triangleMesh.F  = reinterpret_cast<uint3 *>(d_F);
 
     Shape::getOptixHitgroupRecordsShape(rec);
 
     hitgroupRecords.push_back(rec);
 
+    // reuse rec
     OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_prog_group[RAY_TYPE_SHADOWRAY], &rec));
     hitgroupRecords.push_back(rec);
 }
 
 void Mesh::copyMeshDataToDevice()
 {
-    if (d_V != 0)
-        return;
+    // if (d_V != 0) // TODO: what if vertices are updated?
+    //     return;
+    // TODO: note this will invalidate previous deivce pointers
 
     {
         size_t bytes = m_V.size() * sizeof(float);
+        CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_V)));
         CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V), bytes));
         CUDA_CHECK(cudaMemcpy(
             reinterpret_cast<void *>(d_V),
@@ -296,7 +299,8 @@ void Mesh::copyMeshDataToDevice()
 
     {
         size_t bytes = m_N.size() * sizeof(float);
-        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
+	    CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_N)));
+	    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_N), bytes));
         CUDA_CHECK(cudaMemcpy(
             reinterpret_cast<void *>(d_N),
             m_N.data(),
@@ -306,7 +310,8 @@ void Mesh::copyMeshDataToDevice()
 
     {
         size_t bytes = m_UV.size() * sizeof(float);
-        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
+	    CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_UV)));
+	    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_UV), bytes));
         CUDA_CHECK(cudaMemcpy(
             reinterpret_cast<void *>(d_UV),
             m_UV.data(),
@@ -316,7 +321,8 @@ void Mesh::copyMeshDataToDevice()
 
     {
         size_t bytes = m_F.size() * sizeof(uint32_t);
-        CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
+	    CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_F)));
+	    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_F), bytes));
         CUDA_CHECK(cudaMemcpy(
             reinterpret_cast<void *>(d_F),
             m_F.data(),

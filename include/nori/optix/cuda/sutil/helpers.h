@@ -9,8 +9,12 @@
 #include <optix_device.h>
 #include <vector_functions.h>
 #include <vector_types.h>
+#include "stdint.h"
 #include <nanovdb/NanoVDB.h>
 #include "vec_math.h"
+
+#define EPSILON 1e-4f
+#define INFINITY 1e10f
 
 static __forceinline__ __device__ void *unpackPointer(unsigned int i0, unsigned int i1)
 {

@@ -82,7 +82,7 @@ void OptixState::createContext()
  */
 void OptixState::createCompileOptions()
 {
-	if (initializedOptix)
+	if (initializedState)
 		return;
 
 	m_module_compile_options = {};

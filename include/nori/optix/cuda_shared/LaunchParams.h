@@ -3,11 +3,8 @@
 //
 #pragma once
 
-#include <optix.h>
+#include <optix_types.h>
 #include <vector_types.h>
-
-#define Epsilon 1e-4f
-#define Infinity 1e10f
 
 struct RaygenConstantParams
 {

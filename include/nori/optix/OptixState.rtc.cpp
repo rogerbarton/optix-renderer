@@ -74,8 +74,9 @@ static std::string g_nvrtcLog;
 // These must be defined or NVRTC will fail to compile optix programs.
 // CMake will define them automatically.
 #define NANOVDB_OPTIX_ABSOLUTE_INCLUDE_DIRS \
-    NORI_NVRTC_OPTIX_DIR, \
-    NORI_NVRTC_CUDA_DIR
+    NORI_NVRTC_OPTIX_DIR,                   \
+    NORI_NVRTC_CUDA_DIR,                    \
+	NORI_NVRTC_NANOVDB_DIR
 
 #define NANOVDB_CUDA_NVRTC_OPTIONS \
     "--std=c++11", \
@@ -202,6 +203,7 @@ void OptixState::createPtxModules(bool specialize)
 {
 	// Note: module_compile_options set in create()
 	OptixModuleCompileOptions module_compile_options = {m_module_compile_options};
+	std::vector<OptixModuleCompileBoundValueEntry> boundValues{};
 	if (specialize)
 	{
 		/**
@@ -209,8 +211,6 @@ void OptixState::createPtxModules(bool specialize)
 		 * samplesPerLaunch
 		 * integrator
 		 */
-
-		std::vector<OptixModuleCompileBoundValueEntry> boundValues{};
 
 #define BIND_VALUE(paramsVariable) \
         { \
@@ -231,7 +231,7 @@ void OptixState::createPtxModules(bool specialize)
 
 	{
 		// .cu paths relative to current file __FILE__
-		const std::string ptx = getPtxString("cuda/camera.cpp");
+		const std::string ptx = getPtxString("cuda/raygen.cpp");
 		OPTIX_CHECK_LOG2(optixModuleCreateFromPTX(m_context,
 		                                          &module_compile_options,
 		                                          &m_pipeline_compile_options,
@@ -241,6 +241,7 @@ void OptixState::createPtxModules(bool specialize)
 		                                          &LOG_SIZE,
 		                                          &m_camera_module));
 	}
+	std::cout << "-- raygen.cpp done" << std::endl;
 
 	{
 		const std::string ptx = getPtxString("cuda/geometry.cpp");
@@ -253,6 +254,7 @@ void OptixState::createPtxModules(bool specialize)
 		                                          &LOG_SIZE,
 		                                          &m_geometry_module));
 	}
+	std::cout << "-- geometry.cpp done" << std::endl;
 
 	{
 		const std::string ptx = getPtxString("cuda/shading.cpp");
@@ -265,4 +267,5 @@ void OptixState::createPtxModules(bool specialize)
 		                                          &LOG_SIZE,
 		                                          &m_shading_module));
 	}
+	std::cout << "-- shading done" << std::endl;
 }
