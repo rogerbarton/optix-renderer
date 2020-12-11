@@ -118,6 +118,7 @@ add_executable(nori
     src/emitters/pointlight.cpp
     src/emitters/environmentmap.cpp
     src/emitters/volumelight.cpp
+    src/emitters/directionalLight.cpp
 
     src/denoiser/simple.cpp
 

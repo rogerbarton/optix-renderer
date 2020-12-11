@@ -17,6 +17,7 @@ struct EmitterData
 		SPOT   = 2,
 		AREA   = 3,
 		VOLUME = 4,
+		DIRECTIONAL = 5,
 		TYPE_COUNT
 	};
 
@@ -42,6 +43,13 @@ struct EmitterData
 		float3 invVolume; // TODO: set this, so we can use pdf directly
 	};
 
+	struct Directional
+	{
+		float3 direction;
+		float3 position;
+		float angle;
+	};
+
 	Type   type = NONE;
 	float3 radiance;
 
@@ -51,5 +59,6 @@ struct EmitterData
 		Spot spot;
 		Area area;
 		Volume volume;
+		Directional directional;
 	};
 };

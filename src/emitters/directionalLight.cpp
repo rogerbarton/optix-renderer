@@ -18,27 +18,73 @@
 */
 
 #include <nori/emitter.h>
+#include <nori/warp.h>
 
 NORI_NAMESPACE_BEGIN
 
-class DirectionalLight : public Emitter {
+class DirectionalLight : public Emitter
+{
 public:
-    DirectionalLight(const PropertyList &props) {
-        m_direction = props.getVector3("direction").normalized();
-        m_power = props.getColor("power");
-        m_radius = props.getFloat("radius");
+    DirectionalLight(const PropertyList &props)
+    {
+        // could use lookat
+        m_direction = props.getVector3("direction", Vector3f(0, 0, 1)).normalized();
+        m_power = props.getColor("power", Color3f(0.f));
+        m_angle = props.getFloat("angle", 1.f);
+        m_position = props.getPoint3("position", Point3f(0.f));
+        m_radiance = Color3f(0.f);
+        m_radius = props.getFloat("radius", 1.f);
+
+        m_coord = Frame(m_direction);
     }
 
-    virtual std::string toString() const override {
+    NoriObject *cloneAndInit() override
+    {
+        auto clone = new DirectionalLight(*this);
+
+        Emitter::cloneAndInit(clone);
+
+        clone->m_position = m_position;
+        clone->m_power = m_power;
+        clone->m_angle = m_angle;
+        clone->m_direction = m_direction;
+        clone->m_radiance = m_radiance;
+        clone->m_radius = m_radius;
+        return clone;
+    }
+
+    void update(const NoriObject *guiObject) override
+    {
+        const auto *gui = static_cast<const DirectionalLight *>(guiObject);
+        if (!gui->touched)
+            return;
+        gui->touched = false;
+
+        m_position = gui->m_position;
+        m_power = gui->m_power;
+        m_angle = gui->m_angle;
+        m_direction = gui->m_direction;
+        m_coord = gui->m_coord;
+        m_radius = gui->m_radius;
+
+        Emitter::update(guiObject);
+
+        m_radiance = m_power / 4.f * INV_PI;
+    }
+
+    virtual std::string toString() const override
+    {
         return tfm::format(
-                "DirectionalLight[\n"
-                "  direction = %s,\n"
-                "  power = %s,\n"
-                "  world radius = %f\n"
-                "]",
-                m_direction.toString(),
-                m_power.toString(),
-                m_radius);
+            "DirectionalLight[\n"
+            "  direction = %s,\n"
+            "  power = %s,\n"
+            "  angle = %f,\n"
+            "  position = %s,\n"
+            "  radius = %f\n"
+            "]",
+            m_direction.toString(),
+            m_power.toString(),
+            m_angle, m_position.toString(), m_radius);
     }
 
     /**
@@ -52,24 +98,32 @@ public:
      * \return The emitter value divided by the probability density of the sample.
      *         A zero value means that sampling failed.
      */
-    virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const override {  
-        
+    virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const override
+    {
+
         // create shadow ray
         // distant point
         // instead of hardcoded it would be better more robust to have it as the
         // bounding sphere radius time 2 ?
-        float far = 2*m_radius;
-        lRec.shadowRay = Ray3f(lRec.ref - far*m_direction, m_direction, Epsilon, far-Epsilon);
 
-        // wi points from the surface away
-        lRec.wi = -m_direction;
+        Vector3f offsetZ = Warp::squareToUniformSphereCap(sample, cos(degToRad(m_angle)));
+        lRec.wi = -m_coord.toWorld(offsetZ).normalized();
+
+        lRec.p = m_position + lRec.wi * m_radius; // directional light = one point
+
+        const float maxt = (m_position - lRec.ref).norm() - Epsilon;
+        lRec.shadowRay = Ray3f(lRec.p, (lRec.ref - lRec.p).normalized(), Epsilon, maxt);
 
         // calculate the pdf
         lRec.pdf = pdf(lRec);
-    
+
+        if (lRec.pdf < Epsilon)
+        {
+            return Color3f(0.f);
+        }
+
         // return value of emitter divided by pdf
         return eval(lRec) / lRec.pdf;
-
     }
 
     /**
@@ -80,9 +134,13 @@ public:
      * \return
      *     The emitter value, evaluated for each color channel
      */
-    virtual Color3f eval(const EmitterQueryRecord &lRec) const override {
-            // squared distance falloff
-            return m_power * M_PI * m_radius * m_radius;
+    virtual Color3f eval(const EmitterQueryRecord &lRec) const override
+    {
+        // TODO CHECK THIS
+        float cosTotalWidth = std::cos(degToRad(m_angle));
+        Color3f i = m_radiance / (1.f - .5f * (cosTotalWidth));
+        Color3f color = i / (lRec.ref - m_position).squaredNorm();
+        return color;
     }
 
     /**
@@ -97,24 +155,101 @@ public:
      * \return
      *     A probability/density value
      */
-    virtual float pdf(const EmitterQueryRecord &lRec) const override {
-
-    /**
-     * Compute the probability of sampling the given point lRec.p on the emitter
-     * 
-     * All points are equally likely
-     */
-        return 1.0f;
+    virtual float pdf(const EmitterQueryRecord &lRec) const override
+    {
+        // TODO CHECK THSI
+        Vector3f localVector = m_coord.toLocal(-lRec.wi);
+        float prob = Warp::squareToUniformSphereCapPdf(localVector, cos(degToRad(m_angle)));
+        return prob * (lRec.p - lRec.ref).squaredNorm();
     }
 
-    ~DirectionalLight() {};
+    ~DirectionalLight(){};
 
-    EClassType getClassType() const {return EEmitter; };
+    EClassType getClassType() const { return EEmitter; };
+
+    NORI_OBJECT_IMGUI_NAME("DirectionalLight");
+    virtual bool getImGuiNodes() override
+    {
+        touched |= Emitter::getImGuiNodes();
+        int counter = 0;
+        ImGui::PushID(EEmitter);
+
+        ImGui::PushID(counter++);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("position", ImGuiLeafNodeFlags, "Position");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        touched |= ImGui::DragPoint3f("##position", &m_position, 0.1f);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::PushID(counter++);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("direction", ImGuiLeafNodeFlags, "Direction");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        bool dir_touched = ImGui::DragVector3f("##direction", &m_direction, 0.01f, -1.f, 1.f, "%.3f",
+                                               ImGuiSliderFlags_AlwaysClamp);
+        touched |= dir_touched;
+        if (dir_touched)
+        {
+            m_coord = Frame(m_direction.normalized());
+        }
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::PushID(counter++);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("power", ImGuiLeafNodeFlags, "Power");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        touched |= ImGui::DragColor3f("##power", &m_power, 1, 0, SLIDER_MAX_FLOAT, "%.3f",
+                                      ImGuiSliderFlags_AlwaysClamp);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::PushID(counter++);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("angle", ImGuiLeafNodeFlags, "Angle");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        touched |= ImGui::DragFloat("##angle", &m_angle, 0.1f, 0.f, 360.f);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::PushID(counter++);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("radius", ImGuiLeafNodeFlags, "Radius");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        touched |= ImGui::DragFloat("##radius", &m_radius, 0.001f, 0.f, SLIDER_MAX_FLOAT);
+        ImGui::NextColumn();
+        ImGui::PopID();
+
+        ImGui::PopID();
+
+        return touched;
+    }
+
+#ifdef NORI_USE_OPTIX
+    void getOptixEmitterData(EmitterData &sbtData) override
+    {
+        sbtData.type = EmitterData::DIRECTIONAL;
+        sbtData.directional.position = make_float3(m_position);
+        sbtData.directional.angle = m_angle;
+        sbtData.directional.direction = make_float3(m_direction);
+
+        Emitter::getOptixEmitterData(sbtData);
+    }
+#endif
 
 protected:
-    Color3f m_power; // power of the light source in Watts
+    Color3f m_power;      // power of the light source in Watts
     Vector3f m_direction; // direction of the light
-    float m_radius; // world radius (bounding box radius)
+    float m_angle;        // world radius (bounding box radius)
+    Point3f m_position;
+    float m_radius; // offset of the hit point
+    Frame m_coord;
 };
 
 NORI_REGISTER_CLASS(DirectionalLight, "directional")

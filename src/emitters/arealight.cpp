@@ -44,7 +44,6 @@ NORI_NAMESPACE_BEGIN
 			if (!gui->touched)return;
 			gui->touched = false;
 
-			m_radiance = gui->m_radiance;
 			Emitter::update(guiObject);
 		}
 
