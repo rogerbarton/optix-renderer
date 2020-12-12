@@ -193,12 +193,15 @@ void RenderThread::startRenderThread()
 #ifdef NORI_USE_OPTIX
 	m_optixDisplayBlock->lock();
 	m_optixDisplayBlock->resize(outputSize.x(), outputSize.y());
+	m_d_optixDisplayBlock = m_optixDisplayBlock->map();
 	m_optixDisplayBlock->unlock();
 	m_optixDisplayBlockAlbedo->lock();
 	m_optixDisplayBlockAlbedo->resize(outputSize.x(), outputSize.y());
+	m_d_optixDisplayBlockAlbedo = m_optixDisplayBlockAlbedo->map();
 	m_optixDisplayBlockAlbedo->unlock();
 	m_optixDisplayBlockNormal->lock();
 	m_optixDisplayBlockNormal->resize(outputSize.x(), outputSize.y());
+	m_d_optixDisplayBlockNormal = m_optixDisplayBlockNormal->map();
 	m_optixDisplayBlockNormal->unlock();
 #endif
 
@@ -473,20 +476,22 @@ void RenderThread::renderThreadOptix()
 			// Copy output to display buffers if display buffer is available
 			if (m_d_optixDisplayBlock)
 			{
+				std::cout << "copied." << std::endl;
 				m_optixDisplayBlock->lock();
-				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlock), &m_d_optixRenderBlock,
+				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlock),
+				                      m_d_optixRenderBlock,
 				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
 				m_optixDisplayBlock->unlock();
 
 				m_optixDisplayBlockAlbedo->lock();
 				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockAlbedo),
-				                      &m_d_optixRenderBlockAlbedo,
+				                      m_d_optixRenderBlockAlbedo,
 				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
 				m_optixDisplayBlockAlbedo->unlock();
 
 				m_optixDisplayBlockNormal->lock();
 				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockNormal),
-				                      &m_d_optixRenderBlockNormal,
+				                      m_d_optixRenderBlockNormal,
 				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
 				m_optixDisplayBlockNormal->unlock();
 
@@ -629,8 +634,9 @@ void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
 	}
 	else
 	{
-		const uint32_t cpu =  m_currentCpuSample;
-		const uint32_t gpu =  m_currentOptixSample;
+		uint32_t currentCpuSample = m_currentCpuSample;
+		const uint32_t cpu = currentCpuSample == 0 ? 1 : currentCpuSample;
+		const uint32_t gpu = m_currentOptixSample;
 		const float sum = static_cast<float>(cpu + gpu);
 
 		samplesCpu = sum == 0 ? 1.f : cpu / sum;

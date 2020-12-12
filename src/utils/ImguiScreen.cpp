@@ -55,10 +55,13 @@ ImguiScreen::ImguiScreen() : m_renderThread{}
 	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
 	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+
 	GL_CHECK(glGenTextures(1, &m_textureGpu));
 	GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
 	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 	GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GL_CHECK( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT ) );
+	GL_CHECK( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT ) );
 
 	// init shader
 	m_shader = new GLShader();
@@ -274,22 +277,22 @@ void ImguiScreen::render()
 	// gpu block -> tex1
 #ifdef NORI_USE_OPTIX
 	CUDAOutputBuffer<float4>* gpuBlock = m_renderThread.getDisplayBlockGpu();
-	gpuBlock->lock();
 	m_renderThread.updateOptixDisplayBuffers();
+	gpuBlock->lock();
 	{
 		const float width  = gpuBlock->width();
 		const float height = gpuBlock->height();
 
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
-		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, gpuBlock->getPBO()));
+		GL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gpuBlock->getPBO()));
 		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 
 		// Map data to gpu
 		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr));
 
 		// reset state
-		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		GL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
 	}
 	gpuBlock->unlock();
 #endif
