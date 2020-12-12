@@ -8,7 +8,7 @@ NORI_NAMESPACE_BEGIN
 
 	struct VacuumMedium : public Medium
 	{
-		explicit VacuumMedium(const PropertyList &propList) {}
+		explicit VacuumMedium(const PropertyList &propList) : Medium(propList) {}
 
 		NoriObject *cloneAndInit() override
 		{

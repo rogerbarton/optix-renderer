@@ -7,6 +7,15 @@
 
 NORI_NAMESPACE_BEGIN
 
+	Medium::Medium(const PropertyList &propList)
+	{
+		// Beer's law medium as default, sigma_s = 0
+		m_sigma_a_normalized = propList.getColor("sigma_a", 0.5f);
+		m_sigma_s_normalized = propList.getColor("sigma_s", 0);
+		m_sigma_a_intensity  = propList.getFloat("sigma_a_intensity", 1.f);
+		m_sigma_s_intensity  = propList.getFloat("sigma_s_intensity", 1.f);
+	}
+
 	void Medium::cloneAndInit(Medium *clone)
 	{
 		// Use isotropic phase as default phase function
@@ -21,6 +30,11 @@ NORI_NAMESPACE_BEGIN
 	void Medium::update(const NoriObject *guiObject)
 	{
 		const auto *gui = static_cast<const Medium *>(guiObject);
+
+		m_sigma_a = gui->m_sigma_a;
+		m_sigma_s = gui->m_sigma_s;
+		m_sigma_t = gui->m_sigma_t;
+
 		m_phase->update(gui->m_phase);
 		if (m_emitter)
 			m_emitter->update(gui->m_emitter);
@@ -57,40 +71,49 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_IMGUI
 	bool Medium::getImGuiNodes()
 	{
-		ImGui::PushID(EMedium);
+		bool newlyTouched = false;
 
-		if (m_phase)
-		{
-			bool nodeOpen = ImGui::TreeNode("Phase Function");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("sigma_a", ImGuiLeafNodeFlags, "Absorption (sigma_a)");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.75f);
+		newlyTouched |= ImGui::ColorPicker3("##sigma_a", reinterpret_cast<float *>(&m_sigma_a_normalized),
+		                               ImGuiClampColorEditFlags);
+		ImGui::NextColumn();
+		ImGui::TreeNodeEx("sigma_a_intensity", ImGuiLeafNodeFlags, "Intensity");
+		ImGui::Text("");
+		ImGui::NextColumn();
+		newlyTouched |= ImGui::DragFloat("##sigma_a_intensity", &m_sigma_a_intensity, 0.001f, 0.f, SLIDER_MAX_FLOAT);
+		ImGui::NextColumn();
 
-			ImGui::Text(m_phase->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (nodeOpen)
-			{
-				touched |= m_phase->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
+		ImGui::AlignTextToFramePadding();
+		ImGui::TreeNodeEx("sigma_s", ImGuiLeafNodeFlags, "Scattering (sigma_s)");
+		ImGui::NextColumn();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushItemWidth(ImGui::CalcItemWidth() * 0.75f);
+		newlyTouched |= ImGui::ColorPicker3("##sigma_s", reinterpret_cast<float *>(&m_sigma_s_normalized),
+		                               ImGuiClampColorEditFlags);
+		ImGui::NextColumn();
+		ImGui::TreeNodeEx("sigma_s_intensity", ImGuiLeafNodeFlags, "Intensity");
+		ImGui::NextColumn();
+		newlyTouched |= ImGui::DragFloat("##sigma_s_intensity", &m_sigma_s_intensity, 0.001f, 0.f, SLIDER_MAX_FLOAT);
+		ImGui::NextColumn();
 
-		if (m_emitter)
-		{
-			bool nodeOpen = ImGui::TreeNode("Emitter (Volume)");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
+		NORI_IMGUI_CHILD_OBJECT(m_phase, "Phase Function")
+		NORI_IMGUI_CHILD_OBJECT(m_emitter, "Emitter (Volume)")
 
-			ImGui::Text(m_emitter->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (nodeOpen)
-			{
-				touched |= m_emitter->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
+		if (newlyTouched)
+			updateDerivedProperties();
 
-		ImGui::PopID();
+		touched |= newlyTouched;
 		return touched;
+	}
+	void Medium::updateDerivedProperties()
+	{
+		m_sigma_a = m_sigma_a_normalized * m_sigma_a_intensity;
+		m_sigma_s = m_sigma_s_normalized * m_sigma_s_intensity;
+		m_sigma_t = m_sigma_a + m_sigma_s;
 	}
 #endif
 

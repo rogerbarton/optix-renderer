@@ -57,12 +57,12 @@ bool Transform::getImGuiNodes()
     ImGui::NextColumn();
 
     ImGui::NextColumn();
-    ImGui::NextColumn();
     if (ImGui::Button("Reset"))
     {
         touched = true;
         clear();
     }
+    ImGui::NextColumn();
 
     if (!touched)
         return touched;

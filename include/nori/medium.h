@@ -25,7 +25,8 @@ NORI_NAMESPACE_BEGIN
 
 	struct Medium : NoriObject
 	{
-		/**
+		Medium(const PropertyList &propList);
+/**
 		 * Samples the free flight distance to the next interaction inside the medium.
 		 * Note: intersections with the scene and medium boundary should be handled separately
 		 * @return the time until the next interaction
@@ -67,8 +68,24 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 	protected:
+		virtual void updateDerivedProperties();
+
 		PhaseFunction *m_phase   = nullptr;
 		Emitter       *m_emitter = nullptr;
+
+		// Note: mu = density * sigma for each property
+		Color3f m_sigma_a;   // cross-sectional absorption area [m^2]
+		Color3f m_sigma_s;   // cross-sectional absorption area [m^2]
+
+		// Derived properties
+		Color3f m_sigma_t;   // cross-sectional extinction coefficient [m^2]
+
+	private:
+		// gui-only properties
+		Color3f m_sigma_a_normalized;   // cross-sectional absorption area [m^2]
+		Color3f m_sigma_s_normalized;   // cross-sectional scattering area [m^2]
+		float   m_sigma_a_intensity;    // scaling factor
+		float   m_sigma_s_intensity;    // scaling factor
 	};
 
 NORI_NAMESPACE_END
