@@ -76,43 +76,63 @@
             <!-- TODO: report problems, comments, and time spent...  -->
             For normal maps we can add extra detail by perturbing the shading normal by a normal from a texture.
             The normal maps are encoded as png's where whole normal range [-1,1] per dimension is encoded in the
-            color range [0,255]. This conversion is done once, when loading the image.
-
-            There are some numerical issues within this conversion, so our results will not look exactly the same as
+            color range [0,255]. This conversion is done once, when loading the image in PNGTexture.cpp.
+            The sRGB conversion is disabled in the case of a normal map.
+            There might be some small numerical issues within this conversion, so our results will not look exactly the same as
             the reference.
             <br />
 
-            The normal map is stored in the shape base class similar to the albedo texture in the diffuse bsdf.
-            After setting the hit information we apply the normal map. This method keeps the normal mapping generic.
+            The normal map is stored in the shape base class, like the albedo texture in the diffuse bsdf.
+            When setting the hit information, we apply the normal map. To apply this we use the `shFrame.toWorld` to convert
+            the read normal perturbation from the image into world space.
+            After some testing the normal map gave strange discontinuous results and I realised that the tangent must be aligned with the u coordinate.
+            This means calculating smooth uv based tangents. Both of us worked on the calculating tangents seeing as it was also required for the disney anisotropic part.
             <br />
 
-            Below we can validate that this method retains the normal when the identity normal map is used.
-            Using a global normal map without conversion to the local shading normal is show to validate that the
-            mapping also retains the identity.
+            To debug and validate I slightly extended the normal integrator to display the color of a relative direction to the normal. 
+            It simply shows the color of `shFrame.toWorld(direction)`. Using direction=(0,0,1) will display the normals. 
+            When changing this in the gui we can check that the colors remain smooth.
+
+            Below we can validate that this method retains the normal when the identity normal map is used. 
+            The same is done for the bitangent=(0,1,0) and tangent(1,0,0). 
         </p>
 
         <div class="twentytwenty-container">
-            <img src="images/normals/normals-identity.png" alt="Neutral normal map color=(0.5,0.5,1)"
-                class="img-responsive">
-            <img src="images/normals/normals-identity-global.png" alt="Neutral global normal map color=(0.5,0.5,1)"
-                class="img-responsive">
-            <img src="images/normals/normals-identity-ref.png" alt="No normal map" class="img-responsive">
+            <img src="images/normals/normals-001.png" alt="Idendity normal map, png value=(0.5, 0.5, 1)" class="img-responsive">
+            <img src="images/normals/normals-ref-001.png" alt="Reference normal" class="img-responsive">
+        </div>
+        
+        <div class="twentytwenty-container">
+            <img src="images/normals/normals-010.png" alt="Consant normal map, png value=(0.5, 1, 0.5)" class="img-responsive">
+            <img src="images/normals/normals-ref-010.png" alt="Reference bitangent" class="img-responsive">
+        </div>
+
+        
+        <div class="twentytwenty-container">
+            <img src="images/normals/normals-100.png" alt="Consant normal map, png value=(1, 0.5, 0.5)" class="img-responsive">
+            <img src="images/normals/normals-ref-100.png" alt="Reference tangent" class="img-responsive">
         </div>
 
         <!-- TODO: Show test renders, decribe how the rendered image is correct? -->
 
         An example render
         <div class="twentytwenty-container">
-            <img src="images/normals/normals-test.png" alt="Neutral normal map color=(0.5,0.5,1)"
-                class="img-responsive">
-            <img src="images/normals/normals-test-global-normals.png" alt="Neutral global normal map color=(0.5,0.5,1)"
-                class="img-responsive">
-            <img src="images/normals/normals-test-ref.png" alt="No normal map" class="img-responsive">
+            <img src="images/normals/normals-camel.png" alt="Mine" class="img-responsive">
+            <img src="images/normals/normals-camel-ref.png" alt="Blender" class="img-responsive">
         </div>
+
+        <p>
+            We can see clearly that blender smoothly interpolates the values from the image, whereas our evaluation method does not.
+            There are also differences in the uv mapping and thus the tangents. So the normal map looks like it is inverted.
+        </p>
 
         <h4>Implemented in:</h4>
             <ul>
-                <li>TODO</li>
+                <li>include/nori/shape.h</li>
+                <li>src/textures/PNGTexture.cpp</li>
+                <li>src/integrators/normals.cpp</li>
+                <li>Sphere::setHitInformation</li>
+                <li>Mesh::setHitInformation</li>
             </ul>
     </div>
 

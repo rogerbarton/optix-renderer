@@ -1,0 +1,55 @@
+<scene>
+	<!-- Independent sample generator, user-selected samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="32"/>
+	</sampler>
+
+	<!-- Use the average visibility integrator -->
+	<integrator type="direct" />
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0,1,0" origin="5,5,5" up="0,1,0"/>
+		</transform>
+
+		<!-- Field of view: 30 degrees -->
+		<float name="fov" value="30"/>
+
+		<!-- 768 x 768 pixels -->
+		<integer name="width" value="768"/>
+		<integer name="height" value="768"/>
+	</camera>
+
+	<!-- Load the camel head (freely available in ligigl) -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/camelhead.obj"/>
+
+		<texture type="png_texture" name="normal">
+			<string name="filename" value="../res/normal-test.png"/>
+		</texture>
+
+		<transform name="toWorld">
+			<scale value="4,4,4"/>
+			<translate value="0,1,0"/>
+		</transform>
+	</shape>
+
+	<!-- Ground plane -->
+	<shape type="obj">
+		<string name="filename" value="../meshes/plane.obj"/>
+
+		<bsdf type="diffuse"/>
+
+		<transform name="toWorld">
+			<scale value="100,1,100"/>
+		</transform>
+	</shape>
+
+
+		<!-- Illuminate using a point light -->
+		<emitter type="point">
+			<point name="position" value="0,10,0"/>
+			<color name="power" value="1000,1000,1000"/>
+		</emitter>
+</scene>

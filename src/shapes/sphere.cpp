@@ -107,10 +107,19 @@ void Sphere::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &i
 
 	its.geoFrame = Frame(n);
 
-	Vector3f t = (Vector3f(0,0,1).cross(its.p - m_position)).normalized();
+	Vector3f t = (Vector3f(0,0,1).cross(n)).normalized();
 
-	const Vector3f b = n.cross(t);
+	Vector3f b = n.cross(t);
 	its.shFrame = Frame(t, b, n);
+	if (m_normalMap)
+	{
+		n = its.shFrame.toWorld(m_normalMap->eval(its.uv)).normalized();
+
+		// Update tangent and normal
+		t = (Vector3f(0,0,1).cross(n)).normalized();
+		b = n.cross(t);
+		its.shFrame = Frame(t, b, n);
+	}
 }
 
 void Sphere::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
