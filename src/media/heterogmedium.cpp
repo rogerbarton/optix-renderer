@@ -46,7 +46,7 @@ NORI_NAMESPACE_BEGIN
 				case EVolume:
 					if (m_volume)
 						throw NoriException("There is already an volume defined!");
-					m_volume = static_cast<VolumeNvdb *>(obj);
+					m_volume = static_cast<NvdbVolume *>(obj);
 					break;
 				default:
 					throw NoriException("HeterogeneousMedium::addChild(<%s>) is not supported!",
@@ -94,7 +94,7 @@ NORI_NAMESPACE_BEGIN
 		}
 #endif
 
-		VolumeNvdb *m_volume;
+		NvdbVolume *m_volume;
 
 		float m_densityScale;
 		float m_invMaxDensity;

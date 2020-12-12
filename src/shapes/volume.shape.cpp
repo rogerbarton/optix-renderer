@@ -9,21 +9,20 @@
 
 NORI_NAMESPACE_BEGIN
 
-	Volume::Volume(const PropertyList &props)
+	NvdbVolume::NvdbVolume(const PropertyList &props)
 	{
 		filename = getFileResolver()->resolve(props.getString("filename")).str();
 	}
 
-	NoriObject *Volume::cloneAndInit()
+	NoriObject *NvdbVolume::cloneAndInit()
 	{
-		auto clone = new Volume{};
-		Shape::cloneAndInit(clone);
+		auto clone = new NvdbVolume{};
 		return clone;
 	}
 
-	void Volume::update(const NoriObject *guiObject)
+	void NvdbVolume::update(const NoriObject *guiObject)
 	{
-		const auto *gui = static_cast<const Volume *>(guiObject);
+		const auto *gui = static_cast<const NvdbVolume *>(guiObject);
 		if (!gui->touched) return;
 		gui->touched = false;
 
@@ -34,28 +33,10 @@ NORI_NAMESPACE_BEGIN
 			loadFromFile();
 		}
 
-		Shape::update(guiObject);
-
 		gui->fileTouched = false;
 	}
 
-	bool Volume::rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const
-	{
-		return false;
-	}
-	void Volume::setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const
-	{
-	}
-	void Volume::sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const
-	{
-
-	}
-	float Volume::pdfSurface(const ShapeQueryRecord &sRec) const
-	{
-		return 0;
-	}
-
-	std::string Volume::toString() const
+	std::string NvdbVolume::toString() const
 	{
 		return tfm::format("Volume[\n"
 		                   "  filename = %s,\n"
@@ -64,7 +45,7 @@ NORI_NAMESPACE_BEGIN
 	}
 
 #ifdef NORI_USE_IMGUI
-	bool Volume::getImGuiNodes()
+	bool NvdbVolume::getImGuiNodes()
 	{
 		ImGui::PushID(EVolume);
 		ImGui::AlignTextToFramePadding();
@@ -105,6 +86,6 @@ NORI_NAMESPACE_BEGIN
 	}
 #endif
 
-	NORI_REGISTER_CLASS(Volume, "volume");
+	NORI_REGISTER_CLASS(NvdbVolume, "volume");
 
 NORI_NAMESPACE_END

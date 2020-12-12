@@ -144,7 +144,7 @@ NORI_NAMESPACE_BEGIN
 
 #ifdef NORI_USE_VDB
 		for (int i = 0; i < m_volumes.size(); ++i)
-			clone->m_volumes[i] = static_cast<Volume *>(m_volumes[i]->cloneAndInit());
+			clone->m_volumes[i] = static_cast<NvdbVolume *>(m_volumes[i]->cloneAndInit());
 #endif
 
 #ifdef NORI_USE_OPTIX
@@ -265,7 +265,7 @@ NORI_NAMESPACE_BEGIN
 			case EVolume:
 				// Skip if volumes are disabled
 #ifdef NORI_USE_VDB
-				m_volumes.push_back(static_cast<Volume *>(obj));
+				m_volumes.push_back(static_cast<NvdbVolume *>(obj));
 #endif
 				break;
 

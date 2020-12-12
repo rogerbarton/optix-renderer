@@ -5,7 +5,7 @@
 
 NORI_NAMESPACE_BEGIN
 
-	void Volume::loadFromFile()
+	void NvdbVolume::loadFromFile()
 	{
 		const auto originalExtension = filename.extension();
 
@@ -38,8 +38,8 @@ NORI_NAMESPACE_BEGIN
 	}
 
 	void
-	Volume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
-	                 nanovdb::NanoGrid<float> *&grid)
+	NvdbVolume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
+	                     nanovdb::NanoGrid<float> *&grid)
 	{
 		gridHandle = nanovdb::io::readGrid(filename.string(), gridId);
 
@@ -58,7 +58,7 @@ NORI_NAMESPACE_BEGIN
 		}
 	}
 
-	void Volume::loadNanoVdb()
+	void NvdbVolume::loadNanoVdb()
 	{
 		readGrid(filename, 0, densityHandle, densityGrid);
 		readGrid(filename, 1, heatHandle, heatGrid);
@@ -71,7 +71,7 @@ NORI_NAMESPACE_BEGIN
 			printf("(%3i,0,0) NanoVDB cpu: % -4.2f\n", i, densityAcc.getValue(nanovdb::Coord(i, 0, 0)));
 	}
 
-	void Volume::loadOpenVdbAndCacheNanoVdb(const std::filesystem::path &cacheFilename) const
+	void NvdbVolume::loadOpenVdbAndCacheNanoVdb(const std::filesystem::path &cacheFilename) const
 	{
 		try
 		{
@@ -124,7 +124,7 @@ NORI_NAMESPACE_BEGIN
 		}
 	}
 
-	void Volume::writeToNanoVdb(const std::string &outfile) const
+	void NvdbVolume::writeToNanoVdb(const std::string &outfile) const
 	{
 		try
 		{
@@ -136,7 +136,7 @@ NORI_NAMESPACE_BEGIN
 		}
 	}
 
-	void Volume::printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle)
+	void NvdbVolume::printGridMetaData(const nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle)
 	{
 		const auto meta = gridHandle.gridMetaData();
 		std::cout << "\t" << meta->gridName() << std::endl;
@@ -144,7 +144,7 @@ NORI_NAMESPACE_BEGIN
 		std::cout << "\t grid class   : " << static_cast<int>(meta->gridClass()) << std::endl;
 	}
 
-	void Volume::printGridData(const nanovdb::NanoGrid<float> *grid)
+	void NvdbVolume::printGridData(const nanovdb::NanoGrid<float> *grid)
 	{
 		std::cout << "\t active voxels: " << static_cast<unsigned long>(grid->activeVoxelCount()) << std::endl;
 		std::cout << "\t voxel size   : " << grid->voxelSize()[0] << ", " << grid->voxelSize()[1] << ", "
