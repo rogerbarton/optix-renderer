@@ -76,9 +76,8 @@
 
             <p>
                 <!-- TODO: report problems, comments, and time spent...  -->
-                This implementation was based on <a href="#ref-1">[1]</a> and modifies the ray generation for the
-                camera model to simulate a thin lens and aperture of non-zero
-                radius.
+                This implementation was based on the pbr book <a href="#ref-1">[1]</a> and modifies the ray generation for the
+                camera model to simulate a thin lens and aperture of non-zero radius.<br>
                 In comparison to the pinhole camera model, we do not always sample the ray from the origin. Instead we
                 pick a random point on the aperture. In the simple case this is
                 a uniformly random point on the unit disc, but this can also be made to be something else.
@@ -92,12 +91,21 @@
                 <!-- TODO: Show test renders, decribe how the rendered image is correct? -->
             </p>
 
-            <h4>Table scene</h4>
+            <h4>Validation Scene</h4>
 
             <div class="twentytwenty-container">
-                <img src="images/dof/1024.png" alt="Mine" class="img-responsive">
-                <img src="images/dof/dof-table-ref.jpg" alt="Reference" class="img-responsive">
+                <img src="images/dof/dov-val.png" alt="Mine" class="img-responsive">
+                <img src="images/dof/dov-val-ref.png" alt="Blender" class="img-responsive">
             </div> <br>
+
+            <p>
+                There are some differences in the lighting/diffuse material but the focus appears to be correct. 
+                As blender uses the notion focus distance instead of lens focal distance the parameter values used differ slightly. 
+                Using the exact same parameters values does not give the correct calculation and the lens radius is too large.
+            </p>
+
+            <h4>Example render</h4>
+            <img src="images/dof/1024.png" alt="Mine" class="img-responsive">
 
             <h4>Implemented in:</h4>
             <ul>
