@@ -32,6 +32,9 @@ NORI_NAMESPACE_BEGIN
 		 */
 		virtual float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const = 0;
 
+		/**
+		 * Aka sampleFreePathPdf
+		 */
 		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
 
 		const PhaseFunction *getPhase() const { return m_phase; }

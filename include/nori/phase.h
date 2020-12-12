@@ -27,7 +27,7 @@ NORI_NAMESPACE_BEGIN
 	 */
 	struct PhaseFunction : public NoriObject
 	{
-		virtual Color3f sample(PhaseQueryRecord &pRec, const Point2f &sample) const = 0;
+		virtual void sample(PhaseQueryRecord &pRec, const Point2f &sample) const = 0;
 
 		virtual float pdf(const PhaseQueryRecord &bRec) const = 0;
 

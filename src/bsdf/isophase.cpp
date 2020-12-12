@@ -22,11 +22,9 @@ NORI_NAMESPACE_BEGIN
 			return 0.25f / M_PI;
 		}
 
-		Color3f sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
+		void sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
 		{
 			bRec.wo = Warp::squareToUniformSphere(sample);
-
-			return 1.f;
 		}
 
 		std::string toString() const override

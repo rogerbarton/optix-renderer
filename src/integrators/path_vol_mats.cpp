@@ -84,7 +84,8 @@ NORI_NAMESPACE_BEGIN
 				{
 					// Next interaction is in medium => Sample phase
 					PhaseQueryRecord pRec(its.toLocal(-ray.d));
-					throughput *= medium->getPhase()->sample(pRec, sampler->next2D());
+					medium->getPhase()->sample(pRec, sampler->next2D());
+					// throughput constant
 					wo = its.toWorld(pRec.wo);
 				}
 				else

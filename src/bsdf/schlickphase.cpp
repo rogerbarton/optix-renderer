@@ -28,11 +28,9 @@ NORI_NAMESPACE_BEGIN
 		}
 
 		/// Sample the BRDF
-		Color3f sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
+		void sample(PhaseQueryRecord &bRec, const Point2f &sample) const override
 		{
 			bRec.wo = Warp::squareToSchlick(sample, m_k);
-
-			return 1.f;
 		}
 
 		std::string toString() const override
