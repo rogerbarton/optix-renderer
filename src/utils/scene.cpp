@@ -350,104 +350,15 @@ NORI_NAMESPACE_BEGIN
 	{
 		ImGui::PushID(EScene);
 #ifdef NORI_USE_OPTIX
-        if (m_optixRenderer)
-        {
-            bool node_open = ImGui::TreeNode("Renderer");
-            ImGui::NextColumn();
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text(m_optixRenderer->getImGuiName().c_str());
-            ImGui::NextColumn();
-            if (node_open)
-            {
-                touched |= m_optixRenderer->getImGuiNodes();
-                ImGui::TreePop();
-            }
-        }
+		NORI_IMGUI_CHILD_OBJECT(m_optixRenderer, "Renderer")
 #endif
 
-		if (m_camera)
-		{
-			bool node_open_camera = ImGui::TreeNode("Camera");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_camera->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open_camera)
-			{
-				touched |= m_camera->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
-
-		if (m_integrator)
-		{
-			bool node_open_integrator = ImGui::TreeNode("Integrator");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_integrator->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open_integrator)
-			{
-				touched |= m_integrator->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
-
-		if (m_sampler)
-		{
-			bool node_open_sampler = ImGui::TreeNode("Sampler");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_sampler->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open_sampler)
-			{
-				touched |= m_sampler->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
-
-		if (m_envmap)
-		{
-			bool node_open_envmap = ImGui::TreeNode("Environment Map");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_envmap->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open_envmap)
-			{
-				touched |= m_envmap->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
-
-		if (m_denoiser)
-		{
-			bool node_open_denoiser = ImGui::TreeNode("Denoiser");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_denoiser->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open_denoiser)
-			{
-				touched |= m_denoiser->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
-
-		if (m_ambientMedium)
-		{
-			bool node_open = ImGui::TreeNode("Ambient Medium");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-			ImGui::Text(m_ambientMedium->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open)
-			{
-				touched |= m_ambientMedium->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
+		NORI_IMGUI_CHILD_OBJECT(m_camera, "Camera")
+		NORI_IMGUI_CHILD_OBJECT(m_integrator, "Integrator")
+		NORI_IMGUI_CHILD_OBJECT(m_sampler, "Sampler")
+		NORI_IMGUI_CHILD_OBJECT(m_envmap, "Environment Map")
+		NORI_IMGUI_CHILD_OBJECT(m_denoiser, "Denoiser")
+		NORI_IMGUI_CHILD_OBJECT(m_ambientMedium, "Ambient Medium")
 
 		ImGui::Separator();
 		ImGui::NextColumn();
@@ -465,7 +376,7 @@ NORI_NAMESPACE_BEGIN
 				ImGui::PushID(i);
 
 				// for each shape, add a tree node
-				bool node_open_shape = ImGui::TreeNode("Shape", "%s %d", "Shape", i + 1);
+				bool node_open_shape = ImGui::TreeNode("Shape", "Shape %d", i + 1);
 				ImGui::NextColumn();
 				ImGui::AlignTextToFramePadding();
 
@@ -497,22 +408,7 @@ NORI_NAMESPACE_BEGIN
 			for (int i = 0; i < m_emitters.size(); i++)
 			{
 				ImGui::PushID(i);
-
-				// for each shape, add a tree node
-				bool node_open_emitter = ImGui::TreeNode("Emitter", "%s %d", "Emitter", i + 1);
-				ImGui::NextColumn();
-				ImGui::AlignTextToFramePadding();
-
-				ImGui::Text(m_emitters[i]->getImGuiName().c_str());
-				ImGui::NextColumn();
-
-				if (node_open_emitter)
-				{
-					touched |= m_emitters[i]->getImGuiNodes();
-
-					ImGui::TreePop();
-				}
-
+				NORI_IMGUI_CHILD_OBJECT(m_emitters[i], "Emitter", "Emitter %d", i + 1)
 				ImGui::PopID();
 			}
 

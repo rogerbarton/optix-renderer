@@ -165,20 +165,7 @@ public:
 	{
 		touched |= Emitter::getImGuiNodes();
 
-		if (m_map)
-		{
-			bool node_open = ImGui::TreeNode("Texture");
-			ImGui::NextColumn();
-			ImGui::AlignTextToFramePadding();
-
-			ImGui::Text(m_map->getImGuiName().c_str());
-			ImGui::NextColumn();
-			if (node_open)
-			{
-				touched |= m_map->getImGuiNodes();
-				ImGui::TreePop();
-			}
-		}
+		NORI_IMGUI_CHILD_OBJECT(m_map, "Texture")
 
 		return touched;
 	}

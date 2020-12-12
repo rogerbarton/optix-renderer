@@ -178,67 +178,12 @@ std::string Intersection::toString() const
 bool Shape::getImGuiNodes()
 {
     ImGui::PushID(EShape);
-    if (m_bsdf)
-    {
-        bool nodeOpen = ImGui::TreeNode("BSDF");
-        ImGui::NextColumn();
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::Text(m_bsdf->getImGuiName().c_str());
-        ImGui::NextColumn();
-        if (nodeOpen)
-        {
-            touched |= m_bsdf->getImGuiNodes();
-            ImGui::TreePop();
-        }
-    }
-
-    if (m_emitter)
-    {
-        bool nodeOpen = ImGui::TreeNode("Emitter");
-        ImGui::NextColumn();
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::Text(m_emitter->getImGuiName().c_str());
-        ImGui::NextColumn();
-        if (nodeOpen)
-        {
-            touched |= m_emitter->getImGuiNodes();
-            ImGui::TreePop();
-        }
-    }
-
-    if(m_normalMap)
-    {
-	    bool nodeOpen = ImGui::TreeNode("Normal Map");
-	    ImGui::NextColumn();
-	    ImGui::AlignTextToFramePadding();
-
-	    ImGui::Text(m_normalMap->getImGuiName().c_str());
-	    ImGui::NextColumn();
-	    if (nodeOpen)
-	    {
-		    touched |= m_normalMap->getImGuiNodes();
-		    ImGui::TreePop();
-	    }
-    }
-
-	if (m_medium)
-	{
-		bool nodeOpen = ImGui::TreeNode("Medium");
-		ImGui::NextColumn();
-		ImGui::AlignTextToFramePadding();
-
-		ImGui::Text(m_medium->getImGuiName().c_str());
-		ImGui::NextColumn();
-		if (nodeOpen)
-		{
-			touched |= m_medium->getImGuiNodes();
-			ImGui::TreePop();
-		}
-	}
-
+	NORI_IMGUI_CHILD_OBJECT(m_bsdf, "BSDF")
+	NORI_IMGUI_CHILD_OBJECT(m_emitter, "Emitter")
+	NORI_IMGUI_CHILD_OBJECT(m_normalMap, "Normal Map")
+	NORI_IMGUI_CHILD_OBJECT(m_medium, "Medium")
     ImGui::PopID();
+
     return touched;
 }
 #endif

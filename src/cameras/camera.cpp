@@ -12,18 +12,7 @@ bool Camera::getImGuiNodes()
 	touched |= ImGui::DragVector2i("##value", &m_outputSize, 1, 0, SLIDER_MAX_INT, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::NextColumn();
 
-    bool node_open = ImGui::TreeNode("Reconstruction Filter");
-    ImGui::AlignTextToFramePadding();
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(-1);
-    ImGui::Text(m_rfilter->getImGuiName().c_str());
-    ImGui::NextColumn();
-
-    if (node_open)
-    {
-	    touched |= m_rfilter->getImGuiNodes();
-        ImGui::TreePop();
-    }
+	NORI_IMGUI_CHILD_OBJECT(m_rfilter, "Reconstruction Filter")
 
     return touched;
 }

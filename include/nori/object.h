@@ -195,6 +195,25 @@ public:
 	}
 
     virtual bool getImGuiNodes() = 0;
+
+    /**
+     * Add a child NoriObject to the imgui scene tree.
+     */
+#   define NORI_IMGUI_CHILD_OBJECT(child, ...)        \
+    if (child)                                          \
+    {                                                   \
+        bool nodeOpen = ImGui::TreeNode(__VA_ARGS__);   \
+        ImGui::NextColumn();                            \
+        ImGui::AlignTextToFramePadding();               \
+														\
+        ImGui::Text(child->getImGuiName().c_str());     \
+        ImGui::NextColumn();                            \
+        if (nodeOpen)                                   \
+        {                                               \
+            touched |= child->getImGuiNodes();          \
+            ImGui::TreePop();                           \
+        }                                               \
+    }
 #endif
 
 protected:

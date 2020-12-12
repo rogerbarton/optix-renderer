@@ -238,16 +238,7 @@ public:
 
         int id = 1;
 
-        bool node_open = ImGui::TreeNode("Albedo");
-        ImGui::NextColumn();
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text(albedo->getImGuiName().c_str());
-        ImGui::NextColumn();
-        if (node_open)
-        {
-            touched |= albedo->getImGuiNodes();
-            ImGui::TreePop();
-        }
+	    NORI_IMGUI_CHILD_OBJECT(albedo, "Albedo")
 
         ImGuiValue(metallic, "Metallic");
         ImGuiValue(subsurface, "Subsurface");
