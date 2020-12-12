@@ -39,7 +39,9 @@ struct LaunchParams
 {
 	unsigned int sampleIndex;
 	unsigned int samplesPerLaunch;
-	float4       *d_imageBuffer;
+	float4       *d_outputBuffer;
+	float4       *d_outputBufferAlbedo;
+	float4       *d_outputBufferNormal;
 	unsigned int imageWidth;
 	unsigned int imageHeight;
 

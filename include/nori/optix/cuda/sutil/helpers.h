@@ -19,7 +19,7 @@
 static __forceinline__ __device__ void *unpackPointer(unsigned int i0, unsigned int i1)
 {
 	const unsigned long long uptr = static_cast<unsigned long long>( i0 ) << 32 | i1;
-	void *ptr = reinterpret_cast<void *>( uptr );
+	void                     *ptr = reinterpret_cast<void *>( uptr );
 	return ptr;
 }
 
@@ -87,3 +87,23 @@ struct Frame
 
 	float3 m_tangent, m_bitangent, m_normal;
 };
+
+/**
+ * Normalizes the value and writes it into the output buffer with the correct weighting
+ */
+__forceinline__ void
+interpolateAndApplyToBuffer(const uint32_t &sampleIndex, const uint32_t &samplesPerLaunch, const uint32_t &pixelIdx, float4 *const outputBuffer,
+                            float3 value)
+{
+	value /= static_cast<float>(samplesPerLaunch);
+
+	if (sampleIndex > 1)
+	{
+		const float3 prevPixel = make_float3(outputBuffer[pixelIdx]);
+
+		const float a = samplesPerLaunch / static_cast<float>(sampleIndex + samplesPerLaunch);
+		value = lerp(prevPixel, value, a);
+	}
+
+	outputBuffer[pixelIdx] = make_float4(value, 1.f);
+}

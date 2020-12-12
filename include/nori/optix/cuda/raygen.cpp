@@ -11,6 +11,7 @@
 
 #include "RadiancePrd.h"
 
+#include "sutil/exception.h"
 #include "sutil/helpers.h"
 #include "sutil/vec_math.h"
 #include "sutil/random.h"
@@ -48,7 +49,9 @@ extern "C" __global__ void __raygen__perspective()
 
 	unsigned int seed = tea<4>(pixelIdx, sampleIndex);
 
-	float3 color = {0, 0, 0};
+	float3 color  = {0, 0, 0};
+	float3 albedo = {0, 0, 0};
+	float3 normal = {0, 0, 0};
 
 	for (int i = 0; i < launchParams.samplesPerLaunch; ++i)
 	{
@@ -58,8 +61,10 @@ extern "C" __global__ void __raygen__perspective()
 
 		// -- Integrator::Li()
 		RadiancePrd prd{};
-		prd.Li         = make_float3(0.f);
-		prd.throughput = make_float3(1.f);
+		prd.Li         = make_float3(0);
+		prd.throughput = make_float3(1);
+		prd.albedo     = make_float3(0);
+		prd.normal     = make_float3(0, 0, 1);
 		prd.terminated = false;
 		prd.seed       = seed;
 
@@ -94,20 +99,17 @@ extern "C" __global__ void __raygen__perspective()
 
 		// Store Li
 		color += prd.Li;
+		albedo += prd.albedo;
+		normal += prd.normal;
 	}
 
 	// Normalize and update image
-	color /= static_cast<float>(launchParams.samplesPerLaunch);
-
-	if (launchParams.sampleIndex > 1)
-	{
-		float3 prevPixel = make_float3(launchParams.d_imageBuffer[pixelIdx]);
-
-		const float a = 1.0f / static_cast<float>(launchParams.sampleIndex + 1);
-		color = lerp(prevPixel, color, a);
-	}
-
-	launchParams.d_imageBuffer[pixelIdx] = make_float4(color, 1.f);
+	interpolateAndApplyToBuffer(launchParams.sampleIndex, launchParams.samplesPerLaunch, pixelIdx,
+	                            launchParams.d_outputBuffer, color);
+	interpolateAndApplyToBuffer(launchParams.sampleIndex, launchParams.samplesPerLaunch, pixelIdx,
+	                            launchParams.d_outputBufferAlbedo, albedo);
+	interpolateAndApplyToBuffer(launchParams.sampleIndex, launchParams.samplesPerLaunch, pixelIdx,
+	                            launchParams.d_outputBufferNormal, normal);
 }
 
 static __forceinline__ __device__ void sampleRay(

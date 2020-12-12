@@ -24,11 +24,13 @@ struct RadiancePrd
 
 	float3       Li;
 	float3       throughput;
+	float3       albedo;
+	float3       normal;
 	float3       origin;
 	float3       direction;
 	unsigned int seed;
 	int          terminated;
-	int          pad[2];
+	// int          pad;
 
 	static __forceinline__ __device__ RadiancePrd* getPrd()
 	{
