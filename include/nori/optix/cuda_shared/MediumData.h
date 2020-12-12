@@ -14,7 +14,7 @@ struct MediumData
 	{
 		VACUUM = 0,
 		HOMOG  = 1,
-		HETROG = 2,
+		HETEROG = 2,
 		TYPE_COUNT
 	};
 
@@ -40,6 +40,6 @@ struct MediumData
 	{
 		Vacuum vacuum;
 		Homog  homog;
-		Hetrog hetrog;
+		Heterog heterog;
 	};
 };

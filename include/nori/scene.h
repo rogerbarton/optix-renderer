@@ -90,11 +90,11 @@ NORI_NAMESPACE_BEGIN
 			return m_emitters[index];
 		}
 #ifdef NORI_USE_VDB
-		const std::vector<Volume *> &getVolumes() const
+		const std::vector<NvdbVolume *> &getVolumes() const
 		{
 			return m_volumes;
 		}
-		const Volume *getRandomVolume(float rnd) const
+		const NvdbVolume *getRandomVolume(float rnd) const
 		{
 			auto const &n    = m_volumes.size();
 			size_t     index = std::min(
@@ -205,7 +205,7 @@ NORI_NAMESPACE_BEGIN
 		std::vector<Emitter *> m_emitters;
 
 #ifdef NORI_USE_VDB
-		std::vector<Volume *> m_volumes;
+		std::vector<NvdbVolume *> m_volumes;
 #endif
 
 		/**

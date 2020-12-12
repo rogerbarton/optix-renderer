@@ -1,28 +1,22 @@
 #pragma once
 #ifdef NORI_USE_VDB
 
-#include <nori/shape.h>
+#include <nori/object.h>
 #include <nanovdb/util/IO.h>
 #include <filesystem/resolver.h>
 #include <filesystem>
 
 NORI_NAMESPACE_BEGIN
 
-	class Volume : public Shape
+	struct NvdbVolume : public NoriObject
 	{
 	public:
-		Volume() = default;
-		explicit Volume(const PropertyList &props);
+		NvdbVolume() = default;
+		explicit NvdbVolume(const PropertyList &props);
 		NoriObject *cloneAndInit() override;
 		void update(const NoriObject *guiObject) override;
 
-		// -- Shape overrides
-		BoundingBox3f getBoundingBox(uint32_t index) const override { return m_bbox; }
-		Point3f getCentroid(uint32_t index) const override { return m_bbox.getCenter(); }
-		bool rayIntersect(uint32_t index, const Ray3f &ray, float &u, float &v, float &t) const override;
-		void setHitInformation(uint32_t index, const Ray3f &ray, Intersection &its) const override;
-		void sampleSurface(ShapeQueryRecord &sRec, const Point2f &sample) const override;
-		float pdfSurface(const ShapeQueryRecord &sRec) const override;
+		EClassType getClassType() const override { return EVolume; }
 		std::string toString() const override;
 
 #ifdef NORI_USE_IMGUI
