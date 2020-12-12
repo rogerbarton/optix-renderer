@@ -176,7 +176,7 @@ void ImguiScreen::openEXR(const std::string &filename)
 	compositeBlock.init(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
 	compositeBlock.fromBitmap(bitmap);
 	compositeBlock.unlock();
-	m_renderThread.m_visibleRenderLayer = ERenderLayer::Composite;
+	m_renderThread.setVisibleRenderLayer(ERenderLayer::Composite);
 
 	imageZoom = 1.f;
 	centerImage(true);
@@ -613,6 +613,18 @@ void ImguiScreen::keyPressed(int key, int mods)
 		uiShowDemoWindow = !uiShowDemoWindow;
 	else if (key == GLFW_KEY_R)
 		drop(m_renderThread.getFilename());
+	else if (key == GLFW_KEY_Z)
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Composite);
+	else if (key == GLFW_KEY_X)
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Albedo);
+	else if (key == GLFW_KEY_C)
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Normal);
+	else if (key == GLFW_KEY_V)
+		m_renderThread.setVisibleDevice(EDeviceMode::Cpu);
+	else if (key == GLFW_KEY_B)
+		m_renderThread.setVisibleDevice(EDeviceMode::Optix);
+	else if (key == GLFW_KEY_N)
+		m_renderThread.setVisibleDevice(EDeviceMode::Both);
 }
 
 void ImguiScreen::keyReleased(int key, int mods)

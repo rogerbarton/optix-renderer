@@ -53,6 +53,9 @@ using EDeviceMode_t = ERenderLayer::Type;
 class RenderThread {
 
 public:
+	Scene *m_guiScene    = nullptr;
+	Scene *m_renderScene = nullptr;
+
 	RenderThread();
     ~RenderThread();
 	void PreGlDestroy();
@@ -74,22 +77,23 @@ public:
 	void drawSceneGui();
 #endif
 
-	Scene       *m_guiScene       = nullptr;
-	Scene       *m_renderScene    = nullptr;
+	ERenderLayer_t getVisibleRenderLayer() { return m_visibleRenderLayer; }
+	void setVisibleRenderLayer(ERenderLayer_t layer) { m_visibleRenderLayer = layer; }
+	ERenderLayer_t getVisibleDevice() { return m_displayDevice; }
+	void setVisibleDevice(EDeviceMode_t layer) { m_displayDevice = layer; }
 
-	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
+	void initBlocks();
 	ImageBlock &getBlock(ERenderLayer_t layer = ERenderLayer::Size);  /// Get the active block
 #ifdef NORI_USE_OPTIX
 	CUDAOutputBuffer<float4> *getDisplayBlockGpu(ERenderLayer_t layer = ERenderLayer::Size);  /// Get the active optix block
+	void updateOptixDisplayBuffers();
 #endif
-	void initBlocks();
 
 	/**
 	 * Returns the samples done by both devices normalized by the total samples.
 	 */
 	void getDeviceSampleWeights(float &samplesCpu, float &samplesGpu);
 
-	void updateOptixDisplayBuffers();
 protected:
 	void startRenderThread();
 	void renderThreadMain();
@@ -115,7 +119,8 @@ protected:
 	EDeviceMode_t m_renderDevice  = EDeviceMode::Both;
 	EDeviceMode_t m_displayDevice = EDeviceMode::Both;
 
-    ImageBlock m_block;
+	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
+	ImageBlock m_block;
     ImageBlock m_blockNormal;		/// Normals feature buffer
     ImageBlock m_blockAlbedo;      	/// Albedo feature buffer
 
