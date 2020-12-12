@@ -39,21 +39,26 @@ inline double durationMs(const TimePoint time)
 	return std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
 }
 
+struct EDeviceMode
+{
+	using Type = int;
+	static constexpr int  Cpu                          = 0;
+	static constexpr int  Optix                        = 1;
+	static constexpr int  Both                         = 2;
+	static constexpr int  Size                         = 3;
+	static constexpr char *Strings[Size] = {"CPU", "Optix", "CPU + Optix"};
+};
+using EDeviceMode_t = ERenderLayer::Type;
+
 class RenderThread {
 
 public:
 	RenderThread();
     ~RenderThread();
+	void PreGlDestroy();
 
     void loadScene(const std::string & filename);
     void restartRender();
-
-	void renderThreadMain();
-#ifdef NORI_USE_OPTIX
-	void renderThreadOptix();
-	CUDAOutputBuffer<float4>* m_optixBlock;
-	float4* m_d_optixBlock;
-#endif
 
     bool isBusy();
     void stopRendering();
@@ -71,6 +76,34 @@ public:
 
 	Scene       *m_guiScene       = nullptr;
 	Scene       *m_renderScene    = nullptr;
+
+	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
+	ImageBlock &getBlock(ERenderLayer_t layer = ERenderLayer::Size);  /// Get the active block
+#ifdef NORI_USE_OPTIX
+	CUDAOutputBuffer<float4> *getDisplayBlockGpu(ERenderLayer_t layer = ERenderLayer::Size);  /// Get the active optix block
+#endif
+	void initBlocks();
+
+	/**
+	 * Returns the samples done by both devices normalized by the total samples.
+	 */
+	void getDeviceSampleWeights(float &samplesCpu, float &samplesGpu);
+
+	void updateOptixDisplayBuffers();
+protected:
+	void startRenderThread();
+	void renderThreadMain();
+#ifdef NORI_USE_OPTIX
+	void renderThreadOptix();
+#endif
+
+	enum class ERenderStatus : int {
+		Idle      = 0,
+		Busy      = 1,
+		Interrupt = 2,
+		Done      = 3
+	};
+
 	/**
 	 * Restart render when a change is detected. Otherwise the apply button can be used.
 	 * m_preview_mode overrides this.
@@ -79,34 +112,8 @@ public:
 	bool        m_guiSceneTouched = false;
 	bool        m_previewMode     = false;
 
-	static constexpr int EDeviceModeSize = 3;
-	const char* m_deviceModeStrings[EDeviceModeSize] = {"CPU", "Optix", "CPU + Optix"};
-	enum class EDeviceMode : int {
-		Cpu   = 0,
-		Optix = 1,
-		Both  = 2,
-	};
-	EDeviceMode m_deviceMode                         = EDeviceMode::Both;
-
-	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
-	ImageBlock& getCurrentBlock();                      							/// Get the active block
-	ImageBlock& getBlock(ERenderLayer_t renderLayer = ERenderLayer::Composite);  	/// Get a specific block
-	void initBlocks();
-
-	/**
-	 * Returns the samples done by both devices normalized by the total samples.
-	 */
-	void getDeviceSampleWeights(float &samplesCpu, float &samplesGpu);
-
-	protected:
-	void startRenderThread();
-
-	enum class ERenderStatus : int {
-		Idle      = 0,
-		Busy      = 1,
-		Interrupt = 2,
-		Done      = 3
-	};
+	EDeviceMode_t m_renderDevice  = EDeviceMode::Both;
+	EDeviceMode_t m_displayDevice = EDeviceMode::Both;
 
     ImageBlock m_block;
     ImageBlock m_blockNormal;		/// Normals feature buffer
@@ -119,15 +126,27 @@ public:
 	std::atomic<uint32_t>      m_currentOptixSample;
 	time_point_t               m_startTime;
 	time_point_t               m_endTime;
+
 #ifdef NORI_USE_OPTIX
 	std::thread m_optixThread;
+	size_t m_optixBlockSizeBytes = 0;
+	float4* m_d_optixRenderBlock = 0;
+	float4* m_d_optixRenderBlockAlbedo = 0;
+	float4* m_d_optixRenderBlockNormal = 0;
+
+	CUDAOutputBuffer<float4>* m_optixDisplayBlock;
+	CUDAOutputBuffer<float4>* m_optixDisplayBlockAlbedo;
+	CUDAOutputBuffer<float4>* m_optixDisplayBlockNormal;
+	std::atomic<bool> m_optixDisplayBlockTouched = false;
+	float4* m_d_optixDisplayBlock = 0;
+	float4* m_d_optixDisplayBlockAlbedo = 0;
+	float4* m_d_optixDisplayBlockNormal = 0;
 #endif
 
 	std::string sceneFilename;
 	std::string outputName;
 	std::string outputNameDenoised;
 	std::string outputNameVariance;
-		void completeRender();
 	};
 
 NORI_NAMESPACE_END

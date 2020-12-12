@@ -75,7 +75,8 @@ struct OptixState
 	 * Renders one subframe. Assumes that preRender has succeeded
 	 * @param outputBuffer mapped device pointer, use CUDAOutputBuffer::map() on the opengl thread
 	 */
-	void renderSubframe(float4* outputBuffer, uint32_t currentSample);
+	void renderSubframe(const uint32_t currentSample,
+					 float4* outputBuffer, float4* outputBufferAlbedo, float4* outputBufferNormal);
 	void clear();
 	void clearPipeline();
 	~OptixState();

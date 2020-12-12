@@ -212,9 +212,7 @@ void ImguiScreen::mainloop()
 
 		fpsTimer.reset();
 	}
-#ifdef NORI_USE_OPTIX
-	m_renderThread.m_optixBlock->deletePBO();
-#endif
+	m_renderThread.PreGlDestroy();
 	glfwTerminate();
 }
 
@@ -251,40 +249,49 @@ void ImguiScreen::drawAll()
 void ImguiScreen::render()
 {
 	// draws the tonemapped image to screen
-	ImageBlock& block = m_renderThread.getCurrentBlock();
-	block.lock();
-	int borderSize = block.getBorderSize();
-	const Vector2i &size = block.getSize();
+	ImageBlock& cpuBlock = m_renderThread.getBlock();
 
-	// cpu -> tex0
+	// cpu block -> tex0
+	cpuBlock.lock();
+	const Vector2i &size = cpuBlock.getSize();
 	{
+		int borderSize = cpuBlock.getBorderSize();
+
 		GL_CHECK(glActiveTexture(GL_TEXTURE0));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_texture));
-		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, cpuBlock.cols()));
+
+		// Copy data to gpu
 		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x(), size.y(),
 		             0, GL_RGBA, GL_FLOAT,
-		             (uint8_t *) block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f)));
+		             (uint8_t *) cpuBlock.data() + (borderSize * cpuBlock.cols() + borderSize) * sizeof(Color4f)));
+
+		// reset state
 		GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 	}
-	block.unlock();
+	cpuBlock.unlock();
 
-	//gpu image -> tex1
+	// gpu block -> tex1
 #ifdef NORI_USE_OPTIX
-	m_renderThread.m_optixBlock->lock();
+	CUDAOutputBuffer<float4>* gpuBlock = m_renderThread.getDisplayBlockGpu();
+	gpuBlock->lock();
+	m_renderThread.updateOptixDisplayBuffers();
 	{
-		const float width  = m_renderThread.m_optixBlock->width();
-		const float height = m_renderThread.m_optixBlock->height();
+		const float width  = gpuBlock->width();
+		const float height = gpuBlock->height();
+
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureGpu));
-		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, block.cols()));
-		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_renderThread.m_optixBlock->getPBO()));
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, gpuBlock->getPBO()));
 		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
+
+		// Map data to gpu
 		GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr));
-		// GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
+
+		// reset state
 		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
-	m_renderThread.m_optixBlock->unlock();
-	// GL_CHECK(glActiveTexture(GL_TEXTURE0));
+	gpuBlock->unlock();
 #endif
 
 	GL_CHECK(glViewport(imageOffset[0], imageOffset[1], get_pixel_ratio() * size[0] * imageZoom, get_pixel_ratio() * size[1] * imageZoom));

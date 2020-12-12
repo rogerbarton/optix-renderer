@@ -32,6 +32,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <tbb/concurrent_vector.h>
+#include <tbb/task_scheduler_init.h>
 #include <filesystem/resolver.h>
 #include <fstream>
 
@@ -56,7 +57,9 @@ RenderThread::RenderThread() : m_startTime(clock_t::now()), m_endTime(m_startTim
 void RenderThread::initBlocks()
 {
 #ifdef NORI_USE_OPTIX
-	m_optixBlock = new CUDAOutputBuffer<float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	m_optixDisplayBlock       = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	m_optixDisplayBlockAlbedo = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	m_optixDisplayBlockNormal = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
 #endif
 	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
 }
@@ -67,7 +70,22 @@ RenderThread::~RenderThread()
 	delete m_guiScene;
 	delete m_renderScene;
 #ifdef NORI_USE_OPTIX
-	delete m_optixBlock;
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlock)));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo)));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockNormal)));
+	delete m_optixDisplayBlock;
+	delete m_optixDisplayBlockAlbedo;
+	delete m_optixDisplayBlockNormal;
+#endif
+}
+
+
+void RenderThread::PreGlDestroy()
+{
+#ifdef NORI_USE_OPTIX
+	m_optixDisplayBlock->deletePBO();
+	m_optixDisplayBlockAlbedo->deletePBO();
+	m_optixDisplayBlockNormal->deletePBO();
 #endif
 }
 
@@ -76,7 +94,6 @@ bool RenderThread::isBusy()
 	if (m_renderStatus == ERenderStatus::Done)
 	{
 		m_renderThread.join();
-		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 	}
 	return m_renderStatus != ERenderStatus::Idle;
@@ -89,7 +106,6 @@ void RenderThread::stopRendering()
 		cout << "Requesting interruption of the current rendering" << endl;
 		m_renderStatus = ERenderStatus::Interrupt;
 		m_renderThread.join();
-		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 		cout << "Rendering successfully aborted" << endl;
 	}
@@ -120,7 +136,6 @@ void RenderThread::loadScene(const std::string &filename)
 	if (isBusy())
 	{
 		m_renderThread.join();
-		completeRender();
 		m_renderStatus = ERenderStatus::Idle;
 	}
 
@@ -176,18 +191,15 @@ void RenderThread::startRenderThread()
 	// Resize block on main thread
 	const Vector2i outputSize = m_renderScene->getCamera()->getOutputSize();
 #ifdef NORI_USE_OPTIX
-	m_optixBlock->lock();
-	try
-	{
-		m_optixBlock->resize(outputSize.x(), outputSize.y());
-		m_d_optixBlock = m_optixBlock->map();
-		m_optixBlock->unlock();
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << "Failed resizing CUDAOutputBuffer\n";
-		m_optixBlock->unlock();
-	}
+	m_optixDisplayBlock->lock();
+	m_optixDisplayBlock->resize(outputSize.x(), outputSize.y());
+	m_optixDisplayBlock->unlock();
+	m_optixDisplayBlockAlbedo->lock();
+	m_optixDisplayBlockAlbedo->resize(outputSize.x(), outputSize.y());
+	m_optixDisplayBlockAlbedo->unlock();
+	m_optixDisplayBlockNormal->lock();
+	m_optixDisplayBlockNormal->resize(outputSize.x(), outputSize.y());
+	m_optixDisplayBlockNormal->unlock();
 #endif
 
 	// Start the actual thread
@@ -220,6 +232,7 @@ void RenderThread::renderThreadMain()
 	m_currentCpuSample = 0;
 	m_currentOptixSample = 0;
 #ifdef NORI_USE_OPTIX
+	tbb::task_scheduler_init init(tbb::task_scheduler_init::default_num_threads() - 2);
 	m_optixThread = std::thread([this] { renderThreadOptix(); });
 #endif
 
@@ -423,39 +436,104 @@ void RenderThread::renderThreadOptix()
 {
 	try
 	{
-		OptixState *const optixState = m_renderScene->getOptixState();
+		// Resize blocks
+		const Vector2i blockSize      = m_renderScene->getCamera()->getOutputSize();
+		const size_t   blockSizeBytes = blockSize.x() * blockSize.y() * sizeof(float4);;
+		if (m_optixBlockSizeBytes != blockSizeBytes)
+		{
+			m_optixBlockSizeBytes = blockSizeBytes;
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlock)));
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo)));
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockNormal)));
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlock), m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlockAlbedo), m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlockNormal), m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlock), 0, m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo), 0, m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlockNormal), 0, m_optixBlockSizeBytes));
+		}
 
-		Vector2i       imageDim = m_renderScene->getCamera()->getOutputSize();
-		const uint32_t width    = imageDim.x();
-		const uint32_t height   = imageDim.y();
+		OptixState *const optixState = m_renderScene->getOptixState();
 
 		if (!optixState->preRender(*m_renderScene, m_previewMode))
 			return;
 
 		// Render
-		const uint32_t numSamples = m_renderScene->getSampler()->getSampleCount();
-		const uint32_t samplesPerLaunch = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+		const uint32_t numSamples                = m_renderScene->getSampler()->getSampleCount();
+		const uint32_t samplesPerLaunch          = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+
 		for (; m_currentOptixSample + m_currentCpuSample < numSamples; m_currentOptixSample += samplesPerLaunch)
 		{
 			if (m_renderStatus == ERenderStatus::Interrupt)
 				break;
-			optixState->renderSubframe(m_d_optixBlock, m_currentOptixSample);
+
+			optixState->renderSubframe(m_currentOptixSample,
+			                           m_d_optixRenderBlock, m_d_optixRenderBlockAlbedo, m_d_optixRenderBlockNormal);
+
+			// Copy output to display buffers if display buffer is available
+			if (m_d_optixDisplayBlock)
+			{
+				m_optixDisplayBlock->lock();
+				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlock), &m_d_optixRenderBlock,
+				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
+				m_optixDisplayBlock->unlock();
+
+				m_optixDisplayBlockAlbedo->lock();
+				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockAlbedo),
+				                      &m_d_optixRenderBlockAlbedo,
+				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
+				m_optixDisplayBlockAlbedo->unlock();
+
+				m_optixDisplayBlockNormal->lock();
+				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockNormal),
+				                      &m_d_optixRenderBlockNormal,
+				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
+				m_optixDisplayBlockNormal->unlock();
+
+				m_optixDisplayBlockTouched = true;
+			}
 		}
 	}
 	catch (std::exception& e)
 	{
 		std::cerr << "Optix Error: " << e.what() << std::endl;
 		std::cerr << "  Optix disabled.";
-		m_deviceMode = EDeviceMode::Cpu;
+		m_renderDevice  = EDeviceMode::Cpu;
+		m_displayDevice = EDeviceMode::Cpu;
 	}
 }
+
+	void RenderThread::updateOptixDisplayBuffers()
+	{
+		if (!m_optixDisplayBlockTouched) return;
+		m_optixDisplayBlockTouched = false;
+
+		// Remap the display buffer so changes are applied to opengl
+		m_optixDisplayBlock->lock();
+		m_d_optixDisplayBlock = 0;
+		m_optixDisplayBlock->unmap();
+		m_d_optixDisplayBlock = m_optixDisplayBlock->map();
+		m_optixDisplayBlock->unlock();
+
+		m_optixDisplayBlockAlbedo->lock();
+		m_d_optixDisplayBlockAlbedo = 0;
+		m_optixDisplayBlockAlbedo->unmap();
+		m_d_optixDisplayBlockAlbedo = m_optixDisplayBlockAlbedo->map();
+		m_optixDisplayBlockAlbedo->unlock();
+
+		m_optixDisplayBlockNormal->lock();
+		m_d_optixDisplayBlockNormal = 0;
+		m_optixDisplayBlockNormal->unmap();
+		m_d_optixDisplayBlockNormal = m_optixDisplayBlockNormal->map();
+		m_optixDisplayBlockNormal->unlock();
+	}
 #endif
 
 #ifdef NORI_USE_IMGUI
 void RenderThread::drawRenderGui()
 {
 	m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
-	m_guiSceneTouched |= ImGui::Combo("Device Mode", reinterpret_cast<int *>(&m_deviceMode), m_deviceModeStrings, EDeviceModeSize);
+	m_guiSceneTouched |= ImGui::Combo("Device Mode", reinterpret_cast<int *>(&m_renderDevice), EDeviceMode::Strings, EDeviceMode::Size);
 
 	ImGui::Checkbox("Auto-update", &m_autoUpdate);
 	if (m_guiSceneTouched)
@@ -464,6 +542,9 @@ void RenderThread::drawRenderGui()
 		if (ImGui::Button("Apply Changes"))
 			restartRender();
 	}
+
+	ImGui::Combo("Display Device", reinterpret_cast<int *>(&m_displayDevice), EDeviceMode::Strings, EDeviceMode::Size);
+	ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_visibleRenderLayer), ERenderLayer::Strings, ERenderLayer::Size);
 }
 
 void RenderThread::drawSceneGui()
@@ -473,8 +554,6 @@ void RenderThread::drawSceneGui()
 		ImGui::Text("No scene loaded...");
 		return;
 	}
-
-	ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_visibleRenderLayer), ERenderLayer::Strings, ERenderLayer::Size);
 
 	// Start columns
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
@@ -508,34 +587,42 @@ std::string RenderThread::getRenderTime() {
 		return timeString2(clock_t::now() - m_startTime);
 }
 
-ImageBlock &RenderThread::getCurrentBlock()
-{
-	if (m_visibleRenderLayer == ERenderLayer::Albedo)
-		return m_blockAlbedo;
-	if (m_visibleRenderLayer == ERenderLayer::Normal)
-		return m_blockNormal;
-	else
-		return m_block;
-}
+	ImageBlock &RenderThread::getBlock(ERenderLayer_t layer)
+	{
+		if(layer == ERenderLayer::Size)
+			layer = m_visibleRenderLayer;
 
-ImageBlock &RenderThread::getBlock(ERenderLayer_t renderLayer)
-{
-	if (renderLayer == ERenderLayer::Albedo)
-		return m_blockAlbedo;
-	if (renderLayer == ERenderLayer::Normal)
-		return m_blockNormal;
-	else
-		return m_block;
-}
+		if (layer == ERenderLayer::Albedo)
+			return m_blockAlbedo;
+		if (layer == ERenderLayer::Normal)
+			return m_blockNormal;
+		else
+			return m_block;
+	}
+
+#ifdef NORI_USE_OPTIX
+	CUDAOutputBuffer<float4> *RenderThread::getDisplayBlockGpu(ERenderLayer_t layer)
+	{
+		if(layer == ERenderLayer::Size)
+			layer = m_visibleRenderLayer;
+
+		if (layer == ERenderLayer::Albedo)
+			return m_optixDisplayBlockAlbedo;
+		if (layer == ERenderLayer::Normal)
+			return m_optixDisplayBlockNormal;
+		else
+			return m_optixDisplayBlock;
+	}
+#endif
 
 void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
 {
-	if (m_deviceMode == RenderThread::EDeviceMode::Cpu)
+	if (m_displayDevice == EDeviceMode::Cpu)
 	{
 		samplesCpu = 1.f;
 		samplesGpu = 0.f;
 	}
-	else if (m_deviceMode == RenderThread::EDeviceMode::Optix)
+	else if (m_displayDevice == EDeviceMode::Optix)
 	{
 		samplesCpu = 0.f;
 		samplesGpu = 1.f;
@@ -549,19 +636,6 @@ void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
 		samplesCpu = sum == 0 ? 1.f : cpu / sum;
 		samplesGpu = sum == 0 ? 0.f : gpu / sum;
 	}
-}
-
-void RenderThread::completeRender()
-{
-#ifdef NORI_USE_OPTIX
-	if (m_d_optixBlock)
-	{
-		m_optixBlock->lock();
-		m_optixBlock->unmap();
-		m_d_optixBlock = 0;
-		m_optixBlock->unlock();
-	}
-#endif
 }
 
 NORI_NAMESPACE_END

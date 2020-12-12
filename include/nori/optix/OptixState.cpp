@@ -143,7 +143,7 @@ void OptixState::createPipeline()
 	                                     &m_pipeline));
 }
 
-void OptixState::createRaygenProgram(std::vector<OptixProgramGroup>& program_groups)
+void OptixState::createRaygenProgram(std::vector<OptixProgramGroup> &program_groups)
 {
 	OptixProgramGroupOptions rayGenProgGroupOptions = {};
 	OptixProgramGroupDesc    raygenProgGroupDesc    = {};
@@ -157,7 +157,7 @@ void OptixState::createRaygenProgram(std::vector<OptixProgramGroup>& program_gro
 	program_groups.push_back(m_raygen_prog_group);
 }
 
-void OptixState::createMissProgram(std::vector<OptixProgramGroup>& program_groups)
+void OptixState::createMissProgram(std::vector<OptixProgramGroup> &program_groups)
 {
 	{
 		OptixProgramGroupOptions missProgGroupOptions = {};
@@ -199,7 +199,7 @@ void OptixState::createMissProgram(std::vector<OptixProgramGroup>& program_group
 	}
 }
 
-void OptixState::createHitMeshProgram(std::vector<OptixProgramGroup>& program_groups)
+void OptixState::createHitMeshProgram(std::vector<OptixProgramGroup> &program_groups)
 {
 	/**
 	 * Hit programs for Meshes
@@ -248,7 +248,7 @@ void OptixState::createHitMeshProgram(std::vector<OptixProgramGroup>& program_gr
 	}
 }
 
-void OptixState::createHitSphereProgram(std::vector<OptixProgramGroup>& program_groups)
+void OptixState::createHitSphereProgram(std::vector<OptixProgramGroup> &program_groups)
 {
 	/**
 	 * Hit programs for everything except volumes
@@ -297,7 +297,7 @@ void OptixState::createHitSphereProgram(std::vector<OptixProgramGroup>& program_
 	}
 }
 
-void OptixState::createHitVolumeProgram(std::vector<OptixProgramGroup>& program_groups)
+void OptixState::createHitVolumeProgram(std::vector<OptixProgramGroup> &program_groups)
 {
 	// TODO: implement these
 	return;
@@ -484,11 +484,14 @@ void OptixState::clearPipeline()
 }
 
 
-void OptixState::renderSubframe(float4* outputBufferMap, uint32_t currentSample)
+void OptixState::renderSubframe(const uint32_t currentSample,
+                                float4 *outputBuffer, float4 *outputBufferAlbedo, float4 *outputBufferNormal)
 {
 	// Update params and copy to device
-	m_params.sampleIndex   = currentSample;
-	m_params.d_imageBuffer = outputBufferMap;
+	m_params.sampleIndex          = currentSample;
+	m_params.d_outputBuffer       = outputBuffer;
+	m_params.d_outputBufferAlbedo = outputBufferAlbedo;
+	m_params.d_outputBufferNormal = outputBufferNormal;
 
 	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(m_d_params), &m_params, sizeof(LaunchParams),
 	                           cudaMemcpyHostToDevice, m_stream));
