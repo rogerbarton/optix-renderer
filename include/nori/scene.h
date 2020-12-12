@@ -22,7 +22,7 @@
 #include <nori/bvh.h>
 #include <nori/emitter.h>
 #include <nori/denoiser.h>
-#include <nori/volume.h>
+#include <nori/NvdbVolume.h>
 #include <nori/dpdf.h>
 
 #ifdef NORI_USE_OPTIX

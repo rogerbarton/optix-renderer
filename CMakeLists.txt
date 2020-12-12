@@ -135,9 +135,9 @@ add_executable(nori
 
 if(NORI_USE_VDB)
   target_sources(nori PRIVATE
-      include/nori/volume.h
-      src/shapes/volume.vdb.cpp
-      src/shapes/volume.shape.cpp
+      include/nori/NvdbVolume.h
+      src/shapes/NvdbVolume.vdb.cpp
+      src/shapes/NvdbVolume.cpp
       )
 endif()
 

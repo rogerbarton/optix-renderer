@@ -1,4 +1,4 @@
-#include <nori/volume.h>
+#include <nori/NvdbVolume.h>
 
 #include <nori/ImguiHelpers.h>
 #include <imgui/filebrowser.h>

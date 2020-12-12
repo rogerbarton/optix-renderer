@@ -3,7 +3,7 @@
 //
 
 #include <nori/medium.h>
-#include <nori/volume.h>
+#include <nori/NvdbVolume.h>
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/sutil/host_vec_math.h>

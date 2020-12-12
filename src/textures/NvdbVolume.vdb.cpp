@@ -1,4 +1,4 @@
-#include <nori/volume.h>
+#include <nori/NvdbVolume.h>
 
 #include <openvdb/tools/LevelSetSphere.h>
 #include <nanovdb/util/OpenToNanoVDB.h>

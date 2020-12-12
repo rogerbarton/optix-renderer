@@ -10,7 +10,7 @@
 #include <nori/camera.h>
 #include <nori/perspective.h>
 #include <nori/emitter.h>
-#include <nori/volume.h>
+#include <nori/NvdbVolume.h>
 #include <nori/bsdf.h>
 
 
