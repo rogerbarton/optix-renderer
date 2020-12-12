@@ -89,7 +89,7 @@ NORI_NAMESPACE_BEGIN
 				return nullptr;
 			return m_emitters[index];
 		}
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 		const std::vector<Volume *> &getVolumes() const
 		{
 			return m_volumes;
@@ -204,7 +204,7 @@ NORI_NAMESPACE_BEGIN
 
 		std::vector<Emitter *> m_emitters;
 
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 		std::vector<Volume *> m_volumes;
 #endif
 

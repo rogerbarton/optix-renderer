@@ -81,7 +81,7 @@ endif()
 
 
 # -- Build package manager libraries
-if(NORI_USE_VOLUMES)
+if(NORI_USE_VDB)
   # Find installed openvdb
   find_package(OpenVDB REQUIRED)
   include_directories(${OpenVDB_INCLUDE_DIRS})
@@ -93,8 +93,6 @@ if(NORI_USE_VOLUMES)
     configure_file(${CMAKE_SOURCE_DIR}/ext/vcpkg/installed/x64-windows/bin/Half-2_5.dll ${CMAKE_BINARY_DIR}/Half-2_5.dll COPYONLY)
   endif()
 
-  include_directories(ext/nanovdb)
-
   # Optionally find Blosc for nanoVDB compression, (openVDB already finds this by itself)
   find_package(Blosc)
   if(Blosc_FOUND)
@@ -102,6 +100,8 @@ if(NORI_USE_VOLUMES)
     include_directories(${Blosc_INCLUDE_DIRS})
   endif(Blosc_FOUND)
 endif()
+
+include_directories(ext/nanovdb)
 
 find_package(TBB REQUIRED COMPONENTS tbb)
 include_directories(${Tbb_INCLUDE_DIRS})

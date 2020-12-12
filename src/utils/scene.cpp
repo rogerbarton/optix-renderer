@@ -142,7 +142,7 @@ NORI_NAMESPACE_BEGIN
 			}
 		}
 
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 		for (int i = 0; i < m_volumes.size(); ++i)
 			clone->m_volumes[i] = static_cast<Volume *>(m_volumes[i]->cloneAndInit());
 #endif
@@ -189,7 +189,7 @@ NORI_NAMESPACE_BEGIN
 		}
 		emitterDpdf.normalize();
 
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 		for (int i = 0; i < gui->m_volumes.size(); ++i)
 			m_volumes[i]->update(gui->m_volumes[i]);
 #endif
@@ -264,7 +264,7 @@ NORI_NAMESPACE_BEGIN
 
 			case EVolume:
 				// Skip if volumes are disabled
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 				m_volumes.push_back(static_cast<Volume *>(obj));
 #endif
 				break;
@@ -303,7 +303,7 @@ NORI_NAMESPACE_BEGIN
 			lights += "\n";
 		}
 
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 		std::string volumes;
 		for (size_t i = 0; i < m_volumes.size(); ++i)
 		{
@@ -337,7 +337,7 @@ NORI_NAMESPACE_BEGIN
 				m_envmap ? indent(m_envmap->toString()) : "nullptr",
 				m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
 				indent(m_ambientMedium->toString()),
-#ifdef NORI_USE_VOLUMES
+#ifdef NORI_USE_VDB
 				indent(volumes, 2)
 #else
 				"Volumes disabled during compilation"

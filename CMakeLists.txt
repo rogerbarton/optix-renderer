@@ -5,7 +5,7 @@ include(CmakeDependentOption)
 
 option(NORI_USE_GUI "Build the GUI" ON)
 option(NORI_USE_IMGUI "Use ImGui instead of NanoGui, warptest always uses NanoGUI" ON)
-option(NORI_USE_VOLUMES "Enable Volumes" ON)
+option(NORI_USE_VDB "Enable Volumes" ON)
 option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
 option(NORI_USE_OPTIX "Enable OptiX, requires CUDA" ON)
 cmake_dependent_option(NORI_OPTIX_RELEASE "Enable OptiX release mode" ON "CMAKE_BUILD_TYPE STREQUAL Release" OFF)
@@ -133,7 +133,7 @@ add_executable(nori
     src/media/heterogmedium.cpp
     )
 
-if(NORI_USE_VOLUMES)
+if(NORI_USE_VDB)
   target_sources(nori PRIVATE
       include/nori/volume.h
       src/shapes/volume.vdb.cpp
@@ -305,7 +305,7 @@ endif()
 # DISABLE_NORI_GUI
 # NORI_USE_IMGUI
 # NORI_USE_NANOGUI
-# NORI_USE_VOLUMES
+# NORI_USE_VDB
 
 if(NOT NORI_USE_GUI)
   message(STATUS "NORI_USE_GUI is off")
@@ -322,9 +322,9 @@ else()
   endif()
 endif()
 
-if(NORI_USE_VOLUMES)
+if(NORI_USE_VDB)
   message(STATUS "Nori uses Volumes")
-  target_compile_definitions(nori PUBLIC -DNORI_USE_VOLUMES)
+  target_compile_definitions(nori PUBLIC -DNORI_USE_VDB)
 else()
   message(STATUS "Nori doesn't use Volumes")
 endif()
