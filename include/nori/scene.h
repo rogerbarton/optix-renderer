@@ -22,7 +22,6 @@
 #include <nori/bvh.h>
 #include <nori/emitter.h>
 #include <nori/denoiser.h>
-#include <nori/NvdbVolume.h>
 #include <nori/dpdf.h>
 
 #ifdef NORI_USE_OPTIX
@@ -89,22 +88,6 @@ NORI_NAMESPACE_BEGIN
 				return nullptr;
 			return m_emitters[index];
 		}
-#ifdef NORI_USE_VDB
-		const std::vector<NvdbVolume *> &getVolumes() const
-		{
-			return m_volumes;
-		}
-		const NvdbVolume *getRandomVolume(float rnd) const
-		{
-			auto const &n    = m_volumes.size();
-			size_t     index = std::min(
-					static_cast<size_t>(std::floor(n * rnd)),
-					n - 1);
-			if (index >= m_volumes.size())
-				return nullptr;
-			return m_volumes[index];
-		}
-#endif
 
 		Emitter *getEnvMap() const { return m_envmap; }
 
@@ -203,10 +186,6 @@ NORI_NAMESPACE_BEGIN
 		DiscretePDF emitterDpdf;
 
 		std::vector<Emitter *> m_emitters;
-
-#ifdef NORI_USE_VDB
-		std::vector<NvdbVolume *> m_volumes;
-#endif
 
 		/**
 		 * Has the shape only been moved/transformed. Only IAS needs to be reconstructed

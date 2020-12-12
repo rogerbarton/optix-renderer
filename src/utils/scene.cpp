@@ -142,11 +142,6 @@ NORI_NAMESPACE_BEGIN
 			}
 		}
 
-#ifdef NORI_USE_VDB
-		for (int i = 0; i < m_volumes.size(); ++i)
-			clone->m_volumes[i] = static_cast<NvdbVolume *>(m_volumes[i]->cloneAndInit());
-#endif
-
 #ifdef NORI_USE_OPTIX
 		clone->m_optixRenderer = static_cast<OptixRenderer*>(m_optixRenderer->cloneAndInit());
 #endif
@@ -188,11 +183,6 @@ NORI_NAMESPACE_BEGIN
 			emitterDpdf.append(m_emitters[i]->lightProb);
 		}
 		emitterDpdf.normalize();
-
-#ifdef NORI_USE_VDB
-		for (int i = 0; i < gui->m_volumes.size(); ++i)
-			m_volumes[i]->update(gui->m_volumes[i]);
-#endif
 
 		// -- Update this
 		if (gui->geometryTouched || gui->transformTouched)
@@ -262,13 +252,6 @@ NORI_NAMESPACE_BEGIN
 				m_ambientMedium = static_cast<Medium *>(obj);
 				break;
 
-			case EVolume:
-				// Skip if volumes are disabled
-#ifdef NORI_USE_VDB
-				m_volumes.push_back(static_cast<NvdbVolume *>(obj));
-#endif
-				break;
-
 #ifdef NORI_USE_OPTIX
             case ERenderer:
                 if (m_optixRenderer)
@@ -303,17 +286,6 @@ NORI_NAMESPACE_BEGIN
 			lights += "\n";
 		}
 
-#ifdef NORI_USE_VDB
-		std::string volumes;
-		for (size_t i = 0; i < m_volumes.size(); ++i)
-		{
-			volumes += std::string("  ") + indent(m_volumes[i]->toString(), 2);
-			if (i + 1 < m_volumes.size())
-				volumes += ",";
-			volumes += "\n";
-		}
-#endif
-
 		return tfm::format(
 				"Scene[\n"
 				"  integrator = %s,\n"
@@ -336,12 +308,7 @@ NORI_NAMESPACE_BEGIN
 				indent(lights, 2),
 				m_envmap ? indent(m_envmap->toString()) : "nullptr",
 				m_denoiser ? indent(m_denoiser->toString()) : "nullptr",
-				indent(m_ambientMedium->toString()),
-#ifdef NORI_USE_VDB
-				indent(volumes, 2)
-#else
-				"Volumes disabled during compilation"
-#endif
+				indent(m_ambientMedium->toString())
 		);
 	}
 
