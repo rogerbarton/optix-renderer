@@ -63,9 +63,15 @@ NORI_NAMESPACE_BEGIN
 		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
 		{
 			// Sample proportional to transmittance, sample a random channel uniformly
-			int channel = (int)(3 * sample.y());
-			return m_mu_t(channel) < Epsilon ? INFINITY :
-			       -std::log(sample.x()) / m_mu_t(channel);
+			mRec.sampledChannel = (int)(3 * sample.y());
+			return m_mu_t(mRec.sampledChannel) < Epsilon ? INFINITY :
+			       -std::log(sample.x()) / m_mu_t(mRec.sampledChannel);
+		}
+
+		float sampleFreePathPdf(const MediumQueryRecord &mRec, const float t) const override
+		{
+			// Divide by 3 as we sample the channel uniformly
+			return t >= INFINITY ? 0.f : m_mu_t(mRec.sampledChannel) * std::exp(-m_mu_t(mRec.sampledChannel) * t) / 3;
 		}
 
 		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override

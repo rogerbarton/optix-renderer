@@ -75,35 +75,64 @@
         <div class="pageContent">
 
             <!-- ================================================================= -->
-            <p>I first created another base class for phase functions similar to the BSDF. This has only a sample and a
-                pdf function along with a PhaseQueryRecord
+            <p>
+                I first created another base class for phase functions similar to the BSDF. This has only a sample and a
+                pdf function along with a PhaseQueryRecord. The eval function would just return one if it was a BSDF.
                 To test that this worked I implemented the basic isotropic phase function, where the sample and pdf
-                methods are simply the warp::squareToUniformSphere methods from pa2
-                with the additional cosine term for sample.
+                methods are simply the `warp::squareToUniformSphere/Pdf` methods from pa2.<br><br>
 
-                I visualized the phase functions in the warptest to see that the behaviour was as expected and ran the
-                chi2 tests, which passed.
+                For the Henyey-Greenstein phase function I used the pdf and inverse cdf from the slides. These are implemented in the warp.cpp. 
+                I also checked that when g=0 that the warptest showed the same results as the isotropic phase.
+                The warptest also shows that the phase function is symmetric for g as expected.<br><br>
+                
+                I visualized the warp methods in the warptest to see that the behaviour was as expected and ran the
+                chi2 tests. This required some adaptation of the warptest application, so that we can set the g parameter can be set.<br>
 
-                For the Henyey-Greenstein phase function I used the pdf from the slides as well as the inverse cdf to
-                sample from the distribution. I also checked that when
-                g=0 that the warptest showed the same results as the isotropic phase.
+                I also attempted to implement the Schlick phase function using the pdf from the slides. 
+                I did not find a formula for the CDF, so I calculated this manually using the methods from pa3 for the Beckmann distribution.
+                For this inversion we set $\xi=cos(\theta)$, so the integral simplifies greatly.<br><br>
 
+                When visually checking the warp, the behaviour for g values is correct but there are significantly less sample points than in 
+                the Henyey-Greenstein. This is hinting at numerical errors or samples overlapping, although I verified cosTheta is in the correct value range [-1,1].
+                For schlick, the chi2 did not pass for non-zero g values and the chi2 statistic is very large (~1e10). 
+                It is also strange that the sampled histogram and integrated density images are empty.
+                <br><br>
 
+                I also added the phase functions to the warptest like the Mircofacet BRDF for debbugging. 
+                Although I realised that the functions and thus results are exactly the same as the warp functions.
             </p>
 
 
-            <img src="images/iso-warptest.png" alt="Reference" class="img-responsive">
-            <img src="images/aniso-warptest.png" alt="Reference" class="img-responsive">
+            <h2>Henyey-Greenstein g=0 (isotropic case)</h2>
+            <img src="images/aniso/hg-g0.png" alt="Reference" class="img-responsive">
+            <img src="images/aniso/hg-g0-chi2.png" alt="Reference" class="img-responsive">
 
-            <div class="twentytwenty-container">
+            <h2>Henyey-Greenstein g=0.7</h2>
+            <img src="images/aniso/hg-g.7.png" alt="Reference" class="img-responsive">
+            <img src="images/aniso/hg-g.7-chi2.png" alt="Reference" class="img-responsive">
+            
+            <h2>Schlick g=0.7</h2>
+            <img src="images/aniso/schlick-g.7.png" alt="Reference" class="img-responsive">
+            <img src="images/aniso/schlick-g.7-chi2.png" alt="Reference" class="img-responsive">
+
+            <h2>Schlick inverse CDF derivation</h2>
+            <img src="images/aniso/schlick-inverse-cdf.jpg" alt="Reference" class="img-responsive">
+
+            <br><br>
+
+            <!-- <div class="twentytwenty-container">
                 <img src="images/ref/ajax-normals.png" alt="Reference" class="img-responsive">
                 <img src="images/mine/ajax-normals.png" alt="Mine" class="img-responsive">
-            </div> <br>
+            </div> <br> -->
 
             <h4>Implemented in:</h4>
             <ul>
+                <li>include/nori/phase.h</li>
+                <li>src/bsdf/warp.cpp</li>
+                <li>src/bsdf/isophase.cpp</li>
                 <li>src/bsdf/anisophase.cpp</li>
                 <li>src/bsdf/schlickphase.cpp</li>
+                <li>src/bsdf/warptest.cpp</li>
             </ul>
         </div>
     </div>
@@ -117,6 +146,20 @@
 
     <script>
         $(window).load(function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5 }); });
+    </script>
+
+    <script>
+        MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
     </script>
 
 </body>

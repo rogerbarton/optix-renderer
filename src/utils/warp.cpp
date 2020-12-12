@@ -168,9 +168,11 @@ Vector3f Warp::squareToUniformTriangle(const Point2f &sample) {
 Vector3f Warp::squareToHenyeyGreenstein(const Point2f &sample, float g)
 {
 	/**
-	 * See https://www.oceanopticsbook.info/view/scattering/level-2/the-henyey-greenstein-phase-function
+	 * See also https://www.oceanopticsbook.info/view/scattering/level-2/the-henyey-greenstein-phase-function
 	 * phase function integral phi=[pi/2, pi = *partial* cdf =
 	 *   B_HG = (1 - g) / 2g *((1 + g)/sqrt(1 + g^2) - 1)
+	 *
+	 * Implemented formula from lecture slides Participating Media
 	 */
 	float cosTheta;
 	if (std::abs(g) < Epsilon)
@@ -206,10 +208,15 @@ Vector3f Warp::squareToSchlick(const Point2f &sample, float k)
 {
 	float cosTheta;
 	if (std::abs(k) < Epsilon)
-		cosTheta = 1;
+		cosTheta = 1 - 2 * sample.x();
 	else
 	{
-		cosTheta = 1 / k * (1 - 1 / (2 * k * (sample.x() - 1 + k * k + 1 / (2 * k * (1 - k)))));
+		// First incorrect attempt
+		// cosTheta = 1 / k * (1 - 1 / (2 * k * (sample.x() - 1 + k * k + 1 / (2 * k * (1 - k)))));
+
+		cosTheta = 1.f / k * (1.f -
+		                    (1.f - k) /
+		                    (4.f * M_PI * k / (1.f + k) * (sample.x() - 1.f) + 1.f));
 	}
 
 	// random rotation about wi axis
@@ -230,7 +237,7 @@ float Warp::squareToSchlickPdf(const Vector3f &m, float k)
 {
 	// const float k = 1.55f * g - 0.55f * std::pow(g, 3);
 	const float factor = 1 - k * Frame::cosTheta(m);
-	return 0.25f / M_PI * (1 - k * k) / factor;
+	return 0.25f / M_PI * (1 - k * k) / (factor * factor);
 }
 
 NORI_NAMESPACE_END
