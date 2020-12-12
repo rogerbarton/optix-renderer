@@ -94,7 +94,7 @@ NORI_NAMESPACE_BEGIN
 		}
 #endif
 
-		NvdbVolume *m_volume;
+		NvdbVolume *m_volume = nullptr;
 
 		float m_densityScale;
 		float m_invMaxDensity;
