@@ -45,7 +45,7 @@ NORI_NAMESPACE_BEGIN
 		ImGui::HelpMarker("Bind constant values in the launch params. Requires recompilation but gives better performance.");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::Checkbox("##value", &m_enableSpecialization);
+		touched |= ImGui::Checkbox("##specialize", &m_enableSpecialization);
 		ImGui::NextColumn();
 
 		ImGui::AlignTextToFramePadding();
@@ -54,7 +54,7 @@ NORI_NAMESPACE_BEGIN
 		ImGui::HelpMarker("Execute multiple samples per launch for better performance, although at slower refresh rates.");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragInt("##value", &m_samplesPerLaunch, 1, 1, SLIDER_MAX_INT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		touched |= ImGui::DragInt("##samplesPerLaunch", &m_samplesPerLaunch, 1, 1, SLIDER_MAX_INT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 		ImGui::NextColumn();
 
 		return touched;

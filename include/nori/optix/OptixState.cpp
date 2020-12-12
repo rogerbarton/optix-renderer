@@ -496,7 +496,7 @@ void OptixState::renderSubframe(const uint32_t currentSample,
 	CUDA_CHECK(cudaMemcpyAsync(reinterpret_cast<void *>(m_d_params), &m_params, sizeof(LaunchParams),
 	                           cudaMemcpyHostToDevice, m_stream));
 
-	std::cout << "optixLaunch " << currentSample << std::endl;
+	// std::cout << "optixLaunch " << currentSample << std::endl;
 	OPTIX_CHECK(optixLaunch(m_pipeline,
 	                        m_stream,
 	                        reinterpret_cast<CUdeviceptr>(m_d_params),
@@ -508,5 +508,5 @@ void OptixState::renderSubframe(const uint32_t currentSample,
 
 	CUDA_CHECK(cudaStreamSynchronize(m_stream));
 	CUDA_SYNC_CHECK();
-	std::cout << "optixLaunch done." << std::endl;
+	// std::cout << "optixLaunch done." << std::endl;
 }

@@ -192,14 +192,22 @@ void RenderThread::startRenderThread()
 	const Vector2i outputSize = m_renderScene->getCamera()->getOutputSize();
 #ifdef NORI_USE_OPTIX
 	m_optixDisplayBlock->lock();
+	if (m_d_optixDisplayBlock)
+		m_optixDisplayBlock->unmap();
 	m_optixDisplayBlock->resize(outputSize.x(), outputSize.y());
 	m_d_optixDisplayBlock = m_optixDisplayBlock->map();
 	m_optixDisplayBlock->unlock();
+
 	m_optixDisplayBlockAlbedo->lock();
+	if (m_d_optixDisplayBlockAlbedo)
+		m_optixDisplayBlockAlbedo->unmap();
 	m_optixDisplayBlockAlbedo->resize(outputSize.x(), outputSize.y());
 	m_d_optixDisplayBlockAlbedo = m_optixDisplayBlockAlbedo->map();
 	m_optixDisplayBlockAlbedo->unlock();
+
 	m_optixDisplayBlockNormal->lock();
+	if (m_d_optixDisplayBlockNormal)
+		m_optixDisplayBlockNormal->unmap();
 	m_optixDisplayBlockNormal->resize(outputSize.x(), outputSize.y());
 	m_d_optixDisplayBlockNormal = m_optixDisplayBlockNormal->map();
 	m_optixDisplayBlockNormal->unlock();
@@ -235,8 +243,11 @@ void RenderThread::renderThreadMain()
 	m_currentCpuSample = 0;
 	m_currentOptixSample = 0;
 #ifdef NORI_USE_OPTIX
-	tbb::task_scheduler_init init(tbb::task_scheduler_init::default_num_threads() - 2);
-	m_optixThread = std::thread([this] { renderThreadOptix(); });
+	if (m_renderDevice != EDeviceMode::Cpu)
+	{
+		tbb::task_scheduler_init init(tbb::task_scheduler_init::default_num_threads() - 2);
+		m_optixThread = std::thread([this] { renderThreadOptix(); });
+	}
 #endif
 
 	/* Create a block generator (i.e. a work scheduler) */
@@ -473,10 +484,9 @@ void RenderThread::renderThreadOptix()
 			optixState->renderSubframe(m_currentOptixSample,
 			                           m_d_optixRenderBlock, m_d_optixRenderBlockAlbedo, m_d_optixRenderBlockNormal);
 
-			// Copy output to display buffers if display buffer is available
+			// Copy output to display buffers if display buffer is available/mapped
 			if (m_d_optixDisplayBlock)
 			{
-				std::cout << "copied." << std::endl;
 				m_optixDisplayBlock->lock();
 				CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlock),
 				                      m_d_optixRenderBlock,
@@ -537,8 +547,24 @@ void RenderThread::renderThreadOptix()
 #ifdef NORI_USE_IMGUI
 void RenderThread::drawRenderGui()
 {
-	m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
-	m_guiSceneTouched |= ImGui::Combo("Device Mode", reinterpret_cast<int *>(&m_renderDevice), EDeviceMode::Strings, EDeviceMode::Size);
+	ImGui::Text("Render");
+	ImGui::SameLine();
+	ImGui::ProgressBar(getProgress());
+	ImGui::Text("Render time: %s", (char*)getRenderTime().c_str());
+	const uint32_t currentCpuSample = m_currentCpuSample;
+	const uint32_t currentOptixSample = m_currentOptixSample;
+	ImGui::Text("Samples Done: %i (cpu: %i, gpu: %i)", currentCpuSample + currentOptixSample, currentCpuSample, currentOptixSample);
+
+	if (ImGui::Button("Stop Render"))
+		stopRendering();
+
+	// show restart button if m_scene is valid
+	if (m_guiScene)
+	{
+		ImGui::SameLine();
+		if (ImGui::Button("Restart Render"))
+			restartRender();
+	}
 
 	ImGui::Checkbox("Auto-update", &m_autoUpdate);
 	if (m_guiSceneTouched)
@@ -548,6 +574,10 @@ void RenderThread::drawRenderGui()
 			restartRender();
 	}
 
+	m_guiSceneTouched |= ImGui::Checkbox("Preview", &m_previewMode);
+	m_guiSceneTouched |= ImGui::Combo("Device Mode", reinterpret_cast<int *>(&m_renderDevice), EDeviceMode::Strings, EDeviceMode::Size);
+
+	ImGui::Separator();
 	ImGui::Combo("Display Device", reinterpret_cast<int *>(&m_displayDevice), EDeviceMode::Strings, EDeviceMode::Size);
 	ImGui::Combo("Visible Layer", reinterpret_cast<int *>(&m_visibleRenderLayer), ERenderLayer::Strings, ERenderLayer::Size);
 }

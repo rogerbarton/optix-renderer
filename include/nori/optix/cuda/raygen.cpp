@@ -103,6 +103,10 @@ extern "C" __global__ void __raygen__perspective()
 		normal += prd.normal;
 	}
 
+	// PRINT_PIXEL(100, 100, "color  (%f, %f, %f), ", color.x, color.y, color.z);
+	// PRINT_PIXEL(100, 100, "albedo (%f, %f, %f), ", albedo.x, albedo.y, albedo.z);
+	// PRINT_PIXEL(100, 100, "normal (%f, %f, %f)\n", normal.x, normal.y, normal.z);
+
 	// Normalize and update image
 	interpolateAndApplyToBuffer(launchParams.sampleIndex, launchParams.samplesPerLaunch, pixelIdx,
 	                            launchParams.d_outputBuffer, color);

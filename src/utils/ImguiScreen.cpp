@@ -390,46 +390,12 @@ void ImguiScreen::draw()
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("Scene Controller", &uiShowSceneWindow))
 		{
-			ImGui::Text("Render");
-			ImGui::SameLine();
-			ImGui::ProgressBar(m_renderThread.getProgress());
-			ImGui::Text("Render time: %s", (char*)m_renderThread.getRenderTime().c_str());
-
-			if (ImGui::Button("Stop Render"))
-				m_renderThread.stopRendering();
-
-			// show restart button if m_scene is valid
-			if (m_renderThread.m_guiScene)
-			{
-				ImGui::SameLine();
-				if (ImGui::Button("Restart Render"))
-					m_renderThread.restartRender();
-			}
-
 			m_renderThread.drawRenderGui();
 
-			ImGui::NewLine();
-
-			ImGui::Text("Image Offset");
-			ImGui::SameLine();
-			ImGui::PushID(1);
-			ImGui::DragVector2i("##value", &imageOffset);
-			ImGui::PopID();
-
-			ImGui::Text("Zoom Level");
-			ImGui::SameLine();
-			ImGui::PushID(2);
-			ImGui::SliderFloat("##value", &imageZoom, 1.f / 30.f, 30.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
-			ImGui::PopID();
-
-			ImGui::NewLine();
-
-			ImGui::Text("Target Framerate");
-			ImGui::SameLine();
-			ImGui::PushID(3);
-			ImGui::SliderFloat("##value", &targetFramerate, 1.f, 100.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
-			ImGui::PopID();
-			ImGui::NewLine();
+			ImGui::SliderFloat("Target Framerate", &targetFramerate, 1.f, 100.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
+			ImGui::Separator();
+			ImGui::DragVector2i("Image Offset", &imageOffset);
+			ImGui::SliderFloat("Zoom Level", &imageZoom, 1.f / 30.f, 30.f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
 
 			static float exposureLog = 0.5f;
 			ImGui::SliderFloat("Exposure", &exposureLog, 0.01f, 1.f);
