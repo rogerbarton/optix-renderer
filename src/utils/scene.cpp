@@ -151,7 +151,7 @@ NORI_NAMESPACE_BEGIN
 		clone->m_optixRenderer = static_cast<OptixRenderer*>(m_optixRenderer->cloneAndInit());
 #endif
 
-        cout << endl << "Configuration: " << clone->toString() << endl << endl;
+        // cout << endl << "Configuration: " << clone->toString() << endl << endl;
 
 		return clone;
 	}
