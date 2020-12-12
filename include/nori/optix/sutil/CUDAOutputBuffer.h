@@ -351,6 +351,7 @@ void CUDAOutputBuffer<PIXEL_FORMAT>::deletePBO()
 template<typename PIXEL_FORMAT>
 PIXEL_FORMAT *CUDAOutputBuffer<PIXEL_FORMAT>::getHostPointer()
 {
+	// Note: This should be enclosed by map and unmap
 	if (m_type == CUDAOutputBufferType::CUDA_DEVICE ||
 	    m_type == CUDAOutputBufferType::CUDA_P2P ||
 	    m_type == CUDAOutputBufferType::GL_INTEROP)
@@ -358,13 +359,14 @@ PIXEL_FORMAT *CUDAOutputBuffer<PIXEL_FORMAT>::getHostPointer()
 		m_host_pixels.resize(m_width * m_height);
 
 		makeCurrent();
+		// map();
 		CUDA_CHECK(cudaMemcpy(
 				static_cast<void *>( m_host_pixels.data()),
-				map(),
+				m_device_pixels,
 				m_width * m_height * sizeof(PIXEL_FORMAT),
 				cudaMemcpyDeviceToHost
 		));
-		unmap();
+		// unmap();
 
 		return m_host_pixels.data();
 	}
