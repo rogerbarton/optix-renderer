@@ -1,12 +1,14 @@
 # This is the main CMake build file used to compile Nori
 cmake_minimum_required(VERSION 3.12)
 project(nori)
+include(CmakeDependentOption)
 
 option(NORI_USE_GUI "Build the GUI" ON)
 option(NORI_USE_IMGUI "Use ImGui instead of NanoGui, warptest always uses NanoGUI" ON)
 option(NORI_USE_VOLUMES "Enable Volumes" ON)
 option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
 option(NORI_USE_OPTIX "Enable OptiX, requires CUDA" ON)
+cmake_dependent_option(NORI_OPTIX_RELEASE "Enable OptiX release mode" ON "CMAKE_BUILD_TYPE STREQUAL Release" OFF)
 
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
@@ -229,6 +231,10 @@ if(NORI_USE_OPTIX)
         "-DNORI_NVRTC_OPTIX_DIR=\"${OptiX_INCLUDE_DIR}\""
         "-DNORI_NVRTC_CUDA_DIR=\"${CUDA_INCLUDE_DIRS}\""
         "-DNORI_NVRTC_NANOVDB_DIR=\"${CMAKE_SOURCE_DIR}/ext/nanovdb\"")
+
+    if(NORI_OPTIX_RELEASE)
+      target_compile_definitions(nori PRIVATE "-DNORI_OPTIX_RELEASE")
+    endif()
 
     target_link_libraries(nori
         ${CUDA_LIBRARIES}

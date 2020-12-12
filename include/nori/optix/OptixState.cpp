@@ -53,7 +53,7 @@ void OptixState::createContext()
 	OPTIX_CHECK(optixInit());
 	OptixDeviceContextOptions options = {};
 	options.logCallbackFunction = &optixLogCallback;
-#ifdef NDEBUG
+#ifdef NORI_OPTIX_RELEASE
 	options.logCallbackLevel    = 2;
 #else
 	options.logCallbackLevel = 4;
@@ -88,7 +88,7 @@ void OptixState::createCompileOptions()
 
 	m_module_compile_options = {};
 	m_module_compile_options.maxRegisterCount = OPTIX_COMPILE_DEFAULT_MAX_REGISTER_COUNT;
-#ifdef NDEBUG
+#ifdef NORI_OPTIX_RELEASE
 	m_module_compile_options.optLevel   = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
 	m_module_compile_options.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
 #else
@@ -101,7 +101,7 @@ void OptixState::createCompileOptions()
 	m_pipeline_compile_options.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_LEVEL_INSTANCING;
 	m_pipeline_compile_options.numPayloadValues      = NUM_PAYLOAD_VALUES;
 	m_pipeline_compile_options.numAttributeValues    = NUM_ATTRIBUTE_VALUES;
-#ifdef NDEBUG
+#ifdef NORI_OPTIX_RELEASE
 	m_pipeline_compile_options.exceptionFlags                   = OPTIX_EXCEPTION_FLAG_NONE;
 #else
 	m_pipeline_compile_options.exceptionFlags =
@@ -112,7 +112,7 @@ void OptixState::createCompileOptions()
 
 	m_pipeline_link_options = {};
 	m_pipeline_link_options.maxTraceDepth = maxTraceDepth;
-#ifdef NDEBUG
+#ifdef NORI_OPTIX_RELEASE
 	m_pipeline_link_options.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
 #else
 	m_pipeline_link_options.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_FULL;

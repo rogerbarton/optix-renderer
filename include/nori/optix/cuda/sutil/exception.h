@@ -4,7 +4,7 @@
 
 #pragma once
 
-#define ERROR_COLOR make_float3(255,192,203)
+#define ERROR_COLOR make_float3(1.f,0.f,0.8f)
 
 #define IF_PIXEL( x_, y_ )                                                     \
     const uint3 launch_idx__ = optixGetLaunchIndex();                          \
