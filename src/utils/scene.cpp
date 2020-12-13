@@ -22,7 +22,6 @@
 #include <nori/sampler.h>
 #include <nori/camera.h>
 #include <nori/emitter.h>
-#include <nori/NvdbVolume.h>
 #include <nori/bsdf.h>
 
 #ifdef NORI_USE_OPTIX

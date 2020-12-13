@@ -20,7 +20,11 @@ NORI_NAMESPACE_BEGIN
 
 		NoriObject *cloneAndInit() override
 		{
+			if (!m_volume)
+				throw NoriException("HeterogeneousMedium requires a nvdb volume.");
+
 			auto clone = new HeterogeneousMedium(*this);
+			clone->m_volume = static_cast<NvdbVolume *>(m_volume->cloneAndInit());
 			Medium::cloneAndInit(clone);
 			return clone;
 		}
@@ -31,6 +35,7 @@ NORI_NAMESPACE_BEGIN
 			if (!gui->touched)return;
 			gui->touched = false;
 
+			m_volume->update(gui->m_volume);
 			Medium::update(guiObject);
 		}
 
