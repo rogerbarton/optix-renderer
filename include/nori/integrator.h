@@ -32,8 +32,9 @@ struct ERenderLayer
 	static constexpr int Composite                    = 0;
 	static constexpr int Albedo                       = 1;
 	static constexpr int Normal                       = 2;
-	static constexpr int Size                         = 3;
-	static constexpr char *Strings[Size] = {"Composite", "Albedo", "Normal"};
+	static constexpr int Denoised                     = 3;
+	static constexpr int Size                         = 4;
+	static constexpr char *Strings[Size] = {"Composite", "Albedo", "Normal", "Denoised"};
 };
 using ERenderLayer_t = ERenderLayer::Type;
 

@@ -31,6 +31,7 @@ NORI_NAMESPACE_BEGIN
 
 		int  m_samplesPerLaunch;
 		bool m_enableSpecialization; /// Set specific constants at compile time for better optimization
+		int m_denoiseRate; /// Denoise every n frames, set to zero to denoise only at the end
 	protected:
 	};
 

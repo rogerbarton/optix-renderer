@@ -64,6 +64,22 @@ struct OptixState
 
 	const int maxTraceDepth = 2;
 
+	// -- Denoiser
+	bool                initializedDenoiser   = false;
+	OptixDenoiser       m_denoiser            = nullptr;
+	CUstream            m_denoiserStream      = 0;
+	OptixDenoiserParams m_denoiserParams      = {};
+	uint32_t            m_denoiserWidth       = 0;
+	uint32_t            m_denoiserHeight      = 0;
+	CUdeviceptr         m_denoiserIntensity   = 0;
+	CUdeviceptr         m_denoiserScratch     = 0;
+	uint32_t            m_denoiserScratchSize = 0;
+	CUdeviceptr         m_denoiserState       = 0;
+	uint32_t            m_denoiserStateSize   = 0;
+
+	OptixImage2D m_denoiserInputs[3] = {};
+	OptixImage2D m_denoiserOutput;
+
 	// -- Interface
 	void create();
 	/**
@@ -71,12 +87,24 @@ struct OptixState
 	 * @return True if successful without errors and rendering can proceed
 	 */
 	bool preRender(nori::Scene &scene, bool usePreview);
+
+	/**
+	 * Initialize the denoiser with the current image dimensions and IO buffer device pointers
+	 */
+	void preRenderDenoiser(const uint32_t imageWidth, const uint32_t imageHeight,
+	                       const float4 *d_composite, const float4 *d_albedo, const float4 *d_normal,
+	                       float4 *d_denoised);
 	/**
 	 * Renders one subframe. Assumes that preRender has succeeded
 	 * @param outputBuffer mapped device pointer, use CUDAOutputBuffer::map() on the opengl thread
 	 */
 	void renderSubframe(const uint32_t currentSample,
-					 float4* outputBuffer, float4* outputBufferAlbedo, float4* outputBufferNormal);
+	                    float4 *outputBuffer, float4 *outputBufferAlbedo, float4 *outputBufferNormal);
+	/**
+	 * Denoises the device buffers, which should already be allocated
+	 */
+	void denoise();
+
 	void clear();
 	void clearPipeline();
 	~OptixState();
@@ -88,12 +116,14 @@ private:
 	void buildIas();
 	void createPtxModules(bool specialize = true);
 	void createPipeline();
-	void createRaygenProgram(std::vector<OptixProgramGroup>& program_groups);
-	void createHitMeshProgram(std::vector<OptixProgramGroup>& program_groups);
-	void createHitSphereProgram(std::vector<OptixProgramGroup>& program_groups);
-	void createHitVolumeProgram(std::vector<OptixProgramGroup>& program_groups);
-	void createMissProgram(std::vector<OptixProgramGroup>& program_groups);
+	void createRaygenProgram(std::vector<OptixProgramGroup> &program_groups);
+	void createHitMeshProgram(std::vector<OptixProgramGroup> &program_groups);
+	void createHitSphereProgram(std::vector<OptixProgramGroup> &program_groups);
+	void createHitVolumeProgram(std::vector<OptixProgramGroup> &program_groups);
+	void createMissProgram(std::vector<OptixProgramGroup> &program_groups);
 	void updateSbt(const std::vector<nori::Shape *> &shapes);
+
+	void deleteDenoiser();
 };
 
 #endif

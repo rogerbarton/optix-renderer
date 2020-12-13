@@ -60,6 +60,7 @@ void RenderThread::initBlocks()
 	m_optixDisplayBlock       = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
 	m_optixDisplayBlockAlbedo = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
 	m_optixDisplayBlockNormal = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
+	m_optixDisplayBlockDenoised = new CUDAOutputBuffer <float4>{CUDAOutputBufferType::GL_INTEROP, 1, 1};
 #endif
 	m_block.setConstant(Color4f(0.6f, 0.6f, 0.6f, 1.00f));
 }
@@ -73,9 +74,11 @@ RenderThread::~RenderThread()
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlock)));
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo)));
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockNormal)));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockDenoised)));
 	delete m_optixDisplayBlock;
 	delete m_optixDisplayBlockAlbedo;
 	delete m_optixDisplayBlockNormal;
+	delete m_optixDisplayBlockDenoised;
 #endif
 }
 
@@ -86,6 +89,7 @@ void RenderThread::PreGlDestroy()
 	m_optixDisplayBlock->deletePBO();
 	m_optixDisplayBlockAlbedo->deletePBO();
 	m_optixDisplayBlockNormal->deletePBO();
+	m_optixDisplayBlockDenoised->deletePBO();
 #endif
 }
 
@@ -211,6 +215,13 @@ void RenderThread::startRenderThread()
 	m_optixDisplayBlockNormal->resize(outputSize.x(), outputSize.y());
 	m_d_optixDisplayBlockNormal = m_optixDisplayBlockNormal->map();
 	m_optixDisplayBlockNormal->unlock();
+
+	m_optixDisplayBlockDenoised->lock();
+	if (m_d_optixDisplayBlockDenoised)
+		m_optixDisplayBlockDenoised->unmap();
+	m_optixDisplayBlockDenoised->resize(outputSize.x(), outputSize.y());
+	m_d_optixDisplayBlockDenoised = m_optixDisplayBlockDenoised->map();
+	m_optixDisplayBlockDenoised->unlock();
 #endif
 
 	// Start the actual thread
@@ -459,12 +470,15 @@ void RenderThread::renderThreadOptix()
 			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlock)));
 			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo)));
 			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockNormal)));
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_d_optixRenderBlockDenoised)));
 			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlock), m_optixBlockSizeBytes));
 			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlockAlbedo), m_optixBlockSizeBytes));
 			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlockNormal), m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_optixRenderBlockDenoised), m_optixBlockSizeBytes));
 			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlock), 0, m_optixBlockSizeBytes));
 			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlockAlbedo), 0, m_optixBlockSizeBytes));
 			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlockNormal), 0, m_optixBlockSizeBytes));
+			CUDA_CHECK(cudaMemset(reinterpret_cast<void *>(m_d_optixRenderBlockDenoised), 0, m_optixBlockSizeBytes));
 		}
 
 		OptixState *const optixState = m_renderScene->getOptixState();
@@ -472,9 +486,14 @@ void RenderThread::renderThreadOptix()
 		if (!optixState->preRender(*m_renderScene, m_previewMode))
 			return;
 
+		optixState->preRenderDenoiser(blockSize.x(), blockSize.y(),
+		                              m_d_optixRenderBlock, m_d_optixRenderBlockAlbedo, m_d_optixRenderBlockNormal,
+		                              m_d_optixRenderBlockDenoised);
+
 		// Render
-		const uint32_t numSamples                = m_renderScene->getSampler()->getSampleCount();
-		const uint32_t samplesPerLaunch          = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+		const uint32_t numSamples       = m_renderScene->getSampler()->getSampleCount();
+		const uint32_t samplesPerLaunch = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
+		const uint32_t denoiseRate      = m_renderScene->m_optixRenderer->m_denoiseRate;
 
 		for (; m_currentOptixSample + m_currentCpuSample < numSamples; m_currentOptixSample += samplesPerLaunch)
 		{
@@ -483,6 +502,10 @@ void RenderThread::renderThreadOptix()
 
 			optixState->renderSubframe(m_currentOptixSample,
 			                           m_d_optixRenderBlock, m_d_optixRenderBlockAlbedo, m_d_optixRenderBlockNormal);
+
+			const bool denoise = denoiseRate != 0 && m_currentOptixSample > 0 && m_currentOptixSample % denoiseRate == 0;
+			if (denoise)
+				optixState->denoise();
 
 			// Copy output to display buffers if display buffer is available/mapped
 			if (m_d_optixDisplayBlock)
@@ -505,16 +528,42 @@ void RenderThread::renderThreadOptix()
 				                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
 				m_optixDisplayBlockNormal->unlock();
 
+				if (denoise) {
+					m_optixDisplayBlockDenoised->lock();
+					CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockDenoised),
+					                      m_d_optixRenderBlockDenoised,
+					                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
+					m_optixDisplayBlockDenoised->unlock();
+
+					m_optixDisplayBlockDenoisedTouched = true;
+				}
+
 				m_optixDisplayBlockTouched = true;
 			}
+		}
+
+		// Denoise only at the end
+		if (m_renderStatus != ERenderStatus::Interrupt && denoiseRate == 0)
+		{
+			optixState->denoise();
+
+			// Update display buffer (same as above)
+			m_optixDisplayBlockDenoised->lock();
+			CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_d_optixDisplayBlockDenoised),
+			                      m_d_optixRenderBlockDenoised,
+			                      m_optixBlockSizeBytes, cudaMemcpyDeviceToDevice));
+			m_optixDisplayBlockDenoised->unlock();
+
+			m_optixDisplayBlockDenoisedTouched = true;
+			m_optixDisplayBlockTouched = true;
 		}
 	}
 	catch (std::exception& e)
 	{
 		std::cerr << "Optix Error: " << e.what() << std::endl;
-		std::cerr << "  Optix disabled.";
-		m_renderDevice  = EDeviceMode::Cpu;
-		m_displayDevice = EDeviceMode::Cpu;
+		std::cerr << "-- Optix disabled.";
+		// m_renderDevice  = EDeviceMode::Cpu;
+		// m_displayDevice = EDeviceMode::Cpu;
 	}
 }
 
@@ -541,6 +590,16 @@ void RenderThread::renderThreadOptix()
 		m_optixDisplayBlockNormal->unmap();
 		m_d_optixDisplayBlockNormal = m_optixDisplayBlockNormal->map();
 		m_optixDisplayBlockNormal->unlock();
+
+		if (m_optixDisplayBlockDenoisedTouched)
+		{
+			m_optixDisplayBlockDenoisedTouched = false;
+			m_optixDisplayBlockDenoised->lock();
+			m_d_optixDisplayBlockDenoised = 0;
+			m_optixDisplayBlockDenoised->unmap();
+			m_d_optixDisplayBlockDenoised = m_optixDisplayBlockDenoised->map();
+			m_optixDisplayBlockDenoised->unlock();
+		}
 	}
 #endif
 
@@ -631,6 +690,8 @@ std::string RenderThread::getRenderTime() {
 			return m_blockAlbedo;
 		if (layer == ERenderLayer::Normal)
 			return m_blockNormal;
+		// if (layer == ERenderLayer::Denoised)
+		// 	return m_blockDenoised;
 		else
 			return m_block;
 	}
@@ -645,6 +706,8 @@ std::string RenderThread::getRenderTime() {
 			return m_optixDisplayBlockAlbedo;
 		if (layer == ERenderLayer::Normal)
 			return m_optixDisplayBlockNormal;
+		if (layer == ERenderLayer::Denoised)
+			return m_optixDisplayBlockDenoised;
 		else
 			return m_optixDisplayBlock;
 	}

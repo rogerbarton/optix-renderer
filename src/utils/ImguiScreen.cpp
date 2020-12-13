@@ -583,16 +583,18 @@ void ImguiScreen::keyPressed(int key, int mods)
 	else if (key == GLFW_KEY_R)
 		drop(m_renderThread.getFilename());
 	else if (key == GLFW_KEY_Z)
-		m_renderThread.setVisibleRenderLayer(ERenderLayer::Composite);
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Denoised);
 	else if (key == GLFW_KEY_X)
-		m_renderThread.setVisibleRenderLayer(ERenderLayer::Albedo);
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Composite);
 	else if (key == GLFW_KEY_C)
-		m_renderThread.setVisibleRenderLayer(ERenderLayer::Normal);
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Albedo);
 	else if (key == GLFW_KEY_V)
-		m_renderThread.setVisibleDevice(EDeviceMode::Cpu);
+		m_renderThread.setVisibleRenderLayer(ERenderLayer::Normal);
 	else if (key == GLFW_KEY_B)
-		m_renderThread.setVisibleDevice(EDeviceMode::Optix);
+		m_renderThread.setVisibleDevice(EDeviceMode::Cpu);
 	else if (key == GLFW_KEY_N)
+		m_renderThread.setVisibleDevice(EDeviceMode::Optix);
+	else if (key == GLFW_KEY_M)
 		m_renderThread.setVisibleDevice(EDeviceMode::Both);
 }
 

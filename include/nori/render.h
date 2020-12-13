@@ -121,8 +121,8 @@ protected:
 
 	ERenderLayer_t m_visibleRenderLayer = ERenderLayer::Composite;
 	ImageBlock m_block;
-    ImageBlock m_blockNormal;		/// Normals feature buffer
     ImageBlock m_blockAlbedo;      	/// Albedo feature buffer
+    ImageBlock m_blockNormal;		/// Normals feature buffer
 
     std::thread                m_renderThread;
     std::atomic<ERenderStatus> m_renderStatus = ERenderStatus::Idle;
@@ -138,14 +138,18 @@ protected:
 	float4* m_d_optixRenderBlock = 0;
 	float4* m_d_optixRenderBlockAlbedo = 0;
 	float4* m_d_optixRenderBlockNormal = 0;
+	float4* m_d_optixRenderBlockDenoised = 0;
 
 	CUDAOutputBuffer<float4>* m_optixDisplayBlock;
 	CUDAOutputBuffer<float4>* m_optixDisplayBlockAlbedo;
 	CUDAOutputBuffer<float4>* m_optixDisplayBlockNormal;
+	CUDAOutputBuffer<float4>* m_optixDisplayBlockDenoised;
 	std::atomic<bool> m_optixDisplayBlockTouched = false;
+	std::atomic<bool> m_optixDisplayBlockDenoisedTouched = false;
 	float4* m_d_optixDisplayBlock = 0;
 	float4* m_d_optixDisplayBlockAlbedo = 0;
 	float4* m_d_optixDisplayBlockNormal = 0;
+	float4* m_d_optixDisplayBlockDenoised = 0;
 #endif
 
 	std::string sceneFilename;
