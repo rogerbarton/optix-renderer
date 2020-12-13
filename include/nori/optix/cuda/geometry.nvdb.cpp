@@ -44,8 +44,9 @@ rayBoxIntersect(nanovdb::Vec3f rpos, nanovdb::Vec3f rdir, nanovdb::Vec3f vmin, n
 //
 extern "C" __global__ void __intersection__nanovdb_fogvolume()
 {
+	// TODO: This is broken, volumes are not shapes anymore
 	const auto *sbt_data = reinterpret_cast<const HitGroupParams *>(optixGetSbtDataPointer());
-	const auto *grid     = reinterpret_cast<const nanovdb::FloatGrid *>(sbt_data->geometry.volumeNvdb.grid);
+	const auto *grid     = reinterpret_cast<const nanovdb::FloatGrid *>(sbt_data->medium.heterog.densityGrid);
 
 	const float3              ray_orig = optixGetWorldRayOrigin();
 	const float3              ray_dir  = optixGetWorldRayDirection();
@@ -58,6 +59,6 @@ extern "C" __global__ void __intersection__nanovdb_fogvolume()
 	if (hit[2] != -1)
 	{
 		float voxelUniformSize = float(grid->voxelSize()[0]);
-		optixReportIntersection(hit[0] * voxelUniformSize, GeometryData::Type::VOLUME_NVDB);
+		optixReportIntersection(hit[0] * voxelUniformSize, GeometryData::Type::TYPE_SIZE);
 	}
 }

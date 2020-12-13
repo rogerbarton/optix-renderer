@@ -64,7 +64,7 @@ NORI_NAMESPACE_BEGIN
 			return 1.f;
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override
+		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const override
 		{
 			return 0.f;
 		}
@@ -92,10 +92,12 @@ NORI_NAMESPACE_BEGIN
 #ifdef NORI_USE_OPTIX
 		void getOptixMediumData(MediumData &sbtData) override
 		{
-			TODO
+			// TODO
 			sbtData.type          = MediumData::HETEROG;
-
+			sbtData.heterog.densityGrid = m_volume->densityGrid;
+			sbtData.heterog.temperatureGrid = m_volume->heatGrid;
 			Medium::getOptixMediumData(sbtData);
+			throw NoriException("Heterog::getOptixMediumData not implemented!");
 		}
 #endif
 

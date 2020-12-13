@@ -65,7 +65,7 @@ NORI_NAMESPACE_BEGIN
 			       -std::log(sample.x()) / m_mu_t(sampledChannel);
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const override
+		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const override
 		{
 			return (-m_mu_t * (from - to).norm()).array().exp();
 		}

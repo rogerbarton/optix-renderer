@@ -36,7 +36,7 @@ NORI_NAMESPACE_BEGIN
 		/**
 		 * Aka sampleFreePathPdf
 		 */
-		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to) const = 0;
+		virtual Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const = 0;
 
 		const PhaseFunction *getPhase() const { return m_phase; }
 

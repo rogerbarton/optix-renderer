@@ -12,8 +12,8 @@ struct MediumData
 {
 	enum Type
 	{
-		VACUUM = 0,
-		HOMOG  = 1,
+		VACUUM  = 0,
+		HOMOG   = 1,
 		HETEROG = 2,
 		TYPE_COUNT
 	};
@@ -27,19 +27,21 @@ struct MediumData
 		float3 mu_a;
 		float3 mu_s;
 		float3 mu_t;
-		float  density;
+		float  density; // TODO: do we need this? albedo?
 	};
 
-	struct Hetrog
+	struct Heterog
 	{
+		const void *densityGrid;
+		const void *temperatureGrid;
 	};
 
 	Type type = VACUUM;
 
 	union
 	{
-		Vacuum vacuum;
-		Homog  homog;
+		Vacuum  vacuum;
+		Homog   homog;
 		Heterog heterog;
 	};
 };

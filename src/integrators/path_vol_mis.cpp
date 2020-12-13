@@ -44,7 +44,7 @@ NORI_NAMESPACE_BEGIN
 
 				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
-				Color3f Tr = medium->getTransmittance(ray.o, p);
+				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction);
 				throughput *= Tr;
 
 				// -- Apply captured emission
@@ -146,7 +146,7 @@ NORI_NAMESPACE_BEGIN
 									occluded = true;
 									break;
 								}
-								shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p);
+								shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p, false);
 								shadowMedium =
 										shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
 										shadowIts.shape->getMedium() :     // entering
