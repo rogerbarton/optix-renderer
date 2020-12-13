@@ -436,6 +436,8 @@ void OptixState::clear()
 
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>( m_d_params )));
 
+	CUDA_CHECK(cudaStreamDestroy(m_stream));
+
 }
 void OptixState::clearPipeline()
 {
@@ -504,9 +506,9 @@ void OptixState::renderSubframe(const uint32_t currentSample,
 	                        &m_sbt,
 	                        m_params.imageWidth,
 	                        m_params.imageHeight,
-	                        1));
+	                        maxTraceDepth));
 
 	CUDA_CHECK(cudaStreamSynchronize(m_stream));
 	CUDA_SYNC_CHECK();
 	// std::cout << "optixLaunch done." << std::endl;
-}
+}
