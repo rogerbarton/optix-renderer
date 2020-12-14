@@ -13,13 +13,13 @@ NORI_NAMESPACE_BEGIN
 	struct PhaseQueryRecord
 	{
 		// Incident direction (in the local frame)
-		Vector3f wi;
+		static Vector3f wi() { return Vector3f::UnitZ(); };
 
-		// Outgoing direction (in the local frame)
+		// Outgoing direction (in the local frame) with wi=(0,0,1)
 		Vector3f wo;
 
-		PhaseQueryRecord(Vector3f wi) : wi(std::move(wi)) {}
-		PhaseQueryRecord(Vector3f wi, Vector3f wo) : wi(std::move(wi)), wo(std::move(wo)) {}
+		PhaseQueryRecord() = default;
+		PhaseQueryRecord(Vector3f wo) : wo(std::move(wo)) {}
 	};
 
 	/**

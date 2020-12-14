@@ -83,10 +83,13 @@ NORI_NAMESPACE_BEGIN
 				if (isMediumInteraction)
 				{
 					// Next interaction is in medium => Sample phase
-					PhaseQueryRecord pRec(its.toLocal(-ray.d));
-					medium->getPhase()->sample(pRec, sampler->next2D());
 					// throughput constant
-					wo = its.toWorld(pRec.wo);
+					PhaseQueryRecord pRec{};
+					medium->getPhase()->sample(pRec, sampler->next2D());
+
+					// Transform wo to world space
+					// Note, as wi/wo point away from interaction point: toWorld(wi) = ray.d
+					wo = Frame(ray.d).toWorld(pRec.wo);
 				}
 				else
 				{

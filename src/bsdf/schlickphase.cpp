@@ -24,7 +24,7 @@ NORI_NAMESPACE_BEGIN
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
 		float pdf(const PhaseQueryRecord &bRec) const override
 		{
-			return Warp::squareToSchlickPdf(Frame(bRec.wi).toLocal(bRec.wo), m_k);
+			return Warp::squareToSchlickPdf(bRec.wo, m_k);
 		}
 
 		/// Sample the BRDF

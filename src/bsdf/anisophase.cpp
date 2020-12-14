@@ -23,7 +23,7 @@ NORI_NAMESPACE_BEGIN
 		/// Evaluate the sampling density of \ref sample() wrt. solid angles
 		float pdf(const PhaseQueryRecord &bRec) const override
 		{
-			return Warp::squareToHenyeyGreensteinPdf(Frame(bRec.wi).toLocal(bRec.wo), m_g);
+			return Warp::squareToHenyeyGreensteinPdf(bRec.wo, m_g);
 		}
 
 		/// Sample the BRDF
