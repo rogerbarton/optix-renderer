@@ -48,7 +48,7 @@ NORI_NAMESPACE_BEGIN
 				const float       tm                  = medium->sampleFreePath(mRec, *sampler);
 				const bool        isMediumInteraction = tm < its.t;
 
-				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
+				Point3f p = isMediumInteraction ? ray(tm) : its.p;
 
 				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction, *sampler);
 				throughput *= Tr;
@@ -178,6 +178,7 @@ NORI_NAMESPACE_BEGIN
 							}
 						} // End Emitter Sampling
 
+						throughput *= bsdfSample;
 					}
 
 					// Update current medium, if entering or leaving shape (note: overlaps unhandled)
