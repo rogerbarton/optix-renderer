@@ -36,15 +36,25 @@ NORI_NAMESPACE_BEGIN
 		gui->fileTouched = false;
 	}
 
+	float NvdbVolume::getDensity(const nanovdb::Vec3f &p)
+	{
+		return (*densitySampler)(p);
+	}
+
 	float NvdbVolume::getDensity(const Vector3f &point)
 	{
-		const nanovdb::Vec3<float> p(point.x(), point.y(), point.z());
+		const nanovdb::Vec3f p(point.x(), point.y(), point.z());
 		return (*densitySampler)(p);
+	}
+
+	float NvdbVolume::getTemperature(const nanovdb::Vec3f &p)
+	{
+		return (*temperatureSampler)(p);
 	}
 
 	float NvdbVolume::getTemperature(const Vector3f &point)
 	{
-		const nanovdb::Vec3<float> p(point.x(), point.y(), point.z());
+		const nanovdb::Vec3f p(point.x(), point.y(), point.z());
 		return (*temperatureSampler)(p);
 	}
 

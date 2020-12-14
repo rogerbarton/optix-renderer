@@ -17,13 +17,16 @@ NORI_NAMESPACE_BEGIN
 	{
 		explicit HeterogeneousMedium(const PropertyList &propList) : Medium(propList)
 		{
-			m_densityScale = propList.getFloat("densityScale", 1.f);
+			m_densityScale     = propList.getFloat("densityScale", 1.f);
+			m_temperatureScale = propList.getFloat("temperatureScale", 0.f); // disable by default
 		}
 
 		NoriObject *cloneAndInit() override
 		{
 			if (!m_volume)
 				throw NoriException("HeterogeneousMedium requires a nvdb volume.");
+
+			updateDerivedProperties();
 
 			auto clone = new HeterogeneousMedium(*this);
 			clone->m_volume = static_cast<NvdbVolume *>(m_volume->cloneAndInit());

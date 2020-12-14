@@ -13,7 +13,9 @@ NORI_NAMESPACE_BEGIN
 
 	struct NvdbVolume : public NoriObject
 	{
+		float getDensity(const nanovdb::Vec3f &point);
 		float getDensity(const Vector3f &point);
+		float getTemperature(const nanovdb::Vec3f &point);
 		float getTemperature(const Vector3f &point);
 
 		NvdbVolume() = default;
