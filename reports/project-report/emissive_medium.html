@@ -61,6 +61,7 @@
                         <a class="dropdown-item active" href="emissive_medium.html">Emissive Participating Media</a>
                         <a class="dropdown-item" href="heterogenous_media.html">Hetergoenous Participating Media</a>
                         <a class="dropdown-item" href="normals.html">Normal Mapping</a>
+                        <a class="dropdown-item" href="misc-roger.html">Misc</a>
                     </div>
                 </li>
             </ul>
@@ -78,21 +79,33 @@
             <p>
                 I based this feature on the arealight, where instead of sampling the shape surface we sample its volume.
                 The pdf function is the same except that we query the volume. As we are sampling a point uniformly inside the volume, the pdf=1/volume. 
-                As calculating the volume is non-trivial for arbitrary triangle meshes, I have only implemented this feature for the sphere and box. 
+                As calculating the volume is non-trivial for arbitrary triangle meshes, I have only implemented this feature for the sphere and AABB. <br/>
 
-                We also do not have a normal inside the volume and thus assume that the light is emitted with the same strenth in all directions (isotropic in this respect).
+                Volume lights are attached to a medium. This means that a shape can have a surface and medium emitter simultaneously<br/>
+
+                We also do not have a normal inside the volume and thus assume that the light is emitted with the same strenth in all directions (isotropic in this respect).<br/>
+
+                The radiance also needs to be accumulated when a ray travels through the medium. This is done inside the Medium::getTransmittance function.
+                I initialliy started by implementing the sampling and pdf like pointlights without integrating the radiance along a ray. This gave good results for the mats integrator, see below.<br/>
             </p>
-
-            <img src="images/iso-warptest.png" alt="Reference" class="img-responsive">
-            <img src="images/aniso-warptest.png" alt="Reference" class="img-responsive">
                 
+            <h4>Comparison 128spp</h4>
             <div class="twentytwenty-container">
-                <img src="images/ref/ajax-normals.png" alt="Reference" class="img-responsive">
-                <img src="images/mine/ajax-normals.png" alt="Mine" class="img-responsive">
+                <img src="images/emissive-media/volumelight-test-mats.png" alt="Mine MATS" class="img-responsive">
+                <img src="images/emissive-media/volumelight-test-mis.png" alt="Mine MIS" class="img-responsive">
+                <img src="images/emissive-media/volumelight-test-ref.png" alt="Blender" class="img-responsive">
             </div> <br>
+            <p>Mine is significantly more noisy with only mats sampling.</p>
+
+
             <h4>Implemented in:</h4>
             <ul>
-                <li>TODO</li>
+                <li>src/emitter/volumelight.cpp</li>
+                <li>src/mediua/homogeneous.cpp</li>
+                <li>src/mediua/heterogeneous.cpp</li>
+                <li>include/nori/medium.h</li>
+                <li>src/integrators/path_vol_mats.cpp</li>
+                <li>src/integrators/path_vol_mis.cpp</li>
 
             </ul>
         </div>

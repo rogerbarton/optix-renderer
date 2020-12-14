@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="path_vol_mats"/>
+	<integrator type="path_vol_mis"/>
 	<sampler type="independent">
 		<integer name="sampleCount" value="128"/>
 	</sampler>
@@ -27,9 +27,6 @@
 		<point name="center" value="0 0 0.75" />
 		<float name="radius" value="0.5" />
 
-		<emitter type="volumelight">
-			<color name="radiance" value="1 1 1"/>
-		</emitter>
 		<!-- <bsdf type="dielectric"/> -->
 		<medium type="homog">
 			<!-- <phase type="anisophase"/> -->

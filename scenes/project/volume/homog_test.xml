@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="path_vol_mats"/>
+	<integrator type="path_vol_mis"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="2048"/>
+		<integer name="sampleCount" value="128"/>
 	</sampler>
 
 	<camera type="perspective">
@@ -30,18 +30,19 @@
 		<!-- <bsdf type="dielectric"/> -->
 		<medium type="homog">
 			<!-- <phase type="anisophase"/> -->
-			
-			<emitter type="volumelight">
-				<color name="radiance" value="1 1 1"/>
-			</emitter>
 		</medium>
 	</shape>
 
 	<shape type="obj">
-		<string name="filename" value="plane.obj"/>
+		<string name="filename" value="../volume-emission/plane.obj"/>
 
 		<bsdf type="diffuse">
 			<color name="albedo" value="1 1 1"/>
 		</bsdf>
 	</shape>
+
+	<emitter type="point">
+		<point name="position" value = "0,1,0.1"/>
+		<color name="power" value="30,30,30"/>
+	</emitter>
 </scene>

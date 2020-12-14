@@ -61,6 +61,7 @@
                         <a class="dropdown-item" href="emissive_medium.html">Emissive Participating Media</a>
                         <a class="dropdown-item active" href="heterogenous_media.html">Hetergoenous Participating Media</a>
                         <a class="dropdown-item" href="normals.html">Normal Mapping</a>
+                        <a class="dropdown-item" href="misc-roger.html">Misc</a>
                     </div>
                 </li>
             </ul>
@@ -72,11 +73,49 @@
 
     <div class="container contentWrapper">
         <div class="pageContent">
+            For this feature I started with the homogeneous medium and isotropic phase. 
+            We can sample the free path length and its pdf (transmittance) from a medium. The transmittance supports colors.
+            
+            A medium can be attached to a shape and a medium has a phase function.
+            When a ray enters a shape the active medium is updated in the integrator. When it leaves the medium the scene medium replaces it. The scene medium
+            is a vacuum medium by default, with infinite free path. However, an arbitrary medium can be attached to the scene. There are some limitations to
+            scene media. They cannot have an emitter and rays that miss the scene currently use the environment map.
 
-            <!-- ================================================================= -->
+            To support heterogeneous media I used the delta tracking method to step along the ray and sample the free path distance. This iteration is done to sample
+            the free path length and again to determine the pdf of sampling that distance.
+
+            I used NanoVDB to query the vdb volume I exported in blender. The vdb structure is a child object of the heterogeneous media and contains a density and temperature grid.
+
+            I used the NanoVDB viewer as a reference.
+
+            <h4>Cbox without volumes - Comparison to pa4 path integrators</h4>
+            <div class="twentytwenty-container">
+                <img src="images/volume/cbox_path_mats.png" alt="path_mats" class="img-responsive">
+                <img src="images/volume/cbox_path_mis.png" alt="path_mis" class="img-responsive">
+                <img src="images/volume/cbox_path_vol_mats.png" alt="path_vol_mats" class="img-responsive">
+                <img src="images/volume/cbox_path_vol_mis.png" alt="path_vol_mis" class="img-responsive">
+            </div> <br>
+
+            <h4>Cbox homogeneous volume - </h4>
+            <div class="twentytwenty-container">
+                <img src="images/volume/cbox_homog_mats.png" alt="path_mats" class="img-responsive">
+                <img src="images/volume/cbox_homog_mis.png" alt="path_mis" class="img-responsive">
+                <img src="images/volume/cbox_homog_ref.png" alt="Blender" class="img-responsive">
+            </div> <br>
+            <p>Isotropic phase, unit density.</p>
+
             <h4>Implemented in:</h4>
             <ul>
-                <li>TODO</li>
+                <li>include/nori/medium.h</li>
+                <li>src/media/medium.cpp</li>
+                <li>src/media/vacuum.cpp</li>
+                <li>src/media/homogeneous.cpp</li>
+                <li>src/media/heterogeneous.cpp</li>
+                <li>src/integrators/path_vol_mats.cpp</li>
+                <li>src/integrators/path_vol_mis.cpp</li>
+                <li>include/nori/NvdbVolume.h</li>
+                <li>src/textures/NvdbVolume.cpp</li>
+                <li>src/textures/NvdbVolume.vdb.cpp</li>
             </ul>
 
         </div>
