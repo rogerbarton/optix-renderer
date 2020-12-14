@@ -69,8 +69,8 @@ NORI_NAMESPACE_BEGIN
 		Color3f
 		getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered, Sampler &sampler) const override
 		{
-			return (-m_mu_t * (from - to).norm()).array().exp() *
-			       (scattered ? m_mu_t : 1.f);
+			return (scattered ? m_mu_t : 1.f) *
+			       (-m_mu_t * (from - to).norm()).array().exp();
 		}
 
 		std::string toString() const override
