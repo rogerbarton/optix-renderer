@@ -3,15 +3,45 @@
 //
 
 #include <nori/medium.h>
+#include <nori/sampler.h>
 #include <nori/NvdbVolume.h>
 #include <nanovdb/NanoVDB.h>
-#include <nori/sampler.h>
+#include <nanovdb/util/Ray.h>
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/sutil/host_vec_math.h>
 #endif
 
 NORI_NAMESPACE_BEGIN
+	inline Color3f make_color(const nanovdb::Vec3f &v)
+	{
+		return Color3f(v[0], v[2], v[3]);
+	}
+
+	inline Point3f make_point(const nanovdb::Vec3f &v)
+	{
+		return Point3f(v[0], v[2], v[3]);
+	}
+
+	inline nanovdb::Vec3f make_nvec(const Point3f &v)
+	{
+		return nanovdb::Vec3f(v.x(), v.y(), v.z());
+	}
+
+	inline nanovdb::Vec3f make_nvec(const Color3f &v)
+	{
+		return nanovdb::Vec3f(v.x(), v.y(), v.z());
+	}
+
+	template<typename ValueT>
+	inline Color3f colorFromTemperature(const ValueT &v, float scale)
+	{
+		// NanoVDB: RenderFogVolumeUtils.h
+		float r = v;
+		float g = r * r;
+		float b = g * g;
+		return scale * Color3f(r * r * r, g * g * g, b * b * b);
+	}
 
 	struct HeterogeneousMedium : public Medium
 	{
@@ -75,44 +105,71 @@ NORI_NAMESPACE_BEGIN
 		float sampleFreePath(MediumQueryRecord &mRec, Sampler &sampler) const override
 		{
 			// NanoVDB: RenderFogVolumeUtils.h
-			float t = mRec.ray.mint;
+			// Convert ray from world to index and skip to bbox
+			nanovdb::Ray<float> wRay(make_nvec(mRec.ray.o), make_nvec(mRec.ray.d), mRec.ray.mint, mRec.ray.maxt);
+			float               mint, maxt;
+			if (!wRay.intersects(m_volume->densityGrid->worldBBox(), mint, maxt))
+				return INFINITY;
+
+			if (mint > mRec.ray.mint)
+				wRay.setMinTime(mint);
+			if (maxt < mRec.ray.maxt)
+				wRay.setMaxTime(maxt);
+			nanovdb::Ray<float> iRay = wRay.worldToIndexF(*m_volume->densityGrid);
+
+			float t = iRay.t0();
 			do
 			{
-				t += -std::log(sampler.next1D()) * m_densityMaxInv;
-			} while (t < mRec.ray.maxt &&
-			         m_volume->getDensity(mRec.ray(t)) * m_densityMaxInvUnscaled < sampler.next1D());
+				// step to next null collision in homogeneous medium
+				t += -std::log(sampler.next1D()) * m_densityMaxInv / m_sigma_t.maxCoeff();
+			} while (t < iRay.t1() &&
+			         // Check if this is a real collision
+			         m_volume->getDensity(iRay(t)) * m_densityMaxInvUnscaled < sampler.next1D());
 
 			return t;
 		}
 
-		Color3f	getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered,
-		                 Sampler &sampler) const override
+		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered,
+		                         Sampler &sampler) const override
 		{
 			// NanoVDB: RenderFogVolumeUtils.h
-			// delta tracking.
-			// faster due to earlier termination, but we need multiple samples to reduce variance.
-			const int nSamples      = 2;
-			float     transmittance = 0.f;
-			Ray3f     ray(from, (to - from).normalized(), Epsilon, (to - from).norm());
+			// Convert ray from world to index
+			Ray3f               noriRay(from, (to - from).normalized(), Epsilon, (to - from).norm());
+			nanovdb::Ray<float> wRay(make_nvec(noriRay.o), make_nvec(noriRay.d), noriRay.mint, noriRay.maxt);
+			float               mint, maxt;
+			if (!wRay.intersects(m_volume->densityGrid->worldBBox(), mint, maxt))
+				return INFINITY;
 
-			for (int n = 0; n < nSamples; n++)
+			if (mint > noriRay.mint)
+				wRay.setMinTime(mint);
+			if (maxt < noriRay.maxt)
+				wRay.setMaxTime(maxt);
+			nanovdb::Ray<float> iRay = wRay.worldToIndexF(*m_volume->densityGrid);
+
+			assert(iRay.clip(m_volume->densityGrid->worldBBox()));
+
+			Color3f transmittance = 0.f;
+			float   t             = iRay.t0();
+			nanovdb::Vec3f p;
+
+			do
 			{
-				float t = ray.mint;
-				while (true)
-				{
-					t -= std::log(sampler.next1D()) * m_densityMaxInv;
-					if (t >= ray.maxt)
-					{
-						transmittance += 1.0f;
-						break;
-					}
-					if (m_volume->getDensity(ray(t)) * m_densityMaxInvUnscaled >= sampler.next1D())
-						break;
-				}
-			}
+				// step to next null collision in homogeneous medium
+				t += -std::log(sampler.next1D()) * m_densityMaxInv / m_sigma_t.maxCoeff();
 
-			// TODO: calculate a color
-			return transmittance / nSamples;
+				// Use multiplicative transmittance
+				p = iRay(t);
+				transmittance *= 1.f - m_volume->getDensity(p) * m_densityMaxInv;
+
+				// emission
+				if (m_temperatureScale > Epsilon)
+					transmittance *= colorFromTemperature(m_volume->getTemperature(p), m_temperatureScale);
+			} while (t < iRay.t1() &&
+			         // Check if this is a real collision
+			         m_volume->getDensity(p) * m_densityMaxInvUnscaled < sampler.next1D());
+
+
+			return transmittance;
 		}
 
 		std::string toString() const override
