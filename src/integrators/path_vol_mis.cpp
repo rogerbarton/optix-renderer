@@ -33,7 +33,6 @@ NORI_NAMESPACE_BEGIN
 					return true;
 
 				shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p, false, *sampler);
-
 				shadowMedium =
 						shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
 						shadowIts.shape->getMedium() :     // entering
@@ -89,7 +88,7 @@ NORI_NAMESPACE_BEGIN
 				}
 				else
 				{
-					bRecEm = BSDFQueryRecord{its.toLocal(-ray.d), its.toLocal(shadowRay.d), measure};
+					bRecEm = BSDFQueryRecord{its.toLocal(-ray.d), its.toLocal(lRec.wi), measure};
 					bRecEm.uv = its.uv;
 					pdf_em_mat = bsdf->pdf(bRecEm);
 				}
