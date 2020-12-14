@@ -47,14 +47,16 @@ NORI_NAMESPACE_BEGIN
 		}
 
 		/**
-		 * EMS - Sample random emitter and calculate its pdf for the weight
+		 * EMS - Sample random emitter and calculate its pdf for the weight.
+		 * @param bsdf bsdf if there is one involved in the interaction, set to nullptr otherwise and set a phase
 		 * @return Li received from emitter
 		 */
 		Color3f
 		sampleEmitter(const Scene *scene, Sampler *sampler, const Color3f &throughput, const Medium *medium,
-		              const Ray3f &ray, const Intersection &its, const BSDF *bsdf, const BSDFQueryRecord &bRec) const
+		              const Ray3f &ray, const Intersection &its, const EMeasure &measure,
+		              const BSDF *bsdf, const PhaseFunction *phase) const
 		{
-			if (bRec.measure != ESolidAngle) // skip delta bsdf's
+			if (measure != ESolidAngle) // skip delta bsdf's
 				return 0.f;
 
 			const auto &lights        = scene->getLights();
@@ -77,16 +79,27 @@ NORI_NAMESPACE_BEGIN
 
 			if (!traceShadowray(scene, sampler, shadowMedium, shadowRay, shadowTr))
 			{
-				// Use same measure as the other bRec we sampled (its the same bsdf)
-				BSDFQueryRecord bRecEm{its.toLocal(-ray.d), its.toLocal(shadowRay.d), bRec.measure};
-				bRecEm.uv = its.uv;
+				// Apply the captured radiance from the emitter, handle both phase and bsdf cases
+				float           pdf_em_mat;
+				BSDFQueryRecord bRecEm(0);
+				if (phase)
+				{
+					PhaseQueryRecord pRecEm{its.toLocal(shadowRay.d)};
+					pdf_em_mat = phase->pdf(pRecEm);
+				}
+				else
+				{
+					bRecEm = BSDFQueryRecord{its.toLocal(-ray.d), its.toLocal(shadowRay.d), measure};
+					bRecEm.uv = its.uv;
+					pdf_em_mat = bsdf->pdf(bRecEm);
+				}
 
-				const float pdf_em_mat = bsdf->pdf(bRecEm);
-				const float w_em       = pdf_em > Epsilon ? pdf_em / (pdf_em + pdf_em_mat) : 0.f;
+				const float w_em = pdf_em > Epsilon ? pdf_em / (pdf_em + pdf_em_mat) : 0.f;
 
 				if (w_em > Epsilon)
-					return w_em * shadowTr * throughput *
-					       abs(lRec.wi.dot(its.shFrame.n)) * bsdf->eval(bRecEm) * Le;
+					return shadowTr * w_em * throughput * Le *
+					       (bsdf ? bsdf->eval(bRecEm) * abs(lRec.wi.dot(its.shFrame.n)) :
+					        Color3f(abs(lRec.wi.dot(shadowRay.d))));
 			}
 
 			return 0.f;
@@ -179,11 +192,16 @@ NORI_NAMESPACE_BEGIN
 					// throughput constant
 					PhaseQueryRecord pRec{};
 					medium->getPhase()->sample(pRec, sampler->next2D());
-					pdf_mat = medium->getPhase()->pdf(pRec);
 
 					// Transform wo to world space
 					// Note, as wi/wo point away from interaction point: toWorld(wi) = ray.d
 					wo = Frame(ray.d).toWorld(pRec.wo);
+
+					pdf_mat         = medium->getPhase()->pdf(pRec);
+					pdf_mat_measure = ESolidAngle;
+
+					Li += sampleEmitter(scene, sampler, throughput, medium, ray, its, pdf_mat_measure, nullptr,
+					                    medium->getPhase());
 				}
 				else
 				{
@@ -203,8 +221,10 @@ NORI_NAMESPACE_BEGIN
 						pdf_mat         = bsdf->pdf(bRec);
 						pdf_mat_measure = bRec.measure;
 
-						Li += sampleEmitter(scene, sampler, throughput, medium, ray, its, bsdf, bRec);
+						Li += sampleEmitter(scene, sampler, throughput, medium, ray, its, pdf_mat_measure, bsdf,
+						                    nullptr);
 
+						// Update throughput after emitter sampling
 						throughput *= bsdfSample;
 					}
 
