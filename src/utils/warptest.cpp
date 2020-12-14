@@ -122,8 +122,8 @@ public:
             case IsoPhase:
             case AnisoPhase: {
                 PhaseQueryRecord pRec(m_pRec);
-                float value = m_phase->sample(pRec, sample).getLuminance();
-                return std::make_pair(pRec.wo, value == 0 ? 0.f : 1.f);
+                m_phase->sample(pRec, sample);
+                return std::make_pair(pRec.wo, 1.f);
              }
         }
 
