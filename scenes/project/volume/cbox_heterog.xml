@@ -29,7 +29,7 @@
 			<scale value="0.5,0.5,0.5"/>
 		</transform>
 
-		<bsdf type="diffuse"/>
+		<!-- <bsdf type="diffuse"/> -->
 		<medium type="heterog">
 			<color name="sigma_a" value="2, 2, 2"/>
 			<!-- <phase type="anisophase"/>  -->
