@@ -4,6 +4,8 @@
 
 #include <nori/medium.h>
 #include <nori/NvdbVolume.h>
+#include <nanovdb/NanoVDB.h>
+#include <nori/sampler.h>
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/sutil/host_vec_math.h>
@@ -35,8 +37,16 @@ NORI_NAMESPACE_BEGIN
 			if (!gui->touched)return;
 			gui->touched = false;
 
+			m_densityScale     = gui->m_densityScale;
+			m_temperatureScale = gui->m_temperatureScale;
 			m_volume->update(gui->m_volume);
+
 			Medium::update(guiObject);
+
+			m_densityMaxUnscaled    = m_volume->densityGrid->tree().root().valueMax();
+			m_densityMaxInvUnscaled = 1.f / m_densityMaxUnscaled;
+			m_densityMax            = std::max(0.001f, m_densityScale * m_densityMaxUnscaled);
+			m_densityMaxInv         = 1.f / m_densityMax;
 		}
 
 		~HeterogeneousMedium() override
@@ -59,14 +69,47 @@ NORI_NAMESPACE_BEGIN
 			}
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, Sampler &sampler) const override
 		{
-			return 1.f;
+			// NanoVDB: RenderFogVolumeUtils.h
+			float t = mRec.ray.mint;
+			do
+			{
+				t += -std::log(sampler.next1D()) * m_densityMaxInv;
+			} while (t < mRec.ray.maxt &&
+			         m_volume->getDensity(mRec.ray(t)) * m_densityMaxInvUnscaled < sampler.next1D());
+
+			return t;
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const override
+		Color3f	getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered,
+		                 Sampler &sampler) const override
 		{
-			return 0.f;
+			// NanoVDB: RenderFogVolumeUtils.h
+			// delta tracking.
+			// faster due to earlier termination, but we need multiple samples to reduce variance.
+			const int nSamples      = 2;
+			float     transmittance = 0.f;
+			Ray3f     ray(from, (to - from).normalized(), Epsilon, (to - from).norm());
+
+			for (int n = 0; n < nSamples; n++)
+			{
+				float t = ray.mint;
+				while (true)
+				{
+					t -= std::log(sampler.next1D()) * m_densityMaxInv;
+					if (t >= ray.maxt)
+					{
+						transmittance += 1.0f;
+						break;
+					}
+					if (m_volume->getDensity(ray(t)) * m_densityMaxInvUnscaled >= sampler.next1D())
+						break;
+				}
+			}
+
+			// TODO: calculate a color
+			return transmittance / nSamples;
 		}
 
 		std::string toString() const override
@@ -95,7 +138,7 @@ NORI_NAMESPACE_BEGIN
 			// TODO
 			sbtData.type          = MediumData::HETEROG;
 			sbtData.heterog.densityGrid = m_volume->densityGrid;
-			sbtData.heterog.temperatureGrid = m_volume->heatGrid;
+			sbtData.heterog.temperatureGrid = m_volume->temperatureGrid;
 			Medium::getOptixMediumData(sbtData);
 			throw NoriException("Heterog::getOptixMediumData not implemented!");
 		}
@@ -104,7 +147,11 @@ NORI_NAMESPACE_BEGIN
 		NvdbVolume *m_volume = nullptr;
 
 		float m_densityScale;
-		float m_invMaxDensity;
+		float m_temperatureScale;
+		float m_densityMaxUnscaled;
+		float m_densityMaxInvUnscaled;
+		float m_densityMax;
+		float m_densityMaxInv;
 	};
 
 	NORI_REGISTER_CLASS(HeterogeneousMedium, "heterog");

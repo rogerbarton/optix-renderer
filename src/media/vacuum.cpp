@@ -26,12 +26,13 @@ NORI_NAMESPACE_BEGIN
 			Medium::update(guiObject);
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, Sampler &sampler) const override
 		{
 			return INFINITY;
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const override
+		Color3f
+		getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered, Sampler &sampler) const override
 		{
 			return 1.f;
 		}

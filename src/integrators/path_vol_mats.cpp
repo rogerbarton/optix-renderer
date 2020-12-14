@@ -41,12 +41,12 @@ NORI_NAMESPACE_BEGIN
 
 				// -- Find next interaction point
 				MediumQueryRecord mRec(ray);
-				const float       tm                  = medium->sampleFreePath(mRec, sampler->next1D());
+				const float       tm                  = medium->sampleFreePath(mRec, *sampler);
 				const bool        isMediumInteraction = tm < its.t;
 
 				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
-				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction);
+				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction, *sampler);
 				throughput *= Tr;
 
 				// -- Apply captured emission

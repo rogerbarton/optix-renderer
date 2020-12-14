@@ -3,6 +3,7 @@
 //
 
 #include <nori/medium.h>
+#include <nori/sampler.h>
 
 #ifdef NORI_USE_OPTIX
 #include <nori/optix/sutil/host_vec_math.h>
@@ -57,17 +58,19 @@ NORI_NAMESPACE_BEGIN
 			m_mu_t_invNorm = (1 - m_mu_t).matrix().normalized().array();
 		}
 
-		float sampleFreePath(MediumQueryRecord &mRec, const Point2f &sample) const override
+		float sampleFreePath(MediumQueryRecord &mRec, Sampler &sampler) const override
 		{
 			// Sample proportional to transmittance, sample a random channel uniformly
-			const int sampledChannel = (int) (3 * sample.y());
+			const int sampledChannel = (int) (3 * sampler.next1D());
 			return m_mu_t(sampledChannel) < Epsilon ? INFINITY :
-			       -std::log(sample.x()) / m_mu_t(sampledChannel);
+			       -std::log(sampler.next1D()) / m_mu_t(sampledChannel);
 		}
 
-		Color3f getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered) const override
+		Color3f
+		getTransmittance(const Vector3f &from, const Vector3f &to, const bool &scattered, Sampler &sampler) const override
 		{
-			return (-m_mu_t * (from - to).norm()).array().exp();
+			return (-m_mu_t * (from - to).norm()).array().exp() *
+			       (scattered ? m_mu_t : 1.f);
 		}
 
 		std::string toString() const override

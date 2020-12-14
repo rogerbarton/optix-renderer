@@ -45,12 +45,12 @@ NORI_NAMESPACE_BEGIN
 
 				// -- Find next interaction point
 				MediumQueryRecord mRec(ray);
-				const float       tm                  = medium->sampleFreePath(mRec, sampler->next1D());
+				const float       tm                  = medium->sampleFreePath(mRec, *sampler);
 				const bool        isMediumInteraction = tm < its.t;
 
 				Vector3f p = isMediumInteraction ? ray(tm) : its.p;
 
-				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction);
+				Color3f Tr = medium->getTransmittance(ray.o, p, isMediumInteraction, *sampler);
 				throughput *= Tr;
 
 				// -- Apply captured emission
@@ -152,7 +152,8 @@ NORI_NAMESPACE_BEGIN
 									occluded = true;
 									break;
 								}
-								shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p, false);
+								shadowTr *= shadowMedium->getTransmittance(shadowRay.o, shadowIts.p, false,
+								                                           *sampler);
 								shadowMedium =
 										shadowRay.d.dot(shadowIts.geoFrame.n) < 0.f && shadowIts.shape->getMedium() ?
 										shadowIts.shape->getMedium() :     // entering

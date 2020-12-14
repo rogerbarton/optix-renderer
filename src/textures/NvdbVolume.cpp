@@ -36,6 +36,18 @@ NORI_NAMESPACE_BEGIN
 		gui->fileTouched = false;
 	}
 
+	float NvdbVolume::getDensity(const Vector3f &point)
+	{
+		const nanovdb::Vec3<float> p(point.x(), point.y(), point.z());
+		return (*densitySampler)(p);
+	}
+
+	float NvdbVolume::getTemperature(const Vector3f &point)
+	{
+		const nanovdb::Vec3<float> p(point.x(), point.y(), point.z());
+		return (*temperatureSampler)(p);
+	}
+
 	std::string NvdbVolume::toString() const
 	{
 		return tfm::format("Volume[\n"

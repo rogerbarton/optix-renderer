@@ -2,6 +2,7 @@
 
 #include <openvdb/tools/LevelSetSphere.h>
 #include <nanovdb/util/OpenToNanoVDB.h>
+#include <nanovdb/util/SampleFromVoxels.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -38,7 +39,8 @@ NORI_NAMESPACE_BEGIN
 	}
 
 	void
-	NvdbVolume::readGrid(std::filesystem::path &file, uint64_t gridId, nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
+	NvdbVolume::readGrid(std::filesystem::path &file, uint64_t gridId,
+	                     nanovdb::GridHandle<nanovdb::HostBuffer> &gridHandle,
 	                     nanovdb::NanoGrid<float> *&grid)
 	{
 		gridHandle = nanovdb::io::readGrid(filename.string(), gridId);
@@ -61,14 +63,21 @@ NORI_NAMESPACE_BEGIN
 	void NvdbVolume::loadNanoVdb()
 	{
 		readGrid(filename, 0, densityHandle, densityGrid);
-		readGrid(filename, 1, heatHandle, heatGrid);
+		readGrid(filename, 1, temperatureHandle, temperatureGrid);
 
 		// Get accessors for the two grids. Note that accessors only accelerate repeated access!
-		auto densityAcc = densityGrid->getAccessor();
 
+		delete densitySampler;
+		delete temperatureSampler;
+		densitySampler     = new nanovdb::SampleFromVoxels<nanovdb::DefaultReadAccessor<float>, InterpolationOrder>(
+				densityGrid->getAccessor());
+		temperatureSampler = new nanovdb::SampleFromVoxels<nanovdb::DefaultReadAccessor<float>, InterpolationOrder>(
+				densityGrid->getAccessor());
+
+		auto     densityAcc = densityGrid->getAccessor();
 		// Access and print out a cross-section of the narrow-band level set from the two grids
-		for (int i = 97; i < 104; ++i)
-			printf("(%3i,0,0) NanoVDB cpu: % -4.2f\n", i, densityAcc.getValue(nanovdb::Coord(i, 0, 0)));
+		for (int i          = 97; i < 104; ++i)
+			printf("(%3i,%3i,0) NanoVDB cpu: % -4.2f\n", i, densityAcc.getValue(nanovdb::Coord(i, i, 0)));
 	}
 
 	void NvdbVolume::loadOpenVdbAndCacheNanoVdb(const std::filesystem::path &cacheFilename) const
@@ -81,7 +90,7 @@ NORI_NAMESPACE_BEGIN
 			file.open();
 
 			openvdb::FloatGrid::Ptr              ovdbDensityGrid;
-			openvdb::FloatGrid::Ptr              ovdbHeatGrid;
+			openvdb::FloatGrid::Ptr              ovdbTemperatureGrid;
 			for (openvdb::io::File::NameIterator nameIt = file.beginName(); nameIt != file.endName(); ++nameIt)
 			{
 				std::cout << "\t" << nameIt.gridName() << std::endl;
@@ -96,7 +105,7 @@ NORI_NAMESPACE_BEGIN
 				if (nameIt.gridName() == "density")
 					ovdbDensityGrid = openvdb::gridPtrCast<openvdb::FloatGrid>(grid);
 				else if (nameIt.gridName() == "temperature")
-					ovdbHeatGrid = openvdb::gridPtrCast<openvdb::FloatGrid>(grid);
+					ovdbTemperatureGrid = openvdb::gridPtrCast<openvdb::FloatGrid>(grid);
 			}
 
 			file.close();
@@ -106,7 +115,7 @@ NORI_NAMESPACE_BEGIN
 			// Convert the OpenVDB grid into a NanoVDB grid handle.
 			std::vector<nanovdb::GridHandle<nanovdb::HostBuffer>> gridHandles;
 			gridHandles.push_back(nanovdb::openToNanoVDB(*ovdbDensityGrid));
-			gridHandles.push_back(nanovdb::openToNanoVDB(*ovdbHeatGrid));
+			gridHandles.push_back(nanovdb::openToNanoVDB(*ovdbTemperatureGrid));
 
 			// Write the NanoVDB grid to file and throw if writing fails
 			nanovdb::io::writeGrids<nanovdb::HostBuffer, std::vector>(cacheFilename.string(), gridHandles

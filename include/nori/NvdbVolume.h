@@ -3,6 +3,9 @@
 
 #include <nori/object.h>
 #include <nanovdb/util/IO.h>
+#include <nanovdb/NanoVDB.h>
+#include <nanovdb/util/SampleFromVoxels.h>
+
 #include <filesystem/resolver.h>
 #include <filesystem>
 
@@ -10,7 +13,9 @@ NORI_NAMESPACE_BEGIN
 
 	struct NvdbVolume : public NoriObject
 	{
-	public:
+		float getDensity(const Vector3f &point);
+		float getTemperature(const Vector3f &point);
+
 		NvdbVolume() = default;
 		explicit NvdbVolume(const PropertyList &props);
 		NoriObject *cloneAndInit() override;
@@ -25,12 +30,16 @@ NORI_NAMESPACE_BEGIN
 #endif
 
 		std::filesystem::path                    filename;
-		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, heatHandle;
-		nanovdb::NanoGrid<float>                 *densityGrid = nullptr;
-		nanovdb::NanoGrid<float>                 *heatGrid    = nullptr;
+		nanovdb::GridHandle<nanovdb::HostBuffer> densityHandle, temperatureHandle;
+		nanovdb::NanoGrid<float>                 *densityGrid     = nullptr;
+		nanovdb::NanoGrid<float>                 *temperatureGrid = nullptr;
 
+		static constexpr int                                                               InterpolationOrder  = 2;
+		nanovdb::SampleFromVoxels<nanovdb::DefaultReadAccessor<float>, InterpolationOrder> *densitySampler     = nullptr;
+		nanovdb::SampleFromVoxels<nanovdb::DefaultReadAccessor<float>, InterpolationOrder> *temperatureSampler = nullptr;
+
+		mutable bool                            fileTouched = true;
 		mutable std::filesystem::file_time_type fileLastReadTime;
-		mutable bool                            fileTouched   = true;
 
 	private:
 		void loadFromFile();
