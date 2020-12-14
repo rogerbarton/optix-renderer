@@ -3,7 +3,7 @@
 <scene>
 	<integrator type="path_vol_mats"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="2048"/>
+		<integer name="sampleCount" value="512"/>
 	</sampler>
 
 	<camera type="perspective">
