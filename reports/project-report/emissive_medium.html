@@ -88,7 +88,7 @@
                 I initialliy started by implementing the sampling and pdf like pointlights without integrating the radiance along a ray. 
                 This gave good results for the MATS integrator (path_vol_mats) but not for the MIS integrator (path_vol_mis), see below.
                 Later I realized that the radiance also needs to be accumulated when a ray travels through the medium. 
-                This is partially complete inside the HeterogeneousMedium::getTransmittance function where we accumulate the emission from temperature.
+                This is partially complete inside the HeterogeneousMedium::getTransmittance function where we accumulate the emission from temperature and current throughput during delta tracking.
             </p>
                 
             <h4>Comparison 128spp</h4>
