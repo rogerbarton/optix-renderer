@@ -105,11 +105,14 @@
                 implements the sliders for the two parameters.</p>
             <h4>Features</h4>
             <ul>
-                <li>Property Editor</li>
+                <li>Scene Property Editor: a separate gui and render scene, only touched properties are updated, i.e. BVH is only reconstructed if needed. 
+                    Changes can be immediately applied or only when specified.</li>
                 <li>Zooming / Translating</li>
                 <li>Starting / Stopping of the current rendering</li>
                 <li>Built-in tonemapping</li>
-                <li>Built-in filemenu for opening/exporting</li>
+                <li>Built-in filemenu for opening/exporting (using library <a href="https://github.com/AirGuanZ/imgui-filebrowser">imgui-filebrowser by AirGuanZ</a>)</li>
+                <li>Support for displaying different render layers/features (both CPU or GPU buffers)</li>
+                <li>Developers can revert to the traditional nanogui by setting a cmake option.</li>
             </ul>
 
             <h4>Slideshow</h4>
@@ -153,8 +156,8 @@
             <ul>
                 <li>include/nori/ImguiScreen.h</li>
                 <li>src/utils/ImguiScreen.cpp</li>
-                <li>Furthermore, nearly every file in include/nori/</li>
-                <li>Furthermore, nearly every file in src/</li>
+                <li>Every NoriObject</li>
+                <li>src/utils/render.cpp</li>
             </ul>
 
             <h4>References</h4>

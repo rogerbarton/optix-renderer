@@ -79,14 +79,16 @@
             <p>
                 I based this feature on the arealight, where instead of sampling the shape surface we sample its volume.
                 The pdf function is the same except that we query the volume. As we are sampling a point uniformly inside the volume, the pdf=1/volume. 
-                As calculating the volume is non-trivial for arbitrary triangle meshes, I have only implemented this feature for the sphere and AABB. <br/>
+                As calculating the volume is non-trivial for arbitrary triangle meshes, I have only implemented this feature for the sphere and AABB. <br/><br/>
 
-                Volume lights are attached to a medium. This means that a shape can have a surface and medium emitter simultaneously<br/>
+                Volume lights are attached to a medium. This means that a shape can have a surface and medium emitter simultaneously.<br/>
 
-                We also do not have a normal inside the volume and thus assume that the light is emitted with the same strenth in all directions (isotropic in this respect).<br/>
+                We also do not have a normal inside the volume and thus assume that the light is emitted with the same strenth in all directions (isotropic in this respect).<br/><br/>
 
-                The radiance also needs to be accumulated when a ray travels through the medium. This is done inside the Medium::getTransmittance function.
-                I initialliy started by implementing the sampling and pdf like pointlights without integrating the radiance along a ray. This gave good results for the mats integrator, see below.<br/>
+                I initialliy started by implementing the sampling and pdf like pointlights without integrating the radiance along a ray. 
+                This gave good results for the MATS integrator (path_vol_mats) but not for the MIS integrator (path_vol_mis), see below.
+                Later I realized that the radiance also needs to be accumulated when a ray travels through the medium. 
+                This is partially complete inside the HeterogeneousMedium::getTransmittance function where we accumulate the emission from temperature.
             </p>
                 
             <h4>Comparison 128spp</h4>
@@ -95,12 +97,12 @@
                 <img src="images/emissive-media/volumelight-test-mis.png" alt="Mine MIS" class="img-responsive">
                 <img src="images/emissive-media/volumelight-test-ref.png" alt="Blender" class="img-responsive">
             </div> <br>
-            <p>Mine is significantly more noisy with only mats sampling.</p>
+            <p>Mine is significantly more noisy with only mats sampling. MIS sampling is incorrect.</p>
 
             <h4>Emissive surface+media 128spp</h4>
             <div class="twentytwenty-container">
                 <img src="images/emissive-media/volumelight-test-with-surface-mats.png" alt="Mine MATS" class="img-responsive">
-                <img src="images/emissive-media/volumelight-test-with-surface-mis.png" alt="Mine MIS" class="img-responsive">
+                <!-- <img src="images/emissive-media/volumelight-test-with-surface-mis.png" alt="Mine MIS" class="img-responsive"> -->
                 <img src="images/emissive-media/volumelight-test-with-surface-ref.png" alt="Blender" class="img-responsive">
             </div> <br>
 

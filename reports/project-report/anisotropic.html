@@ -84,14 +84,14 @@
 
                 For the Henyey-Greenstein phase function I used the pdf and inverse cdf from the slides. These are implemented in the warp.cpp. 
                 I also checked that when g=0 that the warptest showed the same results as the isotropic phase.
-                The warptest also shows that the phase function is symmetric for g as expected.<br><br>
+                The warptest also shows that the phase function is anti-symmetric for g as expected.<br><br>
                 
                 I visualized the warp methods in the warptest to see that the behaviour was as expected and ran the
                 chi2 tests. This required some adaptation of the warptest application, so that we can set the g parameter can be set.<br>
 
                 I also attempted to implement the Schlick phase function using the pdf from the slides. 
                 I did not find a formula for the CDF, so I calculated this manually using the methods from pa3 for the Beckmann distribution.
-                For this inversion we set $\xi=cos(\theta)$, so the integral simplifies greatly.<br><br>
+                For this inversion we set our sample variable $\xi=cos(\theta)$, so the integral simplifies greatly.<br><br>
 
                 When visually checking the warp, the behaviour for g values is correct but there are significantly less sample points than in 
                 the Henyey-Greenstein. This is hinting at numerical errors or samples overlapping, although I verified cosTheta is in the correct value range [-1,1].
@@ -128,6 +128,11 @@
                 <!-- <img src="images/aniso/cbox_homog_aniso_mats_g+.75_ref.png" alt="Mine g=0 (MATS)" class="img-responsive">
                 <img src="images/aniso/cbox_homog_aniso_mats_g-.75_ref.png" alt="Mine g=0.75 (MATS)" class="img-responsive"> -->
             </div> <br>
+            <p>
+                This example render show various values for g with the `path_vol_mats` integrator. The medium should get darker for negative g values.
+                This behaviour is not seen due to a recent change in the integrators. At one point I did observe the correct behaviour when tweaking the 
+                g parameter in the gui. So the phase function seems to be correct, but it is incorrectly used by the integrator.
+            </p>
 
             <h4>Implemented in:</h4>
             <ul>

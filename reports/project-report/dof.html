@@ -81,7 +81,7 @@
                 camera model to simulate a thin lens and aperture of non-zero radius.<br>
                 In comparison to the pinhole camera model, we do not always sample the ray from the origin. Instead we
                 pick a random point on the aperture. In the simple case this is
-                a uniformly random point on the unit disc, but this can also be made to be something else.
+                a uniformly random point on the unit disc, but this could also be made to be something else for more interesting bokeh effects.
                 We then connect this random ray origin point to the place where the unperturbed pinhole camera ray would
                 intersect the focal plane.
                 <br />
@@ -111,6 +111,7 @@
             <h4>Implemented in:</h4>
             <ul>
                 <li>include/nori/camera.h</li>
+                <li>include/nori/perspective.h</li>
                 <li>src/camera/perspective.cpp</li>
             </ul>
 

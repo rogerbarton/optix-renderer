@@ -75,13 +75,27 @@
     <div class="container contentWrapper">
         <div class="pageContent">
 
-            <h4>Implemented in:</h4>
+            <h4>Implemented:</h4>
             <ul>
-                <li>Rewrote large parts of CMake project: enable debugging on windows, OpenVDB via vcpkg</li>
+                <li>Rewrote large parts of CMake project: enable debugging on windows, Dear gui, glad, OpenVDB via vcpkg</li>
+                <ul>
+                    <li>CMakeConfig.txt, CMakeLists.txt, ext/*</li>
+                </ul>
                 <li>Integrate OptiX renderer (incomplete). See include/nori/optix/* as well as #ifdef NORI_USE_OPTIX parts</li>
-                <li>Integrate OptiX denoiser</li>
+                <ul>
+                    <li>
+                        This is almost complete. Currently the rays do not hit any object due to a minor unkown bug. 
+                        However, almost all of the preparation work to setup the scene on the gpu, create the various acceleration structures and shader binding is complete. 
+                        This is really the significant part of the implementation. The optix specific parts of the cuda code are done as well. The rest would be to implement 
+                        the specific bsdf, emitters, media etc. This should be mostly copy and paste from the cpu version.
+                    </li>
+                    <li>Cuda code is compiled at runtime with nvrtc (standard for optix samples). If specific variables are changed in the gui, the code is recompiled for optimal performance.</li>
+                    <li>Triangle meshes and analytic spheres are supported.</li>
+                    <li>Integrated OptiX denoiser (requires gpu buffers)</li>
+                    <li>OptiX samples and NanoVDB viewer where used as the main references and parts are imported from there (mostly helpers + nvrtc invoking). The pbrt-v4 also has an optix implementation, although I did not find this useful.</li>
+                    <li>CMakeLists.txt, render.{h,cpp}, include/nori/optix/*, main entry point is the include/nori/OptixState.h</li>
+                </ul>
             </ul>
-
         </div>
     </div>
 

@@ -80,10 +80,10 @@
             color range [0,255]. This conversion is done once, when loading the image in PNGTexture.cpp.
             The sRGB conversion is disabled in the case of a normal map.
             There might be some small numerical issues within this conversion, so our results will not look exactly the same as
-            the reference.
+            the reference. 
             <br />
 
-            The normal map is stored in the shape base class, like the albedo texture in the diffuse bsdf.
+            The normal map is stored in the shape base class as a texture, similar to the albedo texture in the diffuse bsdf.
             When setting the hit information, we apply the normal map. To apply this we use the `shFrame.toWorld` to convert
             the read normal perturbation from the image into world space.
             After some testing the normal map gave strange discontinuous results and I realised that the tangent must be aligned with the u coordinate.
@@ -116,7 +116,7 @@
 
         <!-- TODO: Show test renders, decribe how the rendered image is correct? -->
 
-        An example render
+        <h4>An example render</h4>
         <div class="twentytwenty-container">
             <img src="images/normals/normals-camel.png" alt="Mine" class="img-responsive">
             <img src="images/normals/normals-camel-ref.png" alt="Blender" class="img-responsive">
@@ -124,7 +124,8 @@
 
         <p>
             We can see clearly that blender smoothly interpolates the values from the image, whereas our evaluation method does not.
-            There are also differences in the uv mapping and thus the tangents. So the normal map looks like it is inverted.
+            There are also differences in the uv mapping and thus the tangents. So the normal map looks like it is inverted. 
+            However, the effect of the normal map is working correctly and smoothly across the mesh.
         </p>
 
         <h4>Implemented in:</h4>
