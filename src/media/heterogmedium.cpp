@@ -149,6 +149,7 @@ NORI_NAMESPACE_BEGIN
 			assert(iRay.clip(m_volume->densityGrid->worldBBox()));
 
 			Color3f transmittance = 0.f;
+			Color3f capturedEmission = 0.f;
 			float   t             = iRay.t0();
 			nanovdb::Vec3f p;
 
@@ -163,7 +164,7 @@ NORI_NAMESPACE_BEGIN
 
 				// emission
 				if (m_temperatureScale > Epsilon)
-					transmittance *= colorFromTemperature(m_volume->getTemperature(p), m_temperatureScale);
+					capturedEmission += transmittance * colorFromTemperature(m_volume->getTemperature(p), m_temperatureScale);
 			} while (t < iRay.t1() &&
 			         // Check if this is a real collision
 			         m_volume->getDensity(p) * m_densityMaxInvUnscaled < sampler.next1D());
