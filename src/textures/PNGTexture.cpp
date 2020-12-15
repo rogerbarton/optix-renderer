@@ -30,6 +30,7 @@ public:
 		sphericalTexture = props.getBoolean("sphericalTexture", false);
 		offsetU = props.getFloat("offsetU", 0.f);
 		offsetV = props.getFloat("offsetV", 0.f);
+		intensity = props.getFloat("intensity", 1.f);
 	}
 
 	NORI_OBJECT_DEFAULT_CLONE(PNGTexture)
@@ -60,6 +61,7 @@ public:
 		sphericalTexture = gui->sphericalTexture;
 		offsetU = gui->offsetU;
 		offsetV = gui->offsetV;
+		intensity = gui->intensity;
 	}
 
 	void loadFromFile()
@@ -149,6 +151,14 @@ public:
 		out[0] = data[4 * index];
 		out[1] = data[4 * index + 1];
 		out[2] = data[4 * index + 2];
+
+		if(!sRgb) {
+			// normal map
+			out.x() = out.x() * intensity;
+			out.y() = out.y() * intensity;
+			out.z() = out.z() * intensity + (1.f - intensity);
+			out.matrix().normalize();
+		}
 		return out;
 	};
 
@@ -241,6 +251,20 @@ public:
 		fileTouched |= ImGui::Checkbox("##value", &sRgb);
 		ImGui::NextColumn();
 		ImGui::PopID();
+
+		if(!sRgb) {
+			// -- Remaining Properties
+			ImGui::AlignTextToFramePadding();
+			ImGui::PushID(2345);
+			ImGui::TreeNodeEx("intesnity", ImGuiLeafNodeFlags, "Intensity");
+			ImGui::SameLine();
+			ImGui::HelpMarker("Enable this for most textures. Disable for normal maps.");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+			touched |= ImGui::DragFloat("##value", &intensity, 0.01f, 0, 1.f, "%f%", ImGuiSliderFlags_AlwaysClamp);
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
 
 		ImGui::AlignTextToFramePadding();
 		ImGui::PushID(3);
@@ -407,6 +431,8 @@ private:
 	bool sphericalTexture;
 	float offsetU;
 	float offsetV;
+
+	float intensity; // for normal map
 
 #ifdef NORI_USE_OPTIX
 	cudaArray_t d_data = 0;
