@@ -21,7 +21,7 @@
 
 #include <nori/object.h>
 #ifdef NORI_USE_OPTIX
-#include <nori/optix/cuda_shared/LaunchParams.h>
+#include <nori/optix/cuda_shared/IntegratorData.h>
 #endif
 
 NORI_NAMESPACE_BEGIN

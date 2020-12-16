@@ -60,6 +60,7 @@ add_executable(nori
     include/nori/denoiser.h
     include/nori/medium.h
     include/nori/phase.h
+    include/nori/environmentmap.h
 
     # Source code files
     src/utils/bitmap.cpp
@@ -261,6 +262,7 @@ if(NORI_USE_OPTIX)
         include/nori/optix/cuda_shared/MediumData.h
         include/nori/optix/cuda_shared/EmitterData.h
         include/nori/optix/cuda_shared/RaygenData.h
+        include/nori/optix/cuda_shared/IntegratorData.h
 
         include/nori/optix/cuda/sutil/exception.h
         include/nori/optix/cuda/sutil/helpers.h

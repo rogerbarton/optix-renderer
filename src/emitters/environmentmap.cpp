@@ -1,20 +1,13 @@
-#include <nori/emitter.h>
-#include <nori/texture.h>
-#include <Eigen/Geometry>
-#include <nori/warp.h>
-#include <nori/dpdf.h>
+#include <nori/environmentmap.h>
 
 NORI_NAMESPACE_BEGIN
 
-class EnvMap : public Emitter
-{
-public:
-	explicit EnvMap(const PropertyList &props) {
-		lightProb = props.getFloat("lightWeight", 1.f);
+	nori::EnvMap::EnvMap(const nori::PropertyList &props)
+	{
+		lightProb  = props.getFloat("lightWeight", 1.f);
 		m_radiance = props.getColor("radiance", 1.f);
 	}
-
-	NoriObject *cloneAndInit() override
+	NoriObject *EnvMap::cloneAndInit()
 	{
 		// Use constant texture as a fallback
 		if (!m_map)
@@ -31,8 +24,7 @@ public:
 
 		return clone;
 	}
-
-	void update(const NoriObject *guiObject) override
+	void EnvMap::update(const NoriObject *guiObject)
 	{
 		const auto *gui = static_cast<const EnvMap *>(guiObject);
 		if (!gui->touched)
@@ -45,52 +37,47 @@ public:
 
 		calculateProbs();
 	}
-
-	~EnvMap()
+	EnvMap::~EnvMap()
 	{
 		delete m_map;
 	}
-
-	void addChild(NoriObject *obj) override
+	void EnvMap::addChild(NoriObject *obj)
 	{
 		switch (obj->getClassType())
 		{
-		case ETexture:
-			if (obj->getIdName() == "albedo")
-			{
-				if (m_map)
-					throw NoriException("There is already an albedo defined!");
-				m_map = static_cast<Texture<Color3f> *>(obj);
-			}
-			else
-			{
-				throw NoriException("The name of this texture does not match any field!");
-			}
-			break;
+			case ETexture:
+				if (obj->getIdName() == "albedo")
+				{
+					if (m_map)
+						throw NoriException("There is already an albedo defined!");
+					m_map = static_cast<Texture<Color3f> *>(obj);
+				}
+				else
+				{
+					throw NoriException("The name of this texture does not match any field!");
+				}
+				break;
 
-		default:
-			throw NoriException("EnvMap::addChild(<%s>) is not supported!",
-								classTypeName(obj->getClassType()));
+			default:
+				throw NoriException("EnvMap::addChild(<%s>) is not supported!",
+				                    classTypeName(obj->getClassType()));
 		}
 	}
-
-	std::string toString() const override
+	std::string EnvMap::toString() const
 	{
 		return tfm::format("PngEnvMap[\n"
-						   "  texture = %s\n"
-						   "]",
-						   m_map->toString());
-	};
-
-	Color3f sample(EmitterQueryRecord &lRec,
-				   const Point2f &sample) const override
+		                   "  texture = %s\n"
+		                   "]",
+		                   m_map->toString());
+	}
+	Color3f EnvMap::sample(EmitterQueryRecord &lRec, const Point2f &sample) const
 	{
 		// sample any point based on the probabilities
 		size_t elem = dpdf.sample(sample.x());
 
 		// convert result (kind of uv coords) into direction
-		float i = int(elem / m_map->getWidth()) / (float)m_map->getHeight();
-		float j = int(elem % m_map->getWidth()) / (float)m_map->getWidth();
+		float i = int(elem / m_map->getWidth()) / (float) m_map->getHeight();
+		float j = int(elem % m_map->getWidth()) / (float) m_map->getWidth();
 
 		Vector3f v;
 		if (m_map->getHeight() == 1 && m_map->getWidth() == 1)
@@ -103,9 +90,9 @@ public:
 			v = sphericalDirection(j * M_PI, i * 2.0f * M_PI);
 		}
 		Vector3f v_inf = v * 1.f / Epsilon; // divide by epsilon = * inf
-		lRec.n = -v;						// the normal points inwards
-		lRec.p = v_inf;
-		lRec.wi = (lRec.p - lRec.ref).normalized();
+		lRec.n         = -v;                        // the normal points inwards
+		lRec.p         = v_inf;
+		lRec.wi        = (lRec.p - lRec.ref).normalized();
 		lRec.shadowRay = Ray3f(lRec.p, -lRec.wi, Epsilon, (lRec.p - lRec.ref).norm() - Epsilon);
 
 		lRec.pdf = pdf(lRec);
@@ -115,8 +102,7 @@ public:
 
 		return eval(lRec) / lRec.pdf;
 	}
-
-	float pdf(const EmitterQueryRecord &lRec) const override
+	float EnvMap::pdf(const EmitterQueryRecord &lRec) const
 	{
 		// adaptive sampling based on the brightness of each pixel
 
@@ -126,10 +112,10 @@ public:
 		}
 
 		// second and third part is the probability of sampling one pixel (in solid angles)
-		return eval(lRec).getLuminance() * dpdf.getNormalization() / Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
+		return eval(lRec).getLuminance() * dpdf.getNormalization() /
+		       Warp::squareToUniformSpherePdf(Vector3f(1.f, 0.f, 0.f)) * m_map->getHeight() * m_map->getWidth();
 	}
-
-	Color3f eval(const EmitterQueryRecord &lRec) const override
+	Color3f EnvMap::eval(const EmitterQueryRecord &lRec) const
 	{
 		// ref does not have to be set, because the env map has inf size
 		// --> the distance of ref/center of envmap is neglectable
@@ -144,11 +130,10 @@ public:
 
 		return m_map->eval(uv) * m_radiance;
 	}
-
-	Color3f samplePhoton(Ray3f &ray, const Point2f &sample1, const Point2f &sample2) const override
+	Color3f EnvMap::samplePhoton(Ray3f &ray, const Point2f &sample1, const Point2f &sample2) const
 	{
 		EmitterQueryRecord EQR;
-		auto Li = this->sample(EQR, sample1);
+		auto               Li = this->sample(EQR, sample1);
 
 		//set shadowray
 		ray = EQR.shadowRay;
@@ -158,10 +143,7 @@ public:
 
 		return Li / pdf;
 	}
-
-#ifdef NORI_USE_IMGUI
-	NORI_OBJECT_IMGUI_NAME("Environment Map");
-	virtual bool getImGuiNodes() override
+	bool EnvMap::getImGuiNodes()
 	{
 		touched |= Emitter::getImGuiNodes();
 
@@ -169,15 +151,7 @@ public:
 
 		return touched;
 	}
-#endif
-
-	bool isEnvMap() const override
-	{
-		return true;
-	}
-
-private:
-	void calculateProbs()
+	void EnvMap::calculateProbs()
 	{
 		dpdf.clear();
 		dpdf.reserve(m_map->getHeight() * m_map->getWidth());
@@ -185,17 +159,24 @@ private:
 		{
 			for (unsigned int j = 0; j < m_map->getWidth(); j++)
 			{
-				Color3f col = m_map->eval(Point2f(i / (float)m_map->getHeight(), j / (float)m_map->getWidth()));
-				dpdf.append(std::abs(col.getLuminance()) /*+ Epsilon */); // add epsilon to add prob to select every pixel once
+				Color3f col = m_map->eval(Point2f(i / (float) m_map->getHeight(), j / (float) m_map->getWidth()));
+				dpdf.append(std::abs(
+						col.getLuminance()) /*+ Epsilon */); // add epsilon to add prob to select every pixel once
 			}
 		}
 
 		dpdf.normalize();
 	}
 
-	Texture<Color3f> *m_map = nullptr;
-	DiscretePDF dpdf;
-};
+#ifdef NORI_USE_OPTIX
+	void EnvMap::getOptixEmitterData(EmitterData &sbtData)
+	{
+		sbtData.type = EmitterData::ENVIRONMENT;
+		m_map->getOptixTexture(sbtData.environment.envmapValue, sbtData.environment.envmapTex);
 
-NORI_REGISTER_CLASS(EnvMap, "envmap");
+		// No specific data
+		Emitter::getOptixEmitterData(sbtData);
+	}
+#endif
+	NORI_REGISTER_CLASS(EnvMap, "envmap");
 NORI_NAMESPACE_END

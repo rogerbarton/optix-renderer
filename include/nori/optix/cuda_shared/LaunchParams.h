@@ -6,18 +6,11 @@
 #include <optix_types.h>
 #include <vector_types.h>
 #include "RaygenData.h"
+#include "IntegratorData.h"
 
 struct SceneConstantParams
 {
 	float3 bgColor;
-};
-
-enum IntegratorType : int
-{
-	INTEGRATOR_TYPE_PATH_MATS = 0,
-	INTEGRATOR_TYPE_PATH_MIS  = 1,
-	INTEGRATOR_TYPE_DIRECT    = 2,
-	INTEGRATOR_TYPE_SIZE
 };
 
 /**
