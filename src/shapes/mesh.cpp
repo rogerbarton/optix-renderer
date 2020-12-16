@@ -249,7 +249,7 @@ bool Mesh::getImGuiNodes()
     OptixBuildInput buildInputs = {};
 
     buildInputs.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-    flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT};
+    flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_NONE};
     buildInputs.triangleArray.flags = flagsArray;
     buildInputs.triangleArray.numSbtRecords = 1;
 

@@ -206,7 +206,7 @@ bool Shape::getImGuiNodes()
 		buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
 		buildInput.customPrimitiveArray.aabbBuffers   = &d_bbox;
 		buildInput.customPrimitiveArray.numPrimitives = 1;
-		flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT};
+		flagsArray = new uint32_t[]{OPTIX_GEOMETRY_FLAG_NONE};
 		buildInput.customPrimitiveArray.flags         = flagsArray;
 		buildInput.customPrimitiveArray.numSbtRecords = 1;
 

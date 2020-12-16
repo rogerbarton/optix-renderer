@@ -195,11 +195,10 @@ void OptixState::buildIas()
 		optixInstance.flags             = OPTIX_INSTANCE_FLAG_NONE;
 		optixInstance.instanceId        = i;
 		optixInstance.sbtOffset         = sbtOffset;
-		optixInstance.visibilityMask    = 255;
+		optixInstance.visibilityMask    = 1;
 		optixInstance.traversableHandle = gasHandle.handle;
 		memcpy(optixInstance.transform, identityTransform, sizeof(float) * 12);
 
-		// TODO: one sbt record per GAS build input per RAY_TYPE?
 		sbtOffset += RAY_TYPE_COUNT;
 	}
 
@@ -240,8 +239,8 @@ void OptixState::buildIas()
 	                            nullptr, 0 // no emitted properties
 	));
 
-	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_tempInstances)));
 	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_tempBuffer)));
+	CUDA_CHECK(cudaFree(reinterpret_cast<void *>(d_tempInstances)));
 
 	const auto                    t1       = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> duration = t1 - t0;
