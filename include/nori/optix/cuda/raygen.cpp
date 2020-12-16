@@ -130,12 +130,9 @@ extern "C" __global__ void __raygen__perspective()
 
 		// Store Li
 		color += prd.Li;
-		// albedo += prd.albedo;
+		albedo += prd.albedo;
 		normal += prd.normal;
-
-		albedo += rayDirection;
 	}
-
 
 	// PRINT_PIXEL(100, 100, "color  (%f, %f, %f), ", color.x, color.y, color.z);
 	// PRINT_PIXEL(100, 100, "albedo (%f, %f, %f), ", albedo.x, albedo.y, albedo.z);

@@ -44,6 +44,13 @@ __forceinline__ __device__ float3 apply4x4Transform(float4 tx, float4 ty, float4
 	return make_float3(result.x, result.y, result.z) / result.w;
 }
 
+__forceinline__ __device__ float3 apply4x4TransformRotation(float4 tx, float4 ty, float4 tz, float4 tw, float3 p)
+{
+	return make_float3(tx.x * p.x + tx.y * p.y + tx.z * p.z,
+	                   ty.x * p.x + ty.y * p.y + ty.z * p.z,
+	                   tz.x * p.x + tz.y * p.y + tz.z * p.z);
+}
+
 __forceinline__ __device__ void sampleRayPinhole(
 		const LaunchParams &launchParams, unsigned int &seed, float3 &rayOrigin, float3 &rayDirection)
 {
@@ -75,48 +82,52 @@ __forceinline__ __device__ static void sampleRayPerspective(
 	const uint3                   idx   = optixGetLaunchIndex();
 	const RaygenData::Perspective &data = launchParams.camera.perspective;
 
-	const float2 subpixelJitter = make_float2(rnd(seed), rnd(seed));
-	const float2 samplePosition = make_float2(
+	// const float2 subpixelJitter = make_float2(rnd(seed), rnd(seed));
+	const float2 subpixelJitter = make_float2(0.f);
+	const float2 screen         = make_float2(
 			(static_cast<float>(idx.x) + subpixelJitter.x),
 			(static_cast<float>(idx.y) + subpixelJitter.y));
+	PRINT_PIXEL(192, 192, "screen (%f, %f) \n", screen.x, screen.y);
 
-	const float3 screen = make_float3(
-			samplePosition.x * data.invOutputSize.x,
-			samplePosition.y * data.invOutputSize.y,
-			1.f);
+	const float3 viewport = make_float3(screen.x * data.invOutputSize.x, screen.y * data.invOutputSize.y, 0);
+	PRINT_PIXEL(192, 192, "viewport (%f, %f, %f) \n", viewport.x, viewport.y, viewport.z);
 
 	const float3 nearP = apply4x4Transform(data.sampleToCameraX,
 	                                       data.sampleToCameraY,
 	                                       data.sampleToCameraZ,
-	                                       data.sampleToCameraW, screen);
+	                                       data.sampleToCameraW, viewport);
+	PRINT_PIXEL(192, 192, "nearP (%f, %f, %f) \n", nearP.x, nearP.y, nearP.z);
 
 	// Create local space ray
 	float3 d = normalize(nearP);
 	float3 o = make_float3(0, 0, 0);
+	PRINT_PIXEL(192, 192, "d (%f, %f, %f) \n", d.x, d.y, d.z);
 
 	// Depth of field, adjusts ray in local space
-	if (data.lensRadius > EPSILON)
-	{
-		const float2 pLens = data.lensRadius * squareToUniformDisk(make_float2(rnd(seed), rnd(seed)));
-		const float  ft    = data.focalDistance / d.z;
-
-		// position of ray at time of intersection with the focal plane
-		const float3 pFocus = o + d * ft;
-
-		o = make_float3(pLens.x, pLens.y, 0.f);
-		// direction connecting aperture and focal plane points
-		d = normalize(pFocus - o);
-	}
+	// if (data.lensRadius > EPSILON)
+	// {
+	// 	const float2 pLens = data.lensRadius * squareToUniformDisk(make_float2(rnd(seed), rnd(seed)));
+	// 	const float  ft    = data.focalDistance / d.z;
+	//
+	// 	// position of ray at time of intersection with the focal plane
+	// 	const float3 pFocus = o + d * ft;
+	//
+	// 	o = make_float3(pLens.x, pLens.y, 0.f);
+	// 	// direction connecting aperture and focal plane points
+	// 	d = normalize(pFocus - o);
+	// }
 
 	// To world space
 	rayOrigin    = apply4x4Transform(data.cameraToWorldX,
 	                                 data.cameraToWorldY,
 	                                 data.cameraToWorldZ,
 	                                 data.cameraToWorldW, o);
-	rayDirection = apply4x4Transform(data.cameraToWorldX,
-	                                 data.cameraToWorldY,
-	                                 data.cameraToWorldZ,
-	                                 data.cameraToWorldW, d);
+	rayDirection = apply4x4TransformRotation(data.cameraToWorldX,
+	                                         data.cameraToWorldY,
+	                                         data.cameraToWorldZ,
+	                                         data.cameraToWorldW, d);
+
+	rayDirection = normalize(rayDirection);
 }
 
 __forceinline__ __device__ void sampleRay(
@@ -135,5 +146,5 @@ __forceinline__ __device__ void sampleRay(
 			break;
 	}
 
-	// PRINT_PIXEL(200, 200, "ray.d  (%f, %f, %f) \n", rayDirection.x, rayDirection.y, rayDirection.z);
+	PRINT_PIXEL(192, 192, "ray.d  (%f, %f, %f) \n", rayDirection.x, rayDirection.y, rayDirection.z);
 }
