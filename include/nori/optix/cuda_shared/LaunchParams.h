@@ -5,18 +5,7 @@
 
 #include <optix_types.h>
 #include <vector_types.h>
-
-struct RaygenConstantParams
-{
-	float3 eye;
-	float3 U;
-	float3 V;
-	float3 W;
-
-	float fov;
-	float focalDistance;
-	float lensRadius;
-};
+#include "RaygenData.h"
 
 struct SceneConstantParams
 {
@@ -45,7 +34,7 @@ struct LaunchParams
 	unsigned int imageWidth;
 	unsigned int imageHeight;
 
-	RaygenConstantParams camera;
+	RaygenData camera;
 	SceneConstantParams  scene;
 
 	IntegratorType integrator;

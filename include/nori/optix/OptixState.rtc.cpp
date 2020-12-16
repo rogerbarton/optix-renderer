@@ -224,6 +224,7 @@ void OptixState::createPtxModules(bool specialize)
 
 		BIND_VALUE(samplesPerLaunch)
 		BIND_VALUE(integrator)
+		BIND_VALUE(camera.type)
 
 		module_compile_options.boundValues    = boundValues.data();
 		module_compile_options.numBoundValues = static_cast<uint32_t>(boundValues.size());
