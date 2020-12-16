@@ -1,5 +1,10 @@
 #include <nori/perspective.h>
 
+#ifdef NORI_USE_OPTIX
+#include <nori/optix/cuda_shared/RaygenData.h>
+#include <nori/optix/sutil/host_vec_math.h>
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 PerspectiveCamera::PerspectiveCamera(const PropertyList &propList) {
@@ -256,5 +261,23 @@ bool PerspectiveCamera::getImGuiNodes() {
 }
 #endif
 
-NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
+#ifdef NORI_USE_OPTIX
+void PerspectiveCamera::getOptixData(RaygenData &data) const {
+	data.perspective.nearClip      = m_nearClip;
+	data.perspective.farClip       = m_farClip;
+	data.perspective.focalDistance = m_focalDistance;
+	data.perspective.lensRadius    = m_lensRadius;
+	data.perspective.invOutputSize = make_float2(m_invOutputSize);
+
+	const auto& cameraToWorld       =  m_cameraToWorld.getMatrix();
+	data.perspective.cameraToWorldX = make_float4(cameraToWorld(0, 0), cameraToWorld(0, 1), cameraToWorld(0, 2),  cameraToWorld(0, 3));
+	data.perspective.cameraToWorldY = make_float4(cameraToWorld(1, 0), cameraToWorld(1, 1), cameraToWorld(1, 2),  cameraToWorld(1, 3));
+	data.perspective.cameraToWorldZ = make_float4(cameraToWorld(2, 0), cameraToWorld(2, 1), cameraToWorld(2, 2),  cameraToWorld(2, 3));
+	data.perspective.cameraToWorldW = make_float4(cameraToWorld(3, 0), cameraToWorld(3, 1), cameraToWorld(3, 2),  cameraToWorld(3, 3));
+	data.perspective.focalDistance  = getFocalDistance();
+	data.perspective.lensRadius     = getLensRadius();
+}
+#endif
+
+	NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
 NORI_NAMESPACE_END

@@ -19,20 +19,10 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	// -- Iterate over all scene objects and copy them to the optix scene representation
 	// Camera
 	{
-		const auto camera = static_cast<const nori::PerspectiveCamera *>(scene.getCamera());
+		const auto camera = scene.getCamera();
 		m_params.imageWidth  = camera->getOutputSize().x();
 		m_params.imageHeight = camera->getOutputSize().y();
-
-		Eigen::Matrix4f cameraToWorld = camera->getTransform();
-		// W = z = fwd
-		m_params.camera.U   = make_float3(cameraToWorld(0, 0), cameraToWorld(0, 1), cameraToWorld(0, 2));
-		m_params.camera.V   = make_float3(cameraToWorld(1, 0), cameraToWorld(1, 1), cameraToWorld(1, 2));
-		m_params.camera.W   = make_float3(cameraToWorld(2, 0), cameraToWorld(2, 1), cameraToWorld(2, 2));
-		m_params.camera.eye = make_float3(cameraToWorld(0, 3), cameraToWorld(1, 3), cameraToWorld(2, 3));
-
-		m_params.camera.fov           = camera->getFov();
-		m_params.camera.focalDistance = camera->getFocalDistance();
-		m_params.camera.lensRadius    = camera->getLensRadius();
+		camera->getOptixData(m_params.camera);
 	}
 
 	// OptixRenderer
@@ -67,7 +57,7 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	updateSbt(scene.getShapes());
 
 	m_params.sceneHandle = m_ias_handle;
-	
+
 	if (!initializedState)
 	{
 		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_params), sizeof(LaunchParams)));
