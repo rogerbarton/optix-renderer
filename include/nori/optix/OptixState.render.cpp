@@ -13,26 +13,36 @@
 #include <nori/NvdbVolume.h>
 #include <nori/bsdf.h>
 
+#include "sutil/host_vec_math.h"
+
 
 bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 {
 	// -- Iterate over all scene objects and copy them to the optix scene representation
-	// Camera
 	{
+		// Camera
 		const auto camera = scene.getCamera();
 		m_params.imageWidth  = camera->getOutputSize().x();
 		m_params.imageHeight = camera->getOutputSize().y();
 		camera->getOptixData(m_params.camera);
-	}
 
-	// OptixRenderer
-	{
+		// OptixRenderer
 		m_params.samplesPerLaunch = scene.m_optixRenderer->m_samplesPerLaunch;
-	}
 
-	// Integrator
-	{
+		// Integrator
 		m_params.integrator = scene.getIntegrator(usePreview)->getOptixIntegratorType();
+
+		auto                     &emitters = scene.getEmitters();
+		std::vector<EmitterData> emitterData(scene.getEmitters().size());
+		m_params.scene.envmapIndex = -1;
+		m_params.scene.emittersSize = static_cast<uint32_t>(emitters.size());
+
+		for (uint32_t i = 0; i < emitters.size(); i++)
+		{
+			emitters[i]->getOptixEmitterData(emitterData[i]);
+			if (emitters[i]->isEnvMap())
+				m_params.scene.envmapIndex = i;
+		}
 	}
 
 	// -- Create optix scene

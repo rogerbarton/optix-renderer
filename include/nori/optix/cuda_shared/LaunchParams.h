@@ -5,12 +5,16 @@
 
 #include <optix_types.h>
 #include <vector_types.h>
+#include <texture_types.h>
 #include "RaygenData.h"
+#include "EmitterData.h"
 #include "IntegratorData.h"
 
 struct SceneConstantParams
 {
-	float3 bgColor;
+	EmitterData* emitters;
+	unsigned int emittersSize;
+	unsigned int envmapIndex;
 };
 
 /**
@@ -27,8 +31,8 @@ struct LaunchParams
 	unsigned int imageWidth;
 	unsigned int imageHeight;
 
-	RaygenData camera;
-	SceneConstantParams  scene;
+	RaygenData          camera;
+	SceneConstantParams scene;
 
 	IntegratorType integrator;
 

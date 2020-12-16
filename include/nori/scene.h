@@ -89,6 +89,8 @@ NORI_NAMESPACE_BEGIN
 			return m_emitters[index];
 		}
 
+		std::vector<Emitter *>& getEmitters() { return m_emitters; }
+
 		Emitter *getEnvMap() const { return m_envmap; }
 
 		Denoiser *getDenoiser() const { return m_denoiser; }

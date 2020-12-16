@@ -41,7 +41,21 @@ extern "C" __global__ void __miss__radiance()
 	MissParams  *const rt_data = reinterpret_cast<MissParams *>( optixGetSbtDataPointer());
 	RadiancePrd *const prd     = RadiancePrd::getPrd();
 
-	// prd->Li += launchParams.envmap.sample; // TODO: sample envmap texture
+	// Evaluate the envmap
+	if (launchParams.scene.envmapIndex >= 0)
+	{
+		const EmitterData &envmap = launchParams.scene.emitters[launchParams.scene.envmapIndex];
+		if (envmap.environment.envmapTex)
+		{
+			float3 d = optixGetWorldRayDirection();
+			float  u = acosf(d.z) * 0.5f / M_PIf;
+			float  v = atan2f(d.y, d.x) / M_PIf;
+			prd->Li += envmap.radiance * tex2D<float4>(envmap.environment.envmapTex, u, v);
+		}
+		else
+			prd->Li += envmap.radiance * envmap.environment.envmapValue;
+	}
+
 	prd->terminated = true;
 }
 
