@@ -50,7 +50,7 @@ extern "C" __global__ void __miss__radiance()
 			float3 d = optixGetWorldRayDirection();
 			float  u = acosf(d.z) * 0.5f / M_PIf;
 			float  v = atan2f(d.y, d.x) / M_PIf;
-			prd->Li += envmap.radiance * tex2D<float4>(envmap.environment.envmapTex, u, v);
+			prd->Li += envmap.radiance * make_float3(tex2D<float4>(envmap.environment.envmapTex, u, v));
 		}
 		else
 			prd->Li += envmap.radiance * envmap.environment.envmapValue;
@@ -72,6 +72,8 @@ extern "C" __global__ void __closesthit__radiance()
 	const uint32_t vertIdxOffset = primIdx * 3;
 
 	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry, p);
+
+	prd->normal = make_float3(abs(lgeom.n.x), abs(lgeom.n.y), abs(lgeom.n.z));
 
 	if (sbtData->emitter.type != EmitterData::NONE)
 	{

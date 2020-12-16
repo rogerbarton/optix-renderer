@@ -43,6 +43,11 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 			if (emitters[i]->isEnvMap())
 				m_params.scene.envmapIndex = i;
 		}
+
+		if (initializedState)
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_params.scene.emitters)));
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_params.scene.emitters), emitters.size() * sizeof(EmitterData)));
+		CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_params.scene.emitters), emitterData.data(), emitters.size() * sizeof(EmitterData), cudaMemcpyHostToDevice));
 	}
 
 	// -- Create optix scene

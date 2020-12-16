@@ -54,7 +54,7 @@ struct EmitterData
 	struct Environment
 	{
 		float3 envmapValue;
-		cudaTextureObject_t envmapTex = 0;
+		cudaTextureObject_t envmapTex;
 	};
 
 	Type   type = NONE;

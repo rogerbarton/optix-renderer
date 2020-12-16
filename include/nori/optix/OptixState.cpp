@@ -27,10 +27,6 @@
 #include <iomanip>
 #include <map>
 
-void OptixState::create()
-{
-}
-
 static void optixLogCallback(unsigned int level, const char *tag, const char *message, void * /*cbdata */)
 {
 	std::cerr << "[" << std::setw(2) << level << "|" << std::setw(12) << tag << "]: " << message << "\n";
@@ -511,4 +507,4 @@ void OptixState::renderSubframe(const uint32_t currentSample,
 	CUDA_CHECK(cudaStreamSynchronize(m_stream));
 	CUDA_SYNC_CHECK();
 	// std::cout << "optixLaunch done." << std::endl;
-}
+}

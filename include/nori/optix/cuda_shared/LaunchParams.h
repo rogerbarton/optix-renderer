@@ -14,7 +14,7 @@ struct SceneConstantParams
 {
 	EmitterData* emitters;
 	unsigned int emittersSize;
-	unsigned int envmapIndex;
+	int envmapIndex;
 };
 
 /**
