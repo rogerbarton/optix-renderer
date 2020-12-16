@@ -271,7 +271,7 @@ void Mesh::getOptixHitgroupRecords(OptixState &state, std::vector<HitGroupRecord
     // copyMeshDataToDevice(); Already copied in getOptixBuildInput
 
 	HitGroupRecord rec = {};
-	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_mesh_prog_group[RAY_TYPE_SHADOWRAY], &rec));
+	OPTIX_CHECK(optixSbtRecordPackHeader(state.m_hitgroup_mesh_prog_group[RAY_TYPE_RADIANCE], &rec));
 	rec.data.geometry.triangleMesh.V  = reinterpret_cast<float3 *>(d_V);
 	rec.data.geometry.triangleMesh.N  = reinterpret_cast<float3 *>(d_N);
 	rec.data.geometry.triangleMesh.UV = reinterpret_cast<float2 *>(d_UV);
