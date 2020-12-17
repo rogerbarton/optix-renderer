@@ -55,7 +55,7 @@ static __forceinline__ __device__ float3 evalBsdf(
  */
 static __forceinline__ __device__ float3 sampleBsdf(
 		const BsdfData &bsdf, const float2 &uv, const float3 &wi,
-		float3 &wo, float &pdf, unsigned int &seed, float3& albedo)
+		float3 &wo, float &pdf, unsigned int &seed, float3 &albedo)
 {
 	const float2 sample   = make_float2(rnd(seed), rnd(seed));
 	const float  cosTheta = wi.z;

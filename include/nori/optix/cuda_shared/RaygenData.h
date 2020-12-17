@@ -27,10 +27,10 @@ struct RaygenData
 
 	struct Perspective
 	{
-		float nearClip;
-		float farClip;
-		float focalDistance;
-		float lensRadius;
+		float  nearClip;
+		float  farClip;
+		float  focalDistance;
+		float  lensRadius;
 		float2 invOutputSize;
 
 		// 4x4 Transformations with rows [X;Y;Z;W]
