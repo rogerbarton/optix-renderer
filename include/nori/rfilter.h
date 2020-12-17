@@ -62,7 +62,7 @@ public:
 		ImGui::TreeNodeEx("Shape", ImGuiLeafNodeFlags, "Shape");
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(-1);
-		touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0.f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		touched |= ImGui::DragFloat("##value", &m_radius, 0.1f, 0.1f, SLIDER_MAX_FLOAT, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 		ImGui::NextColumn();
 		ImGui::PopID();
 		return touched;

@@ -69,7 +69,10 @@ static __forceinline__ __device__ float3 sampleBsdf(
 			sampledAlbedo = bsdf.diffuse.albedo;
 		else
 			sampledAlbedo = make_float3(tex2D<float4>(bsdf.diffuse.albedoTex, uv.x, uv.y));
-		albedo = sampledAlbedo;
+
+		if (albedo.x < 0)
+			albedo = sampledAlbedo;
+
 		return sampledAlbedo;
 	}
 	else if (bsdf.type == BsdfData::MIRROR)
