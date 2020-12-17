@@ -737,4 +737,10 @@ void RenderThread::getDeviceSampleWeights(float &samplesCpu, float &samplesGpu)
 	}
 }
 
+float RenderThread::getProgress()
+{
+	return isBusy() ? ((float)(m_currentCpuSample + m_currentOptixSample) /
+			(float) m_renderScene->getSampler()->getSampleCount()) : 1.f;
+}
+
 NORI_NAMESPACE_END
