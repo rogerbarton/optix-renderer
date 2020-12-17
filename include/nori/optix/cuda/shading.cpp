@@ -85,7 +85,7 @@ extern "C" __global__ void __closesthit__radiance()
 		float3 wi      = shFrame.toLocal(-rayDir);
 		float3 wo;
 		float  pdf; // unused in mats
-		prd->throughput *= sampleBsdf(sbtData->bsdf, lgeom.uv, wi, wo, pdf, prd->seed);
+		prd->throughput *= sampleBsdf(sbtData->bsdf, lgeom.uv, wi, wo, pdf, prd->seed, prd->albedo);
 		prd->direction = shFrame.toWorld(wo);
 	}
 
