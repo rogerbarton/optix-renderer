@@ -41,7 +41,7 @@ static __forceinline__ __device__ void traceRadiance(
 			tmax,
 			0.0f,                        // rayTime
 			OptixVisibilityMask(1),
-			OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT,
+			OPTIX_RAY_FLAG_NONE,
 			RAY_TYPE_RADIANCE,          // SBT offset
 			RAY_TYPE_COUNT,             // SBT stride
 			RAY_TYPE_RADIANCE,       // missSBTIndex
