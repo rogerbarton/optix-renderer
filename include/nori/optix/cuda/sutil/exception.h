@@ -5,6 +5,7 @@
 #pragma once
 
 #define ERROR_COLOR make_float3(1.f,0.f,0.8f)
+#ifndef NORI_OPTIX_RELEASE
 
 #define IF_PIXEL( x_, y_ )                                                     \
     const uint3 launch_idx__ = optixGetLaunchIndex();                          \
@@ -19,3 +20,7 @@ do                                                                             \
          printf( __VA_ARGS__ );                                                \
     }                                                                          \
 } while(0);
+#else
+#define IF_PIXEL( x_, y_ )
+#define PRINT_PIXEL( x_, y_, ... )
+#endif
