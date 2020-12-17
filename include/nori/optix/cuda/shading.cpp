@@ -64,20 +64,19 @@ extern "C" __global__ void __closesthit__radiance()
 	HitGroupParams *sbtData = reinterpret_cast<HitGroupParams *>( optixGetSbtDataPointer());
 	RadiancePrd    *prd     = RadiancePrd::getPrd();
 
-	const OptixPrimitiveType type      = optixGetPrimitiveType();
-	const uint32_t           primIdx   = optixGetPrimitiveIndex();
-	const float3             rayOrigin = optixGetWorldRayOrigin();
-	const float3             rayDir    = optixGetWorldRayDirection();
-	const float3             p         = rayOrigin + optixGetRayTime() * rayDir;;
-	const uint32_t vertIdxOffset = primIdx * 3;
+	const OptixPrimitiveType type          = optixGetPrimitiveType();
+	const uint32_t           primIdx       = optixGetPrimitiveIndex();
+	const float3             rayOrigin     = optixGetWorldRayOrigin();
+	const float3             rayDir        = optixGetWorldRayDirection();
+	const uint32_t           vertIdxOffset = primIdx * 3;
 
-	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry, p);
+	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry);
 
-	prd->normal = make_float3(abs(lgeom.n.x), abs(lgeom.n.y), abs(lgeom.n.z));
+	prd->normal = lgeom.n;
 
 	if (sbtData->emitter.type != EmitterData::NONE)
 	{
-		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, p, lgeom.n);
+		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, lgeom.p, lgeom.n);
 	}
 
 	if (sbtData->bsdf.type != BsdfData::NONE)
@@ -90,5 +89,5 @@ extern "C" __global__ void __closesthit__radiance()
 		prd->direction = shFrame.toWorld(wo);
 	}
 
-	prd->origin = p;
+	prd->origin = lgeom.p;
 }

@@ -47,7 +47,7 @@ struct LocalGeometry
 
 
 __host__ __device__ __forceinline__ LocalGeometry
-getLocalGeometry(const GeometryData &geometryData, const float3 &its_p)
+getLocalGeometry(const GeometryData &geometryData)
 {
 	LocalGeometry lgeom{};
 	switch (geometryData.type)
@@ -66,7 +66,6 @@ getLocalGeometry(const GeometryData &geometryData, const float3 &its_p)
 			const float3 p2 = meshData.V[tri.z];
 			lgeom.p = (1.0f - barys.x - barys.y) * p0 + barys.x * p1 + barys.y * p2;
 			lgeom.p = optixTransformPointFromObjectToWorldSpace(lgeom.p);
-			// TODO: just use its_p?
 
 			float2 uv0, uv1, uv2;
 			if (meshData.UV)
@@ -124,8 +123,12 @@ getLocalGeometry(const GeometryData &geometryData, const float3 &its_p)
 		}
 		case GeometryData::SPHERE:
 		{
-			lgeom.p = make_float3(0);
-			lgeom.n = normalize(its_p - geometryData.sphere.center);
+			const float hitTime = int_as_float(optixGetAttribute_0());
+			lgeom.p = optixGetWorldRayOrigin() + hitTime * optixGetWorldRayDirection();
+			lgeom.n = make_float3(
+					int_as_float(optixGetAttribute_1()),
+					int_as_float(optixGetAttribute_2()),
+					int_as_float(optixGetAttribute_3()));
 			lgeom.ng = lgeom.n; // No transformations on spheres currently
 
 			lgeom.uv = make_float2(

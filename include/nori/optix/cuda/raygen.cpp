@@ -95,7 +95,7 @@ extern "C" __global__ void __raygen__perspective()
 		prd.Li         = make_float3(0);
 		prd.throughput = make_float3(1);
 		prd.albedo     = make_float3(0);
-		prd.normal     = make_float3(0, 0, 1);
+		prd.normal     = -rayDirection;
 		prd.terminated = false;
 		prd.seed       = seed;
 
@@ -109,10 +109,17 @@ extern "C" __global__ void __raygen__perspective()
 					INFINITY,
 					&prd);
 
+			if (depth == 0)
+			{
+				albedo += prd.albedo;
+				normal += prd.normal;
+			}
+
 			if (prd.terminated)
 				break;
 
 			// russian roulette
+			if (depth >= 3)
 			{
 				const float rouletteSuccess = fminf(fmaxf3(prd.throughput), 0.99f);
 
@@ -130,8 +137,6 @@ extern "C" __global__ void __raygen__perspective()
 
 		// Store Li
 		color += prd.Li;
-		albedo += prd.albedo;
-		normal += prd.normal;
 	}
 
 	// PRINT_PIXEL(100, 100, "color  (%f, %f, %f), ", color.x, color.y, color.z);

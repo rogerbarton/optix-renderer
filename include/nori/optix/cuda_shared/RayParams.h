@@ -16,7 +16,7 @@
 // Payload passed from hit programs to back to the optixTrace caller
 #define NUM_PAYLOAD_VALUES 2
 // Attributes passed from intersect programs to hit programs
-#define NUM_ATTRIBUTE_VALUES 1
+#define NUM_ATTRIBUTE_VALUES 4
 
 enum RayType
 {
