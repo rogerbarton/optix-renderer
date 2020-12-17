@@ -254,9 +254,10 @@ void RenderThread::renderThreadMain()
 	m_currentCpuSample = 0;
 	m_currentOptixSample = 0;
 #ifdef NORI_USE_OPTIX
+	tbb::task_scheduler_init* tbbScheduler;
 	if (m_renderDevice != EDeviceMode::Cpu)
 	{
-		tbb::task_scheduler_init init(tbb::task_scheduler_init::default_num_threads() - 2);
+		tbbScheduler = new tbb::task_scheduler_init(tbb::task_scheduler_init::default_num_threads() - 1);
 		m_optixThread = std::thread([this] { renderThreadOptix(); });
 	}
 #endif
@@ -359,7 +360,8 @@ void RenderThread::renderThreadMain()
 	}
 
 #ifdef NORI_USE_OPTIX
-	if(m_optixThread.joinable())
+	delete tbbScheduler;
+	if (m_optixThread.joinable())
 		m_optixThread.join();
 #endif
 
