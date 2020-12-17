@@ -496,6 +496,7 @@ void RenderThread::renderThreadOptix()
 		const uint32_t numSamples       = m_renderScene->getSampler()->getSampleCount();
 		const uint32_t samplesPerLaunch = m_renderScene->m_optixRenderer->m_samplesPerLaunch;
 		const uint32_t denoiseRate      = m_renderScene->m_optixRenderer->m_denoiseRate;
+		uint32_t lastDenoise            = 0;
 
 		for (; m_currentOptixSample + m_currentCpuSample < numSamples; m_currentOptixSample += samplesPerLaunch)
 		{
@@ -505,9 +506,12 @@ void RenderThread::renderThreadOptix()
 			optixState->renderSubframe(m_currentOptixSample,
 			                           m_d_optixRenderBlock, m_d_optixRenderBlockAlbedo, m_d_optixRenderBlockNormal);
 
-			const bool denoise = denoiseRate != 0 && m_currentOptixSample > 0 && m_currentOptixSample % denoiseRate == 0;
+			const bool denoise = denoiseRate != 0 && m_currentOptixSample > 0 && m_currentOptixSample - lastDenoise > denoiseRate;
 			if (denoise)
+			{
 				optixState->denoise();
+				lastDenoise = m_currentOptixSample;
+			}
 
 			// Copy output to display buffers if display buffer is available/mapped
 			if (m_d_optixDisplayBlock)
@@ -545,7 +549,7 @@ void RenderThread::renderThreadOptix()
 		}
 
 		// Denoise only at the end
-		if (m_renderStatus != ERenderStatus::Interrupt && denoiseRate == 0)
+		if (m_renderStatus != ERenderStatus::Interrupt && lastDenoise != m_currentOptixSample)
 		{
 			optixState->denoise();
 
@@ -612,9 +616,12 @@ void RenderThread::drawRenderGui()
 	ImGui::SameLine();
 	ImGui::ProgressBar(getProgress());
 	ImGui::Text("Render time: %s", (char*)getRenderTime().c_str());
-	const uint32_t currentCpuSample = m_currentCpuSample;
+	const uint32_t currentCpuSample   = m_currentCpuSample;
 	const uint32_t currentOptixSample = m_currentOptixSample;
-	ImGui::Text("Samples Done: %i (cpu: %i, gpu: %i)", currentCpuSample + currentOptixSample, currentCpuSample, currentOptixSample);
+	float          cpuWeight, gpuWeight;
+	getDeviceSampleWeights(cpuWeight, gpuWeight);
+	ImGui::Text("Samples Done: %i (cpu: %i, gpu: %i, %.1f%% cpu)",
+	            currentCpuSample + currentOptixSample, currentCpuSample, currentOptixSample, 100.f * cpuWeight);
 
 	if (ImGui::Button("Stop Render"))
 		stopRendering();
