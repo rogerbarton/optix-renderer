@@ -12,11 +12,12 @@ struct EmitterData
 {
 	enum Type
 	{
-		NONE   = 0,
-		POINT  = 1,
-		SPOT   = 2,
-		AREA   = 3,
-		VOLUME = 4,
+		NONE        = 0,
+		POINT       = 1,
+		SPOT        = 2,
+		AREA        = 3,
+		VOLUME      = 4,
+		ENVIRONMENT = 4,
 		DIRECTIONAL = 5,
 		TYPE_COUNT
 	};
@@ -47,7 +48,13 @@ struct EmitterData
 	{
 		float3 direction;
 		float3 position;
-		float angle;
+		float  angle;
+	};
+
+	struct Environment
+	{
+		float3 envmapValue;
+		cudaTextureObject_t envmapTex;
 	};
 
 	Type   type = NONE;
@@ -55,10 +62,11 @@ struct EmitterData
 
 	union
 	{
-		Point point;
-		Spot spot;
-		Area area;
-		Volume volume;
+		Point       point;
+		Spot        spot;
+		Area        area;
+		Volume      volume;
 		Directional directional;
+		Environment environment;
 	};
 };

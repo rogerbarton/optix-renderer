@@ -65,7 +65,7 @@ public:
 
     bool isBusy();
     void stopRendering();
-	float getProgress() { return isBusy() ? (float) m_progress : 1.f; }
+	float getProgress();
 	std::string getRenderTime();
 	std::string getFilename() { return sceneFilename; }
 

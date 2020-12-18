@@ -13,10 +13,19 @@
  * Contains data used for the SBT
  */
 
-// Payload passed from hit programs to back to the optixTrace caller
+/**
+ * Payload passed from hit programs to back to the optixTrace caller
+ * See RadiancePrd and ShadowrayPrd for details
+ */
 #define NUM_PAYLOAD_VALUES 2
-// Attributes passed from intersect programs to hit programs
-#define NUM_ATTRIBUTE_VALUES 1
+
+/**
+ * Attributes passed from intersect programs to hit programs
+ * Sphere intersection attributes
+ * 0: ray time (float)
+ * 1-3: normal (float3)
+ */
+#define NUM_ATTRIBUTE_VALUES 4
 
 enum RayType
 {

@@ -22,6 +22,10 @@
 #include <nori/object.h>
 #include <Eigen/src/Core/Matrix.h>
 
+#ifdef NORI_USE_OPTIX
+struct RaygenData;
+#endif
+
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -77,7 +81,11 @@ public:
 	NORI_OBJECT_IMGUI_NAME("Camera Base");
     virtual bool getImGuiNodes() override;
 #endif
-protected:
+
+#ifdef NORI_USE_OPTIX
+	virtual void getOptixData(RaygenData &data) const = 0;
+#endif
+	protected:
     Vector2i m_outputSize;
     ReconstructionFilter *m_rfilter;
 };

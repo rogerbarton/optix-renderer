@@ -55,7 +55,7 @@ static __forceinline__ __device__ float3 evalBsdf(
  */
 static __forceinline__ __device__ float3 sampleBsdf(
 		const BsdfData &bsdf, const float2 &uv, const float3 &wi,
-		float3 &wo, float &pdf, unsigned int &seed)
+		float3 &wo, float &pdf, unsigned int &seed, float3 &albedo)
 {
 	const float2 sample   = make_float2(rnd(seed), rnd(seed));
 	const float  cosTheta = wi.z;
@@ -64,10 +64,16 @@ static __forceinline__ __device__ float3 sampleBsdf(
 	{
 		wo = squareToCosineHemisphere(sample);
 
+		float3 sampledAlbedo;
 		if (bsdf.diffuse.albedoTex == 0)
-			return bsdf.diffuse.albedo;
+			sampledAlbedo = bsdf.diffuse.albedo;
 		else
-			return make_float3(tex2D<float4>(bsdf.diffuse.albedoTex, uv.x, uv.y));
+			sampledAlbedo = make_float3(tex2D<float4>(bsdf.diffuse.albedoTex, uv.x, uv.y));
+
+		if (albedo.x < 0)
+			albedo = sampledAlbedo;
+
+		return sampledAlbedo;
 	}
 	else if (bsdf.type == BsdfData::MIRROR)
 	{

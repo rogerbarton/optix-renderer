@@ -56,6 +56,10 @@ NORI_NAMESPACE_BEGIN
 		float getFov() const { return m_fov; }
 		float getFocalDistance() const { return m_focalDistance; }
 		float getLensRadius() const { return m_lensRadius; }
+
+#ifdef NORI_USE_OPTIX
+		void getOptixData(RaygenData &data) const override;
+#endif
 	private:
 		// -- Properties
 		float m_fov;

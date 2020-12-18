@@ -41,7 +41,21 @@ extern "C" __global__ void __miss__radiance()
 	MissParams  *const rt_data = reinterpret_cast<MissParams *>( optixGetSbtDataPointer());
 	RadiancePrd *const prd     = RadiancePrd::getPrd();
 
-	// prd->Li += launchParams.envmap.sample; // TODO: sample envmap texture
+	// Evaluate the envmap
+	if (launchParams.scene.envmapIndex >= 0)
+	{
+		const EmitterData &envmap = launchParams.scene.emitters[launchParams.scene.envmapIndex];
+		if (envmap.environment.envmapTex)
+		{
+			float3 d = optixGetWorldRayDirection();
+			float  u = acosf(d.z) * 0.5f / M_PIf;
+			float  v = atan2f(d.y, d.x) / M_PIf;
+			prd->Li += envmap.radiance * make_float3(tex2D<float4>(envmap.environment.envmapTex, u, v));
+		}
+		else
+			prd->Li += envmap.radiance * envmap.environment.envmapValue;
+	}
+
 	prd->terminated = true;
 }
 
@@ -50,18 +64,19 @@ extern "C" __global__ void __closesthit__radiance()
 	HitGroupParams *sbtData = reinterpret_cast<HitGroupParams *>( optixGetSbtDataPointer());
 	RadiancePrd    *prd     = RadiancePrd::getPrd();
 
-	const OptixPrimitiveType type      = optixGetPrimitiveType();
-	const uint32_t           primIdx   = optixGetPrimitiveIndex();
-	const float3             rayOrigin = optixGetWorldRayOrigin();
-	const float3             rayDir    = optixGetWorldRayDirection();
-	const float3             p         = rayOrigin + optixGetRayTime() * rayDir;;
-	const uint32_t vertIdxOffset = primIdx * 3;
+	const OptixPrimitiveType type          = optixGetPrimitiveType();
+	const uint32_t           primIdx       = optixGetPrimitiveIndex();
+	const float3             rayOrigin     = optixGetWorldRayOrigin();
+	const float3             rayDir        = optixGetWorldRayDirection();
+	const uint32_t           vertIdxOffset = primIdx * 3;
 
-	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry, p);
+	LocalGeometry lgeom = getLocalGeometry(sbtData->geometry);
+
+	prd->normal = lgeom.n;
 
 	if (sbtData->emitter.type != EmitterData::NONE)
 	{
-		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, p, lgeom.n);
+		prd->Li += prd->throughput * evalEmitter(*sbtData, rayOrigin, lgeom.p, lgeom.n);
 	}
 
 	if (sbtData->bsdf.type != BsdfData::NONE)
@@ -70,9 +85,9 @@ extern "C" __global__ void __closesthit__radiance()
 		float3 wi      = shFrame.toLocal(-rayDir);
 		float3 wo;
 		float  pdf; // unused in mats
-		prd->throughput *= sampleBsdf(sbtData->bsdf, lgeom.uv, wi, wo, pdf, prd->seed);
+		prd->throughput *= sampleBsdf(sbtData->bsdf, lgeom.uv, wi, wo, pdf, prd->seed, prd->albedo);
 		prd->direction = shFrame.toWorld(wo);
 	}
 
-	prd->origin = p;
+	prd->origin = lgeom.p;
 }

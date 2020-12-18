@@ -13,36 +13,41 @@
 #include <nori/NvdbVolume.h>
 #include <nori/bsdf.h>
 
+#include "sutil/host_vec_math.h"
+
 
 bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 {
 	// -- Iterate over all scene objects and copy them to the optix scene representation
-	// Camera
 	{
-		const auto camera = static_cast<const nori::PerspectiveCamera *>(scene.getCamera());
+		// Camera
+		const auto camera = scene.getCamera();
 		m_params.imageWidth  = camera->getOutputSize().x();
 		m_params.imageHeight = camera->getOutputSize().y();
+		camera->getOptixData(m_params.camera);
 
-		Eigen::Matrix4f cameraToWorld = camera->getTransform();
-		// W = z = fwd
-		m_params.camera.U   = make_float3(cameraToWorld(0, 0), cameraToWorld(0, 1), cameraToWorld(0, 2));
-		m_params.camera.V   = make_float3(cameraToWorld(1, 0), cameraToWorld(1, 1), cameraToWorld(1, 2));
-		m_params.camera.W   = make_float3(cameraToWorld(2, 0), cameraToWorld(2, 1), cameraToWorld(2, 2));
-		m_params.camera.eye = make_float3(cameraToWorld(0, 3), cameraToWorld(1, 3), cameraToWorld(2, 3));
-
-		m_params.camera.fov           = camera->getFov();
-		m_params.camera.focalDistance = camera->getFocalDistance();
-		m_params.camera.lensRadius    = camera->getLensRadius();
-	}
-
-	// OptixRenderer
-	{
+		// OptixRenderer
 		m_params.samplesPerLaunch = scene.m_optixRenderer->m_samplesPerLaunch;
-	}
 
-	// Integrator
-	{
+		// Integrator
 		m_params.integrator = scene.getIntegrator(usePreview)->getOptixIntegratorType();
+
+		auto                     &emitters = scene.getEmitters();
+		std::vector<EmitterData> emitterData(scene.getEmitters().size());
+		m_params.scene.envmapIndex = -1;
+		m_params.scene.emittersSize = static_cast<uint32_t>(emitters.size());
+
+		for (uint32_t i = 0; i < emitters.size(); i++)
+		{
+			emitters[i]->getOptixEmitterData(emitterData[i]);
+			if (emitters[i]->isEnvMap())
+				m_params.scene.envmapIndex = i;
+		}
+
+		if (initializedState)
+			CUDA_CHECK(cudaFree(reinterpret_cast<void *>(m_params.scene.emitters)));
+		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_params.scene.emitters), emitters.size() * sizeof(EmitterData)));
+		CUDA_CHECK(cudaMemcpy(reinterpret_cast<void *>(m_params.scene.emitters), emitterData.data(), emitters.size() * sizeof(EmitterData), cudaMemcpyHostToDevice));
 	}
 
 	// -- Create optix scene
@@ -67,7 +72,7 @@ bool OptixState::preRender(nori::Scene &scene, bool usePreview)
 	updateSbt(scene.getShapes());
 
 	m_params.sceneHandle = m_ias_handle;
-	
+
 	if (!initializedState)
 	{
 		CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&m_d_params), sizeof(LaunchParams)));

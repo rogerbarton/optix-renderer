@@ -91,7 +91,7 @@ extern "C" __global__ void __intersection__sphere()
 		if (t > ray_tmin && t < ray_tmax)
 		{
 			normal           = (O + (root1 + root11) * D) / radius;
-			if (optixReportIntersection(t, GeometryData::Type::SPHERE))
+			if (optixReportIntersection(t, GeometryData::Type::SPHERE, float_as_int(t), float3_as_ints(normal)))
 				check_second = false;
 		}
 
@@ -101,7 +101,7 @@ extern "C" __global__ void __intersection__sphere()
 			t      = root2 * l;
 			normal = (O + root2 * D) / radius;
 			if (t > ray_tmin && t < ray_tmax)
-				optixReportIntersection(t, GeometryData::Type::SPHERE);
+				optixReportIntersection(t, GeometryData::Type::SPHERE, float_as_int(t), float3_as_ints(normal));
 		}
 	}
 }

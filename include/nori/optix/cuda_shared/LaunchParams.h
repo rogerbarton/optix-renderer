@@ -5,30 +5,16 @@
 
 #include <optix_types.h>
 #include <vector_types.h>
-
-struct RaygenConstantParams
-{
-	float3 eye;
-	float3 U;
-	float3 V;
-	float3 W;
-
-	float fov;
-	float focalDistance;
-	float lensRadius;
-};
+#include <texture_types.h>
+#include "RaygenData.h"
+#include "EmitterData.h"
+#include "IntegratorData.h"
 
 struct SceneConstantParams
 {
-	float3 bgColor;
-};
-
-enum IntegratorType : int
-{
-	INTEGRATOR_TYPE_PATH_MATS = 0,
-	INTEGRATOR_TYPE_PATH_MIS  = 1,
-	INTEGRATOR_TYPE_DIRECT    = 2,
-	INTEGRATOR_TYPE_SIZE
+	EmitterData* emitters;
+	unsigned int emittersSize;
+	int envmapIndex;
 };
 
 /**
@@ -45,8 +31,8 @@ struct LaunchParams
 	unsigned int imageWidth;
 	unsigned int imageHeight;
 
-	RaygenConstantParams camera;
-	SceneConstantParams  scene;
+	RaygenData          camera;
+	SceneConstantParams scene;
 
 	IntegratorType integrator;
 

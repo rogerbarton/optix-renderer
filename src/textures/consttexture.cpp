@@ -114,12 +114,14 @@ bool ConstantTexture<Color3f>::getImGuiNodes()
 	template<>
 	void ConstantTexture<float>::getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
 	{
+		texValue = 0;
 		constValue = make_float3(m_value);
 	}
 
 	template<>
 	void ConstantTexture<Color3f>::getOptixTexture(float3 &constValue, cudaTextureObject_t &texValue)
 	{
+		texValue = 0;
 		constValue = make_float3(m_value);
 	}
 #endif
