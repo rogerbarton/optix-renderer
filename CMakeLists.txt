@@ -1,15 +1,17 @@
 # This is the main CMake build file used to compile Nori
 cmake_minimum_required(VERSION 3.12)
 project(nori)
+if(WIN32)
 include(CmakeDependentOption)
-
+endif()
 option(NORI_USE_GUI "Build the GUI" ON)
 option(NORI_USE_IMGUI "Use ImGui instead of NanoGui, warptest always uses NanoGUI" ON)
 option(NORI_USE_VDB "Enable Volumes" ON)
 option(NORI_BUILD_DOCS "Build Nori Docs" OFF)
 option(NORI_USE_OPTIX "Enable OptiX, requires CUDA" ON)
+if(WIN32)
 cmake_dependent_option(NORI_OPTIX_RELEASE "Enable OptiX release mode" ON "CMAKE_BUILD_TYPE STREQUAL Release" OFF)
-
+endif()
 # This file included below takes care of compiling dependencies
 # and setting compiler flags on different platforms
 include("CMakeConfig.txt")

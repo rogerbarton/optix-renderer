@@ -78,6 +78,18 @@ static std::string g_nvrtcLog;
     NORI_NVRTC_CUDA_DIR,                    \
 	NORI_NVRTC_NANOVDB_DIR
 
+#ifndef WIN32
+#define NANOVDB_CUDA_NVRTC_OPTIONS \
+    "--std=c++11", \
+        "-arch", \
+        "compute_50", \
+        "-use_fast_math", \
+        "-lineinfo", \
+        "-default-device", \
+        "-rdc", \
+        "true", \
+        "-D__x86_64",
+#else
 #define NANOVDB_CUDA_NVRTC_OPTIONS \
     "--std=c++11", \
         "-arch", \
@@ -88,7 +100,7 @@ static std::string g_nvrtcLog;
         "-rdc", \
         "true", \
         "-D__x86_64",
-
+#endif
 
 static void getPtxFromCuString(std::string &ptx, const char *cu_source, const char *name, const char **log_string)
 {
