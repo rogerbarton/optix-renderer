@@ -4,7 +4,7 @@ project(lodepng)
 
 include_directories(include)
 
-add_library(lodepng STATIC src/lodepng.cpp)
+add_library(lodepng STATIC src/lodepng.cpp include/lodepng/lodepng.h)
 
 install(TARGETS lodepng ARCHIVE DESTINATION lib)
 install(DIRECTORY include/lodepng DESTINATION include)

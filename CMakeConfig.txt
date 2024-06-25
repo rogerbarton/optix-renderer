@@ -158,11 +158,7 @@ if(NORI_USE_GUI)
 endif(NORI_USE_GUI)
 
 # Build lodepng
-ExternalProject_Add(lodepng_p
-    URL "${CMAKE_SOURCE_DIR}/ext/lodepng"
-    PREFIX "ext_build"
-    CMAKE_ARGS ${CMAKE_EXTERNAL_ARGUMENTS}
-    )
+add_subdirectory(ext/lodepng)
 
 add_library(pugixml STATIC ext/pugixml/src/pugixml.cpp)
 set_target_properties(pugixml PROPERTIES
