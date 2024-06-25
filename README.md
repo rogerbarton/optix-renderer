@@ -1,4 +1,15 @@
-## Nori Version 2
+# OptiX renderer based on Nori
+
+![demo](./reports/optix-demo.gif)
+
+Extended course project with GPU hardware acceleration. Features:
+
+1. Combined CPU and GPU path tracing.
+2. OptiX GPU image denoising.
+3. [nvrtc](https://docs.nvidia.com/cuda/nvrtc/index.html) runtime compilation of CUDA shaders.
+4. [ImGui](https://github.com/ocornut/imgui) for editing scene parameters with immediate feedback
+
+## Nori
 
 Nori is a simple ray tracer written in C++. It runs on Windows, Linux, and
 Mac OS and provides basic functionality that is required to complete the
